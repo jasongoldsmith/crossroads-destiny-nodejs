@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body class="container">
+
+<main>
+  <div class="jumbotron">
+    <h1>Admin Console : Server</h1>
+    <h2>Environment : <%= utils.config.environment %></h2>
+    <a href='/?secret=<%= secret %>&phoneNo=<%= phoneNo %>'>Home</a> | <a href='/admin?secret=<%= secret %>&phoneNo=<%= phoneNo %>'>Admin</a>
+    <hr>
+
+    <form action="/admin/users?secret=<%= secret %>&phoneNo=<%= phoneNo %>" method="post">
+      <input name="phoneNo" placeholder="Phone" type="text" value="<%= phoneNo %>">
+      <input name="secret" placeholder="secret" value="<%= secret %>">
+      <input type="submit" value="List all users">
+      <br>
+    </form>
+    <form action="/admin/contents?secret=<%= secret %>&phoneNo=<%= phoneNo %>" method="post">
+      <input name="phoneNo" placeholder="Phone" type="text" value="<%= phoneNo %>">
+      <input name="secret" placeholder="secret" value="<%= secret %>">
+      <select name="visibility">
+        <option value="home">home</option>
+        <option value="all">all</option>
+        <option value="hidden">hidden</option>
+      </select>
+      <input type="submit" value="List all contents">
+      <br>
+    </form>
+    <form action="/admin/moments?secret=<%= secret %>&phoneNo=<%= phoneNo %>" method="post">
+      <input name="phoneNo" placeholder="Phone" type="text" value="<%= phoneNo %>">
+      <input name="secret" placeholder="secret" value="<%= secret %>">
+      <input type="submit" value="List all moments">
+      <br>
+    </form>
+<!--     <form action="/admin/chats/delete?secret=<%= secret %>&phoneNo=<%= phoneNo %>" method="post">
+      <input name="phoneNo" placeholder="Phone" value="<%= phoneNo %>">
+      <input name="secret" placeholder="secret" value="<%= secret %>">
+      <input type="submit" value="Delete all chats">
+      <br>
+    </form>
+    -->
+    <form action="/admin/chats?secret=<%= secret %>&phoneNo=<%= phoneNo %>" method="post">
+      <input name="phoneNo" placeholder="Phone" value="<%= phoneNo %>">
+      <input name="secret" placeholder="secret" value="<%= secret %>">
+      <input type="submit" value="List all chats">
+      <br>
+    </form>
+    <form action="/admin/usability?secret=<%= secret %>&phoneNo=<%= phoneNo %>" method="post">
+      <input name="phoneNo" placeholder="Phone" type="text" value="<%= phoneNo %>">
+      <input name="secret" placeholder="secret" value="<%= secret %>">
+      <input type="submit" value="Usability Setup">
+      <br>
+    </form>
+    <form action="/admin/purge?secret=<%= secret %>&phoneNo=<%= phoneNo %>" method="post">
+      <input name="phoneNo" placeholder="Phone" type="text" value="<%= phoneNo %>">
+      <input name="secret" placeholder="secret" value="<%= secret %>">
+      <input type="submit" value="Purge All Users (except for admin)">
+      <br>
+    </form>
+    <form action="/admin/contents/home?secret=<%= secret %>&phoneNo=<%= phoneNo %>" method="post">
+      <input name="phoneNo" placeholder="Phone" type="text" value="<%= phoneNo %>">
+      <input name="secret" placeholder="secret" value="<%= secret %>">
+      <input type="submit" value="Create home content and moments">
+      <br>
+    </form>
+    <hr>
+  </div>

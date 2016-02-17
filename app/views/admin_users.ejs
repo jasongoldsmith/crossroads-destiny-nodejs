@@ -1,0 +1,44 @@
+<% include header %>
+
+
+<hr>
+    <h1>USERS :</h1>
+    <h3>WARNING: * DELETE USER will delete everything for a user, including chat and where this user is member of.</h3>
+    <ul>
+      <% for(var i=users.length-1; i>=0; i--) {%>
+        <li>
+          <form action="/admin/users/delete?secret=<%= secret %>" method="post">
+
+            <input name="secret"  type="hidden" placeholder="secret" value="<%= secret %>">
+            <a href="<%= users[i].profileUrl %>" target="_profile">
+              <img src="<%= users[i].profileUrl %>" width="50" height=""50">
+            </a>
+
+            :&nbsp;&nbsp; &nbsp;&nbsp;<%= users[i].userType %>  :&nbsp;&nbsp;  <%= users[i].phoneNo %>  &nbsp;&nbsp;:&nbsp;&nbsp; <%= users[i]._id %>:&nbsp;&nbsp; <%= users[i].name %>:&nbsp;&nbsp;<%= users[i].signupDate %>:&nbsp;&nbsp;
+            <input name="phoneNo" type="hidden" value="<%= users[i].phoneNo %>">
+            <input name="userid" type="hidden" placeholder="user id" value="<%= users[i]._id %>">
+            <br>
+            <input type="submit" value="delete user">
+            <br>
+          </form>
+          <!--<form action="/admin/chats/delete?secret=<%= secret %>" method="post">
+            <input name="phoneNo" type="hidden" placeholder="Phone" value="<%= users[i].phoneNo %>">
+            <input name="secret" type="hidden" placeholder="secret" value="<%= secret %>">
+            <input type="submit" value="Delete user chats">
+            <br>
+          </form>-->
+          <form action="/admin/chats?secret=<%= secret %>&phoneNo=<%= users[i].phoneNo %>" method="post">
+            <input name="phoneNo" type="hidden" placeholder="Phone" value="<%= users[i].phoneNo %>">
+            <input name="secret"  type="hidden" placeholder="secret" value="<%= secret %>">
+            <input type="submit" value="List user chats">
+            <br><br>
+          </form>
+
+        </li>
+      <% } %>
+    </ul>
+    <hr>
+  </div>
+
+
+<% include footer %>
