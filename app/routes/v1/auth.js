@@ -43,7 +43,7 @@ function login (req, res) {
         if (err instanceof helpers.errors.ValidationError) {
           req.routeErr = err;
         } else {
-          req.routeErr = new helpers.errors.WError(err, 'PhoneNo or password incorrect');
+          req.routeErr = new helpers.errors.WError(err, 'the input auth combination is not valid');
         }
         return routeUtils.handleAPIError(req, res, req.routeErr)
       }
