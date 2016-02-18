@@ -1,18 +1,18 @@
-var express = require('express');
-var router = express.Router();
-var config = require('config');
-var utils = require('../../utils');
-var helpers = require('../../helpers');
-var routeUtils = require('../routeUtils');
-var models = require('../../models');
+var express = require('express')
+var router = express.Router()
+var config = require('config')
+var utils = require('../../utils')
+var helpers = require('../../helpers')
+var routeUtils = require('../routeUtils')
+var models = require('../../models')
 
 function create(req, res) {
 	utils.l.i("Activity create request: " + JSON.stringify(req.body))
 	createActivity(req.body, function(err, activity) {
 		if (err) {
-			res.status(400).send(err)
+			routeUtils.handleAPIError(req, res, err)
 		} else {
-			res.status(200).send(activity)
+			routeUtils.handleAPISuccess(req, res, activity)
 		}
 	})
 }
@@ -21,9 +21,9 @@ function list(req, res) {
 	utils.l.i("Activity list request")
 	listActivities(function(err, activities) {
 		if (err) {
-			res.status(400).send(err)
+			routeUtils.handleAPIError(req, res, err)
 		} else {
-			res.status(200).send(activities)
+			routeUtils.handleAPISuccess(req, res, activities)
 		}
 	})
 }

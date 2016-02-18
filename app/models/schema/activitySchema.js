@@ -1,7 +1,5 @@
 var mongoose = require('mongoose')
-var Schema = mongoose.Schema;
-var Mixed = Schema.Types.Mixed;
-var utils = require('../../utils')
+var Schema = mongoose.Schema
 
 var activitySchema = new Schema({
 	aType: {type: String, required: true},

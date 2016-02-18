@@ -12,11 +12,12 @@ function createActivity(data, callback) {
 	var activityObj = new Activity(data)
 	Activity.findOne({aType: data.aType, aSubType: data.aSubType, aCheckpoint: data.aCheckpoint, aDifficulty: data.aDifficulty}, function(err, activity) {
 		if (err) {
-			utils.l.i("found err " + err)
+			utils.l.i("found error: " + err)
 			return callback(err)
 		} else if (!activity) {
 				activityObj.save(function (err, newActivity) {
 					if (err) {
+						utils.l.i("found error: " + err)
 						return callback(err)
 					} else {
 						return callback(null, newActivity)
