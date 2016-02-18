@@ -10,6 +10,7 @@ module.exports = function (app, passport) {
 
 
   app.use('/api/v1/auth', require('../routes/v1/auth'));
+  app.use('/api/v1/activity', require('../routes/v1/activity'))
 
   /// catch 404 and forward to error handler
   app.use(function(req, res, next) {

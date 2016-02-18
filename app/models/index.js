@@ -1,6 +1,8 @@
 
-var user = require('./userModel');
+var user = require('./userModel')
+var activity = require('./activityModel')
 
 module.exports = {
-  user: user
+  user: user,
+  activity: activity
 };
