@@ -15,10 +15,11 @@ function createActivity(data, callback) {
 			utils.l.i("found error: " + err)
 			return callback(err)
 		} else if (!activity) {
+			utils.l.i("no activity found, saving activity: " + activity)
 				activityObj.save(function (err, newActivity) {
 					if (err) {
 						utils.l.i("found error: " + err)
-						return callback(err)
+						return callback(err, null)
 					} else {
 						return callback(null, newActivity)
 					}

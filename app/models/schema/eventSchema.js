@@ -3,7 +3,7 @@ var Schema = mongoose.Schema
 
 var eventSchema = new Schema({
 	eType: { type: Schema.Types.ObjectId, ref: 'Activity', required: true },
-	status: String,
+	status: { type: String, enum: ['new', 'open', 'full', 'can_join']},
 	minPlayers: Number,
 	maxPlayers: Number,
 	creator: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -19,7 +19,13 @@ eventSchema.pre('validate', function(next) {
 	if (this.isNew) {
 		this.created = new Date()
 	}
+
+	this.status = "new"
 	next()
+})
+
+eventSchema.pre('update', function() {
+	this.updated = new Date()
 })
 
 module.exports = {

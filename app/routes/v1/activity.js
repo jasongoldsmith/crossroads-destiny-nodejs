@@ -10,7 +10,7 @@ function create(req, res) {
 	utils.l.i("Activity create request: " + JSON.stringify(req.body))
 	createActivity(req.body, function(err, activity) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err)
+			routeUtils.handleAPIError(req, res, err, err)
 		} else {
 			routeUtils.handleAPISuccess(req, res, activity)
 		}
@@ -21,7 +21,7 @@ function list(req, res) {
 	utils.l.i("Activity list request")
 	listActivities(function(err, activities) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err)
+			routeUtils.handleAPIError(req, res, err, err)
 		} else {
 			routeUtils.handleAPISuccess(req, res, activities)
 		}

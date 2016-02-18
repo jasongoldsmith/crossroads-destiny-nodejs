@@ -8,7 +8,7 @@ function create(req, res) {
 	utils.l.i("Event create request: " + JSON.stringify(req.body))
 	createEvent(req.body, function(err, event) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err)
+			routeUtils.handleAPIError(req, res, err, err)
 		} else {
 			routeUtils.handleAPISuccess(req, res, event)
 		}
