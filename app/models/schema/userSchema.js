@@ -16,6 +16,7 @@ var UserSchema = new Schema({
   uniqueID : String,
   psnId: String,
   xboxId: String,
+  clanId: String, 
   uDate: Date,
   signupDate: Date,
   flags: Mixed
