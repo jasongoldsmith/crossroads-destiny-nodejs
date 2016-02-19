@@ -16,17 +16,16 @@ module.exports = function (passport, config) {
 
   var local = new LocalStrategy({
       usernameField: 'userName',
-      passwordField: 'passWord',
-      passReqToCallback: true
+      passwordField: 'passWord'
     },
-    function(req, userName, password, done) {
-      utils.l.i("passport, userName= ",userName);
-      utils.l.i("passport, password= ",password);
-      utils.l.i("passport, uniqueId= ",req.body.uniqueID);
-      models.user.getUserByData({userName:userName, passWord: password, uniqueID: req.body.uniqueID}, function (err, user) {
+    function( userName, password, done) {
+      models.user.getUserByData({userName:userName}, function (err, user) {
         if (err) return done(err);
         if (!user) {
           return done(null, false, { message: 'Unknown user' });
+        }
+        if (!utils._.isEqual(user.passWord, password)) {
+          return done(null, false, { message: 'Incorrect password.' });
         }
         return done(null, user);
       });

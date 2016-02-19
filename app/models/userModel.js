@@ -87,20 +87,6 @@ function createUserFromData(data, callback) {
     }
   ], function(err, user) {
     if (err) {
-      if (err instanceof mongoose.Error.ValidationError) {
-        if (err.errors && err.errors.phoneNo) {
-          // at this point we have user in DB and if signup is called
-          // we need to set the new passed username
-        //  getByPhoneNo(data.phoneNo, function(err, user) {
-            // setName(user._id, data.name, callback);
-            // here we also need to set the signupDate including name
-        //    setFields(user._id, data, callback);
-         // });
-
-          return;
-          //err = new helpers.errors.WError(err, 'PhoneNo already in use');
-        }
-      }
       return callback(err);
     }
     callback(null, user);

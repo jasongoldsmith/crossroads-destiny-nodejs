@@ -13,7 +13,7 @@ var UserSchema = new Schema({
   userName: {type: String, required: true},
   date: {type: Date, required: true},
   passWord: {type: String, required: true},
-  uniqueID : {type: String, required: true},
+  uniqueID : String,
   psnId: String,
   xboxId: String,
   uDate: Date,
@@ -21,7 +21,7 @@ var UserSchema = new Schema({
   flags: Mixed
 });
 
-UserSchema.index({'userName':1, 'password':1, 'uniqueID':1}, {'unique': true});
+UserSchema.index({'userName':1}, {'unique': true});
 UserSchema.index({'name':1});
 UserSchema.index({'date': 1});
 UserSchema.index({"__v": 1, "_id": 1});

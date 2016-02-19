@@ -17,7 +17,6 @@ var MESSAGE_APP_UPTODATE = "app upto date";
 function login (req, res) {
   req.assert('userName', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isName();
   req.assert('passWord', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric();
-  req.assert('uniqueID', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric();
 
   var outerUser = null;
   utils.async.waterfall(
@@ -88,12 +87,12 @@ function reqLoginWrapper(req, reason) {
 function signup(req, res) {
   req.assert('userName', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isName();
   req.assert('passWord', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric();
-  req.assert('uniqueID', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric();
   var body = req.body;
   var userData = {
     userName: body.userName,
     passWord: body.passWord,
-    uniqueID: body.uniqueID
+    psnId: body.psnId,
+    xboxId: body.xboxId
   };
   utils.async.waterfall([
       helpers.req.handleVErrorWrapper(req),
