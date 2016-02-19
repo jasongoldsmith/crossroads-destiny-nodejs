@@ -20,7 +20,7 @@ var responseTypesMap = {
 function handleAPIErrorStatus(status, req, res, err, data, trackingData) {
   data = data || {};
   if (utils._.isValid(err)) {
-    console.log("Error: " + err);
+    console.log("Error: " + JSON.stringify(err));
 
     if (err instanceof Error) {
       console.log("Error Stack: " + err.stack);

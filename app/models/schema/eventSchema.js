@@ -15,17 +15,16 @@ var eventSchema = new Schema({
 eventSchema.index({'eType': 1})
 
 eventSchema.pre('validate', function(next) {
-	this.updated = new Date()
 	if (this.isNew) {
 		this.created = new Date()
 	}
-
 	this.status = "new"
 	next()
 })
 
-eventSchema.pre('update', function() {
+eventSchema.pre('update', function(next) {
 	this.updated = new Date()
+	next()
 })
 
 module.exports = {

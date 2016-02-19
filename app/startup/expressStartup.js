@@ -79,9 +79,9 @@ module.exports = function (app, passport) {
     if (!req.isAuthenticated()) {
       return routeUtils.handleAPIUnauthorized(req, res)
     }
-    if (!req.user.isNormal()) {
-      return res.redirect('/');
-    }
+    //if (!req.user.isNormal()) {
+    //  return res.redirect('/');
+    //}
     next();
   });
 

@@ -11,7 +11,7 @@ module.exports = function (app, passport) {
 
   app.use('/api/v1/auth', require('../routes/v1/auth'));
   app.use('/api/v1/activity', require('../routes/v1/activity'))
-  app.use('/api/v1/event', require('../routes/v1/a/event'))
+  app.use('/api/v1/a/event', require('../routes/v1/a/event'))
 
   /// catch 404 and forward to error handler
   app.use(function(req, res, next) {
