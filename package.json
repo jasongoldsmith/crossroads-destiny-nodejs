@@ -49,6 +49,7 @@
     "twilio": "2.2.1",
     "passport": "0.2.2",
     "passport-local": "1.0.0",
+    "password-hash": "1.2.2",
     "raven": "0.8.1",
     "request": "2.60.0",
     "require-dir": "0.3.0",

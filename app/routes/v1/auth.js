@@ -6,6 +6,8 @@ var helpers = require('../../helpers');
 var routeUtils = require('../routeUtils');
 var models = require('../../models');
 var passport = require('passport');
+var passwordHash = require('password-hash');
+
 var platform = {
   ios : "ios",
   android: "android"
@@ -90,7 +92,7 @@ function signup(req, res) {
   var body = req.body;
   var userData = {
     userName: body.userName,
-    passWord: body.passWord,
+    passWord: passwordHash.generate(body.passWord),
     psnId: body.psnId,
     xboxId: body.xboxId
   };

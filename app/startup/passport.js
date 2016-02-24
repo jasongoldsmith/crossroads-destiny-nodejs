@@ -1,6 +1,7 @@
 var utils = require('../utils');
 var LocalStrategy = require('passport-local').Strategy;
 var models = require('../models');
+var passwordHash = require('password-hash');
 
 module.exports = function (passport, config) {
   // serialize sessions
@@ -24,7 +25,7 @@ module.exports = function (passport, config) {
         if (!user) {
           return done(null, false, { message: 'Unknown user' });
         }
-        if (!utils._.isEqual(user.passWord, password)) {
+        if (!passwordHash.verify(password, user.passWord)/*!utils._.isEqual(user.passWord, password)*/) {
           return done(null, false, { message: 'Incorrect password.' });
         }
         return done(null, user);
