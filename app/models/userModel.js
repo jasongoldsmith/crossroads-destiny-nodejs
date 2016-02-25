@@ -113,15 +113,52 @@ function getAll(callback) {
   User.find({}, callback);
 }
 
+function getUserById(data, callback) {
+  utils.async.waterfall([
+      function (callback) {
+        User.findOne({_id: data.id}, callback)
+      },
+      function(user, callback) {
+        if (!user) {
+          utils.l.i("no user found")
+          return callback({ error: "user with this id does not exist" }, null)
+        } else {
+          utils.l.i("found user: " + JSON.stringify(user))
+          return callback(null, user)
+        }
+      }
+  ],
+    function(err, event) {
+      if (err) {
+        return callback(err, null)
+      } else {
+        return callback(null, event)
+      }
+    }
+  )
+}
+
+function listUsers(callback) {
+  User.find(function(err, users) {
+    if (err) {
+      return callback(err, null)
+    } else {
+      return callback(null, users)
+    }
+  })
+}
+
 
 module.exports = {
   model: User,
-  getById: getById,
+  getUserById: getUserById,
   getByIds: getByIds,
+  listUsers:listUsers,
   setFields: setFields,
   save: save,
   deleteUser: deleteUser,
   getUserByData: getUserByData,
   createUserFromData: createUserFromData,
-  getAll: getAll
+  getAll: getAll,
+  getById: getById
 };
