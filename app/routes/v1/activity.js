@@ -39,13 +39,7 @@ function createActivity(data, callback) {
 }
 
 function listActivities(callback) {
-	models.activity.listActivities(function(err, activities) {
-		if (err) {
-			return callback(err, null)
-		} else {
-			return callback(null, activities)
-		}
-	})
+	models.activity.listActivities(callback)
 }
 
 routeUtils.rPost(router, '/create', 'create', create)

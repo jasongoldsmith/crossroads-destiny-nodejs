@@ -23,11 +23,11 @@ function setEventStatus(event) {
 }
 
 function update(event, callback) {
-	Event.update(event, function (err, data) {
+	event.save(function (err, data) {
 		if (err) {
 			return callback(err, null)
 		} else {
-			return callback(null, event)
+			return callback(null, data)
 		}
 	})
 }
@@ -133,8 +133,19 @@ function joinEvent(data, callback) {
 	)
 }
 
+function listEvents(callback) {
+	Event.find(function(err, events) {
+		if (err) {
+			return callback(err, null)
+		} else {
+			return callback(null, events)
+		}
+	})
+}
+
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
-	joinEvent: joinEvent
+	joinEvent: joinEvent,
+	listEvents: listEvents
 }

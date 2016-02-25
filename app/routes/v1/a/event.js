@@ -26,6 +26,21 @@ function join(req, res) {
 	})
 }
 
+function list(req, res) {
+	utils.l.i("Event list request")
+	listEvents(function(err, events) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			routeUtils.handleAPISuccess(req, res, events)
+		}
+	})
+}
+
+function listEvents(callback) {
+	models.event.listEvents(callback)
+}
+
 function createEvent(data, callback) {
 	models.event.createEvent(data, callback)
 }
@@ -36,4 +51,5 @@ function joinEvent(data, callback) {
 
 routeUtils.rPost(router, '/create', 'create', create)
 routeUtils.rPost(router, '/join', 'join', join)
+routeUtils.rGet(router, '/list', 'list', list)
 module.exports = router
