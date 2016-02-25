@@ -9,19 +9,6 @@ var eventSchema = require('./schema/eventSchema')
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
 
-function setEventStatus(event) {
-	var size=event.players.length
-	if ( size==1 ) {
-		event.status="new"
-	} else if ( size<event.minPlayers ) {
-		event.status="open"
-	} else if ( size >= event.minPlayers && size < event.maxPlayers ) {
-		event.status="can_join"
-	} else {
-		event.status="full"
-	}
-}
-
 function update(event, callback) {
 	event.save(function (err, data) {
 		if (err) {
@@ -79,8 +66,7 @@ function createEvent(data, callback) {
 							eventObj.save(callback)
 						} else {
 							utils.l.i("found an already existing event, adding the new player to the event")
-							event.players.push(data.creator)
-							setEventStatus(event)
+							oldEvent.players.push(data.creator)
 							update(oldEvent, callback)
 						}
 					})
@@ -119,7 +105,6 @@ function joinEvent(data, callback) {
 		},
 		function (event, callback) {
 			event.players.push(data.player)
-			setEventStatus(event)
 			update(event, callback)
 		}
 	],

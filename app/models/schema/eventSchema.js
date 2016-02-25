@@ -18,12 +18,19 @@ eventSchema.pre('validate', function(next) {
 	if (this.isNew) {
 		this.created = new Date()
 	}
-	this.status = "new"
-	next()
-})
-
-eventSchema.pre('update', function(next) {
 	this.updated = new Date()
+
+	var size = this.players.length
+	if ( size == 1 ) {
+		this.status="new"
+	} else if ( size < this.minPlayers ) {
+		this.status="open"
+	} else if ( size >= this.minPlayers && size < this.maxPlayers ) {
+		this.status="can_join"
+	} else {
+		this.status="full"
+	}
+	console.log("event status 1: "+this.status)
 	next()
 })
 

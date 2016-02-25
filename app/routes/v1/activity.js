@@ -28,20 +28,30 @@ function list(req, res) {
 	})
 }
 
-function createActivity(data, callback) {
-	models.activity.createActivity(data, function(err, newActivity) {
+function listById(req, res) {
+	utils.l.i("Get activity by id request" + JSON.stringify(req.body))
+	listActivityById(req.body, function(err, activity) {
 		if (err) {
-			return callback(err, null)
+			routeUtils.handleAPIError(req, res, err, err)
 		} else {
-			return callback(null, newActivity)
+			routeUtils.handleAPISuccess(req, res, activity)
 		}
 	})
+}
+
+function createActivity(data, callback) {
+	models.activity.createActivity(data, callback)
 }
 
 function listActivities(callback) {
 	models.activity.listActivities(callback)
 }
 
+function listActivityById(data, callback) {
+	models.activity.listActivityById(data, callback)
+}
+
 routeUtils.rPost(router, '/create', 'create', create)
 routeUtils.rGet(router, '/list', 'list', list)
+routeUtils.rPost(router, '/listById', 'listById', listById)
 module.exports = router
