@@ -109,6 +109,10 @@ function getUserByData(data, callback) {
 }
 
 
+function getAll(callback) {
+  User.find({}, callback);
+}
+
 
 module.exports = {
   model: User,
@@ -118,5 +122,6 @@ module.exports = {
   save: save,
   deleteUser: deleteUser,
   getUserByData: getUserByData,
-  createUserFromData: createUserFromData
+  createUserFromData: createUserFromData,
+  getAll: getAll
 };
