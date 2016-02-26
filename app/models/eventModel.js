@@ -119,13 +119,14 @@ function joinEvent(data, callback) {
 }
 
 function listEvents(callback) {
-	Event.find(function(err, events) {
-		if (err) {
-			return callback(err, null)
-		} else {
-			return callback(null, events)
-		}
-	})
+
+	Event
+		.find({})
+		.populate("eType")
+		.populate("creator")
+		.populate("players")
+		.exec(callback);
+
 }
 
 module.exports = {
