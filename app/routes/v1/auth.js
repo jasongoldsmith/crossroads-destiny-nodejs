@@ -91,7 +91,7 @@ function signup(req, res) {
   req.assert('passWord', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric()
   var body = req.body
   var userData = {
-    userName: body.userName,
+    userName: body.userName.toLowerCase(),
     passWord: passwordHash.generate(body.passWord),
     psnId: body.psnId,
     xboxId: body.xboxId
