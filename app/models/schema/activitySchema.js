@@ -7,6 +7,8 @@ var activitySchema = new Schema({
 	aCheckpoint: String,
 	aDifficulty: String,
 	aLight: Number,
+	aLevel: Number,
+	aIconUrl: String,
 	minPlayers: Number,
 	maxPlayers: Number
 })

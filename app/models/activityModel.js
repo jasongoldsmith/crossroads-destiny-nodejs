@@ -69,9 +69,36 @@ function listActivityById(data, callback) {
 	)
 }
 
+function updateActivity(data, callback) {
+	utils.async.waterfall([
+		function (callback) {
+			Activity.findOne({_id: data.id}, callback)
+		},
+		function(activity, callback) {
+			if (!activity) {
+				utils.l.i("no activity found")
+				return callback({ error: "activity with this id does not exist" }, null)
+			} else {
+				utils.l.i("found activity: " + JSON.stringify(activity))
+				utils._.extend(activity, data)
+				activity.save(callback)
+			}
+		}
+	],
+		function(err, event) {
+			if (err) {
+				return callback(err, null)
+			} else {
+				return callback(null, event)
+			}
+		}
+	)
+}
+
 module.exports = {
 	model: Activity,
 	createActivity: createActivity,
 	listActivities: listActivities,
-	listActivityById: listActivityById
+	listActivityById: listActivityById,
+	updateActivity: updateActivity
 }

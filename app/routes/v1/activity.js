@@ -39,6 +39,17 @@ function listById(req, res) {
 	})
 }
 
+function update(req, res) {
+	utils.l.i("Update activity request" + JSON.stringify(req.body))
+	updateActivity(req.body, function(err, activity) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			routeUtils.handleAPISuccess(req, res, activity)
+		}
+	})
+}
+
 function createActivity(data, callback) {
 	models.activity.createActivity(data, callback)
 }
@@ -51,7 +62,12 @@ function listActivityById(data, callback) {
 	models.activity.listActivityById(data, callback)
 }
 
+function updateActivity(data, callback) {
+	models.activity.updateActivity(data, callback)
+}
+
 routeUtils.rPost(router, '/create', 'create', create)
 routeUtils.rGet(router, '/list', 'list', list)
 routeUtils.rPost(router, '/listById', 'listById', listById)
+routeUtils.rPost(router, '/update', 'update', update)
 module.exports = router
