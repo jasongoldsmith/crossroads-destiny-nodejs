@@ -31,6 +31,17 @@ function list(req, res) {
   })
 }
 
+function update(req, res) {
+  utils.l.i("Update user request" + JSON.stringify(req.body))
+  updateUser(req.body, function(err, user) {
+    if (err) {
+      routeUtils.handleAPIError(req, res, err, err)
+    } else {
+      routeUtils.handleAPISuccess(req, res, user)
+    }
+  })
+}
+
 function getUserById(data, callback) {
   models.user.getUserById(data, callback)
 }
@@ -39,8 +50,13 @@ function listUsers(callback) {
   models.user.listUsers(callback)
 }
 
+function updateUser(data, callback) {
+  models.user.updateUser(data, callback)
+}
+
 routeUtils.rGet(router, '/self', 'GetSelfUser', getSelfUser)
 routeUtils.rGet(router, '/list', 'list', list)
 routeUtils.rPost(router, '/listById', 'listById', listById)
+routeUtils.rPost(router, '/update', 'update', update)
 
 module.exports = router

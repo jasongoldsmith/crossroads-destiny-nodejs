@@ -1,35 +1,35 @@
-var utils = require('../utils');
-var mongoose = require('mongoose');
-var helpers = require('../helpers');
+var utils = require('../utils')
+var mongoose = require('mongoose')
+var helpers = require('../helpers')
 
 // User Schema
-var UserSchema = require('./schema/userSchema');
+var UserSchema = require('./schema/userSchema')
 
 
 // Model initialization
-var User = mongoose.model('User', UserSchema.schema);
+var User = mongoose.model('User', UserSchema.schema)
 
 // Public functions
 function setFields(user_id, data, callback) {
   getById(user_id, function(err, user) {
     if (err)
-      return callback(err);
+      return callback(err)
 
-    utils._.extend(user, data);
+    utils._.extend(user, data)
     save(user, callback)
-  });
+  })
 }
 
 function getById(id, callback) {
-  if (!id) return callback("Invalid id:" + id);
+  if (!id) return callback("Invalid id:" + id)
 
-  User.findById(id, callback);
+  User.findById(id, callback)
 }
 
 function getByIds(ids, callback) {
-  //if (!ids || ids.length == 0) return callback("Invalid ids:" + ids);
+  //if (!ids || ids.length == 0) return callback("Invalid ids:" + ids)
 
-  User.find({ '_id': { '$in': ids }}, callback);
+  User.find({ '_id': { '$in': ids }}, callback)
 }
 
 
@@ -38,7 +38,7 @@ function save(user, callback) {
     if (err) {
       if (err instanceof mongoose.Error.ValidationError) {
         // ignore this case
-        utils.l.i("User exist while signup.  Its normal we will now update this user field");
+        utils.l.i("User exist while signup.  Its normal we will now update this user field")
       }
       else
       {
@@ -47,10 +47,10 @@ function save(user, callback) {
     } else if (!u) {
       utils.l.s("Got null user on saving user", {user: user})
     } else {
-      helpers.m.setPeopleProps(u);
+      helpers.m.setPeopleProps(u)
     }
-    return callback(err, u);
-  });
+    return callback(err, u)
+  })
 }
 
 
@@ -59,7 +59,7 @@ function deleteUser(user, callback) {
   utils.async.waterfall([
         function(callback) {
           if (!user) {
-            callback("User is null");
+            callback("User is null")
           }
           user.remove(function (err, c, numAffected) {
 
@@ -68,9 +68,9 @@ function deleteUser(user, callback) {
             } else if (!c) {
               utils.l.s("Got null chat on saving user", {user: user})
             }
-            callback(null, mResult);
+            callback(null, mResult)
 
-          });
+          })
         }
       ],
       callback)
@@ -82,35 +82,35 @@ function createUserFromData(data, callback) {
 
   utils.async.waterfall([
     function(callback)  {
-      var user = new User(data);
-      save(user, callback);
+      var user = new User(data)
+      save(user, callback)
     }
   ], function(err, user) {
     if (err) {
-      return callback(err);
+      return callback(err)
     }
-    callback(null, user);
-  });
+    callback(null, user)
+  })
 
 }
 
 
 function getUserByData(data, callback) {
-  utils.l.i("getUserByData, data= ",data);
+  utils.l.i("getUserByData, data= ",data)
   User.findOne(data, function(err, user) {
     if(err) {
-      utils.l.i("getUserByData, err= ",err);
-      callback(err);
+      utils.l.i("getUserByData, err= ",err)
+      callback(err)
     }else {
-      utils.l.i("getUserByData, user= ",user);
-      callback(null, user);
+      utils.l.i("getUserByData, user= ",user)
+      callback(null, user)
     }
-  });
+  })
 }
 
 
 function getAll(callback) {
-  User.find({}, callback);
+  User.find({}, callback)
 }
 
 function getUserById(data, callback) {
@@ -148,6 +148,32 @@ function listUsers(callback) {
   })
 }
 
+function updateUser(data, callback) {
+  utils.async.waterfall([
+      function (callback) {
+        User.findOne({_id: data.id}, callback)
+      },
+      function(user, callback) {
+        if (!user) {
+          utils.l.i("no user found")
+          return callback({ error: "user with this id does not exist" }, null)
+        } else {
+          utils.l.i("found user: " + JSON.stringify(user))
+          utils._.extend(user, data)
+          user.save(callback)
+        }
+      }
+    ],
+    function(err, event) {
+      if (err) {
+        return callback(err, null)
+      } else {
+        return callback(null, event)
+      }
+    }
+  )
+}
+
 
 module.exports = {
   model: User,
@@ -160,5 +186,6 @@ module.exports = {
   getUserByData: getUserByData,
   createUserFromData: createUserFromData,
   getAll: getAll,
-  getById: getById
-};
+  getById: getById,
+  updateUser: updateUser
+}
