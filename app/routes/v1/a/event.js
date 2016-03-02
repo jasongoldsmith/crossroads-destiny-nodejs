@@ -37,6 +37,17 @@ function list(req, res) {
 	})
 }
 
+function leave(req, res) {
+	utils.l.i("Event leave request: " + JSON.stringify(req.body))
+	leaveEvent(req.body, function(err, event) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			routeUtils.handleAPISuccess(req, res, event)
+		}
+	})
+}
+
 function listEvents(callback) {
 	models.event.listEvents(callback)
 }
@@ -49,7 +60,12 @@ function joinEvent(data, callback) {
 	models.event.joinEvent(data, callback)
 }
 
+function leaveEvent(data, callback) {
+	models.event.leaveEvent(data, callback)
+}
+
 routeUtils.rPost(router, '/create', 'create', create)
 routeUtils.rPost(router, '/join', 'join', join)
 routeUtils.rGet(router, '/list', 'list', list)
+routeUtils.rPost(router, '/leave', 'leave', leave)
 module.exports = router

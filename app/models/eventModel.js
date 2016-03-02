@@ -1,7 +1,6 @@
 var utils = require('../utils')
 var mongoose = require('mongoose')
 var helpers = require('../helpers')
-var lodash = require ('../utils/lodash')
 
 // Activity Schema
 var eventSchema = require('./schema/eventSchema')
@@ -20,7 +19,7 @@ function update(event, callback) {
 }
 
 function checkIfPlayerAlreadyExists(event, data) {
-	var playerAlreadyExists = lodash.some(event.players, function (player) {
+	var playerAlreadyExists = utils._.some(event.players, function (player) {
 		return player.toString() === data.toString()
 	})
 
@@ -89,10 +88,10 @@ function joinEvent(data, callback) {
 		function (callback) {
 			Event.findOne({_id: data.eId}, callback)
 		},
-		function (event, callback) {
+		function(event, callback) {
 			handleNoEventFound(event, callback)
 		},
-		function (event, callback) {
+		function(event, callback) {
 			if(checkIfPlayerAlreadyExists(event, data.player)) {
 				utils.l.i("player already exists")
 				return callback({ error: "Player is already in the event" }, null)
@@ -100,12 +99,58 @@ function joinEvent(data, callback) {
 				return callback(null, event)
 			}
 		},
-		function (event, callback) {
+		function(event, callback) {
 			handleEventFull(event, callback)
 		},
-		function (event, callback) {
+		function(event, callback) {
 			event.players.push(data.player)
 			update(event, callback)
+		}
+	],
+		function(err, event) {
+			if (err) {
+				return callback(err, null)
+			} else {
+				return callback(null, event)
+			}
+		}
+	)
+}
+
+function leaveEvent(data, callback) {
+	utils.async.waterfall([
+		function(callback) {
+			Event.findOne({_id: data.eId}, callback)
+		},
+		function(event, callback) {
+			handleNoEventFound(event, callback)
+		},
+		function(event, callback) {
+			if(!checkIfPlayerAlreadyExists(event, data.player)) {
+				utils.l.i("player is not part of the event")
+				return callback({ error: "player is not part of the event" }, null)
+			} else {
+				return callback(null, event)
+			}
+		},
+		function(event, callback) {
+			if(event.players.length == 1) {
+				utils.l.i("Just one player in the event; deleting the event")
+				event.remove(callback)
+			} else {
+				utils._.some(event.players, function(player) {
+					if (player.toString() == data.player.toString()) {
+						utils.l.i("player found, deleting the player")
+						event.players.remove(player)
+					}
+				})
+
+				if(event.creator == data.player) {
+					utils.l.i("player is also the creator; changing the creator to the first user in the list")
+					event.creator = event.players[0]
+				}
+				update(event, callback)
+			}
 		}
 	],
 		function(err, event) {
@@ -133,5 +178,6 @@ module.exports = {
 	model: Event,
 	createEvent: createEvent,
 	joinEvent: joinEvent,
-	listEvents: listEvents
+	listEvents: listEvents,
+	leaveEvent: leaveEvent
 }

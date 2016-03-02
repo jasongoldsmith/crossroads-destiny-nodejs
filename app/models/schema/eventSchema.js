@@ -30,7 +30,6 @@ eventSchema.pre('validate', function(next) {
 	} else {
 		this.status="full"
 	}
-	console.log("event status 1: "+this.status)
 	next()
 })
 
