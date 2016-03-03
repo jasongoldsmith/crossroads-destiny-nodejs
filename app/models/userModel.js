@@ -20,37 +20,41 @@ function setFields(user_id, data, callback) {
   })
 }
 
-function getById(id, callback) {
-  if (!id) return callback("Invalid id:" + id)
+function getByQuery(query, callback) {
+  User
+    .find(query)
+    .select("-passWord")
+    .exec(callback);
+}
 
-  User.findById(id, callback)
+
+function getById(id, callback) {
+  if (!id) return callback("Invalid id:" + id);
+  getByQuery({'_id':id}, utils.firstInArrayCallback(callback));
 }
 
 function getByIds(ids, callback) {
-  //if (!ids || ids.length == 0) return callback("Invalid ids:" + ids)
-
-  User.find({ '_id': { '$in': ids }}, callback)
+  if (utils._.isEmpty(ids)) return callback("Invalid ids:" + ids);
+  getByQuery({ '_id': { '$in': ids }}, callback);
 }
 
 
 function save(user, callback) {
-  user.save(function(err, u, numAffected) {
-    if (err) {
-      if (err instanceof mongoose.Error.ValidationError) {
-        // ignore this case
-        utils.l.i("User exist while signup.  Its normal we will now update this user field")
-      }
-      else
-      {
-        utils.l.s("Got error on saving user", {err: err, user: user})
-      }
-    } else if (!u) {
-      utils.l.s("Got null user on saving user", {user: user})
-    } else {
-      helpers.m.setPeopleProps(u)
+  utils.async.waterfall([
+    function(callback) {
+      user.save(function(err, c, numAffected) {
+        if (err) {
+          utils.l.s("Got error on saving user", {err: err, user: user})
+        } else if (!c) {
+          utils.l.s("Got null on saving user", {user: user})
+        }
+        return callback(err, c);
+      });
+    },
+    function(c, callback) {
+      getById(c._id, callback)
     }
-    return callback(err, u)
-  })
+  ], callback)
 }
 
 
@@ -85,32 +89,19 @@ function createUserFromData(data, callback) {
       var user = new User(data)
       save(user, callback)
     }
-  ], function(err, user) {
-    if (err) {
-      return callback(err)
-    }
-    callback(null, user)
-  })
+  ], callback)
 
 }
 
 
 function getUserByData(data, callback) {
-  utils.l.i("getUserByData, data= ",data)
-  User.findOne(data, function(err, user) {
-    if(err) {
-      utils.l.i("getUserByData, err= ",err)
-      callback(err)
-    }else {
-      utils.l.i("getUserByData, user= ",user)
-      callback(null, user)
-    }
-  })
+  User.find(data)
+    .exec(utils.firstInArrayCallback(callback));
 }
 
 
 function getAll(callback) {
-  User.find({}, callback)
+  getByQuery({}, callback);
 }
 
 function getUserById(data, callback) {
@@ -128,30 +119,19 @@ function getUserById(data, callback) {
         }
       }
   ],
-    function(err, event) {
-      if (err) {
-        return callback(err, null)
-      } else {
-        return callback(null, event)
-      }
-    }
+    callback
   )
 }
 
 function listUsers(callback) {
-  User.find(function(err, users) {
-    if (err) {
-      return callback(err, null)
-    } else {
-      return callback(null, users)
-    }
-  })
+  getAll(callback);
 }
+
 
 function updateUser(data, callback) {
   utils.async.waterfall([
       function (callback) {
-        User.findOne({_id: data.id}, callback)
+        getById(data.id, callback)
       },
       function(user, callback) {
         if (!user) {
@@ -164,14 +144,7 @@ function updateUser(data, callback) {
         }
       }
     ],
-    function(err, event) {
-      if (err) {
-        return callback(err, null)
-      } else {
-        return callback(null, event)
-      }
-    }
-  )
+    callback)
 }
 
 

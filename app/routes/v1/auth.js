@@ -109,7 +109,6 @@ function signup(req, res) {
         return routeUtils.handleAPIError(req, res, err)
       }
       helpers.cookies.setCookie("foo", "bar", res)
-      user.passWord = undefined
       return routeUtils.handleAPISuccess(req, res, {value: user})
     }
   )

@@ -20,7 +20,7 @@ module.exports = function (passport, config) {
       passwordField: 'passWord'
     },
     function( userName, password, done) {
-      models.user.getUserByData({userName:userName}, function (err, user) {
+      models.user.getUserByData({userName:userName.toLowerCase()}, function (err, user) {
         if (err) return done(err);
         if (!user) {
           return done(null, false, { message: 'Unknown user' });
@@ -28,7 +28,6 @@ module.exports = function (passport, config) {
         if (!passwordHash.verify(password, user.passWord)/*!utils._.isEqual(user.passWord, password)*/) {
           return done(null, false, { message: 'Incorrect password.' });
         }
-        user.passWord = undefined;
         return done(null, user);
       });
     }

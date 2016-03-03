@@ -183,8 +183,8 @@ function listEvents(callback) {
 	Event
 		.find({})
 		.populate("eType")
-		.populate("creator")
-		.populate("players")
+		.populate("creator", "-passWord")
+		.populate("players", "-passWord")
 		.exec(callback);
 
 }
