@@ -50,7 +50,7 @@ function createEvent(data, callback) {
 		function (callback) {
 			Event.findOne({eType: data.eType}, callback)
 		},
-		function (event, callback){
+		function (event, callback) {
 			if (!event) {
 				utils.l.i ("no event found, creating a new event")
 				eventObj.save(callback)
@@ -77,7 +77,12 @@ function createEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				return callback(null, event)
+				Event
+					.findOne(event)
+					.populate("eType")
+					.populate("creator")
+					.populate("players")
+					.exec(callback)
 			}
 		}
 	)
@@ -111,7 +116,12 @@ function joinEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				return callback(null, event)
+				Event
+					.findOne(event)
+					.populate("eType")
+					.populate("creator")
+					.populate("players")
+					.exec(callback)
 			}
 		}
 	)
@@ -157,7 +167,12 @@ function leaveEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				return callback(null, event)
+				Event
+					.findOne(event)
+					.populate("eType")
+					.populate("creator")
+					.populate("players")
+					.exec(callback)
 			}
 		}
 	)
