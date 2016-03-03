@@ -28,6 +28,7 @@ module.exports = function (passport, config) {
         if (!passwordHash.verify(password, user.passWord)/*!utils._.isEqual(user.passWord, password)*/) {
           return done(null, false, { message: 'Incorrect password.' });
         }
+        user.passWord=undefined;
         return done(null, user);
       });
     }

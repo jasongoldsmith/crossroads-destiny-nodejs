@@ -8,6 +8,21 @@ var eventSchema = require('./schema/eventSchema')
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
 
+
+function getByQuery(query, callback) {
+	Event
+		.find(query)
+		.populate("eType")
+		.populate("creator", "-passWord")
+		.populate("players", "-passWord")
+		.exec(callback)
+}
+
+function getById(id, callback) {
+	if (!id) return callback("Invalid id:" + id);
+	getByQuery({'_id':id}, utils.firstInArrayCallback(callback));
+}
+
 function update(event, callback) {
 	event.save(function (err, data) {
 		if (err) {
@@ -77,12 +92,7 @@ function createEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				Event
-					.findOne(event)
-					.populate("eType")
-					.populate("creator")
-					.populate("players")
-					.exec(callback)
+				getById(event._id, callback);
 			}
 		}
 	)
@@ -116,12 +126,7 @@ function joinEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				Event
-					.findOne(event)
-					.populate("eType")
-					.populate("creator")
-					.populate("players")
-					.exec(callback)
+				getById(event._id, callback);
 			}
 		}
 	)
@@ -167,26 +172,14 @@ function leaveEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				Event
-					.findOne(event)
-					.populate("eType")
-					.populate("creator")
-					.populate("players")
-					.exec(callback)
+				getById(event._id, callback);
 			}
 		}
 	)
 }
 
 function listEvents(callback) {
-
-	Event
-		.find({})
-		.populate("eType")
-		.populate("creator", "-passWord")
-		.populate("players", "-passWord")
-		.exec(callback);
-
+	getByQuery({}, callback);
 }
 
 module.exports = {
