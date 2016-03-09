@@ -41,7 +41,7 @@ function updateInstallation(req, res) {
         if(utils._.isInvalid(pushDeviceType)) {
           return callback("invalid devicetype mentioned in url, use ios or android in endpoint");
         }
-        models.installation.updateInstallation(req.user, req.body.deviceType, req.body.deviceToken, callback)
+        models.installation.updateInstallation(req.user, pushDeviceType, req.body.deviceToken, callback)
       }
     ],
     function(err, installation) {
