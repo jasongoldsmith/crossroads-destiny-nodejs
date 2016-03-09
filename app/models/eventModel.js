@@ -153,13 +153,15 @@ function leaveEvent(data, callback) {
 				utils.l.i("Just one player in the event; deleting the event")
 				event.remove(callback)
 			} else {
-				utils._.some(event.players, function(player) {
+				var player = utils._.remove(event.players, function(player) {
 					if (player.toString() == data.player.toString()) {
-						utils.l.i("player found, deleting the player")
-						event.players.remove(player)
+						utils.l.i("player found")
+						return player
 					}
 				})
-
+				utils.l.i("removing player")
+				event.players.remove(player)
+				
 				if(event.creator == data.player) {
 					utils.l.i("player is also the creator; changing the creator to the first user in the list")
 					event.creator = event.players[0]
