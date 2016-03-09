@@ -32,7 +32,7 @@ function updateInstallation(req, res) {
   var pushDeviceType = null;
   if(reqDeviceType == "ios") {
     pushDeviceType = "apn";
-  }else if(reqDeviceType == "ios") {
+  }else if(reqDeviceType == "android") {
     pushDeviceType = "gcm";
   }
   utils.async.waterfall(
