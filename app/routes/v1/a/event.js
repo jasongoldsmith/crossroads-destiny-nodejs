@@ -5,6 +5,11 @@ var utils = require('../../../utils')
 var models = require('../../../models')
 var helpers = require('../../../helpers');
 
+var eventAction = {
+  leave: 'leave',
+  join: 'join'
+};
+
 function create(req, res) {
 	utils.l.i("Event create request: " + JSON.stringify(req.body))
 	createEvent(req.body, function(err, event) {
@@ -60,6 +65,9 @@ function createEvent(data, callback) {
 				models.event.createEvent(data, callback);
 			},
 			function(event, callback) {
+        if(utils._.isInvalid(event)) {
+          return callback(null, null)
+        }
         sendPushNotificationForJoin(event);
 				callback(null, event);
 			}
@@ -73,6 +81,9 @@ function joinEvent(data, callback) {
 				models.event.joinEvent(data, callback)
 			},
 			function(event, callback) {
+        if(utils._.isInvalid(event)) {
+          return callback(null, null)
+        }
         sendPushNotificationForJoin(event);
 				callback(null, event);
 			}
@@ -87,7 +98,9 @@ function leaveEvent(data, callback) {
 			},
 			function(event, callback) {
         models.user.getById(data.player, function(err, user) {
-          sendPushNotificationForLeave(event, user);
+          if(utils._.isValidNonBlank(user)) {
+            sendPushNotificationForLeave(event, user);
+          }
           callback(null, event);
         })
 			}
@@ -95,29 +108,26 @@ function leaveEvent(data, callback) {
 }
 
 function sendPushNotificationForLeave(event, user) {
-  sendPushNotificationToCreatorForLeave(event, user);
+  sendPushNotification(event, eventAction.leave, user);
 }
-
-function sendPushNotificationToCreatorForLeave(event, user) {
-  models.installation.getInstallationByUser(event.creator, function(err, installation) {
-    if(err) return;
-    helpers.pushNotification.sendSinglePushNotification(event, getJoinMessage(event.eType, user, "leave"), installation)
-  })
-}
-
 
 function sendPushNotificationForJoin(event) {
-  sendPushNotificationToCreatorForJoin(event);
-	if(event.players.length == event.minPlayers) {
+  sendPushNotification(event, eventAction.join);
+}
+
+function sendPushNotification(event, eventType, user) {
+  sendPushNotificationToCreator(event,eventType, user);
+	if(event.players.length == event.minPlayers && eventType == eventAction.join) {
 		sendPushNotificationForMinimumPlayers(event);
 	}
 }
 
-function sendPushNotificationToCreatorForJoin(event) {
+function sendPushNotificationToCreator(event, eventType, user) {
 	models.installation.getInstallationByUser(event.creator, function(err, installation) {
 		if(err) return;
-		if(event.players.length > 1 ) {
-			helpers.pushNotification.sendSinglePushNotification(event, getJoinMessage(event.eType, event.players[event.players.length - 1], "join"), installation)
+		if((eventType == eventAction.join && event.players.length > 1) || (eventType == eventAction.leave) ) {
+      var message = getJoinMessage(event.eType, utils._.isValidNonBlank(user) ? user : event.players[event.players.length - 1], eventType);
+			helpers.pushNotification.sendSinglePushNotification(event, message, installation)
 		}
 	})
 }
@@ -137,10 +147,13 @@ function getMinPlayersJoinedMessage(event) {
 }
 
 function getJoinMessage(activity, addedPlayer, eventType) {
+  if(utils._.isInvalid(activity) || utils._.isInvalid(addedPlayer)) {
+    return "";
+  }
   var eventName = getEventName(activity);
-	if(eventType == "join") {
+	if(eventType == eventAction.join) {
 		return utils.config.joinPushMessage.replace(utils.config.join_username_placeHolder, addedPlayer.userName).replace(utils.config.join_eventname_placeHolder, eventName);
-	}else {
+	}else if(eventType == eventAction.leave){
 		return utils.config.leavePushMessage.replace(utils.config.join_username_placeHolder, addedPlayer.userName).replace(utils.config.join_eventname_placeHolder, eventName);
 	}
 }
