@@ -94,7 +94,8 @@ function signup(req, res) {
     userName: body.userName.toLowerCase(),
     passWord: passwordHash.generate(body.passWord),
     psnId: body.psnId,
-    xboxId: body.xboxId
+    xboxId: body.xboxId,
+    imageUrl: body.imageUrl
   }
   utils.async.waterfall([
       helpers.req.handleVErrorWrapper(req),
