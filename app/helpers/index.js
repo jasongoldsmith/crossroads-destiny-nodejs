@@ -10,5 +10,6 @@ module.exports = {
   twilio: require('./twilio'),
   azure: require('./azure'),
   awsTranscoding: require("./awsTranscoding"),
-  bitly: require("./bitly")
+  bitly: require("./bitly"),
+  pushNotification: require("./push-notification")
 };

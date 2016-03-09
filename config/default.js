@@ -67,7 +67,13 @@ var defaults = {
   currIosAppVersion : process.env.currIosAppVersion,
   currAndroidAppVersion: process.env.currAndroidAppVersion,
   placeholder_versionString: "VERSIONSTRING",
-  upgradeTitle: process.env.upgradeTitle
+  upgradeTitle: process.env.upgradeTitle,
+  googleAPIKey: process.env.googleAPIKey,
+  joinPushMessage: process.env.joinPushMessage,
+  join_username_placeHolder: "userName",
+  join_eventname_placeHolder: "eventName",
+  leavePushMessage: process.env.leavePushMessage,
+  minPlayersJoinedMessage: process.env.minPlayersJoinedMessage
 };
 
 /**
