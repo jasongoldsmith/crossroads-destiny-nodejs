@@ -98,7 +98,7 @@ function leaveEvent(data, callback) {
 			},
 			function(event, callback) {
         models.user.getById(data.player, function(err, user) {
-          if(utils._.isValidNonBlank(user)) {
+          if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event)) {
             sendPushNotificationForLeave(event, user);
           }
           callback(null, event);
@@ -116,7 +116,9 @@ function sendPushNotificationForJoin(event) {
 }
 
 function sendPushNotification(event, eventType, user) {
-  sendPushNotificationToCreator(event,eventType, user);
+	if(utils._.isValidNonBlank(event.creator)) {
+		sendPushNotificationToCreator(event, eventType, user);
+	}
 	if(event.players.length == event.minPlayers && eventType == eventAction.join) {
 		sendPushNotificationForMinimumPlayers(event);
 	}
