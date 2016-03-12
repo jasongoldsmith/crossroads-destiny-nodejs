@@ -18,7 +18,8 @@ PushNotification.init({
 });
 
 function sendSinglePushNotification(data, alert, installation) {
-  if(utils._.isInvalidOrBlank(installation)) {
+  if(utils._.isInvalidOrBlank(installation) || utils._.isInvalidOrBlank(installation.deviceToken)
+    || utils._.isInvalidOrBlank(installation.deviceType) ) {
     return;
   }
   PushNotification.prepare("test", alert, installation.unReadNotificationCount, sound, data);
