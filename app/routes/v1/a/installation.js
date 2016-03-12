@@ -26,8 +26,7 @@ function getInstallation(req, res) {
 
 
 function updateInstallation(req, res) {
-  req.assert('deviceType').notEmpty();
-  req.assert('deviceToken').notEmpty();
+  req.assert('deviceToken',"not a valid token").notEmpty();
   var reqDeviceType = req.param("platformType")
   var pushDeviceType = null;
   if(reqDeviceType == "ios") {
@@ -38,8 +37,8 @@ function updateInstallation(req, res) {
   utils.async.waterfall(
     [
       function(callback) {
-        if(utils._.isInvalid(pushDeviceType)) {
-          return callback("invalid devicetype mentioned in url, use ios or android in endpoint");
+        if(utils._.isInvalid(pushDeviceType) || utils._.isInvalid(req.body.deviceToken)) {
+          return callback("invalid url or token empty in the request");
         }
         models.installation.updateInstallation(req.user, pushDeviceType, req.body.deviceToken, callback)
       }
