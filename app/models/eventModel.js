@@ -43,7 +43,7 @@ function checkIfPlayerAlreadyExists(event, data) {
 
 function handleNoEventFound(event, callback) {
 	if (!event) {
-		utils.l.i("no event found")
+		utils.l.d("no event found")
 		return callback({ error: "No event was found" }, null)
 	} else {
 		return callback(null, event)
@@ -52,7 +52,7 @@ function handleNoEventFound(event, callback) {
 
 function handleEventFull(event, callback) {
 	if (event.status == "full") {
-		utils.l.i("event is full")
+		utils.l.d("event is full")
 		return callback({ error: "Event is full"}, null)
 	} else {
 		return callback(null, event)
@@ -67,19 +67,19 @@ function createEvent(data, callback) {
 		},
 		function (event, callback) {
 			if (!event) {
-				utils.l.i ("no event found, creating a new event")
+				utils.l.d ("no event found, creating a new event")
 				eventObj.save(callback)
 			} else {
 				if (checkIfPlayerAlreadyExists(event, data.creator)) {
-					utils.l.i("player already exists")
-					return callback({ error: "Player is already in the event" }, null)
+					utils.l.d("player already exists, sending the event as it is")
+					return callback(null, event)
 				} else {
 					handleEventFull(event, function (err, oldEvent) {
 						if (err) {
-							utils.l.i ("creating a new event")
+							utils.l.d ("creating a new event")
 							eventObj.save(callback)
 						} else {
-							utils.l.i("found an already existing event, adding the new player to the event")
+							utils.l.d("found an already existing event, adding the new player to the event")
 							oldEvent.players.push(data.creator)
 							update(oldEvent, callback)
 						}
@@ -108,8 +108,8 @@ function joinEvent(data, callback) {
 		},
 		function(event, callback) {
 			if(checkIfPlayerAlreadyExists(event, data.player)) {
-				utils.l.i("player already exists")
-				return callback({ error: "Player is already in the event" }, null)
+				utils.l.d("player already exists, sending the event as it is")
+				return callback(null, event)
 			} else {
 				return callback(null, event)
 			}
@@ -142,7 +142,7 @@ function leaveEvent(data, callback) {
 		},
 		function(event, callback) {
 			if(!checkIfPlayerAlreadyExists(event, data.player)) {
-				utils.l.i("player is not part of the event")
+				utils.l.d("player is not part of the event")
 				return callback({ error: "player is not part of the event" }, null)
 			} else {
 				return callback(null, event)
@@ -150,20 +150,20 @@ function leaveEvent(data, callback) {
 		},
 		function(event, callback) {
 			if(event.players.length == 1) {
-				utils.l.i("Just one player in the event; deleting the event")
+				utils.l.d("Just one player in the event; deleting the event")
 				event.remove(callback)
 			} else {
 				var player = utils._.remove(event.players, function(player) {
 					if (player.toString() == data.player.toString()) {
-						utils.l.i("player found")
+						utils.l.d("player found")
 						return player
 					}
 				})
-				utils.l.i("removing player")
+				utils.l.d("removing player")
 				event.players.remove(player)
 				
 				if(event.creator == data.player) {
-					utils.l.i("player is also the creator; changing the creator to the first user in the list")
+					utils.l.d("player is also the creator; changing the creator to the first user in the list")
 					event.creator = event.players[0]
 				}
 				update(event, callback)
