@@ -40,6 +40,7 @@
     "moment": "2.10.3",
     "moment-timezone": "0.4.0",
     "mongoose": "4.0.7",
+    "mongoose-id-validator": "^0.2.0",
     "morgan": "1.6.1",
     "multer": "1.0.1",
     "newrelic": "^1.21.1",
@@ -73,7 +74,6 @@
   "devDependencies": {
     "gulp-debug": "2.0.1",
     "mocha": "2.2.5",
-    "mongoose-id-validator": "^0.2.0",
     "superagent": "1.2.0"
   }
 }
