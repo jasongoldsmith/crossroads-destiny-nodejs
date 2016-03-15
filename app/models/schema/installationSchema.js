@@ -25,4 +25,4 @@ module.exports = {
   schema: InstallationSchema
 }
 
-eventSchema.plugin(idValidator)
+InstallationSchema.plugin(idValidator)
