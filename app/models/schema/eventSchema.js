@@ -1,5 +1,6 @@
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
+var idValidator = require('mongoose-id-validator')
 
 var eventSchema = new Schema({
 	eType: { type: Schema.Types.ObjectId, ref: 'Activity', required: true },
@@ -36,3 +37,5 @@ eventSchema.pre('validate', function(next) {
 module.exports = {
 	schema: eventSchema
 }
+
+eventSchema.plugin(idValidator)

@@ -1,5 +1,6 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var mongoose = require('mongoose')
+var Schema = mongoose.Schema
+var idValidator = require('mongoose-id-validator')
 
 var InstallationSchema = new Schema ({
   user: {type: Schema.Types.ObjectId, ref: 'User'},
@@ -8,18 +9,20 @@ var InstallationSchema = new Schema ({
   unReadNotificationCount: Number,
   date: Date,
   uDate: Date
-});
+})
 
-InstallationSchema.index({'user':1}, {'unique': true});
+InstallationSchema.index({'user':1}, {'unique': true})
 
 InstallationSchema.pre('validate', function(next) {
-  this.uDate = new Date();
+  this.uDate = new Date()
   if (this.isNew) {
-    this.date = new Date();
+    this.date = new Date()
   }
-  next();
-});
+  next()
+})
 
 module.exports = {
   schema: InstallationSchema
-};
+}
+
+eventSchema.plugin(idValidator)

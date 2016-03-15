@@ -73,6 +73,7 @@
   "devDependencies": {
     "gulp-debug": "2.0.1",
     "mocha": "2.2.5",
+    "mongoose-id-validator": "^0.2.0",
     "superagent": "1.2.0"
   }
 }
