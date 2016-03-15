@@ -50,15 +50,6 @@ function handleNoEventFound(event, callback) {
 	}
 }
 
-function handleEventFull(event, callback) {
-	if (event.status == "full") {
-		utils.l.d("event is full")
-		return callback({ error: "Event is full"}, null)
-	} else {
-		return callback(null, event)
-	}
-}
-
 function createEvent(data, callback) {
 	var eventObj = new Event(data)
 	utils.async.waterfall([
@@ -74,16 +65,14 @@ function createEvent(data, callback) {
 					utils.l.d("player already exists, sending the event as it is")
 					return callback(null, event)
 				} else {
-					handleEventFull(event, function (err, oldEvent) {
-						if (err) {
-							utils.l.d ("creating a new event")
-							eventObj.save(callback)
-						} else {
-							utils.l.d("found an already existing event, adding the new player to the event")
-							oldEvent.players.push(data.creator)
-							update(oldEvent, callback)
-						}
-					})
+					if (event.status == "full") {
+						utils.l.d("creating a new event")
+						eventObj.save(callback)
+					} else {
+						utils.l.d("found an already existing event, adding the new player to the event")
+						event.players.push(data.creator)
+						update(event, callback)
+					}
 				}
 			}
 		}
@@ -107,19 +96,17 @@ function joinEvent(data, callback) {
 			handleNoEventFound(event, callback)
 		},
 		function(event, callback) {
-			if(checkIfPlayerAlreadyExists(event, data.player)) {
+			if (checkIfPlayerAlreadyExists(event, data.player)) {
 				utils.l.d("player already exists, sending the event as it is")
 				return callback(null, event)
 			} else {
-				return callback(null, event)
+				if (event.status == "full") {
+					return callback({ error: "Event is full"}, null)
+				} else {
+					event.players.push(data.player)
+					update(event, callback)
+				}
 			}
-		},
-		function(event, callback) {
-			handleEventFull(event, callback)
-		},
-		function(event, callback) {
-			event.players.push(data.player)
-			update(event, callback)
 		}
 	],
 		function(err, event) {
