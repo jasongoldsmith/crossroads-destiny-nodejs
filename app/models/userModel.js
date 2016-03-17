@@ -9,6 +9,9 @@ var UserSchema = require('./schema/userSchema')
 // Model initialization
 var User = mongoose.model('User', UserSchema.schema)
 
+//static variables
+var roundRobinCount = 0
+
 // Public functions
 function setFields(user_id, data, callback) {
   getById(user_id, function(err, user) {
@@ -24,18 +27,18 @@ function getByQuery(query, callback) {
   User
     .find(query)
     .select("-passWord")
-    .exec(callback);
+    .exec(callback)
 }
 
 
 function getById(id, callback) {
-  if (!id) return callback("Invalid id:" + id);
-  getByQuery({'_id':id}, utils.firstInArrayCallback(callback));
+  if (!id) return callback("Invalid id:" + id)
+  getByQuery({'_id':id}, utils.firstInArrayCallback(callback))
 }
 
 function getByIds(ids, callback) {
-  if (utils._.isEmpty(ids)) return callback("Invalid ids:" + ids);
-  getByQuery({ '_id': { '$in': ids }}, callback);
+  if (utils._.isEmpty(ids)) return callback("Invalid ids:" + ids)
+  getByQuery({ '_id': { '$in': ids }}, callback)
 }
 
 
@@ -48,8 +51,8 @@ function save(user, callback) {
         } else if (!c) {
           utils.l.s("Got null on saving user", {user: user})
         }
-        return callback(err, c);
-      });
+        return callback(err, c)
+      })
     },
     function(c, callback) {
       getById(c._id, callback)
@@ -82,26 +85,33 @@ function deleteUser(user, callback) {
 }
 
 
+function handleMissingImageUrl(data) {
+  if (!data.imageUrl) {
+    utils.l.d("no image URL found")
+    var imageFiles = utils.constants.imageFiles
+    data.imageUrl = utils.constants.baseUrl + imageFiles[roundRobinCount % imageFiles.length]
+    utils.l.d("image URL round robin count = " + roundRobinCount)
+    utils.l.d("image files length = " + imageFiles.length)
+    roundRobinCount++
+		}
+}
+
 function createUserFromData(data, callback) {
-
-  utils.async.waterfall([
-    function(callback)  {
-      var user = new User(data)
-      save(user, callback)
-    }
-  ], callback)
-
+  handleMissingImageUrl(data)
+  var user = new User(data)
+  utils.l.d("image Url assigned: " + data.imageUrl)
+  save(user, callback)
 }
 
 
 function getUserByData(data, callback) {
   User.find(data)
-    .exec(utils.firstInArrayCallback(callback));
+    .exec(utils.firstInArrayCallback(callback))
 }
 
 
 function getAll(callback) {
-  getByQuery({}, callback);
+  getByQuery({}, callback)
 }
 
 function getUserById(data, callback) {
@@ -124,7 +134,7 @@ function getUserById(data, callback) {
 }
 
 function listUsers(callback) {
-  getAll(callback);
+  getAll(callback)
 }
 
 
