@@ -5,8 +5,8 @@ var idValidator = require('mongoose-id-validator')
 var eventSchema = new Schema({
 	eType: { type: Schema.Types.ObjectId, ref: 'Activity', required: true },
 	status: { type: String, enum: ['new', 'open', 'full', 'can_join']},
-	minPlayers: Number,
-	maxPlayers: Number,
+	minPlayers: { type : Number, required : true },
+	maxPlayers: { type : Number, required : true },
 	creator: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 	players: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
 	created: { type: Date, default: Date.now },
