@@ -6,7 +6,7 @@ var routeUtils = require('../routeUtils')
 function android(req, res) {
 	utils.l.d("android appVersion request")
 	utils.l.d("android app version: " + utils.config.androidAppVersion)
-	routeUtils.handleAPISuccess(req, res, utils.config.androidAppVersion)
+	routeUtils.handleAPISuccess(req, res, { latestAndroidVersion: utils.config.androidAppVersion })
 }
 
 routeUtils.rGet(router, '/android', 'android', android)
