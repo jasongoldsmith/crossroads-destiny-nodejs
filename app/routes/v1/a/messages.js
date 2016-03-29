@@ -7,7 +7,7 @@ var helpers = require('../../../helpers')
 
 function send(req, res) {
 	utils.l.d("Message send request: " + JSON.stringify(req.body))
-	
+
 	sendMessage(req.body, req.user, function(err, message) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -28,7 +28,7 @@ function sendMessage(data, messageCreator, callback) {
 			},
 			function (installation, callback) {
 				helpers.pushNotification.sendSinglePushNotification(null, messageCreator.userName + ": "  + data.message, installation)
-				callback(null, data.message)
+				callback(null, { messageSent: data.message })
 			}
 		], callback)
 }
