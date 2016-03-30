@@ -38,11 +38,13 @@ function deleteOldFullEvents() {
   utils.async.waterfall([
     function (callback) {
       var date = new Date()
-      date.setMinutes(date.getMinutes() + 10)
+      //date.setMinutes(date.getMinutes() + 10)
       models.event.getByQuery({ "status":"full", launchDate:{ $lt: date }}, callback)
     },
     function (events, callback) {
       utils._.forEach(events, function(event) {
+        utils.l.d("job archiving event: " + event)
+        models.archiveEvent.createArchiveEvent(event, callback)
         utils.l.d("job removing event: " + event)
         event.remove(callback)
       })

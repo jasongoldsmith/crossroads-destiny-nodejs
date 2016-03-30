@@ -2,6 +2,7 @@
 var user = require('./userModel')
 var activity = require('./activityModel')
 var event = require ('./eventModel')
+var archiveEvent = require ('./archiveEventModel')
 var installation = require('./installationModel')
 
 
@@ -9,5 +10,6 @@ module.exports = {
   user: user,
   activity: activity,
   event: event,
-  installation: installation
+  installation: installation,
+  archiveEvent: archiveEvent
 };
