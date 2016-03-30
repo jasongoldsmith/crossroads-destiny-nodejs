@@ -23,35 +23,15 @@ function createActivity(data, callback) {
 				return callback(null, activity)
 			}
 		}
-	],
-		function(err, event) {
-			if (err) {
-				return callback(err, null)
-			} else {
-				return callback(null, event)
-			}
-		}
-	)
+	], callback)
 }
 
 function listActivities(callback) {
-	Activity.find({ isActive : {$ne: false} },function(err, activities) {
-		if (err) {
-			return callback(err, null)
-		} else {
-			return callback(null, activities)
-		}
-	})
+	Activity.find({ isActive : {$ne: false} }, callback)
 }
 
 function listAllActivities(callback) {
-	Activity.find(function(err, activities) {
-		if (err) {
-			return callback(err, null)
-		} else {
-			return callback(null, activities)
-		}
-	})
+	Activity.find(callback)
 }
 
 function listActivityById(data, callback) {
@@ -68,15 +48,7 @@ function listActivityById(data, callback) {
 				return callback(null, activity)
 			}
 		}
-	],
-		function(err, event) {
-			if (err) {
-				return callback(err, null)
-			} else {
-				return callback(null, event)
-			}
-		}
-	)
+	], callback)
 }
 
 function updateActivity(data, callback) {
@@ -94,15 +66,7 @@ function updateActivity(data, callback) {
 				activity.save(callback)
 			}
 		}
-	],
-		function(err, event) {
-			if (err) {
-				return callback(err, null)
-			} else {
-				return callback(null, event)
-			}
-		}
-	)
+	], callback)
 }
 
 module.exports = {
