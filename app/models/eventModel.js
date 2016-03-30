@@ -19,8 +19,8 @@ function getByQuery(query, callback) {
 }
 
 function getById(id, callback) {
-	if (!id) return callback("Invalid id:" + id);
-	getByQuery({'_id':id}, utils.firstInArrayCallback(callback));
+	if (!id) return callback("Invalid id:" + id)
+	getByQuery({'_id':id}, utils.firstInArrayCallback(callback))
 }
 
 function update(event, callback) {
@@ -81,7 +81,7 @@ function createEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				getById(event._id, callback);
+				getById(event._id, callback)
 			}
 		}
 	)
@@ -113,7 +113,7 @@ function joinEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				getById(event._id, callback);
+				getById(event._id, callback)
 			}
 		}
 	)
@@ -148,7 +148,7 @@ function leaveEvent(data, callback) {
 				})
 				utils.l.d("removing player")
 				event.players.remove(player)
-				
+
 				if(event.creator == data.player) {
 					utils.l.d("player is also the creator; changing the creator to the first user in the list")
 					event.creator = event.players[0]
@@ -161,14 +161,14 @@ function leaveEvent(data, callback) {
 			if (err) {
 				return callback(err, null)
 			} else {
-				getById(event._id, callback);
+				getById(event._id, callback)
 			}
 		}
 	)
 }
 
 function listEvents(callback) {
-	getByQuery({}, callback);
+	getByQuery({}, callback)
 }
 
 module.exports = {
@@ -176,5 +176,6 @@ module.exports = {
 	createEvent: createEvent,
 	joinEvent: joinEvent,
 	listEvents: listEvents,
-	leaveEvent: leaveEvent
+	leaveEvent: leaveEvent,
+	getByQuery: getByQuery
 }
