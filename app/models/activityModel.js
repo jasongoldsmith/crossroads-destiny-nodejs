@@ -35,6 +35,16 @@ function createActivity(data, callback) {
 }
 
 function listActivities(callback) {
+	Activity.find({ isActive : {$ne: false} },function(err, activities) {
+		if (err) {
+			return callback(err, null)
+		} else {
+			return callback(null, activities)
+		}
+	})
+}
+
+function listAllActivities(callback) {
 	Activity.find(function(err, activities) {
 		if (err) {
 			return callback(err, null)
@@ -99,6 +109,7 @@ module.exports = {
 	model: Activity,
 	createActivity: createActivity,
 	listActivities: listActivities,
+	listAllActivities: listAllActivities,
 	listActivityById: listActivityById,
 	updateActivity: updateActivity
 }
