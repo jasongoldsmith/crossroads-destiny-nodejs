@@ -6,18 +6,17 @@ function resolveReport(data,callback){
 }
 
 function createReport(data, callback) {
-    utils.async.waterfall(
-        [
-            function(callback) {
-                models.report.createReport(data, callback)
-            },
-            function(report, callback) {
-                if(utils._.isInvalid(report)) {
-                    return callback(null, null)
-                }
-                callback(null, report)
-            }
-        ], callback)
+  utils.async.waterfall([
+    function(callback) {
+      models.report.createReport(data, callback)
+    },
+    function(report, callback) {
+      if(utils._.isInvalid(report)) {
+        return callback(null, null)
+      }
+      callback(null, report)
+    }
+  ], callback)
 }
 
 function listReport(status, callback){
@@ -39,7 +38,8 @@ function isValidStatus(status){
 }
 
 module.exports = {
-    createReport: createReport,
-    resolveReport: resolveReport,
-    listReport: listReport
+  createReport: createReport,
+  resolveReport: resolveReport,
+  listReport: listReport
+
 }

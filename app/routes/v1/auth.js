@@ -5,16 +5,9 @@ var utils = require('../../utils')
 var helpers = require('../../helpers')
 var routeUtils = require('../routeUtils')
 var models = require('../../models')
+var service = require('../../service/index')
 var passport = require('passport')
 var passwordHash = require('password-hash')
-
-var platform = {
-  ios : "ios",
-  android: "android"
-}
-var MESSAGE_APP_UPTODATE = "app upto date"
-
-
 
 function login (req, res) {
   req.assert('userName', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isName()
@@ -27,17 +20,16 @@ function login (req, res) {
       function(callback) {
         var passportHandler = passport.authenticate('local', function(err, user, info) {
           if (err) {
-            return callback(err)
+            return callback(err, null)
           }
           if (!user) {
-            return callback(new helpers.errors.WError('PhoneNo or Password incorrect'))
+            return callback(new helpers.errors.WError('PhoneNo or Password incorrect'), null)
           }
           outerUser = user
           callback(null, user)
         })
         passportHandler(req, res)
-      },
-      reqLoginWrapper(req, "auth.login")
+      }
     ],
     function (err) {
       if (err) {
@@ -48,7 +40,6 @@ function login (req, res) {
         }
         return routeUtils.handleAPIError(req, res, req.routeErr)
       }
-
       routeUtils.handleAPISuccess(req, res, {value: outerUser})
     }
   )
@@ -137,14 +128,15 @@ function signup(req, res) {
     passWord: passwordHash.generate(body.passWord),
     psnId: body.psnId,
     xboxId: body.xboxId,
-    imageUrl: body.imageUrl
+    imageUrl: body.imageUrl,
+    clanId: body.clanId
   }
+
   utils.async.waterfall([
       helpers.req.handleVErrorWrapper(req),
-      function(callback) {
-        models.user.createUserFromData(userData, callback)  // don't send message
-      },
-      reqLoginWrapper(req, "auth.signup")
+      function (callback) {
+        service.authService.signupUser(userData, callback)
+      }
     ],
     function (err, user) {
       if (err) {
@@ -157,20 +149,15 @@ function signup(req, res) {
   )
 }
 
-
-
 function logout(req, res) {
   req.logout()
   routeUtils.handleAPISuccess(req, res, {success: true})
 }
 
-
-
 /** Routes */
 routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
-
 routeUtils.rPost(router, '/logout', 'Logout', logout)
-
 module.exports = router
+

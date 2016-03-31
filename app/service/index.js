@@ -1,4 +1,5 @@
 
 module.exports = {
-  reportService: require('./reportService')
-};
+  reportService: require('./reportService'),
+  authService: require('./authService')
+}

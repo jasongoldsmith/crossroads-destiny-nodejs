@@ -11,7 +11,7 @@ var UserSchema = new Schema({
   uniqueID : String,
   psnId: { type: String, required: true },
   xboxId: String,
-  clanId: String,
+  clanId: { type: String, default: "clan_id_not_set"},
   imageUrl: String,
   uDate: Date,
   signupDate: Date,

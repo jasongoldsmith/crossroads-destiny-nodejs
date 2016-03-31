@@ -1,19 +1,10 @@
 var expect = require('chai').expect;
-
 var utils = require('../../utils');
-
 var cookie = require('cookie');
-
 var superagent = require('superagent');
-
 var request = require("request");
-
 var assert = require('chai').assert;
-
 var baseURL = 'http://localhost:3000';
-
-
-
 
 function checkStatus(res, status) {
   if (!res) {
