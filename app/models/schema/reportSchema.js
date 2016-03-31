@@ -3,7 +3,7 @@ var Schema = mongoose.Schema
 var idValidator = require('mongoose-id-validator')
 
 var reportSchema = new Schema({
-	reportStatus: { type: String, enum: ['new', 'resolved', 'defered', 'open']},
+	reportStatus: { type: String, enum: ['new', 'resolved', 'defered', 'open'], default:'new'},
 	reportDetails: { type : String, required : true },
 	resolveReason: { type : String},
 	reportType: { type: String, enum: ['issue', 'comment'], default: 'issue'},

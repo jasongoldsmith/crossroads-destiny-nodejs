@@ -6,6 +6,9 @@ var utils = require('../../../utils/index')
 
 function createReport(req, res) {
     utils.l.i("Event create request: " + JSON.stringify(req.body))
+    req.assert('reportDetails', "Report details cannot be empty").notEmpty()
+    req.assert('reporter', "Reporter - User of the person reporting cannot be empty").notEmpty()
+
     service.reportService.createReport(req.body, function(err, event) {
         if (err) {
             routeUtils.handleAPIError(req, res, err, err)
