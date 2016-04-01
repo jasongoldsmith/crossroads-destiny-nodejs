@@ -18,7 +18,7 @@ var defaults = {
   enableNewRelic: false,
   enforceSSL: true,
   devMode: false,
-  logLevel: 'info',
+  logLevel: 'debug',
   hostUrl: function() {
     var url = this.hostName;
     if (this.portNum !== -1) {
