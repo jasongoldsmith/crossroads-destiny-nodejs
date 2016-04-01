@@ -9,6 +9,15 @@ var eventSchema = require('./schema/eventSchema')
 var Event = mongoose.model('Event', eventSchema.schema)
 
 
+function roundDateToNearestQuaterHour(dateString) {
+	if(utils._.isNull(dateString)) {
+		dateString = Date.now
+	}
+	var coeff = 1000 * 60 * 15;
+	var date = new Date(dateString)
+	return new Date(Math.round(date.getTime() / coeff) * coeff)
+}
+
 function getByQuery(query, callback) {
 	Event
 		.find(query)
@@ -51,10 +60,16 @@ function handleNoEventFound(event, callback) {
 }
 
 function createEvent(data, callback) {
+	var launchDate = data.launchDate
+	data.launchDate = roundDateToNearestQuaterHour(data.launchDate)
 	var eventObj = new Event(data)
 	utils.async.waterfall([
 		function (callback) {
-			Event.findOne({eType: data.eType}, callback)
+			if (utils._.isNull(launchDate)) {
+				Event.findOne({ eType: data.eType }, callback)
+			} else {
+				Event.findOne({ eType: data.eType, launchDate: data.launchDate }, callback)
+			}
 		},
 		function (event, callback) {
 			if (!event) {
