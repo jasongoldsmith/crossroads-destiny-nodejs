@@ -29,7 +29,8 @@ function login (req, res) {
           callback(null, user)
         })
         passportHandler(req, res)
-      }
+      },
+      reqLoginWrapper(req, "auth.login")
     ],
     function (err) {
       if (err) {
