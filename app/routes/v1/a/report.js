@@ -28,6 +28,17 @@ function resolveReport(req,res){
     })
 }
 
+function listReport(req,res){
+    service.reportService.listReport(req.param("status"), function(err, event) {
+        if (err) {
+            routeUtils.handleAPIError(req, res, err, err)
+        } else {
+            routeUtils.handleAPISuccess(req, res, event)
+        }
+    })
+}
+
 routeUtils.rPost(router, '/create', 'createReport', createReport)
-routeUtils.rPost(router, '/resolve', 'resolveRepor', resolveReport)
+routeUtils.rPost(router, '/resolve', 'resolveReport', resolveReport)
+routeUtils.rGet(router, '/list', 'listReport', listReport)
 module.exports = router

@@ -10,7 +10,7 @@ var Report = mongoose.model('Report', reportSchema.schema)
 
 
 function getByQuery(query, callback) {
-	Event
+	Report
 		.find(query)
 		.populate("reporter", "-passWord")
 		.exec(callback)

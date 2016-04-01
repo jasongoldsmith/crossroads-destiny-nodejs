@@ -170,5 +170,6 @@ module.exports = {
   createUserFromData: createUserFromData,
   getAll: getAll,
   getById: getById,
-  updateUser: updateUser
+  updateUser: updateUser,
+  getByQuery:getByQuery
 }

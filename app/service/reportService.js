@@ -20,7 +20,26 @@ function createReport(data, callback) {
         ], callback)
 }
 
+function listReport(status, callback){
+  models.report.getByQuery({reportStatus: {$in : getStatusFilter(status)}},callback)
+}
+
+function getStatusFilter(status){
+
+  if(status == null || !isValidStatus(status) || status.toLowerCase() == "all"){
+    status="All"
+  }else if(status != null && isValidStatus(status)){
+    status = utils._.get(utils.constants.reportListStatus, status.toLowerCase())
+  }
+  return status
+}
+
+function isValidStatus(status){
+  return utils._.has(utils.constants.reportListStatus,status.toLowerCase())
+}
+
 module.exports = {
     createReport: createReport,
-    resolveReport: resolveReport
+    resolveReport: resolveReport,
+    listReport: listReport
 }

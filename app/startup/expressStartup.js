@@ -35,6 +35,8 @@ module.exports = function (app, passport) {
 
   app.set('view engine', 'ejs');
 
+  app.use(express.static(__dirname + '/../'+'views'));
+
   app.use(morgan('combined'));
 
   app.use(cookieParser());

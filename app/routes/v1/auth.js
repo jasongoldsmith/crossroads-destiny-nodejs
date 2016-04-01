@@ -54,6 +54,48 @@ function login (req, res) {
   )
 }
 
+function boLogin (req, res) {
+  req.assert('userName', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isName()
+  req.assert('passWord', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric()
+  console.log("In boLogin")
+  var outerUser = null
+  utils.async.waterfall(
+    [
+      helpers.req.handleVErrorWrapper(req),
+      function(callback) {
+        var passportHandler = passport.authenticate('local', function(err, user, info) {
+          if (err) {
+            return callback(err)
+          }
+          var userType = JSON.parse(JSON.stringify(user)).userType
+          console.log("userType from passport "+userType)
+          if (!user) {
+            return callback(new helpers.errors.WError('PhoneNo or Password incorrect'))
+          }else if(user && userType != 'admin'){
+            return callback(new helpers.errors.WError('User Not Authorized'))
+          }
+          outerUser = user
+          callback(null, user)
+        })
+        passportHandler(req, res)
+      },
+      reqLoginWrapper(req, "auth.login")
+    ],
+    function (err) {
+      if (err) {
+        if (err instanceof helpers.errors.ValidationError) {
+          req.routeErr = err
+        } else {
+          req.routeErr = new helpers.errors.WError(err, 'the input auth combination is not valid')
+        }
+        return routeUtils.handleAPIError(req, res, req.routeErr)
+      }
+
+      routeUtils.handleAPISuccess(req, res, {value: outerUser})
+    }
+  )
+};
+
 function addLogin(userId, userIp, userAgent, reason, callback) {
   utils.async.waterfall([
     function (callback) {
@@ -126,7 +168,7 @@ function logout(req, res) {
 
 /** Routes */
 routeUtils.rGetPost(router, '/login', 'Login', login, login)
-
+routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
 
 routeUtils.rPost(router, '/logout', 'Logout', logout)
