@@ -18,17 +18,30 @@ function send(req, res) {
 }
 
 function sendMessage(data, messageCreator, callback) {
+	var eventObj = null
 	utils.async.waterfall(
 		[
-			function (callback) {
+			function(callback) {
+				models.event.getById(data.eId, callback)
+			},
+			function (event, callback) {
+				utils.l.d("Event to send in payload: " + JSON.stringify(event))
+				if(utils._.isInvalidOrBlank(event)) {
+					return callback({ error: "no event found" }, null)
+				} else {
+					eventObj = {
+						event: event,
+						playerMessage: true
+					}
+				}
 				models.user.getUserById(data, callback)
 			},
 			function (user, callback) {
 				models.installation.getInstallationByUser(user, callback)
 			},
 			function (installation, callback) {
-				helpers.pushNotification.sendSinglePushNotification(null, messageCreator.userName + ": "  + data.message, installation)
-				callback(null, { messageSent: data.message })
+				helpers.pushNotification.sendSinglePushNotification(eventObj, messageCreator.userName + ": "  + data.message, installation)
+				return callback(null, { messageSent: data.message })
 			}
 		], callback)
 }

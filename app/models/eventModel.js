@@ -205,5 +205,6 @@ module.exports = {
 	joinEvent: joinEvent,
 	listEvents: listEvents,
 	leaveEvent: leaveEvent,
-	getByQuery: getByQuery
+	getByQuery: getByQuery,
+	getById: getById
 }
