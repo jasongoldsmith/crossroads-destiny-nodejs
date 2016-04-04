@@ -5,13 +5,14 @@ var moment = require('moment')
 
 // Activity Schema
 var eventSchema = require('./schema/eventSchema')
+var userModel = require ('./userModel')
 
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
 
 function roundDateToNearestQuaterHour(dateString) {
-	if(utils._.isNull(dateString)) {
-		dateString = Date.now
+	if(utils._.isInvalidOrBlank(dateString)) {
+		dateString = new Date()
 	}
 	var coeff = 1000 * 60 * 15;
 	var date = new Date(dateString)
@@ -68,16 +69,19 @@ function handleNoEventFound(event, callback) {
 
 function createEvent(data, callback) {
 	var launchDate = data.launchDate
-
 	data.launchDate = roundDateToNearestQuaterHour(data.launchDate)
 
 	var eventObj = new Event(data)
 	utils.async.waterfall([
-		function (callback) {
-			if (utils._.isNull(launchDate)) {
-				Event.findOne({ eType: data.eType }, callback)
+		function(callback) {
+			userModel.getById(data.creator, callback)
+		},
+		function (user, callback) {
+			utils.l.d("Found user: " + JSON.stringify(user))
+			if (utils._.isInvalidOrBlank(launchDate)) {
+				getByQuery({ eType: data.eType }, user, utils.firstInArrayCallback(callback))
 			} else {
-				Event.findOne({ eType: data.eType, launchDate: data.launchDate }, callback)
+				getByQuery({ eType: data.eType, launchDate: data.launchDate }, user, utils.firstInArrayCallback(callback))
 			}
 		},
 		function (event, callback) {
