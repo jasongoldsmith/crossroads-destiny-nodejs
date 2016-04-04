@@ -69,20 +69,7 @@ function handleNoEventFound(event, callback) {
 
 function createEvent(data, callback) {
 	var launchDate = data.launchDate
-
-	/*
-	TODO: this is a hack to deal with an ios bug where current time is passed when user wants the event to be held now
-	We need to remove this once ios has fixed this issue
-	 */
-	if(launchDate) {
-		var startDate = moment(launchDate)
-		var endDate = moment(new Date())
-		var minutesDiff = Math.abs(endDate.diff(startDate, 'minutes'))
-		if(minutesDiff <= 2) {
-			launchDate = null
-			utils.l.d(" making launchDate null ")
-		}
-	}
+	
 	data.launchDate = roundDateToNearestQuaterHour(data.launchDate)
 
 	var eventObj = new Event(data)
