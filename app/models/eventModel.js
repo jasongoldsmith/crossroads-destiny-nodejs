@@ -9,7 +9,6 @@ var eventSchema = require('./schema/eventSchema')
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
 
-
 function roundDateToNearestQuaterHour(dateString) {
 	if(utils._.isNull(dateString)) {
 		dateString = Date.now
@@ -69,7 +68,7 @@ function handleNoEventFound(event, callback) {
 
 function createEvent(data, callback) {
 	var launchDate = data.launchDate
-	
+
 	data.launchDate = roundDateToNearestQuaterHour(data.launchDate)
 
 	var eventObj = new Event(data)

@@ -137,7 +137,8 @@ function signup(req, res) {
       helpers.req.handleVErrorWrapper(req),
       function (callback) {
         service.authService.signupUser(userData, callback)
-      }
+      },
+      reqLoginWrapper(req, "auth.login")
     ],
     function (err, user) {
       if (err) {
