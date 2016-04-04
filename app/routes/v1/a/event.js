@@ -34,7 +34,18 @@ function join(req, res) {
 
 function list(req, res) {
 	utils.l.i("Event list request")
-	listEvents(function(err, events) {
+	listEvents(req.user, function(err, events) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			routeUtils.handleAPISuccess(req, res, events)
+		}
+	})
+}
+
+function listAll(req, res) {
+	utils.l.i("Event list request")
+	listEvents(null, function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
@@ -61,8 +72,8 @@ function leave(req, res) {
 	})
 }
 
-function listEvents(callback) {
-	models.event.listEvents(callback)
+function listEvents(user, callback) {
+	models.event.listEvents(user, callback)
 }
 
 function createEvent(data, callback) {
@@ -174,5 +185,6 @@ function getEventName(activity) {
 routeUtils.rPost(router, '/create', 'create', create)
 routeUtils.rPost(router, '/join', 'join', join)
 routeUtils.rGet(router, '/list', 'list', list)
+routeUtils.rGet(router, '/listAll', 'listAll', listAll)
 routeUtils.rPost(router, '/leave', 'leave', leave)
 module.exports = router

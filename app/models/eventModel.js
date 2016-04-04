@@ -19,18 +19,25 @@ function roundDateToNearestQuaterHour(dateString) {
 	return new Date(Math.round(date.getTime() / coeff) * coeff)
 }
 
-function getByQuery(query, callback) {
+function getByQuery(query, user, callback) {
 	Event
 		.find(query)
 		.populate("eType")
 		.populate("creator", "-passWord")
 		.populate("players", "-passWord")
-		.exec(callback)
+		.exec(function (err, events) {
+			if (user) {
+				events = events.filter(function(event) {
+					return event.creator.clanId == user.clanId
+				})
+			}
+			callback(null, events)
+		})
 }
 
 function getById(id, callback) {
 	if (!id) return callback("Invalid id:" + id)
-	getByQuery({'_id':id}, utils.firstInArrayCallback(callback))
+	getByQuery({'_id':id}, null, utils.firstInArrayCallback(callback))
 }
 
 function update(event, callback) {
@@ -198,8 +205,8 @@ function leaveEvent(data, callback) {
 	)
 }
 
-function listEvents(callback) {
-	getByQuery({}, callback)
+function listEvents(user, callback) {
+	getByQuery({}, user, callback)
 }
 
 module.exports = {

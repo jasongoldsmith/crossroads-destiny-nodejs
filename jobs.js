@@ -39,7 +39,7 @@ function deleteOldFullEvents() {
     function (callback) {
       var date = new Date()
       //date.setMinutes(date.getMinutes() + 10)
-      models.event.getByQuery({ "status":"full", launchDate:{ $lt: date }}, callback)
+      models.event.getByQuery({ "status":"full", launchDate:{ $lt: date }}, null, callback)
     },
     function (events, callback) {
       utils._.forEach(events, function(event) {
@@ -58,8 +58,6 @@ function deleteOldFullEvents() {
     }
   })
 }
-
-
 
 module.exports = {
   updatePassWord: updatePassWord,
