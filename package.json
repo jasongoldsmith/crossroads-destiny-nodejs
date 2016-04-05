@@ -47,22 +47,22 @@
     "nightwatch": "0.7.9",
     "node-uuid": "1.4.3",
     "parse": "1.5.0",
-    "twilio": "2.2.1",
     "passport": "0.2.2",
     "passport-local": "1.0.0",
     "password-hash": "1.2.2",
-    "push-notification": "0.1.8",
+    "push-notification": "git+https://github.com/idw111/push-notification.git",
     "raven": "0.8.1",
     "request": "2.60.0",
     "require-dir": "0.3.0",
     "s3": "4.4.0",
     "s3-upload-stream": "1.0.7",
+    "superagent": "1.2.0",
+    "twilio": "2.2.1",
     "ua-parser-js": "0.7.7",
     "underscore.string": "3.1.1",
     "validator": "3.41.2",
     "verror": "1.5.1",
-    "winston": "1.0.1",
-    "superagent": "1.2.0"
+    "winston": "1.0.1"
   },
   "engines": {
     "node": "0.12.2"
