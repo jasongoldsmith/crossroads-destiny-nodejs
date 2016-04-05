@@ -68,9 +68,9 @@ function handleNoEventFound(event, callback) {
 }
 
 function createEvent(data, callback) {
-	var launchDate = data.launchDate
-	data.launchDate = roundDateToNearestQuaterHour(data.launchDate)
-
+	if(data.launchDate) {
+		data.launchDate = roundDateToNearestQuaterHour(data.launchDate)
+	}
 	var eventObj = new Event(data)
 	utils.async.waterfall([
 		function(callback) {
@@ -78,7 +78,7 @@ function createEvent(data, callback) {
 		},
 		function (user, callback) {
 			utils.l.d("Found user: " + JSON.stringify(user))
-			if (utils._.isInvalidOrBlank(launchDate)) {
+			if (utils._.isInvalidOrBlank(data.launchDate)) {
 				getByQuery({ eType: data.eType }, user, utils.firstInArrayCallback(callback))
 			} else {
 				getByQuery({ eType: data.eType, launchDate: data.launchDate }, user, utils.firstInArrayCallback(callback))
