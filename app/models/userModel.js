@@ -1,20 +1,25 @@
 var utils = require('../utils')
 var mongoose = require('mongoose')
 var helpers = require('../helpers')
-var storage = require('node-persist')
-storage.initSync()
-
 
 // User Schema
 var UserSchema = require('./schema/userSchema')
 
-
 // Model initialization
 var User = mongoose.model('User', UserSchema.schema)
+var roundRobinCounterModel = require('./roundRobinCounterModel')
 
 //static variables
-var roundRobinCount = storage.getItem('roundRobinCount') || 0
-utils.l.d("getting roundRobinCount from storage: " + storage.getItem('roundRobinCount'))
+var roundRobinCount = null
+
+roundRobinCounterModel.getByQuery(function(err, counter) {
+  if (counter) {
+    utils.l.d ( "getting roundRobinCount from mongo: " + counter.value)
+    roundRobinCount = counter.value
+  } else {
+    roundRobinCount = 0
+  }
+})
 
 // Public functions
 function setFields(user_id, data, callback) {
@@ -89,7 +94,7 @@ function deleteUser(user, callback) {
 }
 
 
-function handleMissingImageUrl(data) {
+function handleMissingImageUrl(data, callback) {
   if (!data.imageUrl) {
     utils.l.d("no image URL found")
     var imageFiles = utils.constants.imageFiles
@@ -97,18 +102,26 @@ function handleMissingImageUrl(data) {
     utils.l.d("image URL round robin count = " + roundRobinCount)
     utils.l.d("image files length = " + imageFiles.length)
     roundRobinCount++
-    utils.l.d("setting roundRobinCount to storage: " + roundRobinCount)
-    storage.setItem('roundRobinCount', roundRobinCount)
+    utils.l.d("setting roundRobinCount to mongo: " + roundRobinCount)
+    roundRobinCounterModel.updateCounter(roundRobinCount, function(err, counter) {
+      return callback(null, data)
+    })
 		}
 }
 
 function createUserFromData(data, callback) {
-  handleMissingImageUrl(data)
-  var user = new User(data)
-  utils.l.d("image Url assigned: " + data.imageUrl)
-  save(user, callback)
-}
+  utils.async.waterfall([
+    function(callback) {
+      handleMissingImageUrl(data, callback)
+    },
+    function(data, callback) {
+      var user = new User(data)
+      utils.l.d("image Url assigned: " + data.imageUrl)
+      save(user, callback)
+    }
+  ], callback)
 
+}
 
 function getUserByData(data, callback) {
   User.find(data)
