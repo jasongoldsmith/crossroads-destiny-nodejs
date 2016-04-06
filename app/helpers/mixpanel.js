@@ -1,11 +1,11 @@
 var Mixpanel = require('mixpanel');
 var utils = require('../utils');
-var mixpanelKey = utils.config.mixpanelKey;
+var mixpanelKey = "11356e28f1441f584be7a0dbed89d8df";
 utils.l.i("Mixpanel key", mixpanelKey);
 var mixpanel = null;
 
 if (utils._.isValidNonBlank(mixpanelKey)) {
-  mixpanel = Mixpanel.init(mixpanelKey);
+  mixpanel = Mixpanel.init(mixpanelKey, { debug:true });
 }
 var reqHelper = require('./reqHelper');
 
@@ -115,7 +115,32 @@ function setPeopleProps(user) {
   mixpanel.people.set(user.id, mixpanelPeopleProps);
 }
 
+function setUser(user) {
+  mixpanel.people.set(user.userName, {
+    events_created: 0,
+    events_joined: 0,
+    date_joined: user.uDate
+  })
+}
+
+function trackEvent(event) {
+  mixpanel.track(event.eType.aType + ", " + event.eType.aSubType, event)
+  incrementEventsCreated(event.creator)
+  incrementEventsJoined(event.creator)
+}
+
+function incrementEventsCreated(user) {
+  mixpanel.people.increment(user.userName, "events_created")
+}
+
+function incrementEventsJoined(user) {
+  mixpanel.people.increment(user.userName, "events_joined")
+}
+
 module.exports = {
   trackRequest: trackRequest,
-  setPeopleProps: setPeopleProps
+  setPeopleProps: setPeopleProps,
+  setUser: setUser,
+  trackEvent: trackEvent,
+  incrementEventsJoined: incrementEventsJoined
 };

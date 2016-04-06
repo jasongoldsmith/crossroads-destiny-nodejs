@@ -16,6 +16,7 @@ function create(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
+			helpers.m.trackEvent(event)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
@@ -27,6 +28,10 @@ function join(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
+			var player = utils._.find(event.players, function(player) {
+				return player._id == req.body.player
+			})
+			helpers.m.incrementEventsJoined(player)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
