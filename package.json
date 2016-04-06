@@ -45,6 +45,7 @@
     "multer": "1.0.1",
     "newrelic": "^1.21.1",
     "nightwatch": "0.7.9",
+    "node-persist": "0.0.11",
     "node-uuid": "1.4.3",
     "parse": "1.5.0",
     "passport": "0.2.2",

@@ -1,6 +1,9 @@
 var utils = require('../utils')
 var mongoose = require('mongoose')
 var helpers = require('../helpers')
+var storage = require('node-persist')
+storage.initSync()
+
 
 // User Schema
 var UserSchema = require('./schema/userSchema')
@@ -10,7 +13,8 @@ var UserSchema = require('./schema/userSchema')
 var User = mongoose.model('User', UserSchema.schema)
 
 //static variables
-var roundRobinCount = 0
+var roundRobinCount = storage.getItem('roundRobinCount') || 0
+utils.l.d("getting roundRobinCount from storage: " + storage.getItem('roundRobinCount'))
 
 // Public functions
 function setFields(user_id, data, callback) {
@@ -93,6 +97,8 @@ function handleMissingImageUrl(data) {
     utils.l.d("image URL round robin count = " + roundRobinCount)
     utils.l.d("image files length = " + imageFiles.length)
     roundRobinCount++
+    utils.l.d("setting roundRobinCount to storage: " + roundRobinCount)
+    storage.setItem('roundRobinCount', roundRobinCount)
 		}
 }
 
