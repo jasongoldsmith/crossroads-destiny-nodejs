@@ -68,9 +68,23 @@ function handleNoEventFound(event, callback) {
 }
 
 function createEvent(data, callback) {
+	var checkWithDate = data.launchDate
 	if(data.launchDate) {
 		data.launchDate = roundDateToNearestQuaterHour(data.launchDate)
+		/*
+		We need to macke the checkWithDate null if the launchDate is within 15 minutes
+		because then the event is no longer considered upcoming
+		 */
+		var startDate = moment(data.launchDate)
+		var endDate = moment(Date.now())
+		var minutesDiff = Math.abs(endDate.diff(startDate, 'minutes'))
+		if(minutesDiff < 15) {
+			checkWithDate = null
+		} else {
+			data.launchStatus = "upcoming"
+		}
 	}
+
 	var eventObj = new Event(data)
 	utils.async.waterfall([
 		function(callback) {
@@ -78,7 +92,7 @@ function createEvent(data, callback) {
 		},
 		function (user, callback) {
 			utils.l.d("Found user: " + JSON.stringify(user))
-			if (utils._.isInvalidOrBlank(data.launchDate)) {
+			if (utils._.isInvalidOrBlank(checkWithDate)) {
 				getByQuery({ eType: data.eType }, user, utils.firstInArrayCallback(callback))
 			} else {
 				getByQuery({ eType: data.eType, launchDate: data.launchDate }, user, utils.firstInArrayCallback(callback))
