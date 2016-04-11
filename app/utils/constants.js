@@ -182,6 +182,7 @@ var imageFiles = [
   "9e503ea284c52377d90d4135cbf7781a.jpg",
   "9f325d93a202c1f917cf59a7b9ad9d4d.jpg"
 ]
+
 var reportListStatus = {
   all:['new', 'resolved', 'defered', 'open'],
   unresolved:['new','open'],
@@ -191,9 +192,15 @@ var reportListStatus = {
   defered:'defered'
 }
 
+var eventAction = {
+  leave: 'leave',
+  join: 'join'
+}
+
 module.exports = {
   l: lodash,
   baseUrl: baseUrl,
   imageFiles: imageFiles,
-  reportListStatus: reportListStatus
+  reportListStatus: reportListStatus,
+  eventAction: eventAction
 };
