@@ -86,7 +86,9 @@ function createEvent(data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-        sendPushNotificationForJoin(event)
+				if(event.launchStatus == "now") {
+					sendPushNotificationForJoin(event)
+				}
 				callback(null, event)
 			}
 		], callback)
@@ -102,7 +104,9 @@ function joinEvent(data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-        sendPushNotificationForJoin(event)
+				if(event.launchStatus == "now") {
+					sendPushNotificationForJoin(event)
+				}
 				callback(null, event)
 			}
 		], callback)
@@ -116,7 +120,7 @@ function leaveEvent(data, callback) {
 			},
 			function(event, callback) {
         models.user.getById(data.player, function(err, user) {
-          if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event)) {
+          if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event) && event.launchStatus == "now") {
             sendPushNotificationForLeave(event, user)
           }
           callback(null, event)
