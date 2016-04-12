@@ -52,7 +52,7 @@ function update(event, callback) {
 
 function checkIfPlayerAlreadyExists(event, data) {
 	var playerAlreadyExists = utils._.some(event.players, function (player) {
-		return player.toString() === data.toString()
+		return player._id == data.toString()
 	})
 
 	return playerAlreadyExists
