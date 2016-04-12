@@ -6,6 +6,7 @@ var moment = require('moment')
 // Activity Schema
 var eventSchema = require('./schema/eventSchema')
 var userModel = require ('./userModel')
+mongoose.set('debug',true)
 
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
@@ -81,7 +82,7 @@ function createEvent(data, callback) {
 		if(minutesDiff < 15) {
 			checkWithDate = null
 		} else {
-			data.launchStatus = "upcoming"
+			data.launchStatus = utils.constants.eventLaunchStatusList.upcoming
 		}
 	}
 

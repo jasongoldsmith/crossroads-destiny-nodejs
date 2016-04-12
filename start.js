@@ -18,5 +18,5 @@ var schedule = require('node-schedule');
 var server = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
   fs.writeFile("app/tmp/starttime.txt", new Date().getTime());
-  var j = schedule.scheduleJob('*/1 * * * *', eventService.launchEvents());
+  var j = schedule.scheduleJob('*/1 * * * *', eventService.launchEvents);
 });
