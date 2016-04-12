@@ -3,6 +3,7 @@
 var express = require('express')
 var router = express.Router()
 var jobs = require('./jobs')
+var utils = require('./app/utils')
 
 var hashPassword = "hashPassword"
 var deleteOldFullEvents = "deleteOldFullEvents"
@@ -18,5 +19,7 @@ switch(command) {
   case deleteOldFullEvents:
     jobs.deleteOldFullEvents()
     break
+  case "momentTest":
+    console.log("time: "+utils.moment().add(-utils.config.triggerIntervalMinutes,"minutes").format())
   default:
 }

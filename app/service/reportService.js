@@ -2,7 +2,7 @@ var utils = require('../utils')
 var models = require('../models')
 
 function resolveReport(data,callback){
-
+  models.report.resolveReport(data,callback)
 }
 
 function createReport(data, callback) {

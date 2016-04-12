@@ -199,6 +199,30 @@ function listEvents(user, callback) {
 	getByQuery({}, user, callback)
 }
 
+function launchEvent(event, callback){
+	utils.l.d("Updating event launch status "+event.eType);
+	utils.async.waterfall([
+				function(callback) {
+					getById(event._id, callback)
+				},
+				function (event, callback) {
+					if(!event){
+						return callback("Event does not exist. It is either full or an invalid event is being updated.",null)
+					}
+					utils.l.d("Found event: " + JSON.stringify(event))
+					utils._.extend(event, {launchStatus:utils.constants.eventLaunchStatusList.now})
+					update(event,callback)
+				}
+			],function(err, updatedEvent) {
+				if (err) {
+					return callback(err, null)
+				} else {
+					return callback(null, updatedEvent)
+				}
+			}
+	)
+}
+
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
@@ -206,5 +230,6 @@ module.exports = {
 	listEvents: listEvents,
 	leaveEvent: leaveEvent,
 	getByQuery: getByQuery,
-	getById: getById
+	getById: getById,
+	launchEvent: launchEvent
 }

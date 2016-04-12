@@ -197,10 +197,16 @@ var eventAction = {
   join: 'join'
 }
 
+var eventLaunchStatusList = {
+    now:'now',
+    upcoming:'upcoming'
+}
+
 module.exports = {
   l: lodash,
   baseUrl: baseUrl,
   imageFiles: imageFiles,
   reportListStatus: reportListStatus,
-  eventAction: eventAction
+  eventAction: eventAction,
+  eventLaunchStatusList: eventLaunchStatusList
 };

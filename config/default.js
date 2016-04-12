@@ -73,7 +73,8 @@ var defaults = {
   join_username_placeHolder: "userName",
   join_eventname_placeHolder: "eventName",
   leavePushMessage: process.env.leavePushMessage,
-  minPlayersJoinedMessage: process.env.minPlayersJoinedMessage
+  minPlayersJoinedMessage: process.env.minPlayersJoinedMessage,
+  triggerIntervalMinutes: 15
 };
 
 /**

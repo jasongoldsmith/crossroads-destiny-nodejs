@@ -91,5 +91,6 @@ module.exports = {
   expect: chai.expect,
   l: log,
   firstInArrayCallback: firstInArrayCallback,
-  updateS3Domain: updateS3Domain
+  updateS3Domain: updateS3Domain,
+  moment:require('moment')
 };

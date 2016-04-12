@@ -21,24 +21,21 @@ angular.module('reportManager', ['ngAnimate', 'ui.bootstrap']).controller('repor
 	    $scope.animationsEnabled = true;
 
 			$scope.updateReport = function(reportId, report){
-				var idx = $scope.reportList.indexOf(report)
-				console.log("idx = "+idx)
-				$scope.reportList.splice(idx, 1);
+				var headers = {"Content-Type":"application/json"};
 
-				/*var headers = {"Content-Type":"application/json"};
-
-				$http({method: "POST", url: "/api/v1/a/report/resolve", data:items.data, config: headers}).
+				$http({method: "POST", url: "/api/v1/a/report/resolve", data:report, config: headers}).
 				then(function(response) {
 					$scope.status = response.status;
-					console.log("response.data.offerStatus = "+response.data.offerStatus)
-					$scope.offerStatusUpdated=response.data.offerStatus
-					console.log("$scope.offerStatusUpdated="+$scope.offerStatusUpdated)
-					$uibModalInstance.close(response.data.offerStatus);
+					if(response.data.reportStatus == "resolved") {
+						var idx = $scope.reportList.indexOf(report)
+						console.log("idx = " + idx)
+						$scope.reportList.splice(idx, 1);
+					}
 				}, function(response) {
 					$scope.data = response.data || "Request failed";
 					$scope.status = response.status;
 					$scope.inputTrack3 = "Unable to update the offer"
-				});*/
+				});
 			};
 
 	    $scope.openCustomerDetails = function (offerId,offer) {

@@ -32,9 +32,48 @@ function createReport(report, callback) {
 	})
 }
 
+function resolveReport(reportData, callback){
+	utils.async.waterfall([
+				function(callback) {
+					getById(reportData._id, callback)
+				},
+				function (report, callback) {
+					if(!report){
+						return callback("Report does not exist. It is either resolved or an invalid report is being updated.",null)
+					}
+					utils.l.d("Found Report: " + JSON.stringify(report))
+					utils._.extend(report, {reportStatus:utils.constants.reportListStatus.resolved, resolveReason:"Resolved by admin"})
+					save(report,callback)
+				}
+			],function(err, updatedReport) {
+				if (err) {
+					return callback(err, null)
+				} else {
+					return callback(null, updatedReport)
+				}
+			}
+	)
+}
+
+function save(report, callback) {
+	utils.async.waterfall([
+		function(callback) {
+			report.save(function(err, updatedReport, numAffected) {
+				if (err) {
+					utils.l.s("Got error on saving report", {err: err, offer: report})
+				} else if (!updatedReport) {
+					utils.l.s("Got null offer on saving chat", {report: report})
+				}
+				return callback(err, updatedReport);
+			});
+		}
+	], callback)
+}
+
 module.exports = {
 	model: Report,
 	createReport: createReport,
 	getById: getById,
-	getByQuery: getByQuery
+	getByQuery: getByQuery,
+	resolveReport: resolveReport
 }

@@ -61,6 +61,27 @@ function sendPushNotification(event, eventType, user) {
   }
 }
 
+//TODO: Refactor this and sendPushNotification method to have common implementation
+function sendPushNotificationForScheduler(event) {
+  utils.l.d("sendPushNotificationForScheduler::sending push notification for event : " + event)
+  if((event.players.length >= event.minPlayers && event.players.length < event.maxPlayers) && event.minPlayers > 1) {
+    utils.l.d("sendPushNotificationForScheduler::sending push notification to creator for minimum players met")
+    sendPushNotificationForEventStatus(event, "min")
+  }
+
+  if(event.players.length == event.maxPlayers) {
+    utils.l.d("sendPushNotificationForScheduler::sending push notification to creator for maximum players met")
+    sendPushNotificationForEventStatus(event, "max")
+
+    // removing the creator of the event from the list, as we already have sent a push to creator
+    var players = utils._.remove(event.players, {
+      _id: event.creator._id
+    })
+
+    sendPushNotificationToAllPlayers(event)
+  }
+}
+
 function sendPushNotificationToCreator(event, eventType, user) {
   models = require('../models')
   models.installation.getInstallationByUser(event.creator, function(err, installation) {
@@ -137,5 +158,6 @@ function getEventName(activity) {
 
 module.exports = {
   sendSinglePushNotification: sendSinglePushNotification,
-  sendPushNotification: sendPushNotification
+  sendPushNotification: sendPushNotification,
+  sendPushNotificationForScheduler: sendPushNotificationForScheduler
 }

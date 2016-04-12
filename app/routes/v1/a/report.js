@@ -19,11 +19,11 @@ function createReport(req, res) {
 }
 
 function resolveReport(req,res){
-    service.reportService.resolveReport(req.body, function(err, event) {
+    service.reportService.resolveReport(req.body, function(err, report) {
         if (err) {
             routeUtils.handleAPIError(req, res, err, err)
         } else {
-            routeUtils.handleAPISuccess(req, res, event)
+            routeUtils.handleAPISuccess(req, res, report)
         }
     })
 }
