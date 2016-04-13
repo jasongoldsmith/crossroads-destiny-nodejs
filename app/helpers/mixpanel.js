@@ -5,7 +5,7 @@ utils.l.i("Mixpanel key", mixpanelKey);
 var mixpanel = null;
 
 if (utils._.isValidNonBlank(mixpanelKey)) {
-  mixpanel = Mixpanel.init(mixpanelKey, { debug:true });
+  mixpanel = Mixpanel.init(mixpanelKey);
 }
 var reqHelper = require('./reqHelper');
 

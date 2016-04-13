@@ -46,14 +46,14 @@ function update(event, callback) {
 		if (err) {
 			return callback(err, null)
 		} else {
-			return callback(null, data)
+			Event.findOne({_id: data._id}, callback)
 		}
 	})
 }
 
 function checkIfPlayerAlreadyExists(event, data) {
 	var playerAlreadyExists = utils._.some(event.players, function (player) {
-		return player._id == data.toString()
+		return player == data.toString()
 	})
 
 	return playerAlreadyExists
@@ -104,7 +104,11 @@ function createEvent(data, callback) {
 				utils.l.d ("no event found, creating a new event")
 				eventObj.save(callback)
 			} else {
-				if (checkIfPlayerAlreadyExists(event, data.creator)) {
+				var playerAlreadyExists = utils._.some(event.players, function (player) {
+					return player._id.toString() == data.creator.toString()
+				})
+
+				if (playerAlreadyExists) {
 					utils.l.d("player already exists, sending the event as it is")
 					return callback(null, event)
 				} else {

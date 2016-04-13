@@ -58,6 +58,7 @@ function sendPushNotification(event, eventType, user) {
     })
 
     sendPushNotificationToAllPlayers(event)
+    event.players.push(event.creator)
   }
 }
 
