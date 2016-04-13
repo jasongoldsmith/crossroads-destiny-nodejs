@@ -45,7 +45,7 @@ function launchEvent(event, callback){
     },function(updatedEvent,callback){
       if(updatedEvent){
         utils.l.d("About to send push notification: " + updatedEvent.eventType+",launchDate:"+updatedEvent.launchDate+",launchStatus:"+updatedEvent.launchStatus)
-        helpers.pushNotification.sendPushNotificationForScheduler(updatedEvent)
+        helpers.pushNotification.sendPushNotificationForScheduler(event)
         return callback(null,1)
       }else {
         return callback(null,0)
