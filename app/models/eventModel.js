@@ -62,7 +62,7 @@ function checkIfPlayerAlreadyExists(event, data) {
 function handleNoEventFound(event, callback) {
 	if (!event) {
 		utils.l.d("no event found")
-		return callback({ error: "No event was found" }, null)
+		return callback({ error: "Sorry, that event no longer exists. Please refresh." }, null)
 	} else {
 		return callback(null, event)
 	}
@@ -148,7 +148,7 @@ function joinEvent(data, callback) {
 				return callback(null, event)
 			} else {
 				if (event.status == "full") {
-					return callback({ error: "Event is full"}, null)
+					return callback({ error: "Sorry, that event is full. Please refresh."}, null)
 				} else {
 					event.players.push(data.player)
 					update(event, callback)
@@ -177,7 +177,7 @@ function leaveEvent(data, callback) {
 		function(event, callback) {
 			if(!checkIfPlayerAlreadyExists(event, data.player)) {
 				utils.l.d("player is not part of the event")
-				return callback({ error: "player is not part of the event" }, null)
+				return callback({ error: "Something went wrong! You are trying to leave an event that you are not attending." }, null)
 			} else {
 				return callback(null, event)
 			}
