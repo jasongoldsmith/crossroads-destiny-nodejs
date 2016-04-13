@@ -64,7 +64,7 @@ function sendPushNotification(event, eventType, user) {
 //TODO: Refactor this and sendPushNotification method to have common implementation
 function sendPushNotificationForScheduler(event) {
   utils.l.d("sendPushNotificationForScheduler::sending push notification for event : " + event)
-  if((event.players.length >= event.minPlayers && event.players.length < event.maxPlayers) && event.minPlayers > 1) {
+  if((event.players.length >= event.minPlayers && event.players.length < event.maxPlayers) && event.players.length > 1) {
     utils.l.d("sendPushNotificationForScheduler::sending push notification to creator for minimum players met")
     sendPushNotificationForEventStatus(event, "min")
   }
