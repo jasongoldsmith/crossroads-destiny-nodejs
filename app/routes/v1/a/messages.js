@@ -40,7 +40,8 @@ function sendMessage(data, messageCreator, callback) {
 				models.installation.getInstallationByUser(user, callback)
 			},
 			function (installation, callback) {
-				helpers.pushNotification.sendSinglePushNotification(eventObj, messageCreator.userName + ": "  + data.message, installation)
+				var message = messageCreator.userName + " from " + eventObj.event.eType.aSubType + ": "  + data.message
+				helpers.pushNotification.sendSinglePushNotification(eventObj, message, installation)
 				return callback(null, { messageSent: data.message })
 			}
 		], callback)
