@@ -88,7 +88,7 @@ function sendPushNotificationToCreator(event, eventType, user) {
   models.installation.getInstallationByUser(event.creator, function(err, installation) {
     if(err) return
     if((eventType == utils.constants.eventAction.join && event.players.length > 1)) {
-      var joinMessage = getMessage(event.eType, event.players[event.players.length - 1], eventType)
+      var joinMessage = getMessage(event.eType, event.players[event.players.length - 2], eventType)
       utils.l.d("sending join push notification to creator")
       sendSinglePushNotification(event, joinMessage, installation)
     } else if((eventType == utils.constants.eventAction.leave) && event.players.length >= event.minPlayers - 1) {
@@ -110,9 +110,9 @@ function sendPushNotificationForEventStatus(event, eventStatus) {
 
 function sendPushNotificationToAllPlayers(event) {
   models = require('../models')
-  var messageTemplate = "Your fireteam is ready for eventName. Join on userName"
+  var messageTemplate = "Your fireteam is ready for eventName. Join on psnId"
   var message = messageTemplate
-    .replace("userName", event.creator.userName)
+    .replace("psnId", event.creator.psnId)
     .replace("eventName", getEventName(event.eType))
   utils.async.map(event.players, models.installation.getInstallationByUser, function(err, installations) {
     sendMultiplePushNotifications(installations, event, message)
@@ -121,20 +121,20 @@ function sendPushNotificationToAllPlayers(event) {
 
 function getMinOrMaxPlayersJoinedMessage(event, eventStatus) {
   var playernames = (utils._.compact(utils._.map(event.players, function(player) {
-    return player.userName
+    return player.psnId
   }))).join(", ")
 
   var eventName = getEventName(event.eType)
   var messageTemplate = ""
   var playersNeeded = event.maxPlayers - event.players.length
   if (eventStatus == "min") {
-    messageTemplate = "userName are ready to play eventName. We're still looking for playersNeeded more players"
+    messageTemplate = "psnId are ready to play eventName. We're still looking for playersNeeded more"
   } else if(eventStatus == "max") {
-    messageTemplate = "Your fireteam is ready for eventName. userName will be joining you soon"
+    messageTemplate = "Your fireteam is ready for eventName. psnId will be joining you soon"
   }
 
   return messageTemplate
-    .replace("userName", playernames)
+    .replace("psnId", playernames)
     .replace("eventName", eventName )
     .replace("playersNeeded", "" + playersNeeded)
 }
@@ -146,11 +146,11 @@ function getMessage(activity, addedPlayer, eventType) {
   var eventName = getEventName(activity)
   var message = ""
   if(eventType == utils.constants.eventAction.join) {
-    message = "userName has joined eventName"
+    message = "psnId has joined eventName"
   } else if(eventType == utils.constants.eventAction.leave) {
-    message = "userName has left eventName"
+    message = "psnId has left eventName"
   }
-  return message.replace("userName", addedPlayer.userName).replace("eventName", eventName)
+  return message.replace("psnId", addedPlayer.psnId).replace("eventName", eventName)
 }
 
 function getEventName(activity) {
