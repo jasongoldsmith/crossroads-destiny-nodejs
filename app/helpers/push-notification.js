@@ -88,7 +88,7 @@ function sendPushNotificationToCreator(event, eventType, user) {
   models.installation.getInstallationByUser(event.creator, function(err, installation) {
     if(err) return
     if((eventType == utils.constants.eventAction.join && event.players.length > 1)) {
-      var joinMessage = getMessage(event.eType, event.players[event.players.length - 2], eventType)
+      var joinMessage = getMessage(event.eType, event.players[event.players.length - 1], eventType)
       utils.l.d("sending join push notification to creator")
       sendSinglePushNotification(event, joinMessage, installation)
     } else if((eventType == utils.constants.eventAction.leave) && event.players.length >= event.minPlayers - 1) {
