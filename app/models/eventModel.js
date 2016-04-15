@@ -94,7 +94,7 @@ function createEvent(data, callback) {
 		function (user, callback) {
 			utils.l.d("Found user: " + JSON.stringify(user))
 			if (utils._.isInvalidOrBlank(checkWithDate)) {
-				getByQuery({ eType: data.eType }, user, utils.firstInArrayCallback(callback))
+				getByQuery({ eType: data.eType, launchStatus: "now" }, user, utils.firstInArrayCallback(callback))
 			} else {
 				getByQuery({ eType: data.eType, launchDate: data.launchDate }, user, utils.firstInArrayCallback(callback))
 			}
