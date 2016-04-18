@@ -58,7 +58,12 @@ function sendPushNotification(event, eventType, user) {
     })
 
     sendPushNotificationToAllPlayers(event)
-    event.players.push(event.creator)
+
+    /*
+    Adding back the creator as it was sending a wrong http response
+    unshift adds back the creator to the top of the list
+     */
+    event.players.unshift(event.creator)
   }
 }
 
