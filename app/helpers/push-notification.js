@@ -42,7 +42,11 @@ function sendPushNotification(event, eventType, user) {
   if(utils._.isValidNonBlank(event.creator)) {
     sendPushNotificationToCreator(event, eventType, user)
   }
-  
+
+  if(eventType == utils.constants.eventAction.join && event.players.length == 1) {
+    sendPushNotificationforNewCreate(event)
+  }
+
   if(event.players.length == event.minPlayers && eventType == utils.constants.eventAction.join && event.minPlayers > 1) {
     utils.l.d("sending push notification to creator for minimum players met")
     sendPushNotificationForEventStatus(event, "min")
@@ -53,7 +57,7 @@ function sendPushNotification(event, eventType, user) {
     sendPushNotificationForEventStatus(event, "max")
 
     // removing the creator of the event from the list, as we already have sent a push to creator
-    var players = utils._.remove(event.players, {
+    utils._.remove(event.players, {
       _id: event.creator._id
     })
 
@@ -70,6 +74,11 @@ function sendPushNotification(event, eventType, user) {
 //TODO: Refactor this and sendPushNotification method to have common implementation
 function sendPushNotificationForScheduler(event) {
   utils.l.d("sendPushNotificationForScheduler::sending push notification for event : " + event)
+
+  if(event.players.length == 1) {
+    sendPushNotificationforNewCreate(event)
+  }
+
   if((event.players.length >= event.minPlayers && event.players.length < event.maxPlayers) && event.players.length > 1) {
     utils.l.d("sendPushNotificationForScheduler::sending push notification to creator for minimum players met")
     sendPushNotificationForEventStatus(event, "min")
@@ -80,7 +89,7 @@ function sendPushNotificationForScheduler(event) {
     sendPushNotificationForEventStatus(event, "max")
 
     // removing the creator of the event from the list, as we already have sent a push to creator
-    var players = utils._.remove(event.players, {
+    utils._.remove(event.players, {
       _id: event.creator._id
     })
 
@@ -111,6 +120,45 @@ function sendPushNotificationForEventStatus(event, eventStatus) {
     sendSinglePushNotification(event, getMinOrMaxPlayersJoinedMessage(event, eventStatus), installation)
   })
 
+}
+
+function sendPushNotificationforNewCreate(event) {
+  utils.async.waterfall([
+    function (callback) {
+      models.user.getByQuery({clanId: event.creator.clanId}, function(err, users) {
+        if(err) {
+          return callback(err, null)
+        } else {
+          // removing the creator as we don't want to send a push to the creator again
+          utils._.remove(users, {
+            _id: event.creator._id
+          })
+          callback(null, users)
+        }
+      })
+    },
+    function (users, callback) {
+      if(users.length >= 1) {
+        utils.l.d("sending out a push to all players in the clan for a new event created", users)
+      }
+      utils.async.map(users, models.installation.getInstallationByUser, function(err, installations) {
+        var messageTemplate = "psnId is looking for playersNeeded more for eventName"
+        var eventName = getEventName(event.eType)
+        var playersNeeded = event.maxPlayers - 1
+
+        var message = messageTemplate
+          .replace("psnId", event.creator.psnId)
+          .replace("eventName", eventName)
+          .replace("playersNeeded", "" + playersNeeded)
+        sendMultiplePushNotifications(installations, event, message)
+        callback(null, users)
+      })
+    }
+  ], function(err, users) {
+    if(err) {
+      utils.l.d({ error: err })
+    }
+  })
 }
 
 function sendPushNotificationToAllPlayers(event) {
