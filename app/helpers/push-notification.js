@@ -174,7 +174,9 @@ function sendPushNotificationToAllPlayers(event) {
 
 function getMinOrMaxPlayersJoinedMessage(event, eventStatus) {
   var playernames = (utils._.compact(utils._.map(event.players, function(player) {
-    return player.psnId
+    if(player.psnId != event.creator.psnId) {
+      return player.psnId
+    }
   }))).join(", ")
 
   var eventName = getEventName(event.eType)
