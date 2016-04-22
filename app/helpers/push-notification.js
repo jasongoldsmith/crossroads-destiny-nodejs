@@ -183,7 +183,7 @@ function getMinOrMaxPlayersJoinedMessage(event, eventStatus) {
   var messageTemplate = ""
   var playersNeeded = event.maxPlayers - event.players.length
   if (eventStatus == "min") {
-    messageTemplate = "psnId are ready to play eventName. We're still looking for playersNeeded more"
+    messageTemplate = "psnId needs playersNeeded more for eventName. View details..."
   } else if(eventStatus == "max") {
     messageTemplate = "Your fireteam is ready for eventName. psnId will be joining you soon"
   }
