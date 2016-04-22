@@ -209,7 +209,12 @@ function getMessage(activity, addedPlayer, eventType) {
 }
 
 function getEventName(activity) {
-  return  (utils._.compact([activity.aSubType, activity.aDifficulty, activity.aCheckpoint])).join(":")
+  var eventName = (utils._.compact([activity.aSubType, activity.aDifficulty])).join(" - ")
+  if (utils._.isValidNonBlank(activity.aCheckpoint)) {
+    eventName += ", " + activity.aCheckpoint
+  }
+  console.log("event name: "+eventName)
+  return eventName
 }
 
 module.exports = {
