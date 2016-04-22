@@ -7,8 +7,17 @@ var eventsRef = firebaseRef.child("events")
 function createEvent(event) {
 
   var id = event._id.toString()
-  // We want to remove _id and __v from event as it creates problems while saving in firebase
-  var eventObj = getEventObj(event)
+  var eventObj = null
+
+  // If the event has been deleted it will not have the 'creator' field
+  if(event.creator){
+    // We want to remove _id and __v from event as it creates problems while saving in firebase
+    eventObj = getEventObj(event)
+  } else {
+    eventObj = {
+      message: "Event has been deleted"
+    }
+  }
 
   eventsRef.child(id).set(eventObj, function (error) {
     if (error) {

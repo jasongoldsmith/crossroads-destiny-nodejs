@@ -72,8 +72,11 @@ function leave(req, res) {
 				event =  {
 					_id : req.body.eId
 				}
+				// When the event has been deleted we want to make all fields null in firebase
+				helpers.firebase.createEvent(event)
+			} else {
+				helpers.firebase.updateEvent(event)
 			}
-			helpers.firebase.updateEvent(event)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
