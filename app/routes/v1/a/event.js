@@ -12,6 +12,11 @@ function create(req, res) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
 			helpers.m.trackEvent(event)
+			if(event.players.length == 1) {
+				helpers.firebase.createEvent(event)
+			} else {
+				helpers.firebase.updateEvent(event)
+			}
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
@@ -27,6 +32,7 @@ function join(req, res) {
 				return player._id == req.body.player
 			})
 			helpers.m.incrementEventsJoined(player)
+			helpers.firebase.updateEvent(event)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
@@ -67,6 +73,7 @@ function leave(req, res) {
 					_id : req.body.eId
 				}
 			}
+			helpers.firebase.updateEvent(event)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
