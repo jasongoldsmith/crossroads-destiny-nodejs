@@ -11,7 +11,10 @@ function create(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
-			helpers.m.trackEvent(event)
+			// We do not want to track events if they are created by test users
+			if (event.creator.clanId != "forcecatalyst") {
+				helpers.m.trackEvent(event)
+			}
 			if(event.players.length == 1) {
 				helpers.firebase.createEvent(event)
 			} else {
@@ -28,10 +31,13 @@ function join(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
-			var player = utils._.find(event.players, function(player) {
-				return player._id == req.body.player
-			})
-			helpers.m.incrementEventsJoined(player)
+			// We do not want to track events if they are created by test users
+			if (event.creator.clanId != "forcecatalyst") {
+				var player = utils._.find(event.players, function(player) {
+					return player._id == req.body.player
+				})
+				helpers.m.incrementEventsJoined(player)
+			}
 			helpers.firebase.updateEvent(event)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
@@ -75,6 +81,10 @@ function leave(req, res) {
 				// When the event has been deleted we want to make all fields null in firebase
 				helpers.firebase.createEvent(event)
 			} else {
+				// We do not want to track events if they are created by test users
+				if (event.creator.clanId != "forcecatalyst") {
+					helpers.m.incrementEventsLeft(req.body.player)
+				}
 				helpers.firebase.updateEvent(event)
 			}
 			routeUtils.handleAPISuccess(req, res, event)
