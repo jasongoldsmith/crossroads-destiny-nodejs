@@ -219,6 +219,7 @@ function getEventName(activity) {
 
 module.exports = {
   sendSinglePushNotification: sendSinglePushNotification,
+  sendMultiplePushNotifications: sendMultiplePushNotifications,
   sendPushNotification: sendPushNotification,
   sendPushNotificationForScheduler: sendPushNotificationForScheduler
 }
