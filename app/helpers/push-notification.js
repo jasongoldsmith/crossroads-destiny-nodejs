@@ -47,11 +47,6 @@ function sendPushNotification(event, eventType, user) {
     sendPushNotificationforNewCreate(event)
   }
 
-  if(event.players.length == event.minPlayers && eventType == utils.constants.eventAction.join && event.minPlayers > 1) {
-    utils.l.d("sending push notification to creator for minimum players met")
-    sendPushNotificationForEventStatus(event, "min")
-  }
-
   if(event.players.length == event.maxPlayers && eventType == utils.constants.eventAction.join) {
     utils.l.d("sending push notification to creator for maximum players met")
     sendPushNotificationForEventStatus(event, "max")
@@ -79,11 +74,6 @@ function sendPushNotificationForScheduler(event) {
     sendPushNotificationforNewCreate(event)
   }
 
-  if((event.players.length >= event.minPlayers && event.players.length < event.maxPlayers) && event.players.length > 1) {
-    utils.l.d("sendPushNotificationForScheduler::sending push notification to creator for minimum players met")
-    sendPushNotificationForEventStatus(event, "min")
-  }
-
   if(event.players.length == event.maxPlayers) {
     utils.l.d("sendPushNotificationForScheduler::sending push notification to creator for maximum players met")
     sendPushNotificationForEventStatus(event, "max")
@@ -105,7 +95,7 @@ function sendPushNotificationToCreator(event, eventType, user) {
       var joinMessage = getMessage(event.eType, event.players[event.players.length - 1], eventType)
       utils.l.d("sending join push notification to creator")
       sendSinglePushNotification(event, joinMessage, installation)
-    } else if((eventType == utils.constants.eventAction.leave) && event.players.length >= event.minPlayers - 1) {
+    } else if(eventType == utils.constants.eventAction.leave) {
       var leaveMessage = getMessage(event.eType, user, eventType)
       utils.l.d("sending leave push notification to creator")
       sendSinglePushNotification(event, leaveMessage, installation)
