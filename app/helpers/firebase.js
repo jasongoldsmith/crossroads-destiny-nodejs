@@ -4,8 +4,9 @@ var firebaseRef = new Firebase(utils.config.firebaseURL)
 
 var eventsRef = firebaseRef.child("events")
 
-function createEvent(event) {
+function createEvent(event, user) {
 
+  var clansRef = eventsRef.child(user.clanId)
   var id = event._id.toString()
   var eventObj = null
 
@@ -15,7 +16,7 @@ function createEvent(event) {
     eventObj = getEventObj(event)
   }
 
-  eventsRef.child(id).set(eventObj, function (error) {
+  clansRef.child(id).set(eventObj, function (error) {
     if (error) {
       utils.l.d("event creation failed in firebase", eventObj)
     } else {
@@ -24,13 +25,14 @@ function createEvent(event) {
   })
 }
 
-function updateEvent(event) {
+function updateEvent(event, user) {
 
+  var clansRef = eventsRef.child(user.clanId)
   var id = event._id.toString()
   // We want to remove _id and __v from event as it creates problems while saving in firebase
   var eventObj = getEventObj(event)
 
-  eventsRef.child(id).update(eventObj, function (error) {
+  clansRef.child(id).update(eventObj, function (error) {
     if (error) {
       utils.l.d("event creation failed in firebase", eventObj)
     } else {

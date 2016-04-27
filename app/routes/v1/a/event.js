@@ -16,9 +16,9 @@ function create(req, res) {
 				helpers.m.trackEvent(event)
 			}
 			if(event.players.length == 1) {
-				helpers.firebase.createEvent(event)
+				helpers.firebase.createEvent(event, req.user)
 			} else {
-				helpers.firebase.updateEvent(event)
+				helpers.firebase.updateEvent(event, req.user)
 			}
 			routeUtils.handleAPISuccess(req, res, event)
 		}
@@ -38,7 +38,7 @@ function join(req, res) {
 				})
 				helpers.m.incrementEventsJoined(player)
 			}
-			helpers.firebase.updateEvent(event)
+			helpers.firebase.updateEvent(event, req.user)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
@@ -79,13 +79,13 @@ function leave(req, res) {
 					_id : req.body.eId
 				}
 				// When the event has been deleted we want to make all fields null in firebase
-				helpers.firebase.createEvent(event)
+				helpers.firebase.createEvent(event, req.user)
 			} else {
 				// We do not want to track events if they are created by test users
 				if (event.creator.clanId != "forcecatalyst") {
 					helpers.m.incrementEventsLeft(req.body.player)
 				}
-				helpers.firebase.updateEvent(event)
+				helpers.firebase.updateEvent(event, req.user)
 			}
 			routeUtils.handleAPISuccess(req, res, event)
 		}
