@@ -26,6 +26,7 @@ function getByQuery(query, user, callback) {
 		.populate("eType")
 		.populate("creator", "-passWord")
 		.populate("players", "-passWord")
+		.sort({launchDate:"ascending"})
 		.exec(function (err, events) {
 			if (user) {
 				events = events.filter(function(event) {
