@@ -2,5 +2,6 @@
 module.exports = {
   reportService: require('./reportService'),
   authService: require('./authService'),
-  eventScheduleService: require('./eventScheduleService')
+  eventScheduleService: require('./eventScheduleService'),
+  destinyInerface: require('./destinyInterface')
 }

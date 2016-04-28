@@ -11,5 +11,6 @@ module.exports = {
   azure: require('./azure'),
   awsTranscoding: require("./awsTranscoding"),
   bitly: require("./bitly"),
-  pushNotification: require("./push-notification")
+  pushNotification: require("./push-notification"),
+  uuid: require("./uuidHelper")
 };

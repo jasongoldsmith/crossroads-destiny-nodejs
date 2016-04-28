@@ -74,7 +74,13 @@ var defaults = {
   join_eventname_placeHolder: "eventName",
   leavePushMessage: process.env.leavePushMessage,
   minPlayersJoinedMessage: process.env.minPlayersJoinedMessage,
-  triggerIntervalMinutes: 15
+  triggerIntervalMinutes: 15,
+  bungieAPIToken:"f091c8d36c3c4a17b559c21cd489bec0",
+  bungieCSRFToken:"4410636698596642863",
+  bungieCookie:"__cfduid=d7fe261f69963d40917feac11cad26a761459446069; bungled=4410636698596642863; bungledid=B8wEl0Lj8t9MrnvjhpYjqbg3B+uli1nTCAAA; sto-id-sg_www.bungie.net=OIAKHPAK; bungleRedir=Lw==; bungles=WebView=False; bunglesony=rJHEYOs.Mfs7L6LQlTgtf6fEmGkrZOQNB1PUJcHtBE.AAAAAMn4.TRnDWhCB0D64k.5V.RTrLXHfztRBd8GBhw7eVGfzHI.iD9gOTIcUzXD327XyWL8pq-QHmwPS1uLWYiPin143sMiB4-ele0niu9RoJnhjyQ8oYq7y7sJq4Myon2kd2AHXM1vxu6lOYt3Me3lG1GlYHb1pW0H16ThRFkNHfFo_; bungleatk=wa=qrN3GZ4S2lBJli3THd7-PQwRYLBXAHRnM-uzqXIuFrXgAAAAqmwrhDxn70o3KT3KTS61ChEGuju.L2cgr0CzEKKQ2v.inDKIKCaPN58BdKcHdt8r8EjhTWCrI6x2VCfG.YPRFZ7ej8hHGG5GuXN3Yhjvazp5HrASXRXvUZsHnsiBxoly6GJq-EB6Rzlb-ctUYivtWTxSZvLdl0Awi0PsK1qtTlTIOEWCiMmBAEIlkKkigsF021z5cLIJ4V.j95r9J1IUrfHPsDTNZRxyMPQKcErBlwQFE1YgT9njXntIlL9SklAhy742M-Zj2JVxOn6.o0jYKroNpXoHqO1Nv96a.tzb8gk_&tk=YAAAAEsYTcHXWLv6bec3ugZohzElNBHwqNa8SoGK0OloWMtRr3wxCcn3zVLlABoQMc5RZY6JpGNSv1ssQHXx7rAz9bko0.UmnK4uKVqtPUzIvww3FmCrV4x5NvKh1GiQMJm0iiAAAAAbX8e3jZFt.AVH.usPj0AFolPVexVnzQbaYmW3RUHqgA__; bungleme=13236427; bungleloc=lc=en&lcin=false; _ga=GA1.2.883620681.1459446075; _gat=1; bunglefrogblastventcore=1461881136",
+  bungieDestinySearchURL:"https://www.bungie.net/Platform/Destiny/SearchDestinyPlayer/-1/",
+  bungieUserAccountURL:"https://www.bungie.net/Platform/User/GetBungieAccount/",
+  bungieConvURL:"https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true"
 };
 
 /**

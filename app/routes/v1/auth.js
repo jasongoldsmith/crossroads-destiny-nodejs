@@ -152,6 +152,39 @@ function signup(req, res) {
   )
 }
 
+function verifyAccount(req,res){
+  //var id = req.param("id");
+  var token = req.param("token");
+  //var name = req.param("name");
+  //console.log("id="+id+",token="+token+",name="+name)
+  utils.l.d("verifyAccount::token="+token)
+//  req.assert('id', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
+  req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
+//  req.assert('name', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
+  utils.async.waterfall([
+    function(callback){
+      //models.user.getUserByData({userName:name},callback)
+      models.user.getUserByData({psnToken:token},callback)
+    },function(user, callback){
+        utils.l.d("user="+user)
+      //if(user && ((user.psnId == id || user.xboxId == id) && user.psnToken == token)){
+      if(user){
+        user.psnVerified = "VERIFIED"
+        models.user.save(user,function(err,updatedUser){
+          callback(null, "Your account has been verified and its now active.")
+        })
+      }else{
+        callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.",null)
+      }
+    }
+  ],
+    function (err, successResp){
+      if(err) routeUtils.handleAPIError(req,res,err)
+      else routeUtils.handleAPISuccess(req, res, successResp)
+    }
+  )
+}
+
 function logout(req, res) {
   req.logout()
   routeUtils.handleAPISuccess(req, res, {success: true})
@@ -162,5 +195,6 @@ routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
+routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 module.exports = router
 
