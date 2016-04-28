@@ -215,6 +215,29 @@ function leaveEvent(data, callback) {
 	)
 }
 
+function deleteEvent(data, callback) {
+	utils.async.waterfall([
+		function(callback) {
+			Event.findOne({_id: data.eId}, callback)
+		},
+		function(event, callback) {
+			handleNoEventFound(event, callback)
+		},
+		function(event, callback) {
+			utils.l.d("Deleting the event")
+			event.remove(callback)
+		}
+	],
+		function(err, event) {
+			if (err) {
+				return callback(err, null)
+			} else {
+				getById(event._id, callback)
+			}
+		}
+	)
+}
+
 function listEvents(user, callback) {
 	getByQuery({}, user, callback)
 }
@@ -249,6 +272,7 @@ module.exports = {
 	joinEvent: joinEvent,
 	listEvents: listEvents,
 	leaveEvent: leaveEvent,
+	deleteEvent: deleteEvent,
 	getByQuery: getByQuery,
 	getById: getById,
 	launchEvent: launchEvent

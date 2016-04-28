@@ -92,6 +92,23 @@ function leave(req, res) {
 	})
 }
 
+function remove(req, res) {
+	utils.l.d("Event delete request")
+	deleteEvent(req.body, function(err, event) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			// Adding event id in delete request since it helps the client identify which event was deleted
+			if(utils._.isInvalidOrBlank(event)) {
+				event= {
+					_id: req.body.eId
+				}
+			}
+			routeUtils.handleAPISuccess(req, res, event)
+		}
+	})
+}
+
 function listEvents(user, callback) {
 	models.event.listEvents(user, callback)
 }
@@ -149,6 +166,10 @@ function leaveEvent(data, callback) {
 		], callback)
 }
 
+function deleteEvent(data, callback) {
+	models.event.deleteEvent(data, callback)
+}
+
 function sendPushNotificationForLeave(event, user) {
   helpers.pushNotification.sendPushNotification(event, utils.constants.eventAction.leave, user)
 }
@@ -162,4 +183,5 @@ routeUtils.rPost(router, '/join', 'join', join)
 routeUtils.rGet(router, '/list', 'list', list)
 routeUtils.rGet(router, '/listAll', 'listAll', listAll)
 routeUtils.rPost(router, '/leave', 'leave', leave)
+routeUtils.rPost(router, '/delete', 'remove', remove)
 module.exports = router
