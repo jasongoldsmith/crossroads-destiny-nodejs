@@ -1,118 +1,55 @@
-var utils = require('../utils');
-var https = require('https');
-var request = require("request");
+var utils = require('../utils')
+var Firebase = require("firebase")
+var firebaseRef = new Firebase(utils.config.firebaseURL)
 
-var FIREBASE_ROOTURL = "https://thetestchat.firebaseio.com/";
+var eventsRef = firebaseRef.child("events")
 
-function noop(value1, value2) {
-  // No operations
-  // -- console.log('placeholder NOOP. value1='+value1+'  value2='+value2);
-}
+function createEvent(event, user) {
 
-function performRequest(method, groupOrChannelId, data, callback) {
-  var options = {
-    url: FIREBASE_ROOTURL+groupOrChannelId+".json",
-    json: data
-  };
-  request.put(options, function (err, response, body) {
-    if(err) {
-      return callback(err);
+  var clansRef = eventsRef.child(user.clanId)
+  var id = event._id.toString()
+  var eventObj = null
+
+  // If the event has been deleted it will not have the 'creator' field
+  if(event.creator) {
+    // We want to remove _id and __v from event as it creates problems while saving in firebase
+    eventObj = getEventObj(event)
+  }
+
+  clansRef.child(id).set(eventObj, function (error) {
+    if (error) {
+      utils.l.d("event creation failed in firebase", eventObj)
+    } else {
+      utils.l.d("event was created successfully in firebase", eventObj)
     }
-    return callback(null, data);
   })
 }
 
-function  sendMessageToGroup(groupId, data, callback) {
-  performRequest('POST', groupId + "/" + data._id, data, callback);
+function updateEvent(event, user) {
 
-}
+  var clansRef = eventsRef.child(user.clanId)
+  var id = event._id.toString()
+  // We want to remove _id and __v from event as it creates problems while saving in firebase
+  var eventObj = getEventObj(event)
 
-
-function  sendMessageToChannel(channelId, channel, type, payload, callback) {
-  var data = {
-    channel: channel,
-    type: type,
-    payload: payload,
-    date: Date()
-  };
-  performRequest('POST', 'channel:'+channelId, data, callback);  // $TODO$ - remove 'type' here
-}
-
-function getGETOptions(groupOrChannelId) {
-  var options = {
-    url: FIREBASE_ROOTURL+groupOrChannelId+".json",
-  };
-  return options;
-}
-
-function getMessagesByGroupId(groupId, callback) {
-  request.get(getGETOptions(groupId), function (err, response, body) {
-    if(err) {
-      return callback(err);
+  clansRef.child(id).update(eventObj, function (error) {
+    if (error) {
+      utils.l.d("event creation failed in firebase", eventObj)
+    } else {
+      utils.l.d("event was created successfully in firebase", eventObj)
     }
-    if(!utils._.isInvalidOrBlank(body) && body != "null") {
-      var jsonBody = JSON.parse(body);
-      var values = Object.keys(jsonBody).map(function (key) {
-        return jsonBody[key];
-      });
-      return callback(null, values);
-    }
-    return callback(null, null);
   })
 }
 
-
-
-function getMessagesByChannelId(channelId, callback) {
-  request.get(getGETOptions(channelId), function (err, response, body) {
-    if(err) {
-      return callback(err);
-    }
-    if(!utils._.isInvalidOrBlank(body) && body != "null") {
-      var jsonBody = JSON.parse(body);
-      var values = Object.keys(jsonBody).map(function (key) {
-        return jsonBody[key];
-      });
-      return callback(null, values);
-    }
-    return callback(null, null);
-  })
+function getEventObj(event) {
+  // delete does not work on a mongoose object unless we convert it to a JSON object
+  var eventObj = event.toObject()
+  delete eventObj._id
+  delete eventObj.__v
+  return eventObj
 }
-
-function updateMessage(groupId, messageId, data, callback) {
-  var options = {
-    url: FIREBASE_ROOTURL+groupId+"/"+messageId+".json",
-    json: data
-  };
-  request.put(options, function (err, response, body) {
-    if(err) {
-      return callback(err);
-    }
-    return callback(null, data);
-  })
-}
-
-function deleteChatInFirebase(groupId, callback) {
-  var options = {
-    url: FIREBASE_ROOTURL+groupId+".json",
-  };
-  request.del(options, function (err, response, body) {
-    if(err) {
-      return callback(err);
-    }
-    return callback(null, null);
-  })
-}
-
-
-
 
 module.exports = {
-  sendMessageToGroup: sendMessageToGroup,
-  sendMessageToChannel: sendMessageToChannel,
-  getMessagesByGroupId: getMessagesByGroupId,
-  getMessagesByChannelId: getMessagesByChannelId,
-  noop: noop,
-  updateMessage: updateMessage,
-  deleteChatInFirebase: deleteChatInFirebase
-};
+  createEvent: createEvent,
+  updateEvent: updateEvent
+}

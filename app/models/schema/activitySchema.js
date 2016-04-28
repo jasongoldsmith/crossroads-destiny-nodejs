@@ -10,6 +10,8 @@ var activitySchema = new Schema({
 	aLevel: Number,
 	aIconUrl: String,
 	isActive: { type: Boolean, default: true},
+	isFeatured: { type: Boolean, default: false},
+	location: String,
 	minPlayers: { type : Number, required : true },
 	maxPlayers: { type : Number, required : true }
 })

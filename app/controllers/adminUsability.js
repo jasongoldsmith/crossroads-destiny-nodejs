@@ -163,10 +163,6 @@ module.exports = {
 
                     chat.chatId = myChatId;
                     self.chatgroups.splice(0,0, { "chatid" : myChatId, "chat" : chat} );
-                    helpers.firebase.getMessagesByGroupId(myChatId, function(err, messages) {
-                        console.log("USABILITY: - chatid: " + myChatId );
-                        callback(null, messages);
-                    });
 
                 });
         });
@@ -231,15 +227,6 @@ module.exports = {
                     if (err) {
                         console.log('ADMIN USABILITY: ERROR: ' + err.message);
                         callback(err, null);
-                    }
-                    else {
-
-                        helpers.firebase.getMessagesByGroupId(myChatId, function (err, messages) {
-                            console.log('ADMIN USABILITY: firebase is updated.. but wait');
-                            // this.wait(15);
-                            console.log('ADMIN USABILITY: resume');
-                            callback(null, null);
-                        });
                     }
                 });
         })

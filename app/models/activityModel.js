@@ -12,7 +12,8 @@ function createActivity(data, callback) {
 	var activityObj = new Activity(data)
 	utils.async.waterfall([
 		function (callback) {
-			Activity.findOne({aType: data.aType, aSubType: data.aSubType, aCheckpoint: data.aCheckpoint, aDifficulty: data.aDifficulty}, callback)
+			Activity.findOne({ aType: data.aType, aSubType: data.aSubType, aCheckpoint: data.aCheckpoint,
+				aDifficulty: data.aDifficulty, aLevel: data.aLevel }, callback)
 		},
 		function (activity, callback) {
 			if (!activity) {

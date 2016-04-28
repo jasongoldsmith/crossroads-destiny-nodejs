@@ -26,6 +26,7 @@ function getByQuery(query, user, callback) {
 		.populate("eType")
 		.populate("creator", "-passWord")
 		.populate("players", "-passWord")
+		.sort({launchDate:"ascending"})
 		.exec(function (err, events) {
 			if (user) {
 				events = events.filter(function(event) {
@@ -62,7 +63,7 @@ function checkIfPlayerAlreadyExists(event, data) {
 function handleNoEventFound(event, callback) {
 	if (!event) {
 		utils.l.d("no event found")
-		return callback({ error: "No event was found" }, null)
+		return callback({ error: "Sorry, that event no longer exists. Please refresh." }, null)
 	} else {
 		return callback(null, event)
 	}
@@ -94,7 +95,7 @@ function createEvent(data, callback) {
 		function (user, callback) {
 			utils.l.d("Found user: " + JSON.stringify(user))
 			if (utils._.isInvalidOrBlank(checkWithDate)) {
-				getByQuery({ eType: data.eType }, user, utils.firstInArrayCallback(callback))
+				getByQuery({ eType: data.eType, launchStatus: "now" }, user, utils.firstInArrayCallback(callback))
 			} else {
 				getByQuery({ eType: data.eType, launchDate: data.launchDate }, user, utils.firstInArrayCallback(callback))
 			}
@@ -148,7 +149,7 @@ function joinEvent(data, callback) {
 				return callback(null, event)
 			} else {
 				if (event.status == "full") {
-					return callback({ error: "Event is full"}, null)
+					return callback({ error: "Sorry, that event is full. Please refresh."}, null)
 				} else {
 					event.players.push(data.player)
 					update(event, callback)
@@ -177,7 +178,7 @@ function leaveEvent(data, callback) {
 		function(event, callback) {
 			if(!checkIfPlayerAlreadyExists(event, data.player)) {
 				utils.l.d("player is not part of the event")
-				return callback({ error: "player is not part of the event" }, null)
+				return callback({ error: "Something went wrong! You are trying to leave an event that you are not attending." }, null)
 			} else {
 				return callback(null, event)
 			}
@@ -202,6 +203,29 @@ function leaveEvent(data, callback) {
 				}
 				update(event, callback)
 			}
+		}
+	],
+		function(err, event) {
+			if (err) {
+				return callback(err, null)
+			} else {
+				getById(event._id, callback)
+			}
+		}
+	)
+}
+
+function deleteEvent(data, callback) {
+	utils.async.waterfall([
+		function(callback) {
+			Event.findOne({_id: data.eId}, callback)
+		},
+		function(event, callback) {
+			handleNoEventFound(event, callback)
+		},
+		function(event, callback) {
+			utils.l.d("Deleting the event")
+			event.remove(callback)
 		}
 	],
 		function(err, event) {
@@ -248,6 +272,7 @@ module.exports = {
 	joinEvent: joinEvent,
 	listEvents: listEvents,
 	leaveEvent: leaveEvent,
+	deleteEvent: deleteEvent,
 	getByQuery: getByQuery,
 	getById: getById,
 	launchEvent: launchEvent

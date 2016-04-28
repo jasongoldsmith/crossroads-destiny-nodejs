@@ -1,6 +1,7 @@
 var utils = require('../utils')
 var mongoose = require('mongoose')
 var helpers = require('../helpers')
+var passwordHash = require('password-hash')
 
 // User Schema
 var UserSchema = require('./schema/userSchema')
@@ -168,6 +169,9 @@ function updateUser(data, callback) {
           return callback({ error: "user with this id does not exist" }, null)
         } else {
           utils.l.i("found user: " + JSON.stringify(user))
+          if(data.passWord) {
+            data.passWord = passwordHash.generate(data.passWord)
+          }
           utils._.extend(user, data)
           user.save(callback)
         }
