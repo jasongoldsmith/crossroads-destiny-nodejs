@@ -202,11 +202,17 @@ var eventLaunchStatusList = {
     upcoming:'upcoming'
 }
 
+var bungieMemberShipType = {
+  PSN:2,
+  XBOX:1
+}
+
 module.exports = {
   l: lodash,
   baseUrl: baseUrl,
   imageFiles: imageFiles,
   reportListStatus: reportListStatus,
   eventAction: eventAction,
-  eventLaunchStatusList: eventLaunchStatusList
+  eventLaunchStatusList: eventLaunchStatusList,
+  bungieMemberShipType:bungieMemberShipType
 };
