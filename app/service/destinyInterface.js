@@ -82,18 +82,24 @@ function sendBungieMessage(displayName,username,callback){
         }
       },
       function (bungieAcct,callback) {
-        var bungieAcctResp =JSON.parse(bungieAcct).Response
-        var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
-        var psnDisplayName = bungieAcctResp.bungieNetUser.psnDisplayName
-        var token = helpers.uuid.getRandomUUID()
-        //var convUrl = "https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true"
-        var convUrl = utils.config.bungieConvURL
-        utils.l.d("bungieMemberShipId="+bungieMemberShipId+"---&&--- psnDisplayName="+psnDisplayName)
-        var msgBody = {
-          "membersToId": ["13236427", bungieMemberShipId],
-          "body": getMessageBody(utils.config.hostUrl(),displayName,token,username)
+        var bungieAcctJson =JSON.parse(bungieAcct)
+
+        if(bungieAcctJson && bungieAcctJson.Response && bungieAcctJson.Response.bungieNetUser) {
+          var bungieAcctResp = bungieAcctJson.Response
+          var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
+          var psnDisplayName = bungieAcctResp.bungieNetUser.psnDisplayName
+          var token = helpers.uuid.getRandomUUID()
+          //var convUrl = "https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true"
+          var convUrl = utils.config.bungieConvURL
+          utils.l.d("bungieMemberShipId=" + bungieMemberShipId + "---&&--- psnDisplayName=" + psnDisplayName)
+          var msgBody = {
+            "membersToId": ["13236427", bungieMemberShipId],
+            "body": getMessageBody(utils.config.hostUrl(), displayName, token, username)
+          }
+          bungiePost(convUrl, msgBody, token, callback)
+        }else{
+          callback(null,null)
         }
-        bungiePost(convUrl,msgBody,token,callback)
       }
     ],callback
   )

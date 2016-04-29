@@ -10,8 +10,8 @@ function signupUser(userData, callback) {
 				},
 				function(newuser,callback) {
 					destinyService.sendBungieMessage(userData.psnId,userData.userName,function(error,messageResponse){
-						utils.l.d("messageResponse::token==="+messageResponse.token)
 						if(messageResponse){
+							utils.l.d("messageResponse::token==="+messageResponse.token)
 							newuser.psnVerified = "INITIATED"
 							newuser.psnToken = messageResponse.token
 						}else{
