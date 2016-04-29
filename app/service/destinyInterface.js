@@ -2,12 +2,12 @@
 var request = require('request')
 var utils = require('../utils')
 var helpers = require('../helpers')
-var BungiePlatform = require('bungie-platform');
+//var BungiePlatform = require('bungie-platform');
 //var uuid = require('uuid')
 //harsha //var cookieStr="__cfduid=d7fe261f69963d40917feac11cad26a761459446069; bungled=4410636698596642863; bungledid=B8wEl0Lj8t9MrnvjhpYjqbg3B+uli1nTCAAA; bungles=WebView=False&mt=2&mi=4611686018459149267&ci=2305843009376124114; _gat=1; sto-id-sg_www.bungie.net=JIAKHPAK; bungleRedir=L2VuLVVTL1VzZXIvQVBJ; bungleatk=wa=IA5p1jW3oWevWTX5fUAC33U7s7z01qN86zfWeb1I0eXgAAAAbShTzfBsis8ZKgw6rbdqeOAcBgadNwzKEmRq0VPp7dnlkbOwScnC2WLpMaPZjx3jpfTxDaeP3IoTc9SgayOg0LwkzAlEjngHCcuCjdNIDzTsI8GzhqUkWE5qj9swqF24ZiNdsy0a-i6FSMMScdOVQFhEYgp-0IowidZvmL1Ac4.DlhpMwU0p3du0QZHHYgn1N3LqKXU85JC4PG6wMVYkbuj.89WBLjrc.0Zk1PlmZJOzqU1.AjM6YsjrqzWNUGP6KuzeOWg2MopphqpT.IRmn2C92-Ul8OZD40aEL4-NJns_&tk=YAAAAOk.TpdY-uq2ki7j2NseHl-ZIjC6iOZRfgjxxKK1bexrgXdYtkPoSEuAyQXMEQClJwwWfQCBNr5sqBUtAXiVRPGd1tOfQCuxK339gZS20-F7hFmxaXMbkWLrP6ZFwjsjjCAAAADiWkxIA-IunMqSiTbc33eL6u0sMeA0vn171AzNMz.USA__; bungleme=13172709; bungleloc=lc=en&lcin=false; _ga=GA1.2.883620681.1459446075; bunglefrogblastventcore=1461789721"
 //var cookieStr="__cfduid=d7fe261f69963d40917feac11cad26a761459446069; bungled=4410636698596642863; bungledid=B8wEl0Lj8t9MrnvjhpYjqbg3B+uli1nTCAAA; sto-id-sg_www.bungie.net=OIAKHPAK; bungleRedir=Lw==; bungles=WebView=False; bunglesony=rJHEYOs.Mfs7L6LQlTgtf6fEmGkrZOQNB1PUJcHtBE.AAAAAMn4.TRnDWhCB0D64k.5V.RTrLXHfztRBd8GBhw7eVGfzHI.iD9gOTIcUzXD327XyWL8pq-QHmwPS1uLWYiPin143sMiB4-ele0niu9RoJnhjyQ8oYq7y7sJq4Myon2kd2AHXM1vxu6lOYt3Me3lG1GlYHb1pW0H16ThRFkNHfFo_; bungleatk=wa=qrN3GZ4S2lBJli3THd7-PQwRYLBXAHRnM-uzqXIuFrXgAAAAqmwrhDxn70o3KT3KTS61ChEGuju.L2cgr0CzEKKQ2v.inDKIKCaPN58BdKcHdt8r8EjhTWCrI6x2VCfG.YPRFZ7ej8hHGG5GuXN3Yhjvazp5HrASXRXvUZsHnsiBxoly6GJq-EB6Rzlb-ctUYivtWTxSZvLdl0Awi0PsK1qtTlTIOEWCiMmBAEIlkKkigsF021z5cLIJ4V.j95r9J1IUrfHPsDTNZRxyMPQKcErBlwQFE1YgT9njXntIlL9SklAhy742M-Zj2JVxOn6.o0jYKroNpXoHqO1Nv96a.tzb8gk_&tk=YAAAAEsYTcHXWLv6bec3ugZohzElNBHwqNa8SoGK0OloWMtRr3wxCcn3zVLlABoQMc5RZY6JpGNSv1ssQHXx7rAz9bko0.UmnK4uKVqtPUzIvww3FmCrV4x5NvKh1GiQMJm0iiAAAAAbX8e3jZFt.AVH.usPj0AFolPVexVnzQbaYmW3RUHqgA__; bungleme=13236427; bungleloc=lc=en&lcin=false; _ga=GA1.2.883620681.1459446075; _gat=1; bunglefrogblastventcore=1461881136"
 var cookieStr=utils.config.bungieCookie
-var platform = BungiePlatform(cookieStr);
+//var platform = BungiePlatform(cookieStr);
 // in-house libraries
 
 /*Get bungienet profile
