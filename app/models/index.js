@@ -1,10 +1,11 @@
-
 var user = require('./userModel')
 var activity = require('./activityModel')
 var event = require ('./eventModel')
 var archiveEvent = require ('./archiveEventModel')
 var installation = require('./installationModel')
 var report =  require('./reportModel')
+var notification = require('./notificationModel')
+var notificationTrigger = require('./notificationTriggerModel')
 
 module.exports = {
   user: user,
@@ -12,5 +13,7 @@ module.exports = {
   event: event,
   installation: installation,
   archiveEvent: archiveEvent,
-  report: report
-};
+  report: report,
+  notification: notification,
+  notificationTrigger: notificationTrigger
+}
