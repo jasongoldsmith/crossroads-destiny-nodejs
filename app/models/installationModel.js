@@ -3,7 +3,7 @@ var utils = require('../utils');
 
 var InstallationSchema = require('./schema/installationSchema');
 var Installation = mongoose.model('Installation', InstallationSchema.schema);
-
+mongoose.set('debug',true)
 function getByQuery(query, callback) {
   Installation
     .find(query)
@@ -18,6 +18,30 @@ function getById(id, callback) {
 function getInstallationByUser(user, callback) {
   if (!user) return callback("Invalid user:" + user);
   getByQuery({user: user._id}, utils.firstInArrayCallback(callback));
+}
+
+function getInstallationByUserList(userList, callback){
+  if(userList && userList.length<=0){
+    return callback(null,null)
+  }
+  var userIds = utils._.map(userList, function(user) { return user._id})
+  console.log("userList::"+userList)
+  getByQuery({user:userIds},callback)
+  /* utils.async.waterfall([
+      function (callback) {
+        utils.l.d("got userids from userlist::"+userIds)
+
+       // utils.async.map(userIdList, function(userId) {
+        //  getByQuery({user:userId},utils.firstInArrayCallback(callback))
+       // },function(err,userList){
+        //  callback(null, userList)
+       /// })
+
+        getByQuery({user:{$in:userIds}},callback)
+      }
+    ],
+    callback
+  )*/
 }
 
 function getOrCreateInstallation(user, callback) {
@@ -70,7 +94,8 @@ module.exports = {
   getById: getById,
   save: save,
   updateInstallation: updateInstallation,
-  getInstallationByUser: getInstallationByUser
+  getInstallationByUser: getInstallationByUser,
+  getInstallationByUserList: getInstallationByUserList
 };
 
 

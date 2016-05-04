@@ -207,6 +207,11 @@ var bungieMemberShipType = {
   XBOX:1
 }
 
+var eventNotificationTrigger = {
+  launchUpcomingEvents:'launchUpcomingEvents',
+  launchEventStart:'launchEventStart'
+}
+
 module.exports = {
   l: lodash,
   baseUrl: baseUrl,
@@ -214,5 +219,6 @@ module.exports = {
   reportListStatus: reportListStatus,
   eventAction: eventAction,
   eventLaunchStatusList: eventLaunchStatusList,
-  bungieMemberShipType:bungieMemberShipType
+  bungieMemberShipType:bungieMemberShipType,
+  eventNotificationTrigger: eventNotificationTrigger
 };

@@ -25,6 +25,7 @@ PushNotification.init({
 })
 
 function sendSinglePushNotification(data, alert, installation) {
+  utils.l.d("sending notificaiont installation::"+installation+"\ndata::"+data+"\nalert::"+alert)
   if(utils._.isInvalidOrBlank(installation) || utils._.isInvalidOrBlank(installation.deviceToken)
     || utils._.isInvalidOrBlank(installation.deviceType) ) {
     return
@@ -36,6 +37,40 @@ function sendSinglePushNotification(data, alert, installation) {
 
 function sendMultiplePushNotifications(installations, data, alert) {
   utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, alert))
+}
+
+function sendMultiplePushNotificationsForUsers(notification, data) {
+  models = require('../models')
+
+  utils.l.d("sendMultiplePushNotificationsForUsers::event="+data+"\nnotification::"+JSON.stringify(notification))
+/*  models.installation.getInstallationByUserList(notification.recipients, function(err,installations){
+    if(err) utils.l.s("Unable to send pushnotifications::"+notification.name+" for event "+data._id+"\nerror::"+err)
+
+    console.log("got installations for users "+JSON.stringify(installations))
+    if(installations && installations.length>0){
+      utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, notification.message))
+    }
+  })*/
+
+  utils.async.map(notification.recipients, models.installation.getInstallationByUser, function(err, installations) {
+    sendMultiplePushNotifications(installations, data, notification.message)
+  })
+
+  /*
+  utils.async.waterfall([
+      function (callback) {
+        models.installation.getInstallationByUserList(notification.recipients, callback)
+      },
+      function (installations, callback) {
+        if(installations && installations.length>0){
+          utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, notification.message))
+        }
+      }
+    ],function(err,x){
+        if(err) utils.l.s("Unable to send pushnotifications::"+notification.name+" for event "+data._id)
+    }
+  )
+*/
 }
 
 function sendPushNotification(event, eventType, user) {
@@ -211,5 +246,6 @@ module.exports = {
   sendSinglePushNotification: sendSinglePushNotification,
   sendMultiplePushNotifications: sendMultiplePushNotifications,
   sendPushNotification: sendPushNotification,
-  sendPushNotificationForScheduler: sendPushNotificationForScheduler
+  sendPushNotificationForScheduler: sendPushNotificationForScheduler,
+  sendMultiplePushNotificationsForUsers: sendMultiplePushNotificationsForUsers
 }

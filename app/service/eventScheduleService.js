@@ -1,7 +1,53 @@
 var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
+var schedule = require('node-schedule');
+var eventNotificationTriggerService = require('./eventNotificationTriggerService')
+var scheduleHandles = []
 
+function scheduleNotifications(){
+  utils.l.d("scheduleNotifications::start")
+  utils.async.waterfall([
+      function (callback) {
+        models.notificationTriggerModel.getByQuery({isActive:true, type:'schedule'}, callback)
+      },
+      function (notifTriggerList, callback) {
+        utils.l.d("scheduleNotifications::notifTriggerList::"+notifTriggerList)
+        var totalTriggersToLaunch = notifTriggerList?notifTriggerList.length:0
+        if(totalTriggersToLaunch>0){
+          utils.async.map(notifTriggerList, function(notifTrigger) {
+            handleSchedule(notifTrigger,callback)
+          },function(err,notifScheduled){
+            if(scheduleHandles.length >0) callback(null,{totalTriggersToLaunch:totalTriggersToLaunch,notifScheduled:scheduleHandles.length })
+            else callback({errorMessage:"Unable to schedule any of the schedules",error:err},null)
+          })
+        }else callback(null,{totalTriggersToLaunch:totalTriggersToLaunch,notifScheduled:0})
+      }
+    ],
+    function (err, notifTriggerUpdate) {
+      utils.l.d("scheduleNotifications::end")
+      if (err) {
+        utils.l.s("Error launching Notification Schedules::"+err+"::"+JSON.stringify(notifTriggerUpdate))
+      } else {
+        utils.l.i("Notification Schedules launched successfully::"+JSON.stringify(scheduleHandles.length))
+      }
+    }
+  )
+}
+
+function handleSchedule(notifTrigger,callback){
+/*
+  var jobToRun = eventNotificationService.handleNotificationTrigger(notifTrigger.triggerName,null)
+  scheduleHandles.push(schedule.scheduleJob(notifTrigger.schedule, jobToRun));
+*/
+  var scheduleJob = eventNotificationTriggerService.handleNotificationTrigger(notifTrigger,null)
+  utils.l.d("schedule the job "+notifTrigger.triggerName+"::scheduleJob->handle()="+scheduleJob.name)
+  scheduleHandles.push(scheduleJob);
+
+  return callback(null, scheduleHandles.length)
+}
+
+/*
 function launchEvents() {
   utils.l.i("Starting the job to launch events::"+utils.moment().utc().format())
   utils.async.waterfall([
@@ -53,6 +99,11 @@ function launchEvent(event, callback){
     }],callback)
 }
 
+
 module.exports={
   launchEvents:launchEvents
+}*/
+
+module.exports = {
+  scheduleNotifications: scheduleNotifications
 }

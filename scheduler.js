@@ -5,11 +5,13 @@ var router = express.Router()
 var jobs = require('./jobs')
 var utils = require('./app/utils')
 var helpers = require('./app/helpers')
+var schedule = require('node-schedule');
 
 var hashPassword = "hashPassword"
 var deleteOldFullEvents = "deleteOldFullEvents"
 var destinyService = require('./app/service/destinyInterface')
 var authService = require('./app/service/authService')
+var notifService = require('./app/service/eventNotificationService')
 
 var command = process.argv[2]
 
@@ -37,6 +39,15 @@ switch(command) {
       console.log("token::"+helpers.uuid.getRandomUUID())
     },function(){
     })
+    break;
+  case 'notifService':
+    notifService.handleNotificationTrigger({triggerName:'launchUpcomingEvents',schedule:'*/1 * * * *'});
+    break;
+  case 'scheduleTst':
+    var j = schedule.scheduleJob("test schedule123",'*/1 * * * *',function(){
+      console.log("executing job @"+new Date())
+    })
+    console.log("job name="+ j.name)
     break;
   default:
     break;
