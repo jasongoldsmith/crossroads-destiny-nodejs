@@ -3,7 +3,6 @@ var utils = require('../utils');
 
 var InstallationSchema = require('./schema/installationSchema');
 var Installation = mongoose.model('Installation', InstallationSchema.schema);
-mongoose.set('debug',true)
 function getByQuery(query, callback) {
   Installation
     .find(query)

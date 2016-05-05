@@ -49,6 +49,13 @@ switch(command) {
     })
     console.log("job name="+ j.name)
     break;
+  case 'groupTest':
+    var events = [{id:1,creator:{name:"h",msg:'hi'}},{id:2,creator:{name:"b",msg:'hi'}},{id:3,creator:{name:"h",msg:'hi'}},{id:4,creator:{name:"h",msg:'hi'}}]
+    var eventsByName = utils._.countBy(events,'creator.name')
+    for(var attributename in eventsByName){
+      console.log(attributename+": "+eventsByName[attributename]);
+    }
+    break;
   default:
     break;
 }

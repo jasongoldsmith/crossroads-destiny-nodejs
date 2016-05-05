@@ -160,7 +160,11 @@ function dailyOneTimeReimnder(notifTrigger){
         var totalEventsToLaunch = events?events.length:0
         if(totalEventsToLaunch>0){
           if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
-            utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,events[0]))
+            var eventsByClan = utils._.countBy(events,'creator.clanId')
+            for (var clanId in eventsByClan) {
+              if(eventsByClan[clanId] > 0)
+                utils.async.map(notifTrigger.notifications, utils._.partial(createAggregateNotificationAndSend, clanId, eventsByClan[clanId]))
+            }
           }
         }
         callback(null,null)
@@ -218,7 +222,15 @@ function launchUpComingReminders(notifTrigger){
 function createNotificationAndSend(event,notification){
   utils.l.d("createNotificationAndSend::event="+event+"\nnotification::"+JSON.stringify(notification))
   notificationService.getNotificationDetails(event, notification, null, function(err,notificationResponse){
+    if(err) util.l.s("createNotificationAndSend::Error while creating notificationResponse object"+err)
     helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse,event)
+  })
+}
+
+function createAggregateNotificationAndSend(clanId,eventCount, notification){
+  utils.l.d("createAggregateNotificationAndSend::notification::"+JSON.stringify(notification))
+  notificationService.getAggregateNotificationDetails(clanId,eventCount, notification, function(err,notificationResponse){
+    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse,null)
   })
 }
 

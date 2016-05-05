@@ -8,7 +8,22 @@ function getNotificationDetails(event, notification, playerLeft, callback) {
 		message: formatMessage(notification.messageTemplate, event, playerLeft)
 	}
 
-	getRecipients(notification.recipientType, event, function(err, recipients) {
+	getRecipients(notification.recipientType, event, null, function(err, recipients) {
+		if (err) {
+			return callback(err, null)
+		}
+		notificationObj.recipients = recipients
+		return callback(null, notificationObj)
+	})
+}
+
+function getAggregateNotificationDetails(clanId,eventCount, notification,callback){
+	var notificationObj = {
+		name: notification.name,
+		message: notification.messageTemplate.replace("#EVENT_COUNT#",eventCount)
+	}
+
+	getRecipients(notification.recipientType, null, clanId,function(err, recipients) {
 		if (err) {
 			return callback(err, null)
 		}
@@ -47,7 +62,7 @@ function formatMessage(messageTemplate, event, playerLeft) {
 	return messageTemplate
 }
 
-function getRecipients(recipientType, event, callback) {
+function getRecipients(recipientType, event, clanId, callback) {
 	var recipients = null
 	switch(recipientType) {
 		case "creator":
@@ -65,7 +80,7 @@ function getRecipients(recipientType, event, callback) {
 			return callback(null, recipients)
 			break
 		case "clanNotEventMembers":
-			getClanMembers(event, function(err, users) {
+			getClanMembers(event, null,function(err, users) {
 				if(err) {
 					return callback(err, null)
 				}
@@ -75,13 +90,13 @@ function getRecipients(recipientType, event, callback) {
 			})
 			break
 		case "clan":
-			getClanMembers(event, callback)
+			getClanMembers(event,clanId, callback)
 			break
 	}
 }
 
-function getClanMembers(event, callback) {
-	models.user.getByQuery({clanId: event.creator.clanId}, callback)
+function getClanMembers(event,clanId, callback) {
+	models.user.getByQuery({clanId: event?event.creator.clanId:clanId}, callback)
 }
 
 function removeEventPlayersFromClan(clanPlayers, eventPlayers) {
@@ -112,5 +127,6 @@ function getEventName(activity) {
 }
 
 module.exports = {
-	getNotificationDetails: getNotificationDetails
+	getNotificationDetails: getNotificationDetails,
+	getAggregateNotificationDetails: getAggregateNotificationDetails
 }
