@@ -211,7 +211,8 @@ var eventNotificationTrigger = {
   launchUpcomingEvents:'launchUpcomingEvents',
   launchEventStart:'launchEventStart',
   eventStartreminder:'eventStartreminder',
-  dailyOneTimeReimnder:'dailyOneTimeReimnder'
+  dailyOneTimeReimnder:'dailyOneTimeReimnder',
+  launchUpComingReminders:'launchUpComingReminders'
 }
 
 module.exports = {

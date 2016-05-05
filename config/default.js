@@ -78,7 +78,8 @@ var defaults = {
   bungieConvURL:"https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true",
   firebaseURL: process.env.firebaseURL || "https://traveler-development.firebaseio.com/",
   triggerIntervalMinutes: 15,
-  triggerReminderInterval: 120
+  triggerReminderInterval: 120,
+  triggerUpcomingReminderInterval: 5
 };
 
 /**
