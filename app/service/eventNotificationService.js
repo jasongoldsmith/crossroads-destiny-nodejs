@@ -19,19 +19,19 @@ function getNotificationDetails(event, notification, playerLeft, callback) {
 
 function formatMessage(messageTemplate, event, playerLeft) {
 	messageTemplate =  messageTemplate
-		.replace("creator", event.creator.psnId)
-		.replace("eventName", getEventName(event.eType))
+		.replace("#CREATOR#", event.creator.psnId)
+		.replace("#EVENT_NAME#", getEventName(event.eType))
 
 	if(utils._.isValidNonBlank(playerLeft)) {
-		messageTemplate = messageTemplate.replace("player", playerLeft.psnId)
+		messageTemplate = messageTemplate.replace("#PLAYER#", playerLeft.psnId)
 	} else {
-		messageTemplate = messageTemplate.replace("player", event.players[event.players.length - 1].psnId)
+		messageTemplate = messageTemplate.replace("#PLAYER#", event.players[event.players.length - 1].psnId)
 	}
 
 	var playersNeeded = event.maxPlayers - event.players.length
-	messageTemplate = messageTemplate.replace("number", "" + playersNeeded)
+	messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED#", "" + playersNeeded)
 
-	if(messageTemplate.indexOf("eventPlayers") >= 0 ) {
+	if(messageTemplate.indexOf("#EVENT_PLAYERS#") >= 0 ) {
 		var players = utils._.filter(event.players, function(player) {
 			return player._id != event.creator._id
 		})
@@ -42,7 +42,7 @@ function formatMessage(messageTemplate, event, playerLeft) {
 			}
 		}))).join(", ")
 
-		messageTemplate = messageTemplate.replace("eventPlayers", playernames)
+		messageTemplate = messageTemplate.replace("#EVENT_PLAYERS#", playernames)
 	}
 	return messageTemplate
 }
