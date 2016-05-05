@@ -9,7 +9,7 @@ function scheduleNotifications(){
   utils.l.d("scheduleNotifications::start")
   utils.async.waterfall([
       function (callback) {
-        models.notificationTriggerModel.getByQuery({isActive:true, type:'schedule'}, callback)
+        models.notificationTrigger.getByQuery({isActive:true, type:'schedule'}, callback)
       },
       function (notifTriggerList, callback) {
         utils.l.d("scheduleNotifications::notifTriggerList::"+notifTriggerList)

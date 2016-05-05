@@ -1,6 +1,5 @@
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
-var idValidator = require('mongoose-id-validator')
 
 var notificationTriggerSchema = new Schema({
 	triggerName: { type: String, required: true},
@@ -11,9 +10,6 @@ var notificationTriggerSchema = new Schema({
 	schedule: String
 })
 
-
 module.exports = {
 	schema: notificationTriggerSchema
 }
-
-notificationTriggerSchema.plugin(idValidator)

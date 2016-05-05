@@ -9,6 +9,8 @@ module.exports = function (app, passport) {
 
   app.use('/api/v1/auth', require('../routes/v1/auth'))
   app.use('/api/v1/activity', require('../routes/v1/activity'))
+  app.use('/api/v1/notification', require('../routes/v1/notification'))
+  app.use('/api/v1/notificationTrigger', require('../routes/v1/notificationTrigger'))
   app.use('/api/v1/a/event', require('../routes/v1/a/event'))
   app.use('/api/v1/a/user', require('../routes/v1/a/users'))
   app.use('/api/v1/a/installation', require('../routes/v1/a/installation'))

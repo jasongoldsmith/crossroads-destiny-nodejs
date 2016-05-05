@@ -12,7 +12,8 @@ var eventSchema = new Schema({
 	players: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
 	created: { type: Date, default: Date.now },
 	updated: { type: Date, default: Date.now },
-	launchDate: { type: Date, default: Date.now }
+	launchDate: { type: Date, default: Date.now },
+	notifStatus:[{type: String}]
 })
 
 eventSchema.index({'eType': 1})

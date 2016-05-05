@@ -275,5 +275,6 @@ module.exports = {
 	deleteEvent: deleteEvent,
 	getByQuery: getByQuery,
 	getById: getById,
-	launchEvent: launchEvent
+	launchEvent: launchEvent,
+	update:update
 }

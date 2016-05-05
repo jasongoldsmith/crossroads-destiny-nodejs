@@ -209,7 +209,9 @@ var bungieMemberShipType = {
 
 var eventNotificationTrigger = {
   launchUpcomingEvents:'launchUpcomingEvents',
-  launchEventStart:'launchEventStart'
+  launchEventStart:'launchEventStart',
+  eventStartreminder:'eventStartreminder',
+  dailyOneTimeReimnder:'dailyOneTimeReimnder'
 }
 
 module.exports = {

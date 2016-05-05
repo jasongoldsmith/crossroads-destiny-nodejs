@@ -17,6 +17,14 @@ function handleNotificationTrigger(notifTrigger, event){
       utils.l.d("handleNotificationTrigger::launchEventStart::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
       return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,launchEventStart.bind(null,notifTrigger))
       break;
+    case utils.constants.eventNotificationTrigger.eventStartreminder:
+      utils.l.d("handleNotificationTrigger::eventStartreminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
+      return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,eventStartreminder.bind(null,notifTrigger))
+      break;
+    case utils.constants.eventNotificationTrigger.dailyOneTimeReimnder:
+      utils.l.d("handleNotificationTrigger::eventStartreminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
+      return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,dailyOneTimeReimnder.bind(null,notifTrigger))
+      break;
     default:
       break;
   }
@@ -78,6 +86,89 @@ function launchUpcomingEvent(event, notifTrigger, callback){
 
 function launchEventStart(notifTrigger){
   utils.l.d("Starting trigger launchEventStart::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+  utils.async.waterfall([
+      function (callback) {
+        var date = utils.moment().utc()
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.now, launchDate:{$lte:date},notifStatus:{$nin:["launchEventStart"]}}, null, callback)
+      },
+      function (events, callback) {
+        var totalEventsToLaunch = events?events.length:0
+        if(totalEventsToLaunch>0){
+          utils.async.map(events, function(event) {
+            if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
+              utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event))
+              event.notifStatus.push("launchEventStart")
+              models.event.update(event,callback)
+            }else callback(null,null)
+          },function(err,updatedEvents){
+            callback(err,updatedEvents)
+          })
+        }else callback(null,null)
+      }
+    ],
+    function (err, updatedEvents) {
+      if (err) {
+        utils.l.s("Error sending events start notification::"+err+"::"+JSON.stringify(updatedEvents))
+      }
+      utils.l.i("Completed trigger launchEventStart::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+    }
+  )
+}
+
+function eventStartreminder(notifTrigger){
+  utils.l.d("Starting trigger eventStartreminder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+  utils.async.waterfall([
+      function (callback) {
+        var date = utils.moment().utc().add(utils.config.triggerReminderInterval,"minutes")
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date},notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
+      },
+      function (events, callback) {
+        var totalEventsToLaunch = events?events.length:0
+        if(totalEventsToLaunch>0){
+          utils.async.map(events, function(event) {
+            if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
+              utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event))
+              event.notifStatus.push("eventStartreminder")
+              models.event.update(event,callback)
+            }else callback(null,null)
+          },function(err,updatedEvents){
+            callback(err,updatedEvents)
+          })
+        }else callback(null,null)
+      }
+    ],
+    function (err, updatedEvents) {
+      if (err) {
+        utils.l.s("Error sending eventStartreminder notification::"+err+"::"+JSON.stringify(updatedEvents))
+      }
+      utils.l.i("Completed trigger eventStartreminder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+    }
+  )
+}
+
+function dailyOneTimeReimnder(notifTrigger){
+  utils.l.d("Starting trigger dailyOneTimeReimnder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+  utils.async.waterfall([
+      function (callback) {
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming,status:{$ne:"full"}}, null, callback)
+      },
+      function (events, callback) {
+        var totalEventsToLaunch = events?events.length:0
+        if(totalEventsToLaunch>0){
+          if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
+            utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,events[0]))
+          }
+        }
+        callback(null,null)
+      }
+    ],
+    function (err, updatedEvents) {
+      if (err) {
+        utils.l.s("Error sending dailyOneTimeReimnder notification::"+err+"::"+JSON.stringify(updatedEvents))
+      }
+      utils.l.i("Completed trigger dailyOneTimeReimnder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+    }
+  )
 }
 
 function createNotificationAndSend(event,notification){
