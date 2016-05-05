@@ -180,7 +180,7 @@ function launchUpComingReminders(notifTrigger){
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerUpcomingReminderInterval,"minutes")
-        models.event.getByQuery({launchDate:{$lte:date},notifStatus:{$nin:["RaidEventLf2mNotification","EventLf1mNotification"]}}, null, callback)
+        models.event.getByQuery({launchStatus:utils.constants.eventLaunchStatusList.now,launchDate:{$lte:date},notifStatus:{$nin:["RaidEventLf2mNotification","EventLf1mNotification"]}}, null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0

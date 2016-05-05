@@ -79,7 +79,7 @@ var defaults = {
   firebaseURL: process.env.firebaseURL || "https://traveler-development.firebaseio.com/",
   triggerIntervalMinutes: 15,
   triggerReminderInterval: 120,
-  triggerUpcomingReminderInterval: 5
+  triggerUpcomingReminderInterval: -5
 };
 
 /**
