@@ -25,7 +25,15 @@ switch(command) {
     jobs.deleteOldFullEvents()
     break
   case "momentTest":
+    var date = new Date()
+    date.setHours(0,0,0,0)
+    var date1 =  utils.moment(date).utc().format()
+    console.log("date1:"+date1)
+    var date2 = utils.moment(date).utc().add(24,"hours").format()
+    console.log("date2::"+date2)
+    //console.log("date1::"+date1.year()+"-"+date1.month()+"-"+date1.day())
     console.log("time: "+utils.moment().add(-utils.config.triggerIntervalMinutes,"minutes").format())
+    break;
   case "bugieTest":
     var response = destinyService.getBungieMemberShipJson("kaeden2010")
     console.log("final response="+response) //13172709 //sreeharshadasa //12269331

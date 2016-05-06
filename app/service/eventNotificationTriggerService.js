@@ -153,9 +153,14 @@ function eventStartreminder(notifTrigger){
 
 function dailyOneTimeReimnder(notifTrigger){
   utils.l.d("Starting trigger dailyOneTimeReimnder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+  var date = new Date()
+  date.setHours(0,0,0,0)
+  var date1 =  utils.moment(date).utc().format()
+  var date2 = utils.moment(date).utc().add(24,"hours").format()
+
   utils.async.waterfall([
       function (callback) {
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming,status:{$ne:"full"}}, null, callback)
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming,status:{$ne:"full"}, launchDate:{$gte:date1,$lte:date2}}, null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0
