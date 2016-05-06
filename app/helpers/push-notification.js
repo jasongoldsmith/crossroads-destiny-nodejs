@@ -42,7 +42,7 @@ function sendMultiplePushNotifications(installations, data, alert) {
 function sendMultiplePushNotificationsForUsers(notification, data) {
   models = require('../models')
 
-  utils.l.d("sendMultiplePushNotificationsForUsers::notification::"+{notification:notification.name,message:notification.message})
+  utils.l.d("sendMultiplePushNotificationsForUsers::notification::"+JSON.stringify({notification:notification.name,message:notification.message}))
 /*  models.installation.getInstallationByUserList(notification.recipients, function(err,installations){
     if(err) utils.l.s("Unable to send pushnotifications::"+notification.name+" for event "+data._id+"\nerror::"+err)
 

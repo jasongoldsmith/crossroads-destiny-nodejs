@@ -80,10 +80,11 @@ function launchUpcomingEvent(event, notifTrigger, callback){
       // Return notificationResp - array of notification{name:"",recepients:[{}],message:"")}
       if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
         //Send NoSignupNotification only if there are no players signedup. i.e Only player in event is creator
-        if(event.players.length > 1) utils._.remove(notifTrigger.notifications, {name: 'NoSignupNotification'})
-        else utils._.remove(notifTrigger.notifications, {name: 'EventNotFullNotification'})
+        var notifications = notifTrigger.notifications
+        if(event.players.length > 1) utils._.remove(notifications, {name: 'NoSignupNotification'})
+        else utils._.remove(notifications, {name: 'EventNotFullNotification'})
 
-        utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event))
+        utils.async.map(notifications,utils._.partial(createNotificationAndSend,event))
       }else callback(null,null)
     }],callback)
 }
