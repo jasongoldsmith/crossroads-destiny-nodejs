@@ -26,11 +26,13 @@ PushNotification.init({
 
 function sendSinglePushNotification(data, alert, installation) {
   utils.l.d("sending notificaiont installation::"+installation+"\nalert::"+alert)
+  var dataObj = stripEventObject(data)
   if(utils._.isInvalidOrBlank(installation) || utils._.isInvalidOrBlank(installation.deviceToken)
     || utils._.isInvalidOrBlank(installation.deviceType) ) {
     return
   }
-  PushNotification.prepare("test", alert, installation.unReadNotificationCount, sound, data)
+
+  PushNotification.prepare("test", alert, installation.unReadNotificationCount, sound, dataObj)
   PushNotification.addTarget(installation.deviceType, installation.deviceToken)
   PushNotification.push()
 }
@@ -42,35 +44,12 @@ function sendMultiplePushNotifications(installations, data, alert) {
 function sendMultiplePushNotificationsForUsers(notification, data) {
   models = require('../models')
 
-  utils.l.d("sendMultiplePushNotificationsForUsers::notification::"+JSON.stringify({notification:notification.name,message:notification.message}))
-/*  models.installation.getInstallationByUserList(notification.recipients, function(err,installations){
-    if(err) utils.l.s("Unable to send pushnotifications::"+notification.name+" for event "+data._id+"\nerror::"+err)
-
-    console.log("got installations for users "+JSON.stringify(installations))
-    if(installations && installations.length>0){
-      utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, notification.message))
-    }
-  })*/
+  utils.l.d("sendMultiplePushNotificationsForUsers::notification::"
+    + JSON.stringify({notification:notification.name,message:notification.message}))
 
   utils.async.map(notification.recipients, models.installation.getInstallationByUser, function(err, installations) {
     sendMultiplePushNotifications(installations, data, notification.message)
   })
-
-  /*
-  utils.async.waterfall([
-      function (callback) {
-        models.installation.getInstallationByUserList(notification.recipients, callback)
-      },
-      function (installations, callback) {
-        if(installations && installations.length>0){
-          utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, notification.message))
-        }
-      }
-    ],function(err,x){
-        if(err) utils.l.s("Unable to send pushnotifications::"+notification.name+" for event "+data._id)
-    }
-  )
-*/
 }
 
 function sendPushNotification(event, eventType, user) {
@@ -240,6 +219,30 @@ function getEventName(activity) {
   }
   console.log("event name: "+eventName)
   return eventName
+}
+
+function stripEventObject(event) {
+  if(utils._.isInvalidOrBlank(event)) {
+    return null
+  }
+  var eventObj = event.toObject()
+  delete eventObj.__v
+  delete eventObj.notifStatus
+  delete eventObj.eType.__v
+  stripPlayerObject(eventObj.creator)
+  utils._.map(eventObj.players, function(player) {
+    stripPlayerObject(player)
+  })
+
+  utils.l.d("eventObj: ", eventObj)
+  return eventObj
+}
+
+function stripPlayerObject(player) {
+  delete player.date
+  delete player.uDate
+  delete player.__v
+  delete player.psnVerified
 }
 
 module.exports = {
