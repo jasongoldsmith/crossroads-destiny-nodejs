@@ -125,7 +125,7 @@ function eventStartreminder(notifTrigger){
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerReminderInterval,"minutes")
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date},status:"full",notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date},notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0
