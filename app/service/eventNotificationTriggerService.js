@@ -125,7 +125,7 @@ function eventStartreminder(notifTrigger){
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerReminderInterval,"minutes")
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date},status:"full",notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date},notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0
@@ -234,6 +234,7 @@ function hasNotifStatus(notifStatusList, notifStatus){
 function createNotificationAndSend(event,notification){
   utils.l.d("createNotificationAndSend::event="+event+"\nnotification::"+JSON.stringify(notification))
   notificationService.getNotificationDetails(event, notification, null, function(err,notificationResponse){
+    utils.l.d("notification response object", notificationResponse)
     if(err) util.l.s("createNotificationAndSend::Error while creating notificationResponse object"+err)
     helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse,event)
   })
