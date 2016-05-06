@@ -229,6 +229,7 @@ function hasNotifStatus(notifStatusList, notifStatus){
 function createNotificationAndSend(event,notification){
   utils.l.d("createNotificationAndSend::event="+event+"\nnotification::"+JSON.stringify(notification))
   notificationService.getNotificationDetails(event, notification, null, function(err,notificationResponse){
+    utils.l.d("notification response object", notificationResponse)
     if(err) util.l.s("createNotificationAndSend::Error while creating notificationResponse object"+err)
     helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse,event)
   })
