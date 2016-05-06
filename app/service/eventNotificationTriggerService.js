@@ -124,7 +124,7 @@ function eventStartreminder(notifTrigger){
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerReminderInterval,"minutes")
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date},notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date},status:"full",notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0
@@ -184,7 +184,8 @@ function launchUpComingReminders(notifTrigger){
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerUpcomingReminderInterval,"minutes")
-        models.event.getByQuery({launchStatus:utils.constants.eventLaunchStatusList.now,launchDate:{$lte:date},notifStatus:{$nin:["RaidEventLf2mNotification","EventLf1mNotification"]}}, null, callback)
+        //models.event.getByQuery({launchStatus:utils.constants.eventLaunchStatusList.now,launchDate:{$lte:date},notifStatus:{$nin:["RaidEventLf2mNotification","EventLf1mNotification"]}}, null, callback)
+        models.event.getByQuery({launchStatus:utils.constants.eventLaunchStatusList.now,launchDate:{$lte:date}}, null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0
@@ -193,12 +194,12 @@ function launchUpComingReminders(notifTrigger){
             if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
               var raidLf2mfNotif = utils._.find(notifTrigger.notifications,{"name":"RaidEventLf2mNotification"})
               var eventLf1mNotif = utils._.find(notifTrigger.notifications,{"name":"EventLf1mNotification"})
-              if(event.eType.aType== "Raid" && ((event.maxPlayers - event.players.length) ==2) ){
+              if(event.eType.aType== "Raid" && ((event.maxPlayers - event.players.length) ==2) && !hasNotifStatus(event.notifStatus,"RaidEventLf2mNotification") ){
                 createNotificationAndSend(event,raidLf2mfNotif)
                 event.notifStatus.push("RaidEventLf2mNotification")
               }
 
-              if((event.maxPlayers - event.players.length) ==1 ){
+              if((event.maxPlayers - event.players.length) ==1 && !hasNotifStatus(event.notifStatus,"EventLf1mNotification") ){
                 createNotificationAndSend(event,eventLf1mNotif)
                 event.notifStatus.push("EventLf1mNotification")
               }
@@ -217,6 +218,11 @@ function launchUpComingReminders(notifTrigger){
       utils.l.i("Completed trigger launchUpComingReminders::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
     }
   )
+}
+
+function hasNotifStatus(notifStatusList, notifStatus){
+  if(utils._.indexOf(notifStatusList,notifStatus) > 0) return true
+  else return false
 }
 
 function createNotificationAndSend(event,notification){

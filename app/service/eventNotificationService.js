@@ -85,7 +85,7 @@ function getRecipients(recipientType, event, clanId, callback) {
 					return callback(err, null)
 				}
 				recipients = removeEventPlayersFromClan(users, event.players)
-				utils.l.i("recipients with callback", recipients)
+				//utils.l.i("recipients with callback", recipients)
 				return callback(null, recipients)
 			})
 			break
@@ -100,8 +100,8 @@ function getClanMembers(event,clanId, callback) {
 }
 
 function removeEventPlayersFromClan(clanPlayers, eventPlayers) {
-	utils.l.i("clan players", clanPlayers)
-	utils.l.d("event players", eventPlayers)
+	//utils.l.d("clan players", clanPlayers)
+	//utils.l.d("event players", eventPlayers)
 
 	var recipients = []
 	utils._.forEach(clanPlayers, function(clanPlayer) {

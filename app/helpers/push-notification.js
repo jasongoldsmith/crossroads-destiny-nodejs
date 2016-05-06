@@ -25,7 +25,7 @@ PushNotification.init({
 })
 
 function sendSinglePushNotification(data, alert, installation) {
-  utils.l.d("sending notificaiont installation::"+installation+"\ndata::"+data+"\nalert::"+alert)
+  utils.l.d("sending notificaiont installation::"+installation+"\nalert::"+alert)
   if(utils._.isInvalidOrBlank(installation) || utils._.isInvalidOrBlank(installation.deviceToken)
     || utils._.isInvalidOrBlank(installation.deviceType) ) {
     return
@@ -42,7 +42,7 @@ function sendMultiplePushNotifications(installations, data, alert) {
 function sendMultiplePushNotificationsForUsers(notification, data) {
   models = require('../models')
 
-  utils.l.d("sendMultiplePushNotificationsForUsers::event="+data+"\nnotification::"+JSON.stringify(notification))
+  utils.l.d("sendMultiplePushNotificationsForUsers::notification::"+{notification:notification.name,message:notification.message})
 /*  models.installation.getInstallationByUserList(notification.recipients, function(err,installations){
     if(err) utils.l.s("Unable to send pushnotifications::"+notification.name+" for event "+data._id+"\nerror::"+err)
 

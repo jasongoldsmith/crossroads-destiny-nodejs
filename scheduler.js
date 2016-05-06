@@ -5,6 +5,7 @@ var router = express.Router()
 var jobs = require('./jobs')
 var utils = require('./app/utils')
 var helpers = require('./app/helpers')
+var models = require('./app/models')
 var schedule = require('node-schedule');
 
 var hashPassword = "hashPassword"
@@ -56,6 +57,16 @@ switch(command) {
       console.log(attributename+": "+eventsByName[attributename]);
     }
     break;
+  case 'arrayTest':
+    models.event.getByQuery({_id:"572ad94e2cc2139d75c6afd8"},null,function(err, event){
+      if(event){
+        console.log("event:"+event)
+        var jsonEvt = JSON.parse(JSON.stringify(event))
+        console.log("status::"+jsonEvt.launchDate)
+        console.log("finding::"+utils._.has(event.notifStatus,"EventLf1mNotification"))
+      }
+    })
+    break
   default:
     break;
 }
