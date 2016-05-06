@@ -227,7 +227,8 @@ function launchUpComingReminders(notifTrigger){
 }
 
 function hasNotifStatus(notifStatusList, notifStatus){
-  if(utils._.indexOf(notifStatusList,notifStatus) > 0) return true
+  //console.log("notifStatusList["+JSON.stringify(notifStatusList)+"],notifStatus:"+JSON.stringify(notifStatus)+"="+utils._.indexOf(JSON.parse(JSON.stringify(notifStatusList)),notifStatus))
+  if(utils._.indexOf(notifStatusList,notifStatus) >= 0) return true
   else return false
 }
 
