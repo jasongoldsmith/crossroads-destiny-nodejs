@@ -66,7 +66,7 @@ function getRecipients(recipientType, event, clanId, callback) {
 	var recipients = null
 	switch(recipientType) {
 		case "creator":
-			recipients = event.creator
+			recipients = [event.creator]
 			return callback(null, recipients)
 			break
 		case "eventMembers":
