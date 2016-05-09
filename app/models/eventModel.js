@@ -201,6 +201,14 @@ function leaveEvent(data, callback) {
 					utils.l.d("player is also the creator; changing the creator to the first user in the list")
 					event.creator = event.players[0]
 				}
+
+				// Reseting the notification flags for LFXM reminders
+				if(event.maxPlayers - event.players.length == 3) {
+					event.notifStatus.remove("RaidEventLf2mNotification")
+				} else if(event.maxPlayers - event.players.length == 2) {
+					event.notifStatus.remove("EventLf1mNotification")
+				}
+
 				update(event, callback)
 			}
 		}
