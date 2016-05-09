@@ -75,7 +75,7 @@ function getRecipients(recipientType, event, clanId, callback) {
 			break
 		case "eventMembersNotCreator":
 			recipients = utils._.filter(event.players, function(player) {
-				return player._id != event.creator._id
+				return player._id.toString() != event.creator._id.toString()
 			})
 			return callback(null, recipients)
 			break
