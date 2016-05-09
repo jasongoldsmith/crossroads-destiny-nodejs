@@ -76,6 +76,7 @@ function launchUpcomingEvent(event, notifTrigger, callback){
       models.event.launchEvent(event, callback)
       //TODO: Make a firebase API to notify
     },function(updatedEvent,callback){
+     // helpers.firebase.updateEvent(updatedEvent, updatedEvent.creator)
       // for each notification in the list return notification object with formatter message, recepients
       // Return notificationResp - array of notification{name:"",recepients:[{}],message:"")}
       if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
@@ -125,7 +126,8 @@ function eventStartreminder(notifTrigger){
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerReminderInterval,"minutes")
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date},notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
+        var date1 =  utils.moment().utc().add((utils.config.triggerReminderInterval-15),"minutes")
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date,$gte:date1},notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0
