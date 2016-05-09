@@ -61,7 +61,7 @@ function sendPushNotification(event, eventType, user) {
     sendPushNotificationforNewCreate(event)
   }
 
-  if(event.players.length == event.maxPlayers && eventType == utils.constants.eventAction.join) {
+/*  if(event.players.length == event.maxPlayers && eventType == utils.constants.eventAction.join) {
     utils.l.d("sending push notification to creator for maximum players met")
     sendPushNotificationForEventStatus(event, "max")
 
@@ -72,12 +72,12 @@ function sendPushNotification(event, eventType, user) {
 
     sendPushNotificationToAllPlayers(event)
 
-    /*
+    /!*
     Adding back the creator as it was sending a wrong http response
     unshift adds back the creator to the top of the list
-     */
+     *!/
     event.players.unshift(event.creator)
-  }
+  }*/
 }
 
 //TODO: Refactor this and sendPushNotification method to have common implementation
