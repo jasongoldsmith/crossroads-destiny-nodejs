@@ -35,8 +35,10 @@ switch(command) {
     console.log("time: "+utils.moment().add(-utils.config.triggerIntervalMinutes,"minutes").format())
 
     var now = utils.moment().utc()
-    var then = utils.moment().utc().add(200 , "minutes")
+    var then = utils.moment().utc().add(48 , "hours")
     console.log("time difference :"+utils.moment.duration(now.diff(then)).humanize())
+
+    console.log("date of month::"+then.date())
     break;
   case "bugieTest":
     var response = destinyService.getBungieMemberShipJson("kaeden2010")
@@ -57,7 +59,7 @@ switch(command) {
     notifService.handleNotificationTrigger({triggerName:'launchUpcomingEvents',schedule:'*/1 * * * *'});
     break;
   case 'scheduleTst':
-    var j = schedule.scheduleJob("test schedule123",'*/1 * * * *',function(){
+    var j = schedule.scheduleJob("test schedule123",'0 43 16 * * *',function(){
       console.log("executing job @"+new Date())
     })
     console.log("job name="+ j.name)

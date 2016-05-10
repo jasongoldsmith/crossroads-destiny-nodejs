@@ -260,7 +260,8 @@ function launchEvent(event, callback){
 				if (err) {
 					return callback(err, null)
 				} else {
-					return callback(null, updatedEvent)
+					//return callback(null, updatedEvent) //
+					getById(updatedEvent._id, callback)
 				}
 			}
 	)

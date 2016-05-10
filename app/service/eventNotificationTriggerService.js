@@ -76,7 +76,7 @@ function launchUpcomingEvent(event, notifTrigger, callback){
       models.event.launchEvent(event, callback)
       //TODO: Make a firebase API to notify
     },function(updatedEvent,callback){
-     // helpers.firebase.updateEvent(updatedEvent, updatedEvent.creator)
+      helpers.firebase.updateEvent(updatedEvent, updatedEvent.creator)
       // for each notification in the list return notification object with formatter message, recepients
       // Return notificationResp - array of notification{name:"",recepients:[{}],message:"")}
       if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
