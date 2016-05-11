@@ -1,5 +1,6 @@
 var utils = require('../utils')
 var models = require('../models')
+var moment = require('moment')
 
 function getNotificationDetails(event, notification, playerLeft, callback) {
 
@@ -36,6 +37,7 @@ function formatMessage(messageTemplate, event, playerLeft) {
 	messageTemplate =  messageTemplate
 		.replace("#CREATOR#", event.creator.psnId)
 		.replace("#EVENT_NAME#", getEventName(event.eType))
+		.replace("#TIME#", getTimeStringForDisplay(event.launchDate))
 
 	if(utils._.isValidNonBlank(playerLeft)) {
 		messageTemplate = messageTemplate.replace("#PLAYER#", playerLeft.psnId)
@@ -59,6 +61,7 @@ function formatMessage(messageTemplate, event, playerLeft) {
 
 		messageTemplate = messageTemplate.replace("#EVENT_PLAYERS#", playernames)
 	}
+
 	return messageTemplate
 }
 
@@ -124,6 +127,31 @@ function getEventName(activity) {
 		eventName += ", " + activity.aCheckpoint
 	}
 	return eventName
+}
+
+function getTimeStringForDisplay(date) {
+
+	var currentTime = new Date(moment.tz(Date.now(), 'America/Los_Angeles').format())
+	var launchDate = new Date(moment.tz(date, 'America/Los_Angeles').format())
+
+	switch(compareDates(launchDate, currentTime)) {
+		case 0:
+			return "today"
+			break
+		case 1:
+			return "tomorrow"
+			break
+		default:
+			return moment.tz(date, 'America/Los_Angeles').format('MMM D, YYYY')
+			break
+	}
+}
+
+function compareDates(date1, date2) {
+	if(date1.getFullYear() != date2.getFullYear() || date1.getMonth() != date2.getMonth()) {
+		return 2
+	}
+	return date1.getDate() - date2.getDate()
 }
 
 module.exports = {

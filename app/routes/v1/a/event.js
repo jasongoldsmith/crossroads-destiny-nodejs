@@ -4,6 +4,7 @@ var routeUtils = require('./../../routeUtils')
 var utils = require('../../../utils')
 var models = require('../../../models')
 var helpers = require('../../../helpers')
+var service = require('../../../service')
 
 function create(req, res) {
 	utils.l.d("Event create request: " + JSON.stringify(req.body))
@@ -125,6 +126,8 @@ function createEvent(data, callback) {
         }
 				if(event.launchStatus == "now") {
 					sendPushNotificationForJoin(event)
+				} else {
+					service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(event)
 				}
 				callback(null, event)
 			}
