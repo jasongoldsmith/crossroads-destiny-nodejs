@@ -228,6 +228,21 @@ function launchUpComingReminders(notifTrigger){
   )
 }
 
+function handleNewEvents(event, notifTrigger, callback) {
+  utils.l.d("Running trigger handleNewEvents for event", event)
+  if(notifTrigger.isActive) {
+    var newEventNotif = null
+    if (event.launchStatus == "upcoming") {
+      newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NewCreateForUpcoming"})
+      event.notifStatus.push("NewCreateForUpcoming")
+    }
+    createNotificationAndSend(event, newEventNotif)
+    models.event.update(event,callback)
+  } else {
+    return callback(null, {message: "handleNewEvents Trigger is not active"})
+  }
+}
+
 function hasNotifStatus(notifStatusList, notifStatus){
   //console.log("notifStatusList["+JSON.stringify(notifStatusList)+"],notifStatus:"+JSON.stringify(notifStatus)+"="+utils._.indexOf(JSON.parse(JSON.stringify(notifStatusList)),notifStatus))
   if(utils._.indexOf(notifStatusList,notifStatus) >= 0) return true
@@ -253,5 +268,6 @@ function createAggregateNotificationAndSend(clanId,eventCount, notification){
 module.exports ={
   handleNotificationTrigger:handleNotificationTrigger,
   handleUpcomingEvents: handleUpcomingEvents,
-  launchEventStart:launchEventStart
+  launchEventStart:launchEventStart,
+  handleNewEvents: handleNewEvents
 }

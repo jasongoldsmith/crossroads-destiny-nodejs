@@ -26,7 +26,20 @@ PushNotification.init({
 
 function sendSinglePushNotification(data, alert, installation) {
   utils.l.d("sending notificaiont installation::"+installation+"\nalert::"+alert)
-  var dataObj = stripEventObject(data)
+  var dataObj = null
+
+  /* We need to do this check as we have a different payload for player messages
+  TODO: Refactor this code when push-notification payload is refactored
+   */
+  if(utils._.isValidNonBlank(data.event)) {
+    dataObj = {
+      event: stripEventObject(data.event),
+      playerMessage: data.playerMessage
+    }
+  } else {
+    dataObj = stripEventObject(data)
+  }
+
   if(utils._.isInvalidOrBlank(installation) || utils._.isInvalidOrBlank(installation.deviceToken)
     || utils._.isInvalidOrBlank(installation.deviceType) ) {
     return
