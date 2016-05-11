@@ -44,10 +44,13 @@ function sendSinglePushNotification(data, alert, installation) {
     || utils._.isInvalidOrBlank(installation.deviceType) ) {
     return
   }
-
-  PushNotification.prepare("test", alert, installation.unReadNotificationCount, sound, dataObj)
-  PushNotification.addTarget(installation.deviceType, installation.deviceToken)
-  PushNotification.push()
+  try {
+    PushNotification.prepare("test", alert, installation.unReadNotificationCount, sound, dataObj)
+    PushNotification.addTarget(installation.deviceType, installation.deviceToken)
+    PushNotification.push()
+  }catch(exp){
+    utils.l.s("Error sending push notificaiont::sendSinglePushNotification::+"+exp)
+  }
 }
 
 function sendMultiplePushNotifications(installations, data, alert) {
