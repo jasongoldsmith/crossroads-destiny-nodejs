@@ -134,7 +134,7 @@ function getTimeStringForDisplay(date) {
 	var currentTime = new Date(moment.tz(Date.now(), 'America/Los_Angeles').format())
 	var launchDate = new Date(moment.tz(date, 'America/Los_Angeles').format())
 
-	switch(compareDates(launchDate, currentTime)) {
+	switch(utils.format.compareDates(launchDate, currentTime)) {
 		case 0:
 			return "today"
 			break
@@ -145,13 +145,6 @@ function getTimeStringForDisplay(date) {
 			return moment.tz(date, 'America/Los_Angeles').format('MMM D, YYYY')
 			break
 	}
-}
-
-function compareDates(date1, date2) {
-	if(date1.getFullYear() != date2.getFullYear() || date1.getMonth() != date2.getMonth()) {
-		return 2
-	}
-	return date1.getDate() - date2.getDate()
 }
 
 module.exports = {

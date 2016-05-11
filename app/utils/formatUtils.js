@@ -88,6 +88,13 @@ function chanceAlpha(length) {
   return chance.string({pool: "abcdefghijklmnopqrstuvwxyz", length: length});
 }
 
+function compareDates(date1, date2) {
+  if(date1.getFullYear() != date2.getFullYear() || date1.getMonth() != date2.getMonth()) {
+    return 2
+  }
+  return date1.getDate() - date2.getDate()
+}
+
 module.exports = {
   formatNumber: formatNumber,
   cleanNumber: cleanNumber,
@@ -101,5 +108,6 @@ module.exports = {
   isEmail: isEmail,
   isPhoneNo: isPhoneNo,
   cleanEmail: cleanEmail,
-  chanceAlpha: chanceAlpha
+  chanceAlpha: chanceAlpha,
+  compareDates: compareDates
 };

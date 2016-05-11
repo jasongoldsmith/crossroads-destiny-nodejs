@@ -38,28 +38,55 @@ function deleteOldFullEvents() {
   utils.async.waterfall([
     function (callback) {
       var date = new Date()
-      //date.setMinutes(date.getMinutes() + 10)
       models.event.getByQuery({ "status":"full", launchDate:{ $lt: date }}, null, callback)
     },
     function (events, callback) {
       utils._.forEach(events, function(event) {
-        utils.l.d("job archiving event: " + event)
+        utils.l.i("job archiving event: ", event)
         models.archiveEvent.createArchiveEvent(event, callback)
-        utils.l.d("job removing event: " + event)
+        utils.l.i("job removing event: ", event)
         event.remove(callback)
       })
     }
   ],
   function (err, event) {
     if (err) {
-      utils.l.i("job unable to remove event due to: " + err)
+      utils.l.i("job unable to remove event due to: ", err)
     } else {
       utils.l.i("job removed events succesfully")
     }
   })
 }
 
+function deleteOldStaleEvents() {
+  utils.async.waterfall([
+      function (callback) {
+        models.event.getByQuery({ launchStatus: "now"}, null, callback)
+      },
+      function(events, callback) {
+        var currentTime = new Date(moment.tz(Date.now(), 'America/Los_Angeles').format())
+        utils._.forEach(events, function(event) {
+          var launchDate = new Date(moment.tz(event.launchDate, 'America/Los_Angeles').format())
+          if(utils.format.compareDates(launchDate, currentTime) > 0) {
+            utils.l.i("job archiving event: ", event)
+            models.archiveEvent.createArchiveEvent(event, callback)
+            utils.l.i("job removing event: ", event)
+            event.remove(callback)
+          }
+        })
+      },
+    ],
+    function (err, event) {
+      if (err) {
+        utils.l.i("job unable to remove event due to: ", err)
+      } else {
+        utils.l.i("job removed events succesfully")
+      }
+    })
+}
+
 module.exports = {
   updatePassWord: updatePassWord,
-  deleteOldFullEvents: deleteOldFullEvents
+  deleteOldFullEvents: deleteOldFullEvents,
+  deleteOldStaleEvents: deleteOldStaleEvents
 }
