@@ -215,6 +215,10 @@ var eventNotificationTrigger = {
   launchUpComingReminders:'launchUpComingReminders'
 }
 
+var userNotificationTrigger = {
+  userSignup:'userSignup'
+}
+
 module.exports = {
   l: lodash,
   baseUrl: baseUrl,
@@ -223,5 +227,6 @@ module.exports = {
   eventAction: eventAction,
   eventLaunchStatusList: eventLaunchStatusList,
   bungieMemberShipType:bungieMemberShipType,
-  eventNotificationTrigger: eventNotificationTrigger
+  eventNotificationTrigger: eventNotificationTrigger,
+  userNotificationTrigger: userNotificationTrigger
 };

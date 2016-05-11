@@ -147,12 +147,26 @@ function signup(req, res) {
       }
       helpers.cookies.setCookie("foo", "bar", res)
       helpers.m.setUser(user)
-      return routeUtils.handleAPISuccess(req, res, {value: user})
+      return routeUtils.handleAPISuccess(req, res, {value: user,message:getSignupMessage(user)})
     }
   )
 }
 
 function verifyAccount(req,res){
+  var token = req.param("token")
+  models.user.getUserByData({psnToken:token},function(err, user){
+    if(user){
+      res.render("account/index",{
+        token: token,
+        psnId: user.psnId
+      })
+    }else{
+      res.render("account/error")
+    }
+  })
+}
+
+function verifyAccountConfirm(req,res){
   //var id = req.param("id");
   var token = req.param("token");
   //var name = req.param("name");
@@ -171,7 +185,7 @@ function verifyAccount(req,res){
       if(user){
         user.psnVerified = "VERIFIED"
         models.user.save(user,function(err,updatedUser){
-          callback(null, "Your account has been verified and its now active.")
+          callback(null, utils.config.accountVerificationSuccess)
         })
       }else{
         callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.",null)
@@ -190,11 +204,18 @@ function logout(req, res) {
   routeUtils.handleAPISuccess(req, res, {success: true})
 }
 
+function getSignupMessage(user){
+  if(user.psnVerified == "INITIATED") return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app! An account verification message has been sent to your bungie.net account. Click the link in the message to verify your PSN id."
+  else return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app!"
+}
+
+
 /** Routes */
 routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
+routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyAccountConfirm)
 routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 module.exports = router
 

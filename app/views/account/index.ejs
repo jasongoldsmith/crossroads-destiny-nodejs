@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+</head>
+<body ng-app="travelerAdmin"  ng-controller="appController">
+<h3>Welcome, Guardian!</h3>
+
+<p>You signed up for Traveler, the Destiny Fireteam Finder mobile app!</p>
+
+<p>Please confirm that you are <%= psnId %> so that your account for the Traveler app can be verified.</p>
+
+<a href="/api/v1/auth/verifyconfirm/<%= token %>">Yes, that's me! I'm ready to start finding fire teams!</a> &nbsp;&nbsp;&nbsp;
+<a href="/api/v1/auth/about/">No, that's not me. But what is Traveler?</a>
+
+</body>
+
+</html>
