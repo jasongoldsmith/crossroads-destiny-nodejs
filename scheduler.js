@@ -10,6 +10,7 @@ var schedule = require('node-schedule');
 
 var hashPassword = "hashPassword"
 var deleteOldFullEvents = "deleteOldFullEvents"
+var deleteOldStaleEvents = "deleteOldStaleEvents"
 var destinyService = require('./app/service/destinyInterface')
 var authService = require('./app/service/authService')
 var notifService = require('./app/service/eventNotificationService')
@@ -23,6 +24,9 @@ switch(command) {
     break
   case deleteOldFullEvents:
     jobs.deleteOldFullEvents()
+    break
+  case deleteOldStaleEvents:
+    jobs.deleteOldStaleEvents()
     break
   case "momentTest":
     var date = new Date()

@@ -23,7 +23,7 @@ function login (req, res) {
             return callback(err, null)
           }
           if (!user) {
-            return callback(new helpers.errors.WError('PhoneNo or Password incorrect'), null)
+            return callback({error: "Password is incorrect"}, null)
           }
           outerUser = user
           callback(null, user)
@@ -37,7 +37,7 @@ function login (req, res) {
         if (err instanceof helpers.errors.ValidationError) {
           req.routeErr = err
         } else {
-          req.routeErr = new helpers.errors.WError(err, 'the input auth combination is not valid')
+          req.routeErr = {error: "the input auth combination is not valid"}
         }
         return routeUtils.handleAPIError(req, res, req.routeErr)
       }
@@ -62,9 +62,9 @@ function boLogin (req, res) {
           var userType = JSON.parse(JSON.stringify(user)).userType
           console.log("userType from passport "+userType)
           if (!user) {
-            return callback(new helpers.errors.WError('PhoneNo or Password incorrect'))
+            return callback({error: "Password is incorrect"}, null)
           }else if(user && userType != 'admin'){
-            return callback(new helpers.errors.WError('User Not Authorized'))
+            return callback({error: "User is not authorized"}, null)
           }
           outerUser = user
           callback(null, user)
@@ -78,7 +78,7 @@ function boLogin (req, res) {
         if (err instanceof helpers.errors.ValidationError) {
           req.routeErr = err
         } else {
-          req.routeErr = new helpers.errors.WError(err, 'the input auth combination is not valid')
+          req.routeErr = {error: "the input auth combination is not valid"}
         }
         return routeUtils.handleAPIError(req, res, req.routeErr)
       }
