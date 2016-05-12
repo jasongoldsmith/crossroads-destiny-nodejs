@@ -52,11 +52,11 @@ function getBungieMemberShipJson(memberShipId) {
  *
  * TBD - Change the from ID to traveler account instead of Harsha's account :-)
  * */
-function sendBungieMessage(displayName,username,membershipType,callback){
+function sendBungieMessage(gamerId, username, membershipType, callback){
 
   utils.async.waterfall([
       function (callback) {
-        var destinySearchURL = utils.config.bungieDestinySearchByPSNURL.replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(membershipType)).replace(/%MEMBERSHIPID%/g, displayName);
+        var destinySearchURL = utils.config.bungieDestinySearchByPSNURL.replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(membershipType)).replace(/%MEMBERSHIPID%/g, gamerId);
         bungieGet(destinySearchURL,callback)
       },
       function (destinyProfile, callback) {
@@ -86,7 +86,7 @@ function sendBungieMessage(displayName,username,membershipType,callback){
           utils.l.d("bungieMemberShipId=" + bungieMemberShipId + "---&&--- psnDisplayName=" + psnDisplayName)
           var msgBody = {
             "membersToId": ["13236427", bungieMemberShipId],
-            "body": getMessageBody(utils.config.hostUrl(), displayName, token, username)
+            "body": getMessageBody(utils.config.hostUrl(), gamerId, token, username)
           }
           bungiePost(convUrl, msgBody, token,bungieMemberShipId, callback)
         }else{
@@ -134,7 +134,7 @@ function bungiePost(url,msgBody,token,bungieMemberShipId,callback){
     json:true
   }, function(error, response, bungieProfile) {
     if(error) {
-      utils.l.s("Error getting membership"+error)
+      utils.l.s("Error posting to bungie::"+error)
       return callback(error, null)
     } else {
       utils.l.d("response html "+JSON.stringify(bungieProfile))

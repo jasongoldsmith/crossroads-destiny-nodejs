@@ -209,7 +209,30 @@ function getSignupMessage(user){
   else return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app!"
 }
 
-
+function resetPassword(req,res){
+  var userName = req.body.userName
+  var newPassword = passwordHash.generate(req.body.passWord)
+  console.log("resetPassword::"+userName)
+  utils.async.waterfall([
+      function (callback) {
+        models.user.getUserByData({userName:userName},callback)
+      },
+      function(user,callback){
+        if(user) {
+          user.passWord = newPassword
+          models.user.save(user, callback)
+        }else callback({error:"Invalid username. Please provide a valid username"})
+      }
+    ],
+    function (err, updatedUser) {
+      if (err) {
+        req.routeErr = err
+        return routeUtils.handleAPIError(req, res, err)
+      }
+      return routeUtils.handleAPISuccess(req, res, updatedUser)
+    }
+  )
+}
 /** Routes */
 routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
@@ -217,5 +240,6 @@ routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
 routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyAccountConfirm)
 routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
+routeUtils.rGetPost(router, '/resetPassword', 'resetPassword', resetPassword, resetPassword)
 module.exports = router
 

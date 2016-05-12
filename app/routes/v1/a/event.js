@@ -49,9 +49,9 @@ function list(req, res) {
 	utils.l.d("Event list request")
 	listEvents(req.user, function(err, events) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err, err)
+			routeUtils.handleAPIError(req, res, err, err,{utm_dnt:"list"})
 		} else {
-			routeUtils.handleAPISuccess(req, res, events)
+			routeUtils.handleAPISuccess(req, res, events,{utm_dnt:"list"})
 		}
 	})
 }
@@ -60,9 +60,9 @@ function listAll(req, res) {
 	utils.l.d("Event listAll request")
 	listEvents(null, function(err, events) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err, err)
+			routeUtils.handleAPIError(req, res, err, err,{utm_dnt:"listAll"})
 		} else {
-			routeUtils.handleAPISuccess(req, res, events)
+			routeUtils.handleAPISuccess(req, res, events,{utm_dnt:"listAll"})
 		}
 	})
 }
@@ -183,8 +183,8 @@ function sendPushNotificationForJoin(event) {
 
 routeUtils.rPost(router, '/create', 'create', create)
 routeUtils.rPost(router, '/join', 'join', join)
-routeUtils.rGet(router, '/list', 'list', list)
-routeUtils.rGet(router, '/listAll', 'listAll', listAll)
+routeUtils.rGet(router, '/list', 'list', list,{utm_dnt:"androidAppVersion"})
+routeUtils.rGet(router, '/listAll', 'listAll', listAll,{utm_dnt:"androidAppVersion"})
 routeUtils.rPost(router, '/leave', 'leave', leave)
 routeUtils.rPost(router, '/delete', 'remove', remove)
 module.exports = router

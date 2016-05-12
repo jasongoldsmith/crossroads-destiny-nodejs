@@ -18,6 +18,7 @@ function signupUser(userData, callback) {
 								utils.l.d("messageResponse::token===" + messageResponse.token)
 								newuser.psnVerified = "INITIATED"
 								newuser.psnToken = messageResponse.token
+								newuser.bungieMemberShipId = messageResponse.bungieMemberShipId
 							} else {
 								newuser.psnVerified = "FAILED_INITIATION"
 							}

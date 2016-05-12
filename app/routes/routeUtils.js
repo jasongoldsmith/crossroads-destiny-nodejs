@@ -138,7 +138,7 @@ function getTrackingKeyFromRequest(req, suffix) {
   return trackingKey;
 }
 
-function addTrackingKeyBaseToRequest(trackingKeyBase) {
+function addTrackingKeyBaseToRequest(trackingKeyBase,trackData) {
   return function(req, res, next) {
     if (utils._.isFunction(trackingKeyBase)) {
       req.trackingKeyBase = trackingKeyBase(req);
@@ -148,34 +148,39 @@ function addTrackingKeyBaseToRequest(trackingKeyBase) {
 
     var trackingKey = getTrackingKeyFromRequest(req, RequestTypeMap.REQUEST);
     // Track to mixpanel
-    helpers.m.trackRequest(trackingKey, {}, req, req.user);
-    return next();
+    if(trackData && trackData['utm_dnt']) {
+      utils.l.d('routeUtils::addTrackingKeyBaseToRequest::Skipping trackdata[utm_dnt]')
+      return next();
+    }else{
+      helpers.m.trackRequest(trackingKey, {}, req, req.user);
+      return next();
+    }
   }
 }
 
-function rGet(router, path, trackingKey, getFn) {
+function rGet(router, path, trackingKey, getFn,trackData) {
   router.route(path).
-    all(addTrackingKeyBaseToRequest(trackingKey))
+    all(addTrackingKeyBaseToRequest(trackingKey,trackData))
     .get(getFn);
 }
 
-function rPost(router, path, trackingKey, middlewareFn, postFn) {
+function rPost(router, path, trackingKey, middlewareFn, postFn,trackData) {
   if (!postFn) {
     postFn = middlewareFn;
     router.route(path).
-      all(addTrackingKeyBaseToRequest(trackingKey))
+      all(addTrackingKeyBaseToRequest(trackingKey,trackData))
       .post(postFn);
   } else {
     router.route(path).
-      all(addTrackingKeyBaseToRequest(trackingKey))
+      all(addTrackingKeyBaseToRequest(trackingKey,trackData))
       .post(middlewareFn, postFn);
   }
 
 }
 
-function rGetPost(router, path, trackingKey, getFn, postFn) {
+function rGetPost(router, path, trackingKey, getFn, postFn,trackData) {
   router.route(path).
-    all(addTrackingKeyBaseToRequest(trackingKey))
+    all(addTrackingKeyBaseToRequest(trackingKey,trackData))
     .get(getFn)
     .post(postFn);
 }
