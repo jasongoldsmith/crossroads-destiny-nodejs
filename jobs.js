@@ -7,6 +7,7 @@ require('./app/startup/db')
 var config = require("config")
 var fs = require('fs')
 var passwordHash = require('password-hash')
+var moment = require('moment')
 
 function updatePassWord() {
 
@@ -67,7 +68,7 @@ function deleteOldStaleEvents() {
         var currentTime = new Date(moment.tz(Date.now(), 'America/Los_Angeles').format())
         utils._.forEach(events, function(event) {
           var launchDate = new Date(moment.tz(event.launchDate, 'America/Los_Angeles').format())
-          if(utils.format.compareDates(launchDate, currentTime) > 0) {
+          if(utils.format.compareDates(currentTime, launchDate) > 0) {
             utils.l.i("job archiving event: ", event)
             models.archiveEvent.createArchiveEvent(event, callback)
             utils.l.i("job removing event: ", event)
