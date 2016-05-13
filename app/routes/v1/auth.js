@@ -209,6 +209,48 @@ function getSignupMessage(user){
   else return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app!"
 }
 
+function requestResetPassword(req,res){
+  var psnId = req.body.psnId
+  console.log("requestResetPassword::"+psnId)
+  utils.async.waterfall([
+      function (callback) {
+        models.user.getUserByData({psnId:psnId},callback)
+      },
+      function(user,callback){
+        if(user) {
+          service.authService.requestResetPassword(user, callback)
+        }else callback({error:"Invalid psnId. Please provide a valid psnId"})
+      }
+    ],
+    function (err, updatedUser) {
+      if (err) {
+        req.routeErr = err
+        return routeUtils.handleAPIError(req, res, err)
+      }
+
+      if(updatedUser && utils._.isEmpty(updatedUser.passwordResetToken)){
+        return routeUtils.handleAPIError(req, res, {error:"Unable to process password reset request. Please try again later."})
+      }
+      return routeUtils.handleAPISuccess(req, res, updatedUser)
+    }
+  )
+}
+
+function resetPasswordLaunch(req,res){
+  var token = req.param("token")
+  models.user.getUserByData({passwordResetToken:token},function(err, user){
+    if(user){
+      res.render("account/resetPassword",{
+        token: token,
+        psnId: user.psnId,
+        userName: user.userName
+      })
+    }else{
+      res.render("account/error")
+    }
+  })
+}
+
 function resetPassword(req,res){
   var userName = req.body.userName
   var newPassword = passwordHash.generate(req.body.passWord)
@@ -227,9 +269,9 @@ function resetPassword(req,res){
     function (err, updatedUser) {
       if (err) {
         req.routeErr = err
-        return routeUtils.handleAPIError(req, res, err)
+        return res.render("Unable to reset password at this time. Please try again later.."+err)
       }
-      return routeUtils.handleAPISuccess(req, res, updatedUser)
+      return res.send("Congratulations your request has been processed successfully")
     }
   )
 }
@@ -240,6 +282,8 @@ routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
 routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyAccountConfirm)
 routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
-routeUtils.rGetPost(router, '/resetPassword', 'resetPassword', resetPassword, resetPassword)
+routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
+routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', requestResetPassword, requestResetPassword)
+routeUtils.rPost(router, '/resetPassword/:token', 'resetPassword', resetPassword, resetPassword)
 module.exports = router
 

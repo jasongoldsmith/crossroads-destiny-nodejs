@@ -18,7 +18,8 @@ var UserSchema = new Schema({
   flags: Mixed,
   psnVerified:{ type: String, default: "NOT_INITIATED"},
   psnToken:{ type: String},
-  bungieMemberShipId:{type: String}
+  bungieMemberShipId:{type: String},
+  passwordResetToken:{type: String}
 })
 
 UserSchema.index({'userName':1}, {'unique': true})

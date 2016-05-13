@@ -52,7 +52,7 @@ function getBungieMemberShipJson(memberShipId) {
  *
  * TBD - Change the from ID to traveler account instead of Harsha's account :-)
  * */
-function sendBungieMessage(gamerId, username, membershipType, callback){
+function sendBungieMessage(gamerId, membershipType, messageType,callback){
 
   utils.async.waterfall([
       function (callback) {
@@ -86,7 +86,7 @@ function sendBungieMessage(gamerId, username, membershipType, callback){
           utils.l.d("bungieMemberShipId=" + bungieMemberShipId + "---&&--- psnDisplayName=" + psnDisplayName)
           var msgBody = {
             "membersToId": ["13236427", bungieMemberShipId],
-            "body": getMessageBody(utils.config.hostUrl(), gamerId, token, username)
+            "body": getMessageBody(utils.config.hostUrl(), gamerId, token, messageType)
           }
           bungiePost(convUrl, msgBody, token,bungieMemberShipId, callback)
         }else{
@@ -144,9 +144,19 @@ function bungiePost(url,msgBody,token,bungieMemberShipId,callback){
   })
 }
 
-function getMessageBody(host,displayName,token,username){
-  var msg= utils.config.accountVerification.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token)
-  return msg
+function getMessageBody(host,displayName,token,messageType){
+  switch (messageType) {
+    case utils.constants.bungieMessageTypes.accountVerification:
+      var msg = utils.constants.bungieMessages.accountVerification.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token)
+      return msg
+      break;
+    case utils.constants.bungieMessageTypes.passwordReset:
+      var msg = utils.constants.bungieMessages.passwordReset.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token)
+      return msg
+      break;
+    default:
+      break;
+  }
 }
 
 function getBungieMembershipType(membershipType){

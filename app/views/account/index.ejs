@@ -1,24 +1,33 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 </head>
-<body ng-app="travelerAdmin"  ng-controller="appController">
-<div class="container jumbotron">
-  <h3 align="center">Welcome, Guardian!</h3>
-  <br/>
-  <div align="center">
-    <p><h5>You signed up for Traveler, the Destiny Fireteam Finder mobile app!</h5></p>
+<body ng-app="travelerAdmin" ng-controller="appController">
+    <div class="row">
+        <div class="col-md-3"></div>
 
-    <p><h5>Please confirm that you are <h4><span class="label label-info"><%= psnId %></span></h4> so that your account for the Traveler app can be verified.</h5></p>
-  </div>
-  <br/>
-  <p align="center">
-    <a class="btn btn-success" href="/api/v1/auth/verifyconfirm/<%= token %>">Yes, that's me! I'm ready to start finding fire teams!</a> &nbsp;&nbsp;&nbsp;
-    <a class="btn btn-warning" href="/api/v1/auth/about/">No, that's not me. But what is Traveler?</a>
-  </p>
-</div>
+        <div class="container jumbotron col-md-4">
+            <h3 align="center">Welcome, Guardian!</h3>
+            <br/>
+            <div>
+                <p><h5>You signed up for Traveler, the Destiny Fireteam Finder mobile app!</h5></p>
+                <div>
+                    <h5>
+                        Please confirm that you are <button class="btn btn-info badge"><%= psnId %></button> so that your
+                        account for the Traveler app can be verified.
+                    </h5>
+                </div>
+            </div>
+            <br/>
+
+            <div align="center">
+                <a class="btn btn-success" href="/api/v1/auth/verifyconfirm/<%= token %>">Yes, that's me! I'm ready to start finding fire teams!</a> &nbsp;&nbsp;&nbsp;
+                <a class="btn btn-warning" href="/api/v1/auth/about/">No, that's not me. But what is Traveler?</a>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

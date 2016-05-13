@@ -207,6 +207,16 @@ var bungieMemberShipType = {
   XBOX:1
 }
 
+var bungieMessageTypes = {
+  accountVerification:'accountVerification',
+  passwordReset:'passwordReset'
+}
+
+var bungieMessages = {
+  accountVerification:'Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app! Click the link below to verify your PSN id. %HOST%/api/v1/auth/verify/%TOKEN%',
+  passwordReset:'Greetings from TRVLR! We received a request to reset your password. To reset your password please follow the link: %HOST%/api/v1/auth/resetPassword/%TOKEN% If you did not make this request, please let us know and disregard this message..'
+}
+
 var eventNotificationTrigger = {
   launchUpcomingEvents:'launchUpcomingEvents',
   launchEventStart:'launchEventStart',
@@ -228,5 +238,7 @@ module.exports = {
   eventLaunchStatusList: eventLaunchStatusList,
   bungieMemberShipType:bungieMemberShipType,
   eventNotificationTrigger: eventNotificationTrigger,
-  userNotificationTrigger: userNotificationTrigger
+  userNotificationTrigger: userNotificationTrigger,
+  bungieMessageTypes: bungieMessageTypes,
+  bungieMessages: bungieMessages
 };
