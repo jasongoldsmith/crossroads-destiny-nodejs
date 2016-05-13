@@ -1,6 +1,6 @@
 
 module.exports = {
-  hostName: 'https://feighty.herokuapp.com',
+  hostName: 'https://travelerbackendproduction.herokuapp.com',
   enableNewRelic: true,
   portNum: -1,
   s3: {
