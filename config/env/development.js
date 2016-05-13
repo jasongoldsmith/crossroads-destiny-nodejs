@@ -1,10 +1,11 @@
 
 module.exports = {
-  hostName: 'http://localhost',
+  hostName: 'https://travelerbackend.herokuapp.com',
   devMode: true,
-  portNum: 3000,
+  portNum: -1,
   enforceSSL: false,
   showErrorStacktrace: true,
   sendEmail: true,
-  logLevel: 'debug'
+  logLevel: 'debug',
+  enableBungieIntegration: true
 };

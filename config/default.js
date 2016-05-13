@@ -69,7 +69,7 @@ var defaults = {
   placeholder_versionString: "VERSIONSTRING",
   upgradeTitle: process.env.upgradeTitle,
   googleAPIKey: process.env.googleAPIKey,
-  enableBungieIntegration: true,
+  enableBungieIntegration: false,
   bungieAPIToken:"f091c8d36c3c4a17b559c21cd489bec0",
   bungieCSRFToken:"4410636698596642863",
   bungieCookie:"__cfduid=d7fe261f69963d40917feac11cad26a761459446069; bungled=4410636698596642863; bungledid=B8wEl0Lj8t9MrnvjhpYjqbg3B+uli1nTCAAA; bungles=WebView=False&mt=2&mi=4611686018459049393&ci=2305843009374775013; bungleab=gm=1; sto-id-sg_www.bungie.net=OLAKHPAK; _gat=1; bungleRedir=L2VuL0xlZ2VuZC9BZHZpc29ycy8yLzQ2MTE2ODYwMTg0NTkwNDkzOTMvMjMwNTg0MzAwOTM3NDc3NTAxMw==; bungleatk=wa=.mKrssVSL5cDBhnVA-pND0kNlhrmDCHVQ.0I0XmyGqrgAAAAJa2lsGorE5g2fmQkBMXCAGDdFX-W9br7wUKWEVAxePG8tpvFTKdFie9lqE6fgJbfiC0XHRQUCJOHwm9WN3O5xPooYGF9.fST2yCZd2vi63rnQSiLQa.jiMvfwjEg0AP8gQ.1nv4C4HJH8IzVBkXuyr5BKc9HGfjD.D.ZTpntIJ4GLQsRFQrRAgF249F.xaUlzlcnneOXloGJ.TznuxPlSDP2Rc8i5--WbSbzxzsKE9nvKfRQ7F2abUY.n-dlBqgGB815VNXyt6y4eGsAzcA1g3YV4VqgQPCvBLgVDD0ZzpU_&tk=YAAAAEJWeM.ZS5Ll8SrMWCwVYVpCALj371Lz4nZkJF3X1DNoFIW-xGP0oxFJevHrH6.jqd0uQbxMexdabGJT2PcopUOzVqt16JiSzH.TtZpyGhL0mdrsEB-m83fi61KIYXtlVCAAAAAZQ-cHMNhUwqdZkEh5GmJurKzN.cQyXIlM7jb5FFFm-A__; bungleme=13236427; bungleloc=lc=en&lcin=false; bunglefrogblastventcore=1463091914; _ga=GA1.2.883620681.1459446075",
