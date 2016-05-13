@@ -9,5 +9,5 @@ module.exports = {
     momentsBucket: "feighty-moments",
   },
   awsProfileImageUrl: "http://feighty-images.s3.amazonaws.com/",
-  enableBungieIntegration: false,
+  enableBungieIntegration: false
 };
