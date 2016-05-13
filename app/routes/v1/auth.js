@@ -39,7 +39,7 @@ function login (req, res) {
         } else {
           req.routeErr = {error: "the input auth combination is not valid"}
         }
-        return routeUtils.handleAPIError(req, res, req.routeErr)
+        return routeUtils.handleAPIError(req, res, req.routeErr,req.routeErr)
       }
       routeUtils.handleAPISuccess(req, res, {value: outerUser})
     }
@@ -80,7 +80,7 @@ function boLogin (req, res) {
         } else {
           req.routeErr = {error: "the input auth combination is not valid"}
         }
-        return routeUtils.handleAPIError(req, res, req.routeErr)
+        return routeUtils.handleAPIError(req, res, req.routeErr,req.routeErr)
       }
 
       routeUtils.handleAPISuccess(req, res, {value: outerUser})
@@ -143,7 +143,7 @@ function signup(req, res) {
     function (err, user) {
       if (err) {
         req.routeErr = err
-        return routeUtils.handleAPIError(req, res, err)
+        return routeUtils.handleAPIError(req, res, err,err)
       }
       helpers.cookies.setCookie("foo", "bar", res)
       helpers.m.setUser(user)
@@ -193,7 +193,7 @@ function verifyAccountConfirm(req,res){
     }
   ],
     function (err, successResp){
-      if(err) routeUtils.handleAPIError(req,res,err)
+      if(err) routeUtils.handleAPIError(req,res,err,err)
       else routeUtils.handleAPISuccess(req, res, successResp)
     }
   )
@@ -224,14 +224,13 @@ function requestResetPassword(req,res){
     ],
     function (err, updatedUser) {
       if (err) {
-        req.routeErr = err
-        return routeUtils.handleAPIError(req, res, err)
+        return routeUtils.handleAPIError(req, res, err,err)
+      }else  if(updatedUser && utils._.isEmpty(updatedUser.passwordResetToken)){
+        var error =  {error:"Unable to process password reset request. Please try again later."}
+        return routeUtils.handleAPIError(req, res,error,error)
+      }else{
+        return routeUtils.handleAPISuccess(req, res, updatedUser)
       }
-
-      if(updatedUser && utils._.isEmpty(updatedUser.passwordResetToken)){
-        return routeUtils.handleAPIError(req, res, {error:"Unable to process password reset request. Please try again later."})
-      }
-      return routeUtils.handleAPISuccess(req, res, updatedUser)
     }
   )
 }
