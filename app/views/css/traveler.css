@@ -46,3 +46,92 @@ th {
   margin-bottom: 0; /* optional */
 }
 
+body{
+  background-color: #18303a;
+}
+
+.appTitle{
+  padding-top: 34px;
+  font-family: HelveticaNeue-Bold;
+  font-size: 14px;
+  color: white;
+  line-height: 14px;
+  letter-spacing: -0.2px;
+}
+
+.msgLarge{
+  font-family: HelveticaNeue;
+  font-size: 20px;
+  color: white;
+  line-height: 28px;
+  width: 355px;
+}
+
+.labelSm{
+  font-family: HelveticaNeue;
+  font-size: 10px;
+  color: white;
+  line-height: 10px;
+  letter-spacing: 1px;
+  padding-top: 10px;
+}
+
+.txtSm{
+  font-family: HelveticaNeue;
+  font-size: 14px;
+  color: white;
+  line-height: 14px;
+  letter-spacing: 1px;
+  border-left: 0px;
+  border-right: 0px;
+  border-top: 0px;
+  border-bottom: 1px;
+  border-style: dotted;
+  border-color: #ffffff;
+  background-color: #000000;
+  height: 14px;
+  width: 160px;
+  padding-top: 10px;
+}
+
+.pad{
+  padding-top: 38px;
+}
+.padSm{
+  padding-top: 10px;
+}
+.imgLogo{
+  padding-top: 54px;
+  padding-bottom: 26px;
+}
+
+.container{
+  height:66px;
+  width:375px;
+  background-color:#000000;
+}
+
+.lockContainer{
+  height: 66px;
+  width: 66px;
+  float:left;
+}
+
+.formContainer{
+  height: 66px;
+  width: 285px;
+  float:left;
+}
+
+.btnBlue{
+  font-family: HelveticaNeue-Bold;
+  font-size: 14px;
+  color: white;
+  border-left: 0px;
+  border-right: 0px;
+  border-top: 0px;
+  border-bottom: 0px;
+  background-color: #0086D0;
+  height: 50px;
+  width: 375px;
+}
