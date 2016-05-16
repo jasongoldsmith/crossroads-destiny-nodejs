@@ -124,7 +124,7 @@ function createEvent(data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				sendPushNotificationForJoin(event)
+				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event)
 				service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(event)
 				callback(null, event)
 			}
@@ -141,9 +141,7 @@ function joinEvent(data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				if(event.launchStatus == "now") {
-					sendPushNotificationForJoin(event)
-				}
+				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event)
 				callback(null, event)
 			}
 		], callback)
@@ -172,10 +170,6 @@ function deleteEvent(data, callback) {
 
 function sendPushNotificationForLeave(event, user) {
   helpers.pushNotification.sendPushNotification(event, utils.constants.eventAction.leave, user)
-}
-
-function sendPushNotificationForJoin(event) {
-  helpers.pushNotification.sendPushNotification(event, utils.constants.eventAction.join)
 }
 
 routeUtils.rPost(router, '/create', 'create', create)

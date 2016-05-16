@@ -19,6 +19,24 @@ function sendPushNotificationForNewCreate(event) {
 	})
 }
 
+function sendPushNotificationForJoin(event) {
+	utils.async.waterfall([
+		function (callback) {
+			models.notificationTrigger.getByQuery({triggerName: "Join"}, utils.firstInArrayCallback(callback))
+		},
+		function (notificationTrigger, callback) {
+			notificationTriggerService.handleJoinEvent(event, notificationTrigger, callback)
+		}
+	], function (err, updatedEvent) {
+		if (err) {
+			utils.l.s("Error in sendPushNotificationForJoin::"+err+"::"+JSON.stringify(updatedEvent))
+		} else {
+			utils.l.d("sendPushNotificationForJoin successful::", updatedEvent)
+		}
+	})
+}
+
 module.exports ={
-	sendPushNotificationForNewCreate: sendPushNotificationForNewCreate
+	sendPushNotificationForNewCreate: sendPushNotificationForNewCreate,
+	sendPushNotificationForJoin: sendPushNotificationForJoin
 }

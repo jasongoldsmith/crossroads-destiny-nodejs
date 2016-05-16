@@ -253,9 +253,16 @@ function handleNewEvents(event, notifTrigger, callback) {
 function handleJoinEvent(event, notifTrigger, callback) {
   utils.l.d("Running trigger for event join", event)
   if(notifTrigger.isActive) {
-    if(event.players.length > 1 && event.players.length < event.maxPlayers) {
-
+    if(event.launchStatus == utils.constants.eventLaunchStatusList.now &&
+      event.players.length > 1 && event.players.length < event.maxPlayers) {
+      utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event))
+      event.notifStatus.push("Join")
+      models.event.update(event,callback)
+    } else {
+      return callback(null, null)
     }
+  } else {
+    return callback(null, {message: "handleJoinEvent Trigger is not active"})
   }
 }
 
@@ -285,5 +292,6 @@ module.exports ={
   handleNotificationTrigger:handleNotificationTrigger,
   handleUpcomingEvents: handleUpcomingEvents,
   launchEventStart:launchEventStart,
-  handleNewEvents: handleNewEvents
+  handleNewEvents: handleNewEvents,
+  handleJoinEvent: handleJoinEvent
 }
