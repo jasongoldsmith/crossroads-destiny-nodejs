@@ -9,15 +9,15 @@ var models = require('../models')
 
 PushNotification.init({
   apn: {
-    //cert: (process.env.NODE_ENV == 'production' ? path.resolve('./keys/prod/cert.pem'): path.resolve('./keys/cert.pem')),
-    //key:  (process.env.NODE_ENV == 'production' ? path.resolve('./keys/prod/key.pem'): path.resolve('./keys/key.pem')),
-    //production: (process.env.NODE_ENV === 'production'),
-    //gateway: (process.env.NODE_ENV == 'production' ? "gateway.push.apple.com": "gateway.sandbox.push.apple.com")
+    cert: (process.env.NODE_ENV == 'production' ? path.resolve('./keys/prod/cert.pem'): path.resolve('./keys/cert.pem')),
+    key:  (process.env.NODE_ENV == 'production' ? path.resolve('./keys/prod/key.pem'): path.resolve('./keys/key.pem')),
+    production: (process.env.NODE_ENV === 'production'),
+    gateway: (process.env.NODE_ENV == 'production' ? "gateway.push.apple.com": "gateway.sandbox.push.apple.com")
 
-    cert: path.resolve('./keys/prod/cert.pem'),
-    key:  path.resolve('./keys/prod/key.pem'),
-    production: true,
-    gateway: "gateway.push.apple.com"
+    //cert: path.resolve('./keys/prod/cert.pem'),
+    //key:  path.resolve('./keys/prod/key.pem'),
+    //production: true,
+    //gateway: "gateway.push.apple.com"
   },
   gcm: {
     apiKey: utils.config.googleAPIKey
