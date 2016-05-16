@@ -155,8 +155,8 @@ function leaveEvent(data, callback) {
 			},
 			function(event, callback) {
         models.user.getById(data.player, function(err, user) {
-          if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event) && event.launchStatus == "now") {
-            sendPushNotificationForLeave(event, user)
+          if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event)) {
+						service.eventBasedPushNotificationService.sendPushNotificationForLeave(event, user)
           }
           callback(null, event)
         })
@@ -166,10 +166,6 @@ function leaveEvent(data, callback) {
 
 function deleteEvent(data, callback) {
 	models.event.deleteEvent(data, callback)
-}
-
-function sendPushNotificationForLeave(event, user) {
-  helpers.pushNotification.sendPushNotification(event, utils.constants.eventAction.leave, user)
 }
 
 routeUtils.rPost(router, '/create', 'create', create)

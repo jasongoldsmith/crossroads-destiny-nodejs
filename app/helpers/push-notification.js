@@ -25,7 +25,7 @@ PushNotification.init({
 })
 
 function sendSinglePushNotification(data, alert, installation) {
-  utils.l.d("sending notificaiont installation::"+installation+"\nalert::"+alert)
+  utils.l.d("sending notification installation::"+installation+"\nalert::"+alert)
   var dataObj = null
 
   /* We need to do this check as we have a different payload for player messages
@@ -68,51 +68,6 @@ function sendMultiplePushNotificationsForUsers(notification, data) {
   })
 }
 
-function sendPushNotification(event, eventType, user) {
-  if(utils._.isValidNonBlank(event.creator)) {
-    sendPushNotificationToCreator(event, eventType, user)
-  }
-}
-
-function sendPushNotificationToCreator(event, eventType, user) {
-  models = require('../models')
-  models.installation.getInstallationByUser(event.creator, function(err, installation) {
-    if(err) return
-    if(eventType == utils.constants.eventAction.join && event.players.length > 1 && event.players.length < event.maxPlayers) {
-      var joinMessage = getMessage(event.eType, event.players[event.players.length - 1], eventType)
-      utils.l.d("sending join push notification to creator")
-      sendSinglePushNotification(event, joinMessage, installation)
-    } else if(eventType == utils.constants.eventAction.leave) {
-      var leaveMessage = getMessage(event.eType, user, eventType)
-      utils.l.d("sending leave push notification to creator")
-      sendSinglePushNotification(event, leaveMessage, installation)
-    }
-  })
-}
-
-function getMessage(activity, addedPlayer, eventType) {
-  if(utils._.isInvalid(activity) || utils._.isInvalid(addedPlayer)) {
-    return ""
-  }
-  var eventName = getEventName(activity)
-  var message = ""
-  if(eventType == utils.constants.eventAction.join) {
-    message = "psnId has joined eventName"
-  } else if(eventType == utils.constants.eventAction.leave) {
-    message = "psnId has left eventName"
-  }
-  return message.replace("psnId", addedPlayer.psnId).replace("eventName", eventName)
-}
-
-function getEventName(activity) {
-  var eventName = (utils._.compact([activity.aSubType, activity.aDifficulty])).join(" - ")
-  if (utils._.isValidNonBlank(activity.aCheckpoint)) {
-    eventName += ", " + activity.aCheckpoint
-  }
-  console.log("event name: "+eventName)
-  return eventName
-}
-
 function stripEventObject(event) {
   if(utils._.isInvalidOrBlank(event)) {
     return null
@@ -140,6 +95,5 @@ function stripPlayerObject(player) {
 module.exports = {
   sendSinglePushNotification: sendSinglePushNotification,
   sendMultiplePushNotifications: sendMultiplePushNotifications,
-  sendPushNotification: sendPushNotification,
   sendMultiplePushNotificationsForUsers: sendMultiplePushNotificationsForUsers
 }
