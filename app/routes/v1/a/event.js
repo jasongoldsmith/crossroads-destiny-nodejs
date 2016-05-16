@@ -124,11 +124,8 @@ function createEvent(data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				if(event.launchStatus == "now") {
-					sendPushNotificationForJoin(event)
-				} else {
-					service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(event)
-				}
+				sendPushNotificationForJoin(event)
+				service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(event)
 				callback(null, event)
 			}
 		], callback)

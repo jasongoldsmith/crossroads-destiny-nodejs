@@ -202,12 +202,14 @@ function launchUpComingReminders(notifTrigger){
             if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
               var raidLf2mfNotif = utils._.find(notifTrigger.notifications,{"name":"RaidEventLf2mNotification"})
               var eventLf1mNotif = utils._.find(notifTrigger.notifications,{"name":"EventLf1mNotification"})
-              if(event.eType.aType== "Raid" && ((event.maxPlayers - event.players.length) ==2) && !hasNotifStatus(event.notifStatus,"RaidEventLf2mNotification") ){
+              if(event.eType.aType== "Raid" && ((event.maxPlayers - event.players.length) ==2)
+                && !hasNotifStatus(event.notifStatus,"RaidEventLf2mNotification") ){
                 createNotificationAndSend(event,raidLf2mfNotif)
                 event.notifStatus.push("RaidEventLf2mNotification")
               }
 
-              if((event.maxPlayers - event.players.length) ==1 && !hasNotifStatus(event.notifStatus,"EventLf1mNotification") ){
+              if((event.maxPlayers - event.players.length) ==1
+                && !hasNotifStatus(event.notifStatus,"EventLf1mNotification") ){
                 createNotificationAndSend(event,eventLf1mNotif)
                 event.notifStatus.push("EventLf1mNotification")
               }
@@ -232,14 +234,28 @@ function handleNewEvents(event, notifTrigger, callback) {
   utils.l.d("Running trigger handleNewEvents for event", event)
   if(notifTrigger.isActive) {
     var newEventNotif = null
-    if (event.launchStatus == "upcoming") {
+    if (event.launchStatus == utils.constants.eventLaunchStatusList.upcoming
+      && !hasNotifStatus(event.notifStatus,"NewCreateForUpcoming")) {
       newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NewCreateForUpcoming"})
       event.notifStatus.push("NewCreateForUpcoming")
+    } else if (event.launchStatus == utils.constants.eventLaunchStatusList.now
+      && !hasNotifStatus(event.notifStatus,"NoSignupNotification")) {
+      newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NoSignupNotification"})
+      event.notifStatus.push("NoSignupNotification")
     }
     createNotificationAndSend(event, newEventNotif)
     models.event.update(event,callback)
   } else {
     return callback(null, {message: "handleNewEvents Trigger is not active"})
+  }
+}
+
+function handleJoinEvent(event, notifTrigger, callback) {
+  utils.l.d("Running trigger for event join", event)
+  if(notifTrigger.isActive) {
+    if(event.players.length > 1 && event.players.length < event.maxPlayers) {
+
+    }
   }
 }
 

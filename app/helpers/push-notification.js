@@ -72,49 +72,6 @@ function sendPushNotification(event, eventType, user) {
   if(utils._.isValidNonBlank(event.creator)) {
     sendPushNotificationToCreator(event, eventType, user)
   }
-
-  if(eventType == utils.constants.eventAction.join && event.players.length == 1) {
-    sendPushNotificationforNewCreate(event)
-  }
-
-/*  if(event.players.length == event.maxPlayers && eventType == utils.constants.eventAction.join) {
-    utils.l.d("sending push notification to creator for maximum players met")
-    sendPushNotificationForEventStatus(event, "max")
-
-    // removing the creator of the event from the list, as we already have sent a push to creator
-    utils._.remove(event.players, {
-      _id: event.creator._id
-    })
-
-    sendPushNotificationToAllPlayers(event)
-
-    /!*
-    Adding back the creator as it was sending a wrong http response
-    unshift adds back the creator to the top of the list
-     *!/
-    event.players.unshift(event.creator)
-  }*/
-}
-
-//TODO: Refactor this and sendPushNotification method to have common implementation
-function sendPushNotificationForScheduler(event) {
-  utils.l.d("sendPushNotificationForScheduler::sending push notification for event : " + event)
-
-  if(event.players.length == 1) {
-    sendPushNotificationforNewCreate(event)
-  }
-
-  if(event.players.length == event.maxPlayers) {
-    utils.l.d("sendPushNotificationForScheduler::sending push notification to creator for maximum players met")
-    sendPushNotificationForEventStatus(event, "max")
-
-    // removing the creator of the event from the list, as we already have sent a push to creator
-    utils._.remove(event.players, {
-      _id: event.creator._id
-    })
-
-    sendPushNotificationToAllPlayers(event)
-  }
 }
 
 function sendPushNotificationToCreator(event, eventType, user) {
@@ -131,87 +88,6 @@ function sendPushNotificationToCreator(event, eventType, user) {
       sendSinglePushNotification(event, leaveMessage, installation)
     }
   })
-}
-
-function sendPushNotificationForEventStatus(event, eventStatus) {
-  models = require('../models')
-  models.installation.getInstallationByUser(event.creator, function(err, installation) {
-    if(err) return
-    sendSinglePushNotification(event, getMinOrMaxPlayersJoinedMessage(event, eventStatus), installation)
-  })
-
-}
-
-function sendPushNotificationforNewCreate(event) {
-  utils.async.waterfall([
-    function (callback) {
-      models.user.getByQuery({clanId: event.creator.clanId}, function(err, users) {
-        if(err) {
-          return callback(err, null)
-        } else {
-          // removing the creator as we don't want to send a push to the creator again
-          utils._.remove(users, {
-            _id: event.creator._id
-          })
-          callback(null, users)
-        }
-      })
-    },
-    function (users, callback) {
-      if(users.length >= 1) {
-        utils.l.d("sending out a push to all players in the clan for a new event created", users)
-      }
-      utils.async.map(users, models.installation.getInstallationByUser, function(err, installations) {
-        var messageTemplate = "psnId is looking for playersNeeded more for eventName"
-        var eventName = getEventName(event.eType)
-        var playersNeeded = event.maxPlayers - 1
-
-        var message = messageTemplate
-          .replace("psnId", event.creator.psnId)
-          .replace("eventName", eventName)
-          .replace("playersNeeded", "" + playersNeeded)
-        sendMultiplePushNotifications(installations, event, message)
-        callback(null, users)
-      })
-    }
-  ], function(err, users) {
-    if(err) {
-      utils.l.d({ error: err })
-    }
-  })
-}
-
-function sendPushNotificationToAllPlayers(event) {
-  models = require('../models')
-  var messageTemplate = "Your fireteam is ready for eventName. Join on psnId"
-  var message = messageTemplate
-    .replace("psnId", event.creator.psnId)
-    .replace("eventName", getEventName(event.eType))
-  utils.async.map(event.players, models.installation.getInstallationByUser, function(err, installations) {
-    sendMultiplePushNotifications(installations, event, message)
-  })
-}
-
-function getMinOrMaxPlayersJoinedMessage(event, eventStatus) {
-  var playernames = (utils._.compact(utils._.map(event.players, function(player) {
-    if(player.psnId != event.creator.psnId) {
-      return player.psnId
-    }
-  }))).join(", ")
-
-  var eventName = getEventName(event.eType)
-  var messageTemplate = ""
-  var playersNeeded = event.maxPlayers - event.players.length
-  if (eventStatus == "min") {
-    messageTemplate = "psnId needs playersNeeded more for eventName. View details..."
-  } else if(eventStatus == "max") {
-    messageTemplate = "Your fireteam is ready for eventName. psnId will be joining you soon"
-  }
-
-  return messageTemplate
-    .replace("psnId", playernames)
-    .replace("eventName", eventName )
-    .replace("playersNeeded", "" + playersNeeded)
 }
 
 function getMessage(activity, addedPlayer, eventType) {
@@ -265,6 +141,5 @@ module.exports = {
   sendSinglePushNotification: sendSinglePushNotification,
   sendMultiplePushNotifications: sendMultiplePushNotifications,
   sendPushNotification: sendPushNotification,
-  sendPushNotificationForScheduler: sendPushNotificationForScheduler,
   sendMultiplePushNotificationsForUsers: sendMultiplePushNotificationsForUsers
 }
