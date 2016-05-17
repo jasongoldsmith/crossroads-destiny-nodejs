@@ -61,6 +61,7 @@ function getPayload(event, notificationResponse) {
     notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
     eventId: utils._.isValidNonBlank(event) ? event._id : null,
     eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
+    eventName: utils._.isValidNonBlank(event) ? event.eType.aSubType : null,
     isTrackable: true
   }
   utils.l.d("payload", payload)
