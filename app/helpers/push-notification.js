@@ -24,28 +24,16 @@ PushNotification.init({
   }
 })
 
-function sendSinglePushNotification(data, alert, installation) {
+function sendSinglePushNotification(data, alert, notificationResponse, installation) {
   utils.l.d("sending notification installation::"+installation+"\nalert::"+alert)
-  var dataObj = null
-
-  /* We need to do this check as we have a different payload for player messages
-  TODO: Refactor this code when push-notification payload is refactored
-   */
-  if(utils._.isValidNonBlank(data.event)) {
-    dataObj = {
-      event: stripEventObject(data.event),
-      playerMessage: data.playerMessage
-    }
-  } else {
-    dataObj = stripEventObject(data)
-  }
+  var payload = getPayload(data, notificationResponse)
 
   if(utils._.isInvalidOrBlank(installation) || utils._.isInvalidOrBlank(installation.deviceToken)
     || utils._.isInvalidOrBlank(installation.deviceType) ) {
     return
   }
   try {
-    PushNotification.prepare("test", alert, installation.unReadNotificationCount, sound, dataObj)
+    PushNotification.prepare("test", alert, installation.unReadNotificationCount, sound, payload)
     PushNotification.addTarget(installation.deviceType, installation.deviceToken)
     PushNotification.push()
   }catch(exp){
@@ -53,8 +41,8 @@ function sendSinglePushNotification(data, alert, installation) {
   }
 }
 
-function sendMultiplePushNotifications(installations, data, alert) {
-  utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, alert))
+function sendMultiplePushNotifications(installations, data, alert, notificationResponse) {
+  utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, alert, notificationResponse))
 }
 
 function sendMultiplePushNotificationsForUsers(notification, data) {
@@ -64,32 +52,19 @@ function sendMultiplePushNotificationsForUsers(notification, data) {
     + JSON.stringify({notification:notification.name,message:notification.message}))
 
   utils.async.map(notification.recipients, models.installation.getInstallationByUser, function(err, installations) {
-    sendMultiplePushNotifications(installations, data, notification.message)
+    sendMultiplePushNotifications(installations, data, notification.message, notification)
   })
 }
 
-function stripEventObject(event) {
-  if(utils._.isInvalidOrBlank(event)) {
-    return null
+function getPayload(event, notificationResponse) {
+  var payload = {
+    notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
+    eventId: utils._.isValidNonBlank(event) ? event._id : null,
+    eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
+    isTrackable: true
   }
-  var eventObj = event.toObject()
-  delete eventObj.__v
-  delete eventObj.notifStatus
-  delete eventObj.eType.__v
-  stripPlayerObject(eventObj.creator)
-  utils._.map(eventObj.players, function(player) {
-    stripPlayerObject(player)
-  })
-
-  utils.l.d("eventObj: ", eventObj)
-  return eventObj
-}
-
-function stripPlayerObject(player) {
-  delete player.date
-  delete player.uDate
-  delete player.__v
-  delete player.psnVerified
+  utils.l.d("payload", payload)
+  return payload
 }
 
 module.exports = {
