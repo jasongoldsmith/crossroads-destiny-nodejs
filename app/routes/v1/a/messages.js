@@ -40,12 +40,8 @@ function sendMessage(data, messageCreator, callback) {
 				utils.l.d("Event to send in payload: " + JSON.stringify(event))
 				if(utils._.isInvalidOrBlank(event)) {
 					return callback({ error: "no event found" }, null)
-				} else {
-					eventObj = {
-						event: event,
-						playerMessage: true
-					}
 				}
+				eventObj = event
 				models.user.getUserById(data, callback)
 			},
 			function (user, callback) {
@@ -55,7 +51,7 @@ function sendMessage(data, messageCreator, callback) {
 				var notificationObject = {
 					name : "messageFromPlayer"
 				}
-				var message = messageCreator.psnId + " from " + eventObj.event.eType.aSubType + ": "  + data.message
+				var message = messageCreator.psnId + " from " + eventObj.eType.aSubType + ": "  + data.message
 				helpers.pushNotification.sendSinglePushNotification(eventObj, message, notificationObject, installation)
 				return callback(null, { messageSent: data.message })
 			}
