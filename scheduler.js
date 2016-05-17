@@ -16,6 +16,35 @@ var authService = require('./app/service/authService')
 var notifService = require('./app/service/eventNotificationService')
 
 var command = process.argv[2]
+var event ='{'+
+  '"_id": "572ce86427efb203002ea3f6",'+
+  '"status": "can_join",'+
+  '"creator":'+
+  '{ "_id": "572ce20e27efb203002ea3d9",'+
+  '"date": "Fri May 06 2016 18:27:26 GMT+0000 (UTC)",'+
+  '"uDate": "Fri May 06 2016 18:30:33 GMT+0000 (UTC)",'+
+  '"userName": "unteins"'+
+  '},'+
+  '"eType":'+
+  '{ "_id": "56c647568162210300101953",'+
+  '"aType": "Raid"},'+
+  '"maxPlayers": "6",'+
+  '"updated": "Fri May 06 2016 19:13:11 GMT+0000 (UTC)",'+
+  '"created": "Fri May 06 2016 18:54:28 GMT+0000 (UTC)",'+
+  '"players":'+
+  '[ { "_id": "572ce20e27efb203002ea3d9",'+
+  '"date": "Fri May 06 2016 18:27:26 GMT+0000 (UTC)",'+
+  '"uDate": "Fri May 06 2016 18:30:33 GMT+0000 (UTC)",'+
+  '"userName": "unteins"'+
+  '},'+
+  '{ "_id": "572ce20e27efb20307745666",'+
+  '"date": "Fri May 06 2016 18:27:26 GMT+0000 (UTC)",'+
+  '"uDate": "Fri May 06 2016 18:30:33 GMT+0000 (UTC)",'+
+  '"userName": "unteins"'+
+  '}'+
+  '],'+
+  '"launchStatus": "now"'+
+  '}'
 
 
 switch(command) {
@@ -44,13 +73,18 @@ switch(command) {
 
     console.log("date of month::"+then.date())
     break;
-  case "bugieTest":
-    var response = destinyService.getBungieMemberShipJson("kaeden2010")
+  case "bugieMembership":
+    var response = destinyService.getBungieMemberShip("kaeden2010")
     console.log("final response="+response) //13172709 //sreeharshadasa //12269331
     break;
   case "bungieMsg1":
     console.log(destinyService.sendBungieMessage("kaeden2010"))
     break;
+  case "bungieGroups":
+    destinyService.listBungieGroupsJoined(12269331,null,1,function(err,groups,callback){
+      console.log("Got group::"+groups)
+      console.log("ANy group error::"+err)
+    })
   case "uuid":
     var listInt = [1,2,3,4,5,6,7,8,9,10]
 
@@ -87,35 +121,6 @@ switch(command) {
     break
   case "omitTest":
     var deleteKey = require('key-del')
-    var event ='{'+
-      '"_id": "572ce86427efb203002ea3f6",'+
-      '"status": "can_join",'+
-      '"creator":'+
-      '{ "_id": "572ce20e27efb203002ea3d9",'+
-        '"date": "Fri May 06 2016 18:27:26 GMT+0000 (UTC)",'+
-        '"uDate": "Fri May 06 2016 18:30:33 GMT+0000 (UTC)",'+
-        '"userName": "unteins"'+
-      '},'+
-      '"eType":'+
-      '{ "_id": "56c647568162210300101953",'+
-        '"aType": "Raid"},'+
-      '"maxPlayers": "6",'+
-      '"updated": "Fri May 06 2016 19:13:11 GMT+0000 (UTC)",'+
-      '"created": "Fri May 06 2016 18:54:28 GMT+0000 (UTC)",'+
-      '"players":'+
-        '[ { "_id": "572ce20e27efb203002ea3d9",'+
-          '"date": "Fri May 06 2016 18:27:26 GMT+0000 (UTC)",'+
-          '"uDate": "Fri May 06 2016 18:30:33 GMT+0000 (UTC)",'+
-          '"userName": "unteins"'+
-        '},'+
-          '{ "_id": "572ce20e27efb20307745666",'+
-            '"date": "Fri May 06 2016 18:27:26 GMT+0000 (UTC)",'+
-            '"uDate": "Fri May 06 2016 18:30:33 GMT+0000 (UTC)",'+
-            '"userName": "unteins"'+
-          '}'+
-        '],'+
-      '"launchStatus": "now"'+
-    '}'
     console.log("event"+event)
     var jsonEvent = JSON.parse(event)
     delete jsonEvent.creator.date
@@ -143,6 +148,14 @@ switch(command) {
     console.log("jsonEvent::removed"+JSON.stringify(jsonEvent))
 
     break
+  case "pullTest":
+    var jsonEvent = JSON.parse(event)
+    var players = utils._.map(jsonEvent.players,function(player){
+      return {"_id":player._id,"uDate":player.uDate}
+    })
+    console.log("event::"+JSON.stringify(players))
+
+    console.log("players::get"+JSON.stringify(utils._.get(jsonEvent.players,['_id','uDate'])))
   default:
     break;
 }

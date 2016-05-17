@@ -9,39 +9,43 @@ var cookieStr=utils.config.bungieCookie
 * 1. Make destinySearch call for displayname
 * 2. Using the result from search take membershipType and call GetBungieAccount API to bungie membershipcode
 * */
-function getBungieMemberShipJson(memberShipId) {
+function getBungieMemberShip(gamerId,membershipType,callback) {
   utils.async.waterfall([
       function (callback) {
-        var destinySearchURL ="https://www.bungie.net/Platform/Destiny/SearchDestinyPlayer/-1/"+memberShipId+"/"
+        var destinySearchURL = utils.config.bungieDestinySearchByPSNURL.replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(membershipType)).replace(/%MEMBERSHIPID%/g, gamerId);
         bungieGet(destinySearchURL,callback)
       },
       function (destinyProfile, callback) {
-        var respArr = JSON.parse(destinyProfile).Response
-        if(respArr[0]){
-          utils.l.d("Got response "+JSON.stringify(respArr[0]))
-          var memberShipType = respArr[0].membershipType
-          var memberShipId=  respArr[0].membershipId
+        var destinyProfileJSON = JSON.parse(destinyProfile)
+        if(destinyProfileJSON && destinyProfileJSON.Response){
+          var memberShipType = getBungieMembershipType(membershipType)
+          var memberShipId=  destinyProfileJSON.Response
 
           utils.l.d("Got destiny profile memberShipId="+memberShipId+" && memberShipType="+memberShipType)
-          var bungieAcctURL ="https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/"+memberShipType+"/"
+          //var bungieAcctURL ="https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/"+memberShipType+"/"
+          var bungieAcctURL =utils.config.bungieUserAccountURL+memberShipId+"/"+memberShipType+"/"
           bungieGet(bungieAcctURL,callback)
         }else{
           return callback(null,null)
         }
+      },
+      function (bungieAcct,callback) {
+        var bungieAcctJson =JSON.parse(bungieAcct)
+
+        if(bungieAcctJson && bungieAcctJson.Response && bungieAcctJson.Response.bungieNetUser) {
+          var bungieAcctResp = bungieAcctJson.Response
+          var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
+          var psnDisplayName = bungieAcctResp.bungieNetUser.psnDisplayName
+          var token = helpers.uuid.getRandomUUID()
+          //var convUrl = "https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true"
+          var convUrl = utils.config.bungieConvURL
+          utils.l.d("bungieMemberShipId=" + bungieMemberShipId + "---&&--- psnDisplayName=" + psnDisplayName)
+          callback(null,{bungieMemberShipId:bungieMemberShipId})
+        }else{
+          callback(null,null)
+        }
       }
-    ],
-    function (err, bungieAcct) {
-      if (err || !bungieAcct) {
-        utils.l.s("Unable to get bungie account due to error"+err)
-        return "Unable to get bungie account due to error"+err
-      } else {
-        var bungieAcctResp =JSON.parse(bungieAcct).Response
-        var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
-        var psnDisplayName = bungieAcctResp.bungieNetUser.psnDisplayName
-        utils.l.d("bungieMemberShipId="+bungieMemberShipId+"---&&--- psnDisplayName="+psnDisplayName)
-        return "done"
-      }
-    }
+    ],callback
   )
 }
 
@@ -95,6 +99,17 @@ function sendBungieMessage(gamerId, membershipType, messageType,callback){
       }
     ],callback
   )
+}
+
+function listBungieGroupsJoined(destinyMembershipId, psnId,currentPage, callback){
+  utils.async.waterfall([
+    function(callback){
+      var destinyGruopsJoinedURL = utils.config.destinyGruopsJoinedURL.replace(/%MEMBERSHIPID%/g,destinyMembershipId).replace(/%CURRENTPAGE%/g,currentPage)
+      bungieGet(destinyGruopsJoinedURL,callback)
+    },function(bungieGroups,callback){
+      tranformJoinedGroups(bungieGroups,callback)
+    }
+  ],callback)
 }
 
 //url: "https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/2/",
@@ -159,11 +174,22 @@ function getMessageBody(host,displayName,token,messageType){
   }
 }
 
+function tranformJoinedGroups(bungieGroups,callback){
+  if(bungieGroups){
+    var bungieGroupsJson = JSON.parse(bungieGroups)
+    var groups = utils._.map(bungieGroupsJson.Response.results,function(group){
+      return {groupId:group.detail.groupId,groupName:group.detail.name,avatarPath:utils.config.bungieBaseURL+group.detail.avatarPath}
+    })
+    return callback(null,groups)
+  }return callback(null, null)
+}
+
 function getBungieMembershipType(membershipType){
   return utils.constants.bungieMemberShipType.PSN
 }
 
 module.exports={
-  getBungieMemberShipJson:getBungieMemberShipJson,
-  sendBungieMessage:sendBungieMessage
+  getBungieMemberShip:getBungieMemberShip,
+  sendBungieMessage:sendBungieMessage,
+  listBungieGroupsJoined:listBungieGroupsJoined
 }
