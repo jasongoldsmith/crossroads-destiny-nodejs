@@ -49,9 +49,9 @@ function list(req, res) {
 	utils.l.d("Event list request")
 	listEvents(req.user, function(err, events) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err, err,{utm_dnt:"list"})
+			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"list"})
 		} else {
-			routeUtils.handleAPISuccess(req, res, events,{utm_dnt:"list"})
+			routeUtils.handleAPISuccess(req, res, events, {utm_dnt:"list"})
 		}
 	})
 }
@@ -60,9 +60,20 @@ function listAll(req, res) {
 	utils.l.d("Event listAll request")
 	listEvents(null, function(err, events) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err, err,{utm_dnt:"listAll"})
+			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listAll"})
 		} else {
-			routeUtils.handleAPISuccess(req, res, events,{utm_dnt:"listAll"})
+			routeUtils.handleAPISuccess(req, res, events, {utm_dnt:"listAll"})
+		}
+	})
+}
+
+function listById(req, res) {
+	utils.l.d("Get event by id request" + JSON.stringify(req.body))
+	listEventById(req.body, function(err, event) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listById"})
+		} else {
+			routeUtils.handleAPISuccess(req, res, event, {utm_dnt:"listById"})
 		}
 	})
 }
@@ -112,6 +123,10 @@ function remove(req, res) {
 
 function listEvents(user, callback) {
 	models.event.listEvents(user, callback)
+}
+
+function listEventById(data, callback) {
+	models.event.getById(data.id, callback)
 }
 
 function createEvent(data, callback) {
@@ -170,8 +185,9 @@ function deleteEvent(data, callback) {
 
 routeUtils.rPost(router, '/create', 'create', create)
 routeUtils.rPost(router, '/join', 'join', join)
-routeUtils.rGet(router, '/list', 'list', list,{utm_dnt:"androidAppVersion"})
-routeUtils.rGet(router, '/listAll', 'listAll', listAll,{utm_dnt:"androidAppVersion"})
+routeUtils.rGet(router, '/list', 'list', list, {utm_dnt:"androidAppVersion"})
+routeUtils.rGet(router, '/listAll', 'listAll', listAll, {utm_dnt:"androidAppVersion"})
+routeUtils.rPost(router, '/listById', 'listById', listById)
 routeUtils.rPost(router, '/leave', 'leave', leave)
 routeUtils.rPost(router, '/delete', 'remove', remove)
 module.exports = router
