@@ -49,9 +49,9 @@ function list(req, res) {
 	utils.l.d("Event list request")
 	listEvents(req.user, function(err, events) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err, err,{utm_dnt:"list"})
+			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"list"})
 		} else {
-			routeUtils.handleAPISuccess(req, res, events,{utm_dnt:"list"})
+			routeUtils.handleAPISuccess(req, res, events, {utm_dnt:"list"})
 		}
 	})
 }
@@ -60,9 +60,20 @@ function listAll(req, res) {
 	utils.l.d("Event listAll request")
 	listEvents(null, function(err, events) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err, err,{utm_dnt:"listAll"})
+			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listAll"})
 		} else {
-			routeUtils.handleAPISuccess(req, res, events,{utm_dnt:"listAll"})
+			routeUtils.handleAPISuccess(req, res, events, {utm_dnt:"listAll"})
+		}
+	})
+}
+
+function listById(req, res) {
+	utils.l.d("Get event by id request" + JSON.stringify(req.body))
+	listEventById(req.body, function(err, event) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listById"})
+		} else {
+			routeUtils.handleAPISuccess(req, res, event, {utm_dnt:"listById"})
 		}
 	})
 }
@@ -114,6 +125,10 @@ function listEvents(user, callback) {
 	models.event.listEvents(user, callback)
 }
 
+function listEventById(data, callback) {
+	models.event.getById(data.id, callback)
+}
+
 function createEvent(data, callback) {
 	utils.async.waterfall(
 		[
@@ -124,7 +139,7 @@ function createEvent(data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				sendPushNotificationForJoin(event)
+				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event)
 				service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(event)
 				callback(null, event)
 			}
@@ -141,9 +156,7 @@ function joinEvent(data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				if(event.launchStatus == "now") {
-					sendPushNotificationForJoin(event)
-				}
+				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event)
 				callback(null, event)
 			}
 		], callback)
@@ -157,8 +170,8 @@ function leaveEvent(data, callback) {
 			},
 			function(event, callback) {
         models.user.getById(data.player, function(err, user) {
-          if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event) && event.launchStatus == "now") {
-            sendPushNotificationForLeave(event, user)
+          if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event)) {
+						service.eventBasedPushNotificationService.sendPushNotificationForLeave(event, user)
           }
           callback(null, event)
         })
@@ -170,18 +183,11 @@ function deleteEvent(data, callback) {
 	models.event.deleteEvent(data, callback)
 }
 
-function sendPushNotificationForLeave(event, user) {
-  helpers.pushNotification.sendPushNotification(event, utils.constants.eventAction.leave, user)
-}
-
-function sendPushNotificationForJoin(event) {
-  helpers.pushNotification.sendPushNotification(event, utils.constants.eventAction.join)
-}
-
 routeUtils.rPost(router, '/create', 'create', create)
 routeUtils.rPost(router, '/join', 'join', join)
-routeUtils.rGet(router, '/list', 'list', list,{utm_dnt:"androidAppVersion"})
-routeUtils.rGet(router, '/listAll', 'listAll', listAll,{utm_dnt:"androidAppVersion"})
+routeUtils.rGet(router, '/list', 'list', list, {utm_dnt:"androidAppVersion"})
+routeUtils.rGet(router, '/listAll', 'listAll', listAll, {utm_dnt:"androidAppVersion"})
+routeUtils.rPost(router, '/listById', 'listById', listById)
 routeUtils.rPost(router, '/leave', 'leave', leave)
 routeUtils.rPost(router, '/delete', 'remove', remove)
 module.exports = router

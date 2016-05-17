@@ -40,20 +40,19 @@ function sendMessage(data, messageCreator, callback) {
 				utils.l.d("Event to send in payload: " + JSON.stringify(event))
 				if(utils._.isInvalidOrBlank(event)) {
 					return callback({ error: "no event found" }, null)
-				} else {
-					eventObj = {
-						event: event,
-						playerMessage: true
-					}
 				}
+				eventObj = event
 				models.user.getUserById(data, callback)
 			},
 			function (user, callback) {
 				models.installation.getInstallationByUser(user, callback)
 			},
 			function (installation, callback) {
-				var message = messageCreator.psnId + " from " + eventObj.event.eType.aSubType + ": "  + data.message
-				helpers.pushNotification.sendSinglePushNotification(eventObj, message, installation)
+				var notificationObject = {
+					name : "messageFromPlayer"
+				}
+				var message = messageCreator.psnId + " from " + eventObj.eType.aSubType + ": "  + data.message
+				helpers.pushNotification.sendSinglePushNotification(eventObj, message, notificationObject, installation)
 				return callback(null, { messageSent: data.message })
 			}
 		], callback)
@@ -68,8 +67,12 @@ function sendCustomMessageToAllUsers(data, callback) {
 				models.user.getByQuery({}, callback)
 			}
 		}, function (users, callback) {
+			var notificationObject = {
+				name : "customMessageFromFounders"
+			}
+
 			utils.async.map(users, models.installation.getInstallationByUser, function(err, installations) {
-				helpers.pushNotification.sendMultiplePushNotifications(installations, null, data.message)
+				helpers.pushNotification.sendMultiplePushNotifications(installations, null, data.message, notificationObject)
 			})
 			callback(null, {message: "pushes were sent successfully"})
 		}

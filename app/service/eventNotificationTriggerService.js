@@ -85,7 +85,7 @@ function launchUpcomingEvent(event, notifTrigger, callback){
         if(event.players.length > 1) utils._.remove(notifications, {name: 'NoSignupNotification'})
         else utils._.remove(notifications, {name: 'EventNotFullNotification'})
 
-        utils.async.map(notifications,utils._.partial(createNotificationAndSend,event))
+        utils.async.map(notifications,utils._.partial(createNotificationAndSend,event,null))
       }else callback(null,null)
     }],callback)
 }
@@ -102,7 +102,7 @@ function launchEventStart(notifTrigger){
         if(totalEventsToLaunch>0){
           utils.async.map(events, function(event) {
             if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
-              utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event))
+              utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,null))
               event.notifStatus.push("launchEventStart")
               models.event.update(event,callback)
             }else callback(null,null)
@@ -134,7 +134,7 @@ function eventStartreminder(notifTrigger){
         if(totalEventsToLaunch>0){
           utils.async.map(events, function(event) {
             if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
-              utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event))
+              utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,null))
               event.notifStatus.push("eventStartreminder")
               models.event.update(event,callback)
             }else callback(null,null)
@@ -204,13 +204,13 @@ function launchUpComingReminders(notifTrigger){
               var eventLf1mNotif = utils._.find(notifTrigger.notifications,{"name":"EventLf1mNotification"})
               if(event.eType.aType== "Raid" && ((event.maxPlayers - event.players.length) ==2)
                 && !hasNotifStatus(event.notifStatus,"RaidEventLf2mNotification") ){
-                createNotificationAndSend(event,raidLf2mfNotif)
+                createNotificationAndSend(event,null,raidLf2mfNotif)
                 event.notifStatus.push("RaidEventLf2mNotification")
               }
 
               if((event.maxPlayers - event.players.length) ==1
                 && !hasNotifStatus(event.notifStatus,"EventLf1mNotification") ){
-                createNotificationAndSend(event,eventLf1mNotif)
+                createNotificationAndSend(event,null,eventLf1mNotif)
                 event.notifStatus.push("EventLf1mNotification")
               }
               models.event.update(event,callback)
@@ -243,7 +243,7 @@ function handleNewEvents(event, notifTrigger, callback) {
       newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NoSignupNotification"})
       event.notifStatus.push("NoSignupNotification")
     }
-    createNotificationAndSend(event, newEventNotif)
+    createNotificationAndSend(event,null,newEventNotif)
     models.event.update(event,callback)
   } else {
     return callback(null, {message: "handleNewEvents Trigger is not active"})
@@ -253,9 +253,31 @@ function handleNewEvents(event, notifTrigger, callback) {
 function handleJoinEvent(event, notifTrigger, callback) {
   utils.l.d("Running trigger for event join", event)
   if(notifTrigger.isActive) {
-    if(event.players.length > 1 && event.players.length < event.maxPlayers) {
-
+    if(event.launchStatus == utils.constants.eventLaunchStatusList.now &&
+      event.players.length > 1 && event.players.length < event.maxPlayers) {
+      utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,null))
+      event.notifStatus.push("Join")
+      models.event.update(event,callback)
+    } else {
+      return callback(null, null)
     }
+  } else {
+    return callback(null, {message: "handleJoinEvent Trigger is not active"})
+  }
+}
+
+function handleLeaveEvent(event, user, notifTrigger, callback) {
+  utils.l.d("Running trigger for event leave", event)
+  if(notifTrigger.isActive) {
+    if(event.launchStatus == utils.constants.eventLaunchStatusList.now) {
+      utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,user))
+      event.notifStatus.push("Leave")
+      models.event.update(event,callback)
+    } else {
+      return callback(null, null)
+    }
+  } else {
+    return callback(null, {message: "handleLeaveEvent Trigger is not active"})
   }
 }
 
@@ -265,19 +287,19 @@ function hasNotifStatus(notifStatusList, notifStatus){
   else return false
 }
 
-function createNotificationAndSend(event,notification){
-  utils.l.d("createNotificationAndSend::event="+event+"\nnotification::"+JSON.stringify(notification))
-  notificationService.getNotificationDetails(event, notification, null, function(err,notificationResponse){
+function createNotificationAndSend(event, user, notification){
+  utils.l.d("createNotificationAndSend::event="+event+"\nnotification::" + JSON.stringify(notification))
+  notificationService.getNotificationDetails(event, notification, user, function(err, notificationResponse) {
     utils.l.d("notification response object", notificationResponse)
-    if(err) util.l.s("createNotificationAndSend::Error while creating notificationResponse object"+err)
-    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse,event)
+    if(err) util.l.s("createNotificationAndSend::Error while creating notificationResponse object" + err)
+    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, event)
   })
 }
 
-function createAggregateNotificationAndSend(clanId,eventCount, notification){
+function createAggregateNotificationAndSend(clanId, eventCount, notification){
   utils.l.d("createAggregateNotificationAndSend::notification::"+JSON.stringify(notification))
-  notificationService.getAggregateNotificationDetails(clanId,eventCount, notification, function(err,notificationResponse){
-    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse,null)
+  notificationService.getAggregateNotificationDetails(clanId, eventCount, notification, function(err,notificationResponse){
+    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, null)
   })
 }
 
@@ -285,5 +307,7 @@ module.exports ={
   handleNotificationTrigger:handleNotificationTrigger,
   handleUpcomingEvents: handleUpcomingEvents,
   launchEventStart:launchEventStart,
-  handleNewEvents: handleNewEvents
+  handleNewEvents: handleNewEvents,
+  handleJoinEvent: handleJoinEvent,
+  handleLeaveEvent: handleLeaveEvent
 }

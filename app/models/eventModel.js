@@ -202,11 +202,13 @@ function leaveEvent(data, callback) {
 					event.creator = event.players[0]
 				}
 
-				// Reseting the notification flags for LFXM reminders
+				// Reseting the notification flags for reminders
 				if(event.maxPlayers - event.players.length == 3) {
 					event.notifStatus.remove("RaidEventLf2mNotification")
 				} else if(event.maxPlayers - event.players.length == 2) {
 					event.notifStatus.remove("EventLf1mNotification")
+				} else if(event.maxPlayers - event.players.length == 1) {
+					event.notifStatus.remove("launchEventStart")
 				}
 
 				update(event, callback)
