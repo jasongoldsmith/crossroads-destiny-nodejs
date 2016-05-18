@@ -16,7 +16,7 @@ var UserSchema = new Schema({
   uDate: Date,
   signupDate: Date,
   flags: Mixed,
-  psnVerified:{ type: String, default: "NOT_INITIATED"},
+  psnVerified:{ type: String, enum: ['VERIFIED','INITIATED','FAILED_INITIATION','NOT_INITIATED'], default: "NOT_INITIATED"},
   psnToken:{ type: String},
   bungieMemberShipId:{type: String},
   passwordResetToken:{type: String}

@@ -158,7 +158,7 @@ function listUsers(callback) {
 }
 
 
-function updateUser(data, callback) {
+function updateUser(data, allowClanUpdate, callback) {
   utils.async.waterfall([
       function (callback) {
         getById(data.id, callback)
@@ -168,12 +168,16 @@ function updateUser(data, callback) {
           utils.l.i("no user found")
           return callback({ error: "user with this id does not exist" }, null)
         } else {
-          utils.l.i("found user: " + JSON.stringify(user))
-          if(data.passWord) {
-            data.passWord = passwordHash.generate(data.passWord)
+          if(!allowClanUpdate && (data.clanId && data.clanId != user.clanId)) {
+            return callback({ error: "ClanId Update is not allowed." }, null)
+          }else {
+            utils.l.i("found user: " + JSON.stringify(user))
+            if (data.passWord) {
+              data.passWord = passwordHash.generate(data.passWord)
+            }
+            utils._.extend(user, data)
+            user.save(callback)
           }
-          utils._.extend(user, data)
-          user.save(callback)
         }
       }
     ],

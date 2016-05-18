@@ -175,8 +175,8 @@ function getMessageBody(host,displayName,token,messageType){
 }
 
 function tranformJoinedGroups(bungieGroups,callback){
-  if(bungieGroups){
-    var bungieGroupsJson = JSON.parse(bungieGroups)
+  var bungieGroupsJson = JSON.parse(bungieGroups)
+  if(bungieGroupsJson && bungieGroupsJson.Response && bungieGroupsJson.Response.results){
     var groups = utils._.map(bungieGroupsJson.Response.results,function(group){
       return {groupId:group.detail.groupId,groupName:group.detail.name,avatarPath:utils.config.bungieBaseURL+group.detail.avatarPath}
     })
