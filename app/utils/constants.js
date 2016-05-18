@@ -221,7 +221,7 @@ var eventNotificationTrigger = {
   launchUpcomingEvents:'launchUpcomingEvents',
   launchEventStart:'launchEventStart',
   eventStartreminder:'eventStartreminder',
-  dailyOneTimeReimnder:'dailyOneTimeReimnder',
+  dailyOneTimeReminder:'dailyOneTimeReminder',
   launchUpComingReminders:'launchUpComingReminders'
 }
 

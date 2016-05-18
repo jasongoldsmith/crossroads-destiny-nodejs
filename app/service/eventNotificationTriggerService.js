@@ -21,10 +21,10 @@ function handleNotificationTrigger(notifTrigger, event){
       utils.l.d("handleNotificationTrigger::eventStartreminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
       return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,eventStartreminder.bind(null,notifTrigger))
       break;
-    case utils.constants.eventNotificationTrigger.dailyOneTimeReimnder:
-      utils.l.d("handleNotificationTrigger::dailyOneTimeReimnder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-      return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,dailyOneTimeReimnder.bind(null,notifTrigger))
-      break;
+    //case utils.constants.eventNotificationTrigger.dailyOneTimeReminder:
+    //  utils.l.d("handleNotificationTrigger::dailyOneTimeReminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
+    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,dailyOneTimeReminder.bind(null,notifTrigger))
+    //  break;
     case utils.constants.eventNotificationTrigger.launchUpComingReminders:
       utils.l.d("handleNotificationTrigger::launchUpComingReminders::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
       return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,launchUpComingReminders.bind(null,notifTrigger))
@@ -153,8 +153,8 @@ function eventStartreminder(notifTrigger){
   )
 }
 
-function dailyOneTimeReimnder(notifTrigger){
-  utils.l.d("Starting trigger dailyOneTimeReimnder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+function dailyOneTimeReminder(notifTrigger, callback){
+  utils.l.i("Starting trigger dailyOneTimeReminder")
   var date = new Date()
   date.setHours(0,0,0,0)
   var date1 =  utils.moment(date).utc().format()
@@ -177,14 +177,7 @@ function dailyOneTimeReimnder(notifTrigger){
         }
         callback(null,null)
       }
-    ],
-    function (err, updatedEvents) {
-      if (err) {
-        utils.l.s("Error sending dailyOneTimeReimnder notification::"+err+"::"+JSON.stringify(updatedEvents))
-      }
-      utils.l.i("Completed trigger dailyOneTimeReimnder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
-    }
-  )
+    ], callback)
 }
 
 function launchUpComingReminders(notifTrigger){
@@ -307,6 +300,7 @@ module.exports ={
   handleNotificationTrigger:handleNotificationTrigger,
   handleUpcomingEvents: handleUpcomingEvents,
   launchEventStart:launchEventStart,
+  dailyOneTimeReminder: dailyOneTimeReminder,
   handleNewEvents: handleNewEvents,
   handleJoinEvent: handleJoinEvent,
   handleLeaveEvent: handleLeaveEvent
