@@ -91,7 +91,6 @@ body{
   background-color: #000000;
   height: 14px;
   width: 160px;
-  padding-top: 10px;
 }
 
 .pad{
@@ -105,10 +104,26 @@ body{
   padding-bottom: 26px;
 }
 
-.container{
+.containerBox{
   height:66px;
-  width:375px;
+  width:355px;
   background-color:#000000;
+}
+
+.blueTerms{
+  font-family: HelveticaNeue;
+  font-size: 13px;
+  color: #0086D0;
+}
+
+.containerTerms{
+  height:47px;
+  width:307px;
+  font-family: HelveticaNeue;
+  font-size: 13px;
+  color: white;
+  padding-top: 20px;
+  align-self: left;
 }
 
 .lockContainer{
@@ -133,5 +148,38 @@ body{
   border-bottom: 0px;
   background-color: #0086D0;
   height: 50px;
-  width: 375px;
+  width: 355px;
 }
+
+.linkBlue{
+  font-family: HelveticaNeue-Bold;
+  font-size: 14px;
+  color: white;
+  border-left: 0px;
+  border-right: 0px;
+  border-top: 0px;
+  border-bottom: 0px;
+  background-color: #0086D0;
+  height: 50px;
+  width: 355px;
+  display: block;
+}
+
+.linkGreyBlue{
+  font-family: HelveticaNeue-Bold;
+  font-size: 14px;
+  color: white;
+  border-left: 0px;
+  border-right: 0px;
+  border-top: 0px;
+  border-bottom: 0px;
+  background-color: #365D65;
+  height: 50px;
+  width: 355px;
+  display: block;
+}
+
+a:hover, a:active {
+  color: white;
+}
+

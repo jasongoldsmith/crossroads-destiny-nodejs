@@ -1,33 +1,29 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-</head>
-<body ng-app="travelerAdmin" ng-controller="appController">
-    <div class="row">
-        <div class="col-md-3"></div>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="traveler.css">
+    </head>
+    <body>
+    <div class="container" align="center">
+        <div class="appTitle">ACCOUNT VERIFICATION</div>
+        <div class="imgLogo"> <img align="center" src="img/imgLogoBadge.png"/></div>
+        <div align="center">
+            <div class="msgLarge">Welcome Guardian!</div>
 
-        <div class="container jumbotron col-md-4">
-            <h3 align="center">Welcome, Guardian!</h3>
-            <br/>
-            <div>
-                <p><h5>You signed up for Traveler, the Destiny Fireteam Finder mobile app!</h5></p>
-                <div>
-                    <h5>
-                        Please confirm that you are <button class="btn btn-info badge"><%= psnId %></button> so that your
-                        account for the Traveler app can be verified.
-                    </h5>
-                </div>
-            </div>
-            <br/>
+            <div class="msgLarge pad">Your signed up for Travelers, the Destiny Fireteam Finder mobile app!</div>
+            <div class="msgLarge pad">Please confirm that you are <%= psnId %> so that your account for the Traveler app can be verified.</div>
+        </div>
+        <div class="pad"/>
 
-            <div align="center">
-                <a class="btn btn-success" href="/api/v1/auth/verifyconfirm/<%= token %>">Yes, that's me! I'm ready to start finding fire teams!</a> &nbsp;&nbsp;&nbsp;
-                <a class="btn btn-warning" href="/api/v1/auth/about/">No, that's not me. But what is Traveler?</a>
-            </div>
+        <a href="/api/v1/auth/verifyconfirm/<%= token %>" class="linkBlue">YES, that's me!. <br/>I'am ready to start finding firemates!</a>
+        <div class="padSm"/>
+        <a href="/api/v1/auth/about/" class="linkGreyBlue">NO, that's not me. <BR/>But what is <%=appName%>?</a>
+        <div class="containerTerms" align="justify">
+            By verifying your account and clicking “Yes, that’s me!,” you agree to our <span class="blueTerms">Terms</span> and that you have read our <span class="blueTerms">Data Policy</span>, including our <span class="blueTerms">Cookie Use</span>.
         </div>
     </div>
-</body>
+    </body>
 
 </html>
