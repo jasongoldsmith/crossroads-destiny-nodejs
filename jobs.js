@@ -145,6 +145,42 @@ function callHandleUpcomingEvents(notifTrigger,stopTime, callback) {
 }
 */
 
+function eventFullReminder() {
+  utils.async.waterfall([
+      function (callback) {
+        models.notificationTrigger.getByQuery({
+            type: 'schedule',
+            triggerName: utils.constants.eventNotificationTrigger.launchEventStart,
+            isActive: true
+          },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({ error:"Trigger for eventFullReminder not found or is not active" }, null)
+        }
+        var stopTime = moment().add(8, 'minutes')
+        var minsToSleep = 2
+
+        service.eventNotificationTriggerService.launchEventStart(notifTrigger)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.eventNotificationTriggerService.launchEventStart(notifTrigger)
+          if(moment() > stopTime) {
+            this.stop()
+            return callback(null, null)
+          }
+        })
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending eventFullReminder notification::"+JSON.stringify(err)+"::"+JSON.stringify(events))
+      } else {
+        utils.l.i("eventFullReminder was successful")
+      }
+    })
+}
+
 function eventStartReminder() {
   utils.async.waterfall([
       function (callback) {
@@ -212,6 +248,7 @@ module.exports = {
   deleteOldFullEvents: deleteOldFullEvents,
   deleteOldStaleEvents: deleteOldStaleEvents,
   upcomingEventsReminder: upcomingEventsReminder,
+  eventFullReminder: eventFullReminder,
   eventStartReminder: eventStartReminder,
   dailyOneTimeReminder: dailyOneTimeReminder,
 }

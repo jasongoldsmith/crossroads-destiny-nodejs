@@ -12,6 +12,7 @@ var hashPassword = "hashPassword"
 var deleteOldFullEvents = "deleteOldFullEvents"
 var deleteOldStaleEvents = "deleteOldStaleEvents"
 var upcomingEventsReminder = "upcomingEventsReminder"
+var eventFullReminder = "eventFullReminder"
 var eventStartReminder = "eventStartReminder"
 var dailyOneTimeReminder = "dailyOneTimeReminder"
 
@@ -63,6 +64,9 @@ switch(command) {
     break
   case upcomingEventsReminder:
     jobs.upcomingEventsReminder()
+    break
+  case eventFullReminder:
+    jobs.eventFullReminder()
     break
   case eventStartReminder:
     jobs.eventStartReminder()

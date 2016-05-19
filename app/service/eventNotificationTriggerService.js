@@ -13,10 +13,10 @@ function handleNotificationTrigger(notifTrigger, event){
     //  utils.l.d("handleNotificationTrigger::launchUpcomingEvents::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
     //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,handleUpcomingEvents.bind(null,notifTrigger))
     //  break;
-    case utils.constants.eventNotificationTrigger.launchEventStart:
-      utils.l.d("handleNotificationTrigger::launchEventStart::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-      return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,launchEventStart.bind(null,notifTrigger))
-      break;
+    //case utils.constants.eventNotificationTrigger.launchEventStart:
+    //  utils.l.d("handleNotificationTrigger::launchEventStart::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
+    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,launchEventStart.bind(null,notifTrigger))
+    //  break;
     //case utils.constants.eventNotificationTrigger.eventStartReminder:
     //  utils.l.d("handleNotificationTrigger::eventStartReminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
     //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,eventStartReminder.bind(null,notifTrigger))
@@ -83,28 +83,38 @@ function launchEventStart(notifTrigger){
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc()
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.now, launchDate:{$lte:date}, status:"full", notifStatus:{$nin:["launchEventStart"]}}, null, callback)
+        models.event.getByQuery({
+          launchStatus: utils.constants.eventLaunchStatusList.now,
+          launchDate: {$lte: date},
+          status: "full",
+          notifStatus: {$nin: ["launchEventStart"]}},
+          null, callback)
       },
       function (events, callback) {
-        var totalEventsToLaunch = events?events.length:0
-        if(totalEventsToLaunch>0){
+        var totalEventsToLaunch = events ? events.length: 0
+        if(totalEventsToLaunch > 0) {
           utils.async.map(events, function(event) {
-            if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
-              utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,null))
+            if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
+              utils.async.map(notifTrigger.notifications,
+                utils._.partial(createNotificationAndSend, event, null))
               event.notifStatus.push("launchEventStart")
-              models.event.update(event,callback)
-            }else callback(null,null)
-          },function(err,updatedEvents){
-            callback(err,updatedEvents)
+              models.event.update(event, callback)
+            } else {
+              return callback(null, null)
+            }
+          }, function(err, updatedEvents) {
+            return callback(err, updatedEvents)
           })
-        }else callback(null,null)
+        } else {
+          return callback(null, null)
+        }
       }
     ],
     function (err, updatedEvents) {
       if (err) {
-        utils.l.s("Error sending events start notification::"+err+"::"+JSON.stringify(updatedEvents))
+        utils.l.s("Error sending events start notification::" + JSON.stringify(err) + "::" + JSON.stringify(updatedEvents))
       }
-      utils.l.i("Completed trigger launchEventStart::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+      utils.l.i("Completed trigger launchEventStart::" + utils.moment().utc().format())
     }
   )
 }
