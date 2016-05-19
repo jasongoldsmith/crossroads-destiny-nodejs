@@ -8,6 +8,7 @@ var config = require("config")
 var fs = require('fs')
 var passwordHash = require('password-hash')
 var moment = require('moment')
+var service = require ('./app/service')
 
 function updatePassWord() {
 
@@ -86,8 +87,31 @@ function deleteOldStaleEvents() {
     })
 }
 
+function dailyOneTimeReminder() {
+  utils.async.waterfall([
+    function (callback) {
+      models.notificationTrigger.getByQuery({type:'schedule', triggerName:"dailyOneTimeReminder"},
+        utils.firstInArrayCallback(callback))
+    },
+    function(notifTrigger, callback) {
+      if(!notifTrigger) {
+        return callback({error:"Trigger for dailyOneTimeReminder not found or is not active"}, null)
+      }
+      service.eventNotificationTriggerService.dailyOneTimeReminder(notifTrigger, callback)
+    }
+  ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending dailyOneTimeReminder notification::"+err+"::"+JSON.stringify(events))
+      } else {
+        utils.l.i("job completed dailyOneTimeReminder successfully")
+      }
+    })
+}
+
 module.exports = {
   updatePassWord: updatePassWord,
   deleteOldFullEvents: deleteOldFullEvents,
-  deleteOldStaleEvents: deleteOldStaleEvents
+  deleteOldStaleEvents: deleteOldStaleEvents,
+  dailyOneTimeReminder: dailyOneTimeReminder
 }

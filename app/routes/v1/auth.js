@@ -158,7 +158,8 @@ function verifyAccount(req,res){
     if(user){
       res.render("account/index",{
         token: token,
-        psnId: user.psnId
+        psnId: user.psnId,
+        appName:"TRVLR"
       })
     }else{
       res.render("account/error")
