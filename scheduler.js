@@ -12,6 +12,7 @@ var hashPassword = "hashPassword"
 var deleteOldFullEvents = "deleteOldFullEvents"
 var deleteOldStaleEvents = "deleteOldStaleEvents"
 var upcomingEventsReminder = "upcomingEventsReminder"
+var eventStartReminder = "eventStartReminder"
 var dailyOneTimeReminder = "dailyOneTimeReminder"
 
 var destinyService = require('./app/service/destinyInterface')
@@ -62,6 +63,9 @@ switch(command) {
     break
   case upcomingEventsReminder:
     jobs.upcomingEventsReminder()
+    break
+  case eventStartReminder:
+    jobs.eventStartReminder()
     break
   case dailyOneTimeReminder:
     jobs.dailyOneTimeReminder()

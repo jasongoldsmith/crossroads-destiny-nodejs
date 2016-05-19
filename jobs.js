@@ -111,6 +111,7 @@ function upcomingEventsReminder() {
         temporal.loop(minsToSleep * 60 * 1000, function() {
           service.eventNotificationTriggerService.handleUpcomingEvents(notifTrigger)
           if(moment() > stopTime) {
+            this.stop()
             return callback(null, null)
           }
         })
@@ -144,6 +145,42 @@ function callHandleUpcomingEvents(notifTrigger,stopTime, callback) {
 }
 */
 
+function eventStartReminder() {
+  utils.async.waterfall([
+      function (callback) {
+        models.notificationTrigger.getByQuery({
+            type: 'schedule',
+            triggerName: utils.constants.eventNotificationTrigger.eventStartReminder,
+            isActive: true
+          },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({ error:"Trigger for eventStartReminder not found or is not active" }, null)
+        }
+        var stopTime = moment().add(8, 'minutes')
+        var minsToSleep = 2
+
+        service.eventNotificationTriggerService.eventStartReminder(notifTrigger)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.eventNotificationTriggerService.eventStartReminder(notifTrigger)
+          if(moment() > stopTime) {
+            this.stop()
+            return callback(null, null)
+          }
+        })
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending eventStartReminder notification::"+JSON.stringify(err)+"::"+JSON.stringify(events))
+      } else {
+        utils.l.i("eventStartReminder was successful")
+      }
+    })
+}
+
 function dailyOneTimeReminder() {
   utils.async.waterfall([
     function (callback) {
@@ -175,5 +212,6 @@ module.exports = {
   deleteOldFullEvents: deleteOldFullEvents,
   deleteOldStaleEvents: deleteOldStaleEvents,
   upcomingEventsReminder: upcomingEventsReminder,
+  eventStartReminder: eventStartReminder,
   dailyOneTimeReminder: dailyOneTimeReminder,
 }

@@ -17,10 +17,10 @@ function handleNotificationTrigger(notifTrigger, event){
       utils.l.d("handleNotificationTrigger::launchEventStart::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
       return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,launchEventStart.bind(null,notifTrigger))
       break;
-    case utils.constants.eventNotificationTrigger.eventStartreminder:
-      utils.l.d("handleNotificationTrigger::eventStartreminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-      return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,eventStartreminder.bind(null,notifTrigger))
-      break;
+    //case utils.constants.eventNotificationTrigger.eventStartReminder:
+    //  utils.l.d("handleNotificationTrigger::eventStartReminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
+    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,eventStartReminder.bind(null,notifTrigger))
+    //  break;
     //case utils.constants.eventNotificationTrigger.dailyOneTimeReminder:
     //  utils.l.d("handleNotificationTrigger::dailyOneTimeReminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
     //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,dailyOneTimeReminder.bind(null,notifTrigger))
@@ -34,13 +34,17 @@ function handleNotificationTrigger(notifTrigger, event){
   }
 }
 
+// Schedule Based Notifications
+
 function handleUpcomingEvents(notifTrigger) {
-  utils.l.i("Starting the job to launch events::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+  utils.l.i("Starting the job to launch events")
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerIntervalMinutes,"minutes")
-        models.event.getByQuery({ "launchStatus":utils.constants.eventLaunchStatusList.upcoming,
-          launchDate:{ $lte: date }}, null, callback)
+        models.event.getByQuery({
+          launchStatus: utils.constants.eventLaunchStatusList.upcoming,
+          launchDate: {$lte: date}},
+          null, callback)
       },
       function (events, callback) {
         var eventsLaunched = 0
@@ -52,7 +56,7 @@ function handleUpcomingEvents(notifTrigger) {
           }, function(err, eventUpdatedStatus) {
             eventsLaunched = utils._.sum(eventUpdatedStatus)
             if(eventsLaunched > 0) {
-              return callback(null,{ totalEventsToLaunch: totalEventsToLaunch, eventsLaunched: eventsLaunched })
+              return callback(null, { totalEventsToLaunch: totalEventsToLaunch, eventsLaunched: eventsLaunched })
             }
             else {
               return callback({ errorMessage: "Unable to launch any of the events", error: lastError }, null)
@@ -65,39 +69,13 @@ function handleUpcomingEvents(notifTrigger) {
     ],
     function (err, eventsLaunchUpdate) {
       if (err) {
-        utils.l.s("Error launching events::"+err+"::"+JSON.stringify(eventsLaunchUpdate))
+        utils.l.s("Error launching events::" + JSON.stringify(err) + "::" + JSON.stringify(eventsLaunchUpdate))
       } else {
-        utils.l.i("Events launched successfully::"+JSON.stringify(eventsLaunchUpdate))
+        utils.l.i("Events launched successfully::" + JSON.stringify(eventsLaunchUpdate))
       }
       utils.l.i("Completed the job to launch events::"+utils.moment().utc().format())
     }
   )
-}
-
-function launchUpcomingEvent(event, notifTrigger, callback){
-  utils.async.waterfall([
-    function (callback) {
-      utils.l.d("launchEvent:: " + event.eventType + ",launchDate: " + event.launchDate)
-      models.event.launchEvent(event, callback)
-      //TODO: Make a firebase API to notify
-    },
-    function(updatedEvent, callback) {
-      helpers.firebase.updateEvent(updatedEvent, updatedEvent.creator)
-      // for each notification in the list return notification object with formatter message, recepients
-      // Return notificationResp - array of notification{name:"",recepients:[{}],message:"")}
-      if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
-        //Send NoSignupNotification only if there are no players signedup. i.e Only player in event is creator
-        var notifications = notifTrigger.notifications
-        if(event.players.length > 1) {
-          utils._.remove(notifications, {name: 'NoSignupNotification'})
-        } else {
-          utils._.remove(notifications, {name: 'EventNotFullNotification'})
-        }
-        utils.async.map(notifications, utils._.partial(createNotificationAndSend, event, null))
-      } else {
-        return callback(null, null)
-      }
-    }], callback)
 }
 
 function launchEventStart(notifTrigger){
@@ -131,34 +109,43 @@ function launchEventStart(notifTrigger){
   )
 }
 
-function eventStartreminder(notifTrigger){
-  utils.l.d("Starting trigger eventStartreminder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+function eventStartReminder(notifTrigger){
+  utils.l.d("Starting trigger eventStartReminder")
   utils.async.waterfall([
       function (callback) {
-        var date = utils.moment().utc().add(utils.config.triggerReminderInterval,"minutes")
-        var date1 =  utils.moment().utc().add((utils.config.triggerReminderInterval-15),"minutes")
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{$lte:date,$gte:date1},notifStatus:{$nin:["eventStartreminder"]}}, null, callback)
+        var date = utils.moment().utc().add(utils.config.triggerReminderInterval, "minutes")
+        var date1 =  utils.moment().utc().add((utils.config.triggerReminderInterval - 15), "minutes")
+        models.event.getByQuery({
+          launchStatus: utils.constants.eventLaunchStatusList.upcoming,
+          launchDate: {$lte: date, $gte: date1},
+          notifStatus: {$nin: ["eventStartReminder"]}},
+          null, callback)
       },
       function (events, callback) {
-        var totalEventsToLaunch = events?events.length:0
-        if(totalEventsToLaunch>0){
+        var totalEventsToLaunch = events ? events.length: 0
+        if(totalEventsToLaunch > 0) {
           utils.async.map(events, function(event) {
-            if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
-              utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,null))
-              event.notifStatus.push("eventStartreminder")
-              models.event.update(event,callback)
-            }else callback(null,null)
-          },function(err,updatedEvents){
-            callback(err,updatedEvents)
+            if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
+              utils.async.map(notifTrigger.notifications,
+                utils._.partial(createNotificationAndSend,event,null))
+              event.notifStatus.push("eventStartReminder")
+              models.event.update(event, callback)
+            }else {
+              return callback(null, null)
+            }
+          },function(err, updatedEvents) {
+            return callback(err, updatedEvents)
           })
-        }else callback(null,null)
+        }else {
+          return callback(null, null)
+        }
       }
     ],
     function (err, updatedEvents) {
       if (err) {
-        utils.l.s("Error sending eventStartreminder notification::"+err+"::"+JSON.stringify(updatedEvents))
+        utils.l.s("Error sending eventStartReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(updatedEvents))
       }
-      utils.l.i("Completed trigger eventStartreminder::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+      utils.l.i("Completed trigger eventStartReminder::" +utils.moment().utc().format())
     }
   )
 }
@@ -172,8 +159,11 @@ function dailyOneTimeReminder(notifTrigger, callback){
 
   utils.async.waterfall([
       function (callback) {
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming,
-          status:{$ne:"full"}, launchDate:{$gte:date1,$lte:date2}}, null, callback)
+        models.event.getByQuery({
+          launchStatus: utils.constants.eventLaunchStatusList.upcoming,
+          status: {$ne: "full"},
+          launchDate: {$gte: date1, $lte: date2}},
+          null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0
@@ -187,7 +177,7 @@ function dailyOneTimeReminder(notifTrigger, callback){
             }
           }
         }
-        callback(null,null)
+        callback(null, null)
       }
     ], callback)
 }
@@ -234,6 +224,8 @@ function launchUpComingReminders(notifTrigger){
     }
   )
 }
+
+// Event based Notifications
 
 function handleNewEvents(event, notifTrigger, callback) {
   utils.l.d("Running trigger handleNewEvents for event", event)
@@ -286,6 +278,34 @@ function handleLeaveEvent(event, user, notifTrigger, callback) {
   }
 }
 
+// Helper Functions
+
+function launchUpcomingEvent(event, notifTrigger, callback){
+  utils.async.waterfall([
+    function (callback) {
+      utils.l.d("launchEvent:: " + event.eventType + ",launchDate: " + event.launchDate)
+      models.event.launchEvent(event, callback)
+      //TODO: Make a firebase API to notify
+    },
+    function(updatedEvent, callback) {
+      helpers.firebase.updateEvent(updatedEvent, updatedEvent.creator)
+      // for each notification in the list return notification object with formatter message, recepients
+      // Return notificationResp - array of notification{name:"",recepients:[{}],message:"")}
+      if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
+        //Send NoSignupNotification only if there are no players signedup. i.e Only player in event is creator
+        var notifications = notifTrigger.notifications
+        if(event.players.length > 1) {
+          utils._.remove(notifications, {name: 'NoSignupNotification'})
+        } else {
+          utils._.remove(notifications, {name: 'EventNotFullNotification'})
+        }
+        utils.async.map(notifications, utils._.partial(createNotificationAndSend, event, null))
+      } else {
+        return callback(null, null)
+      }
+    }], callback)
+}
+
 function hasNotifStatus(notifStatusList, notifStatus){
   //console.log("notifStatusList["+JSON.stringify(notifStatusList)+"],notifStatus:"+JSON.stringify(notifStatus)+"="+utils._.indexOf(JSON.parse(JSON.stringify(notifStatusList)),notifStatus))
   if(utils._.indexOf(notifStatusList,notifStatus) >= 0) return true
@@ -312,6 +332,7 @@ module.exports ={
   handleNotificationTrigger:handleNotificationTrigger,
   handleUpcomingEvents: handleUpcomingEvents,
   launchEventStart:launchEventStart,
+  eventStartReminder: eventStartReminder,
   dailyOneTimeReminder: dailyOneTimeReminder,
   handleNewEvents: handleNewEvents,
   handleJoinEvent: handleJoinEvent,
