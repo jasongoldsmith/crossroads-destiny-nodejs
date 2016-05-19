@@ -178,10 +178,22 @@ function tranformJoinedGroups(bungieGroups,callback){
   var bungieGroupsJson = JSON.parse(bungieGroups)
   if(bungieGroupsJson && bungieGroupsJson.Response && bungieGroupsJson.Response.results){
     var groups = utils._.map(bungieGroupsJson.Response.results,function(group){
-      return {groupId:group.detail.groupId,groupName:group.detail.name,avatarPath:utils.config.bungieBaseURL+group.detail.avatarPath}
+      return {groupId:group.detail.groupId,
+        groupName:group.detail.name,
+        avatarPath:utils.config.bungieBaseURL+group.detail.avatarPath,
+        memberCount:group.detail.memberCount,
+        clanEnabled:isClanEnabled(group.detail.clanCallsign)}
     })
     return callback(null,groups)
   }return callback(null, null)
+}
+
+function isClanEnabled(clanCallSign){
+  if(utils._.isUndefined(clanCallSign) || utils._.isEmpty(clanCallSign)){
+    return false
+  }else{
+    return true
+  }
 }
 
 function getBungieMembershipType(membershipType){
