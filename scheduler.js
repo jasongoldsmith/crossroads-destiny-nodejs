@@ -11,7 +11,9 @@ var schedule = require('node-schedule');
 var hashPassword = "hashPassword"
 var deleteOldFullEvents = "deleteOldFullEvents"
 var deleteOldStaleEvents = "deleteOldStaleEvents"
+var upcomingEventsReminder = "upcomingEventsReminder"
 var dailyOneTimeReminder = "dailyOneTimeReminder"
+
 var destinyService = require('./app/service/destinyInterface')
 var authService = require('./app/service/authService')
 var notifService = require('./app/service/eventNotificationService')
@@ -57,6 +59,9 @@ switch(command) {
     break
   case deleteOldStaleEvents:
     jobs.deleteOldStaleEvents()
+    break
+  case upcomingEventsReminder:
+    jobs.upcomingEventsReminder()
     break
   case dailyOneTimeReminder:
     jobs.dailyOneTimeReminder()

@@ -9,10 +9,10 @@ function handleNotificationTrigger(notifTrigger, event){
   utils.l.d("handleNotificationTrigger::"+notifTrigger.triggerName+"@@@@"+utils.moment().utc().format())
 
   switch (notifTrigger.triggerName) {
-    case utils.constants.eventNotificationTrigger.launchUpcomingEvents:
-      utils.l.d("handleNotificationTrigger::launchUpcomingEvents::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-      return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,handleUpcomingEvents.bind(null,notifTrigger))
-      break;
+    //case utils.constants.eventNotificationTrigger.launchUpcomingEvents:
+    //  utils.l.d("handleNotificationTrigger::launchUpcomingEvents::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
+    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,handleUpcomingEvents.bind(null,notifTrigger))
+    //  break;
     case utils.constants.eventNotificationTrigger.launchEventStart:
       utils.l.d("handleNotificationTrigger::launchEventStart::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
       return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,launchEventStart.bind(null,notifTrigger))
@@ -39,23 +39,28 @@ function handleUpcomingEvents(notifTrigger) {
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerIntervalMinutes,"minutes")
-        models.event.getByQuery({ "launchStatus":utils.constants.eventLaunchStatusList.upcoming, launchDate:{ $lte: date }}, null, callback)
+        models.event.getByQuery({ "launchStatus":utils.constants.eventLaunchStatusList.upcoming,
+          launchDate:{ $lte: date }}, null, callback)
       },
       function (events, callback) {
-        var eventsLaunched = 0;
-        var totalEventsToLaunch = events?events.length:0
+        var eventsLaunched = 0
+        var totalEventsToLaunch = events ? events.length: 0
         var lastError = null
-        if(totalEventsToLaunch>0){
+        if(totalEventsToLaunch > 0) {
           utils.async.map(events, function(event) {
             launchUpcomingEvent(event, notifTrigger, callback)
-          },function(err,eventUpdatedStatus){
-            var sum = 0
+          }, function(err, eventUpdatedStatus) {
             eventsLaunched = utils._.sum(eventUpdatedStatus)
-
-            if(eventsLaunched >0) callback(null,{totalEventsToLaunch:totalEventsToLaunch,eventsLaunched:eventsLaunched})
-            else callback({errorMessage:"Unable to launch any of the events",error:lastError},null)
+            if(eventsLaunched > 0) {
+              return callback(null,{ totalEventsToLaunch: totalEventsToLaunch, eventsLaunched: eventsLaunched })
+            }
+            else {
+              return callback({ errorMessage: "Unable to launch any of the events", error: lastError }, null)
+            }
           })
-        }else callback(null,{totalEventsToLaunch:totalEventsToLaunch,eventsLaunched:0})
+        } else {
+          return callback(null,{ totalEventsToLaunch: totalEventsToLaunch, eventsLaunched: 0 })
+        }
       }
     ],
     function (err, eventsLaunchUpdate) {
@@ -72,26 +77,31 @@ function handleUpcomingEvents(notifTrigger) {
 function launchUpcomingEvent(event, notifTrigger, callback){
   utils.async.waterfall([
     function (callback) {
-      utils.l.d("launchEvent:: " + event.eventType+",launchDate:"+event.launchDate)
+      utils.l.d("launchEvent:: " + event.eventType + ",launchDate: " + event.launchDate)
       models.event.launchEvent(event, callback)
       //TODO: Make a firebase API to notify
-    },function(updatedEvent,callback){
+    },
+    function(updatedEvent, callback) {
       helpers.firebase.updateEvent(updatedEvent, updatedEvent.creator)
       // for each notification in the list return notification object with formatter message, recepients
       // Return notificationResp - array of notification{name:"",recepients:[{}],message:"")}
-      if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
+      if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
         //Send NoSignupNotification only if there are no players signedup. i.e Only player in event is creator
         var notifications = notifTrigger.notifications
-        if(event.players.length > 1) utils._.remove(notifications, {name: 'NoSignupNotification'})
-        else utils._.remove(notifications, {name: 'EventNotFullNotification'})
-
-        utils.async.map(notifications,utils._.partial(createNotificationAndSend,event,null))
-      }else callback(null,null)
-    }],callback)
+        if(event.players.length > 1) {
+          utils._.remove(notifications, {name: 'NoSignupNotification'})
+        } else {
+          utils._.remove(notifications, {name: 'EventNotFullNotification'})
+        }
+        utils.async.map(notifications, utils._.partial(createNotificationAndSend, event, null))
+      } else {
+        return callback(null, null)
+      }
+    }], callback)
 }
 
 function launchEventStart(notifTrigger){
-  utils.l.d("Starting trigger launchEventStart::scheduled::"+notifTrigger.schedule+"::"+utils.moment().utc().format())
+  utils.l.d("Starting trigger launchEventStart")
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc()
@@ -162,7 +172,8 @@ function dailyOneTimeReminder(notifTrigger, callback){
 
   utils.async.waterfall([
       function (callback) {
-        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming,status:{$ne:"full"}, launchDate:{$gte:date1,$lte:date2}}, null, callback)
+        models.event.getByQuery({"launchStatus":utils.constants.eventLaunchStatusList.upcoming,
+          status:{$ne:"full"}, launchDate:{$gte:date1,$lte:date2}}, null, callback)
       },
       function (events, callback) {
         var totalEventsToLaunch = events?events.length:0
@@ -171,7 +182,8 @@ function dailyOneTimeReminder(notifTrigger, callback){
             var eventsByClan = utils._.countBy(events,'creator.clanId')
             for (var clanId in eventsByClan) {
               if(eventsByClan[clanId] > 0)
-                utils.async.map(notifTrigger.notifications, utils._.partial(createAggregateNotificationAndSend, clanId, eventsByClan[clanId]))
+                utils.async.map(notifTrigger.notifications,
+                  utils._.partial(createAggregateNotificationAndSend, clanId, eventsByClan[clanId]))
             }
           }
         }
