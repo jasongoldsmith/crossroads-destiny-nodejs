@@ -60,6 +60,7 @@
     "s3": "4.4.0",
     "s3-upload-stream": "1.0.7",
     "superagent": "1.2.0",
+    "temporal": "^0.5.0",
     "twilio": "2.2.1",
     "ua-parser-js": "0.7.7",
     "underscore.string": "3.1.1",

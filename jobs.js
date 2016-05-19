@@ -1,17 +1,20 @@
+// external dependencies
 var express = require('express')
-var routeUtils = require('./app/routes/routeUtils')
-var utils = require('./app/utils/index')
-var models = require('./app/models/index')
-var helpers = require('./app/helpers')
-require('./app/startup/db')
 var config = require("config")
 var fs = require('fs')
 var passwordHash = require('password-hash')
 var moment = require('moment')
+var temporal = require('temporal')
+
+// internal dependencies
+var routeUtils = require('./app/routes/routeUtils')
+var utils = require('./app/utils/index')
+var models = require('./app/models/index')
+var helpers = require('./app/helpers')
 var service = require ('./app/service')
+require('./app/startup/db')
 
 function updatePassWord() {
-
   utils.async.waterfall(
     [
       function(callback) {
@@ -87,10 +90,68 @@ function deleteOldStaleEvents() {
     })
 }
 
+function upcomingEventsReminder() {
+  utils.async.waterfall([
+      function (callback) {
+        models.notificationTrigger.getByQuery({
+          type: 'schedule',
+          triggerName: utils.constants.eventNotificationTrigger.launchUpcomingEvents,
+          isActive: true
+        },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({ error:"Trigger for upcomingEventsReminder not found or is not active" }, null)
+        }
+        var stopTime = moment().add(9, 'minutes')
+        var minsToSleep = 1
+
+        service.eventNotificationTriggerService.handleUpcomingEvents(notifTrigger)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.eventNotificationTriggerService.handleUpcomingEvents(notifTrigger)
+          if(moment() > stopTime) {
+            return callback(null, null)
+          }
+        })
+
+        // If temporal is too CPU intensive we can use this logic
+        /*
+        service.eventNotificationTriggerService.handleUpcomingEvents(notifTrigger)
+        callHandleUpcomingEvents(notifTrigger, stopTime, callback)
+        */
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending upcomingEventsReminder notification::"+err+"::"+JSON.stringify(events))
+      } else {
+        utils.l.i("upcomingEventsReminder was successful")
+      }
+    })
+}
+
+/*
+function callHandleUpcomingEvents(notifTrigger,stopTime, callback) {
+  setTimeout(function() {
+    service.eventNotificationTriggerService.handleUpcomingEvents(notifTrigger)
+      if(moment() < stopTime) {
+        callHandleUpcomingEvents(notifTrigger, stopTime, callback)
+      } else {
+        return callback(null, null)
+      }
+  }, 60000)
+}
+*/
+
 function dailyOneTimeReminder() {
   utils.async.waterfall([
     function (callback) {
-      models.notificationTrigger.getByQuery({type:'schedule', triggerName:"dailyOneTimeReminder"},
+      models.notificationTrigger.getByQuery({
+        type: 'schedule',
+        triggerName: utils.constants.eventNotificationTrigger.dailyOneTimeReminder,
+        isActive: true
+      },
         utils.firstInArrayCallback(callback))
     },
     function(notifTrigger, callback) {
@@ -113,5 +174,6 @@ module.exports = {
   updatePassWord: updatePassWord,
   deleteOldFullEvents: deleteOldFullEvents,
   deleteOldStaleEvents: deleteOldStaleEvents,
-  dailyOneTimeReminder: dailyOneTimeReminder
+  upcomingEventsReminder: upcomingEventsReminder,
+  dailyOneTimeReminder: dailyOneTimeReminder,
 }
