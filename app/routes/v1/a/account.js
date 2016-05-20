@@ -63,7 +63,7 @@ function searchGroup(user,groupId,callback){
       if(err) return callback(err, null)
       else{
         utils.l.d("Groups::"+JSON.stringify(bungieGroups))
-        return callback(null,utils._.filter(bungieGroups,{groupId:groupId}))
+        return callback(null,utils._.head(utils._.filter(bungieGroups,{groupId:groupId})))
       }
     }
   )
