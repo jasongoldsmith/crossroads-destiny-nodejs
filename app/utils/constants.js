@@ -220,7 +220,7 @@ var bungieMessages = {
 var eventNotificationTrigger = {
   launchUpcomingEvents:'launchUpcomingEvents',
   launchEventStart:'launchEventStart',
-  eventStartreminder:'eventStartreminder',
+  eventStartReminder:'eventStartReminder',
   dailyOneTimeReminder:'dailyOneTimeReminder',
   launchUpComingReminders:'launchUpComingReminders'
 }

@@ -102,7 +102,7 @@ function upcomingEventsReminder() {
       },
       function(notifTrigger, callback) {
         if(!notifTrigger) {
-          return callback({ error:"Trigger for upcomingEventsReminder not found or is not active" }, null)
+          return callback({error: "Trigger for upcomingEventsReminder not found or is not active"}, null)
         }
         var stopTime = moment().add(9, 'minutes')
         var minsToSleep = 1
@@ -111,6 +111,7 @@ function upcomingEventsReminder() {
         temporal.loop(minsToSleep * 60 * 1000, function() {
           service.eventNotificationTriggerService.handleUpcomingEvents(notifTrigger)
           if(moment() > stopTime) {
+            this.stop()
             return callback(null, null)
           }
         })
@@ -124,7 +125,7 @@ function upcomingEventsReminder() {
     ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending upcomingEventsReminder notification::"+err+"::"+JSON.stringify(events))
+        utils.l.s("Error sending upcomingEventsReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
       } else {
         utils.l.i("upcomingEventsReminder was successful")
       }
@@ -144,6 +145,78 @@ function callHandleUpcomingEvents(notifTrigger,stopTime, callback) {
 }
 */
 
+function eventFullReminder() {
+  utils.async.waterfall([
+      function (callback) {
+        models.notificationTrigger.getByQuery({
+            type: 'schedule',
+            triggerName: utils.constants.eventNotificationTrigger.launchEventStart,
+            isActive: true
+          },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({error: "Trigger for eventFullReminder not found or is not active"}, null)
+        }
+        var stopTime = moment().add(8, 'minutes')
+        var minsToSleep = 2
+
+        service.eventNotificationTriggerService.launchEventStart(notifTrigger)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.eventNotificationTriggerService.launchEventStart(notifTrigger)
+          if(moment() > stopTime) {
+            this.stop()
+            return callback(null, null)
+          }
+        })
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending eventFullReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+      } else {
+        utils.l.i("eventFullReminder was successful")
+      }
+    })
+}
+
+function eventStartReminder() {
+  utils.async.waterfall([
+      function (callback) {
+        models.notificationTrigger.getByQuery({
+            type: 'schedule',
+            triggerName: utils.constants.eventNotificationTrigger.eventStartReminder,
+            isActive: true
+          },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({error: "Trigger for eventStartReminder not found or is not active"}, null)
+        }
+        var stopTime = moment().add(8, 'minutes')
+        var minsToSleep = 2
+
+        service.eventNotificationTriggerService.eventStartReminder(notifTrigger)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.eventNotificationTriggerService.eventStartReminder(notifTrigger)
+          if(moment() > stopTime) {
+            this.stop()
+            return callback(null, null)
+          }
+        })
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending eventStartReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+      } else {
+        utils.l.i("eventStartReminder was successful")
+      }
+    })
+}
+
 function dailyOneTimeReminder() {
   utils.async.waterfall([
     function (callback) {
@@ -156,16 +229,52 @@ function dailyOneTimeReminder() {
     },
     function(notifTrigger, callback) {
       if(!notifTrigger) {
-        return callback({error:"Trigger for dailyOneTimeReminder not found or is not active"}, null)
+        return callback({error: "Trigger for dailyOneTimeReminder not found or is not active"}, null)
       }
       service.eventNotificationTriggerService.dailyOneTimeReminder(notifTrigger, callback)
     }
   ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending dailyOneTimeReminder notification::"+err+"::"+JSON.stringify(events))
+        utils.l.s("Error sending dailyOneTimeReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
       } else {
         utils.l.i("job completed dailyOneTimeReminder successfully")
+      }
+    })
+}
+
+function eventUpcomingReminder() {
+  utils.async.waterfall([
+      function (callback) {
+        models.notificationTrigger.getByQuery({
+            type: 'schedule',
+            triggerName: utils.constants.eventNotificationTrigger.launchUpComingReminders,
+            isActive: true
+          },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({error: "Trigger for eventUpcomingReminder not found or is not active"}, null)
+        }
+        var stopTime = moment().add(8, 'minutes')
+        var minsToSleep = 2
+
+        service.eventNotificationTriggerService.launchUpComingReminders(notifTrigger)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.eventNotificationTriggerService.launchUpComingReminders(notifTrigger)
+          if(moment() > stopTime) {
+            this.stop()
+            return callback(null, null)
+          }
+        })
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending eventUpcomingReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+      } else {
+        utils.l.i("eventUpcomingReminder was successful")
       }
     })
 }
@@ -175,5 +284,8 @@ module.exports = {
   deleteOldFullEvents: deleteOldFullEvents,
   deleteOldStaleEvents: deleteOldStaleEvents,
   upcomingEventsReminder: upcomingEventsReminder,
+  eventFullReminder: eventFullReminder,
+  eventStartReminder: eventStartReminder,
   dailyOneTimeReminder: dailyOneTimeReminder,
+  eventUpcomingReminder: eventUpcomingReminder
 }
