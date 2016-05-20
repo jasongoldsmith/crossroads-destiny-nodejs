@@ -15,6 +15,7 @@ var upcomingEventsReminder = "upcomingEventsReminder"
 var eventFullReminder = "eventFullReminder"
 var eventStartReminder = "eventStartReminder"
 var dailyOneTimeReminder = "dailyOneTimeReminder"
+var eventUpcomingReminder = "eventUpcomingReminder"
 
 var destinyService = require('./app/service/destinyInterface')
 var authService = require('./app/service/authService')
@@ -73,6 +74,9 @@ switch(command) {
     break
   case dailyOneTimeReminder:
     jobs.dailyOneTimeReminder()
+    break
+  case eventUpcomingReminder:
+    jobs.eventUpcomingReminder()
     break
   case "momentTest":
     var date = new Date()
