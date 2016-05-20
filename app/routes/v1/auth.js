@@ -171,6 +171,7 @@ function verifyAccountConfirm(req,res){
   var token = req.param("token");
   utils.l.d("verifyAccount::token="+token)
   req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
+  var userObj = null
   utils.async.waterfall([
     function(callback){
       //models.user.getUserByData({userName:name},callback)
@@ -179,6 +180,7 @@ function verifyAccountConfirm(req,res){
         utils.l.d("user="+user)
       //if(user && ((user.psnId == id || user.xboxId == id) && user.psnToken == token)){
       if(user){
+        userObj = user
         user.psnVerified = "VERIFIED"
         models.user.save(user,function(err,updatedUser){
           callback(null, utils.config.accountVerificationSuccess)
@@ -190,7 +192,10 @@ function verifyAccountConfirm(req,res){
   ],
     function (err, successResp){
       if(err) routeUtils.handleAPIError(req,res,err,err)
-      else res.render("account/verifyConfirm",{appName:"TRVLR"})
+      else {
+        helpers.firebase.updateUser(userObj)
+        res.render("account/verifyConfirm",{appName:"TRVLR"})
+      }
     }
   )
 }

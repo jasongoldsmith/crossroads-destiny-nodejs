@@ -3,6 +3,7 @@ var Firebase = require("firebase")
 var firebaseRef = new Firebase(utils.config.firebaseURL)
 
 var eventsRef = firebaseRef.child("events")
+var usersRef = firebaseRef.child("users")
 
 function createEvent(event, user) {
 
@@ -41,6 +42,21 @@ function updateEvent(event, user) {
   })
 }
 
+function updateUser(user) {
+
+  var clansRef = usersRef.child(user.clanId)
+  var id = user._id.toString()
+  // We want to remove _id and __v from event as it creates problems while saving in firebase
+
+  clansRef.child(id).update(user.toObject(), function (error) {
+    if (error) {
+      utils.l.d("user creation failed in firebase", user)
+    } else {
+      utils.l.d("user was created successfully in firebase", user)
+    }
+  })
+}
+
 function getEventObj(event) {
   // delete does not work on a mongoose object unless we convert it to a JSON object
   var eventObj = event.toObject()
@@ -51,5 +67,6 @@ function getEventObj(event) {
 
 module.exports = {
   createEvent: createEvent,
-  updateEvent: updateEvent
+  updateEvent: updateEvent,
+  updateUser:updateUser
 }
