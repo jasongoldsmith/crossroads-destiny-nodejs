@@ -3,7 +3,7 @@ var router = express.Router()
 var routeUtils = require('./../../routeUtils')
 var models = require('../../../models')
 var utils = require('../../../utils')
-
+var service = require('../../../service')
 function getSelfUser(req, res) {
   var feedData = {value: req.user}
   routeUtils.handleAPISuccess(req, res, feedData)
@@ -72,7 +72,14 @@ function updateUser(data, callback) {
 
 //TODO: GroupID is set in clanID field. Need to change it later.
 function updateUserGroup(data, callback) {
-  models.user.updateUser({id:data.id,clanId:data.clanId}, true,callback)
+  utils.async.waterfall([
+    function(callback){
+      service.eventService.clearEventsForPlayer(data.id,callback)
+    },function(events,callback){
+      models.user.updateUser({id:data.id,clanId:data.clanId}, true,callback)
+    }
+  ],callback)
+
 }
 
 routeUtils.rGet(router, '/self', 'GetSelfUser', getSelfUser)

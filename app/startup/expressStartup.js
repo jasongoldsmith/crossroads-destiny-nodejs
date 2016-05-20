@@ -86,6 +86,5 @@ module.exports = function (app, passport) {
     //}
     next();
   });
-
   app.use(middlewares.visitTracker());
 };

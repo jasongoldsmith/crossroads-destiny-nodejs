@@ -81,7 +81,7 @@ function listById(req, res) {
 function leave(req, res) {
 	utils.l.d("Event leave request: " + JSON.stringify(req.body))
 
-	leaveEvent(req.body, function(err, event) {
+	service.eventService.leaveEvent(req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
@@ -162,25 +162,20 @@ function joinEvent(data, callback) {
 		], callback)
 }
 
-function leaveEvent(data, callback) {
-	utils.async.waterfall(
-		[
-			function(callback) {
-				models.event.leaveEvent(data, callback)
-			},
-			function(event, callback) {
-        models.user.getById(data.player, function(err, user) {
-          if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event)) {
-						service.eventBasedPushNotificationService.sendPushNotificationForLeave(event, user)
-          }
-          callback(null, event)
-        })
-			}
-		], callback)
-}
+
 
 function deleteEvent(data, callback) {
 	models.event.deleteEvent(data, callback)
+}
+
+function clearEventsForPlayer(req,res){
+	service.eventService.clearEventsForPlayer(req.body.playerId, function(err, events) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			routeUtils.handleAPISuccess(req, res, events)
+		}
+	})
 }
 
 routeUtils.rPost(router, '/create', 'create', create)
@@ -190,4 +185,5 @@ routeUtils.rGet(router, '/listAll', 'listAll', listAll, {utm_dnt:"androidAppVers
 routeUtils.rPost(router, '/listById', 'listById', listById)
 routeUtils.rPost(router, '/leave', 'leave', leave)
 routeUtils.rPost(router, '/delete', 'remove', remove)
+routeUtils.rPost(router, '/clear', 'clearEventsForPlayer', clearEventsForPlayer)
 module.exports = router

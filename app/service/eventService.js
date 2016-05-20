@@ -1,7 +1,7 @@
 var utils = require('../utils')
 var models = require('../models')
 
-function cleanEventsForPlayer(playerId,callback){
+function clearEventsForPlayer(playerId,callback){
   utils.async.waterfall([
     function(callback){
       models.event.listEventsByUser(playerId,callback)
@@ -34,5 +34,5 @@ function leaveEvent(data, callback) {
 
 module.exports = {
   leaveEvent:leaveEvent,
-  cleanEventsForPlayer:cleanEventsForPlayer
+  clearEventsForPlayer:clearEventsForPlayer
 }

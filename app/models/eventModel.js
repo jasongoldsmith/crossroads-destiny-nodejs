@@ -277,6 +277,10 @@ function launchEvent(event, callback){
 	)
 }
 
+function listEventsByUser(userId,callback){
+	getByQuery({players:{$in:[userId]}}, null, callback)
+}
+
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
@@ -287,5 +291,6 @@ module.exports = {
 	getByQuery: getByQuery,
 	getById: getById,
 	launchEvent: launchEvent,
-	update:update
+	update:update,
+	listEventsByUser:listEventsByUser
 }
