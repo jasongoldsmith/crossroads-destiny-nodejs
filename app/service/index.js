@@ -6,5 +6,6 @@ module.exports = {
   destinyInerface: require('./destinyInterface'),
   eventNotificationTriggerService:require('./eventNotificationTriggerService'),
   eventNotificationService:require('./eventNotificationService'),
-  eventBasedPushNotificationService:require('./eventBasedPushNotificationService')
+  eventBasedPushNotificationService:require('./eventBasedPushNotificationService'),
+  eventService:require('./eventService')
 }

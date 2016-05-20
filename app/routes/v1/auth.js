@@ -168,14 +168,9 @@ function verifyAccount(req,res){
 }
 
 function verifyAccountConfirm(req,res){
-  //var id = req.param("id");
   var token = req.param("token");
-  //var name = req.param("name");
-  //console.log("id="+id+",token="+token+",name="+name)
   utils.l.d("verifyAccount::token="+token)
-//  req.assert('id', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
   req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
-//  req.assert('name', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
   utils.async.waterfall([
     function(callback){
       //models.user.getUserByData({userName:name},callback)
@@ -195,7 +190,7 @@ function verifyAccountConfirm(req,res){
   ],
     function (err, successResp){
       if(err) routeUtils.handleAPIError(req,res,err,err)
-      else routeUtils.handleAPISuccess(req, res, successResp)
+      else res.render("account/verifyConfirm",{appName:"TRVLR"})
     }
   )
 }
@@ -271,7 +266,7 @@ function resetPassword(req,res){
         req.routeErr = err
         return res.render("Unable to reset password at this time. Please try again later.."+err)
       }
-      return res.send("Congratulations your request has been processed successfully")
+      return res.render("account/resetPasswordConfirm",{appName:"TRVLR"})
     }
   )
 }
