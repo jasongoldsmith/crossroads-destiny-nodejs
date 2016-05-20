@@ -1,38 +1,7 @@
 var utils = require('../utils')
 var models = require('../models')
-var schedule = require('node-schedule');
 var notificationService = require('./eventNotificationService')
 var helpers = require('../helpers')
-
-function handleNotificationTrigger(notifTrigger, event){
-  var scheduleTime = notifTrigger.schedule
-  utils.l.d("handleNotificationTrigger::"+notifTrigger.triggerName+"@@@@"+utils.moment().utc().format())
-
-  switch (notifTrigger.triggerName) {
-    //case utils.constants.eventNotificationTrigger.launchUpcomingEvents:
-    //  utils.l.d("handleNotificationTrigger::launchUpcomingEvents::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,handleUpcomingEvents.bind(null,notifTrigger))
-    //  break;
-    //case utils.constants.eventNotificationTrigger.launchEventStart:
-    //  utils.l.d("handleNotificationTrigger::launchEventStart::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,launchEventStart.bind(null,notifTrigger))
-    //  break;
-    //case utils.constants.eventNotificationTrigger.eventStartReminder:
-    //  utils.l.d("handleNotificationTrigger::eventStartReminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,eventStartReminder.bind(null,notifTrigger))
-    //  break;
-    //case utils.constants.eventNotificationTrigger.dailyOneTimeReminder:
-    //  utils.l.d("handleNotificationTrigger::dailyOneTimeReminder::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,dailyOneTimeReminder.bind(null,notifTrigger))
-    //  break;
-    //case utils.constants.eventNotificationTrigger.launchUpComingReminders:
-    //  utils.l.d("handleNotificationTrigger::launchUpComingReminders::schedule::"+scheduleTime+"----"+utils.moment().utc().format())
-    //  return schedule.scheduleJob(notifTrigger.triggerName,scheduleTime,launchUpComingReminders.bind(null,notifTrigger))
-    //  break
-    default:
-      break;
-  }
-}
 
 // Schedule Based Notifications
 
@@ -346,7 +315,6 @@ function createAggregateNotificationAndSend(clanId, eventCount, notification){
 }
 
 module.exports ={
-  handleNotificationTrigger:handleNotificationTrigger,
   handleUpcomingEvents: handleUpcomingEvents,
   launchEventStart:launchEventStart,
   eventStartReminder: eventStartReminder,

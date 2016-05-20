@@ -114,9 +114,6 @@ switch(command) {
     },function(){
     })
     break;
-  case 'notifService':
-    notifService.handleNotificationTrigger({triggerName:'launchUpcomingEvents',schedule:'*/1 * * * *'});
-    break;
   case 'scheduleTst':
     var j = schedule.scheduleJob("test schedule123",'0 43 16 * * *',function(){
       console.log("executing job @"+new Date())
