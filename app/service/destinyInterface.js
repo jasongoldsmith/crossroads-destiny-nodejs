@@ -130,7 +130,7 @@ function bungieGet(url, callback){
       utils.l.s("Error getting bungie for url "+url+" and error is::----"+error)
       return callback(error,null)
     } else {
-      utils.l.d("Got bungie for "+url+" and bungieData::----"+bungieData)
+      utils.l.d("Got bungie for "+url)
       return callback(null,bungieData)
     }
   })

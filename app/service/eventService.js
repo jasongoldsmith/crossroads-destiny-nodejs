@@ -32,7 +32,12 @@ function leaveEvent(data, callback) {
     ], callback)
 }
 
+function listEventCountByGroups(groupIds, callback){
+  models.event.listEventCount("clanId",{clanId:{$in:groupIds}},callback)
+}
+
 module.exports = {
   leaveEvent:leaveEvent,
-  clearEventsForPlayer:clearEventsForPlayer
+  clearEventsForPlayer:clearEventsForPlayer,
+  listEventCountByGroups: listEventCountByGroups
 }

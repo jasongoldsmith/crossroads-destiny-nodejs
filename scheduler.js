@@ -173,7 +173,7 @@ switch(command) {
     })
     console.log("event::"+JSON.stringify(players))
 
-    console.log("players::get"+JSON.stringify(utils._.get(jsonEvent.players,['_id','uDate'])))
+    console.log("players::get"+JSON.stringify(utils._.map(jsonEvent.players,{_id:'_id',uDate:'uDate'})))
   default:
     break;
 }

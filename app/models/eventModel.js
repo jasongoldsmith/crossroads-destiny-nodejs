@@ -94,6 +94,7 @@ function createEvent(data, callback) {
 		},
 		function (user, callback) {
 			utils.l.d("Found user: " + JSON.stringify(user))
+			eventObj.clanId=user.clanId
 			if (utils._.isInvalidOrBlank(checkWithDate)) {
 				getByQuery({ eType: data.eType, launchStatus: "now" }, user, utils.firstInArrayCallback(callback))
 			} else {
@@ -281,6 +282,12 @@ function listEventsByUser(userId,callback){
 	getByQuery({players:{$in:[userId]}}, null, callback)
 }
 
+function listEventCount(id,filter,callback){
+	Event
+			.aggregate([{ $match : filter},{$group: {_id : "$"+id, count:  { $sum : 1} }}])
+			.exec(callback)
+}
+
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
@@ -292,5 +299,6 @@ module.exports = {
 	getById: getById,
 	launchEvent: launchEvent,
 	update:update,
-	listEventsByUser:listEventsByUser
+	listEventsByUser:listEventsByUser,
+	listEventCount: listEventCount
 }

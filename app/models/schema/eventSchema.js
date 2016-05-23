@@ -13,7 +13,8 @@ var eventSchema = new Schema({
 	created: { type: Date, default: Date.now },
 	updated: { type: Date, default: Date.now },
 	launchDate: { type: Date, default: Date.now },
-	notifStatus:[{type: String}]
+	notifStatus:[{type: String}],
+	clanId:{type:String}
 })
 
 eventSchema.index({'eType': 1})

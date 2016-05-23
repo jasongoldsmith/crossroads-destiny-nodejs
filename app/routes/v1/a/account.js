@@ -12,7 +12,7 @@ function listMyGroups(req,res){
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {
-      utils.l.d("Bungie groups response ::"+JSON.stringify(groups))
+      utils.l.d("Bungie groups response ::",groups)
       groupsResponse = groups || [{}]
       routeUtils.handleAPISuccess(req, res, groupsResponse)
     }
@@ -20,6 +20,7 @@ function listMyGroups(req,res){
 }
 
 function listGroups(user,callback){
+  var groupList = null
   utils.async.waterfall([
       function (callback) {
         models.user.getUserById({id:user._id},callback)
@@ -29,6 +30,13 @@ function listGroups(user,callback){
           //TODO: set current page to 1 for now. Change it when we have paging for groups.
           service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, user.psnId,1, callback)
         }else callback({error:"User doesnot exist/logged in."})
+      },function(groups,callback){
+        if(groups) {
+          groupList = groups
+          service.eventService.listEventCountByGroups(utils._.map(groups, 'groupId'), callback)
+        }else return callback(null, null)
+      },function(eventCounts, callback){
+        mergeEventStatsWithGroups(eventCounts,groupList, callback)
       }
     ],
   callback
@@ -67,6 +75,19 @@ function searchGroup(user,groupId,callback){
       }
     }
   )
+}
+
+function mergeEventStatsWithGroups(eventCountList,groupList, callback){
+  if(eventCountList){
+    //groupList = {groupList:groupList,eventStats:eventCounts}
+    groupUpdatedList = utils._.map(JSON.parse(JSON.stringify(groupList)),function(group){
+      var eventCount = utils._.find(eventCountList,{"_id":group.groupId})
+      if(eventCount) group.eventCount=eventCount.count
+      return group
+    })
+  }
+
+  return callback(null, groupUpdatedList)
 }
 
 /** Routes */
