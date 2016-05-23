@@ -24,9 +24,9 @@ PushNotification.init({
   }
 })
 
-function sendSinglePushNotification(data, alert, notificationResponse, installation) {
+function sendSinglePushNotification(data, alert, notificationResponse, installation, clanId) {
   utils.l.d("sending notification installation::"+installation+"\nalert::"+alert)
-  var payload = getPayload(data, notificationResponse)
+  var payload = getPayload(data, notificationResponse, clanId)
 
   if(utils._.isInvalidOrBlank(installation) || utils._.isInvalidOrBlank(installation.deviceToken)
     || utils._.isInvalidOrBlank(installation.deviceType) ) {
@@ -41,27 +41,28 @@ function sendSinglePushNotification(data, alert, notificationResponse, installat
   }
 }
 
-function sendMultiplePushNotifications(installations, data, alert, notificationResponse) {
-  utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, alert, notificationResponse))
+function sendMultiplePushNotifications(installations, data, alert, notificationResponse, clanId) {
+  utils.async.map(installations, utils._.partial(sendSinglePushNotification, data, alert, notificationResponse, clanId))
 }
 
-function sendMultiplePushNotificationsForUsers(notification, data) {
+function sendMultiplePushNotificationsForUsers(notification, data, clanId) {
   models = require('../models')
 
   utils.l.d("sendMultiplePushNotificationsForUsers::notification::"
     + JSON.stringify({notification:notification.name,message:notification.message}))
 
   utils.async.map(notification.recipients, models.installation.getInstallationByUser, function(err, installations) {
-    sendMultiplePushNotifications(installations, data, notification.message, notification)
+    sendMultiplePushNotifications(installations, data, notification.message, notification, clanId)
   })
 }
 
-function getPayload(event, notificationResponse) {
+function getPayload(event, notificationResponse, clanId) {
   var payload = {
     notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
     eventId: utils._.isValidNonBlank(event) ? event._id : null,
     eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
     eventName: utils._.isValidNonBlank(event) ? event.eType.aSubType : null,
+    eventClanId: utils._.isValidNonBlank(event) ? event.clanId : clanId,
     isTrackable: true
   }
   utils.l.d("payload", payload)

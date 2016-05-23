@@ -303,14 +303,14 @@ function createNotificationAndSend(event, user, notification){
   notificationService.getNotificationDetails(event, notification, user, function(err, notificationResponse) {
     utils.l.d("notification response object", notificationResponse)
     if(err) util.l.s("createNotificationAndSend::Error while creating notificationResponse object" + err)
-    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, event)
+    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, event, null)
   })
 }
 
 function createAggregateNotificationAndSend(clanId, eventCount, notification){
   utils.l.d("createAggregateNotificationAndSend::notification::"+JSON.stringify(notification))
   notificationService.getAggregateNotificationDetails(clanId, eventCount, notification, function(err,notificationResponse){
-    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, null)
+    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, null, clanId)
   })
 }
 

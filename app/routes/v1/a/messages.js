@@ -52,7 +52,7 @@ function sendMessage(data, messageCreator, callback) {
 					name : "messageFromPlayer"
 				}
 				var message = messageCreator.psnId + " from " + eventObj.eType.aSubType + ": "  + data.message
-				helpers.pushNotification.sendSinglePushNotification(eventObj, message, notificationObject, installation)
+				helpers.pushNotification.sendSinglePushNotification(eventObj, message, notificationObject, installation, null)
 				return callback(null, { messageSent: data.message })
 			}
 		], callback)
@@ -72,7 +72,7 @@ function sendCustomMessageToAllUsers(data, callback) {
 			}
 
 			utils.async.map(users, models.installation.getInstallationByUser, function(err, installations) {
-				helpers.pushNotification.sendMultiplePushNotifications(installations, null, data.message, notificationObject)
+				helpers.pushNotification.sendMultiplePushNotifications(installations, null, data.message, notificationObject, null)
 			})
 			callback(null, {message: "pushes were sent successfully"})
 		}
