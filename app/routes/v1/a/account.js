@@ -55,6 +55,7 @@ function searchGroupReq(req,res){
 
 function searchGroup(user,groupId,callback){
   var userObj = null
+  var groupList = null
   utils.async.waterfall([
       function (callback) {
         models.user.getUserById({id:user._id},callback)
@@ -65,6 +66,13 @@ function searchGroup(user,groupId,callback){
           //TODO: set current page to 1 for now. Change it when we have paging for groups.
           service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, user.psnId,1, callback)
         }else return callback({error:"User doesnot exist/logged in."})
+      },function(groups,callback){
+        if(groups) {
+          groupList = groups
+          service.eventService.listEventCountByGroups(utils._.map(groups, 'groupId'), callback)
+        }else return callback(null, null)
+      },function(eventCounts, callback){
+        mergeEventStatsWithGroups(eventCounts,groupList, callback)
       }
     ],
     function(err, bungieGroups){
