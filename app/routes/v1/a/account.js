@@ -106,11 +106,14 @@ function mergeEventStatsWithGroups(eventCountList,groupList, callback){
 
 function mergeGroups(user,bungieGroups){
   var bungieGroupIds = utils._.map(bungieGroups, 'groupId')
-  utils._.map(bungieGroupIds,function(bungieId){
-    if(!utils._.find(user.groups,{groupId:bungieId})) user.groups.push({groupId:bungieId,muteNotification:false})
+  var updatedGroups = utils._.map(bungieGroupIds,function(bungieId){
+    var userGroup = utils._.find(user.groups,{groupId:bungieId})
+    if(!userGroup) return {groupId:bungieId,muteNotification:false}
+    else return userGroup
   })
+  groups=updatedGroups
   utils.l.d("mergeGroups",user)
-  return user
+  return {id:user._id,groups:updatedGroups}
 }
 /** Routes */
 routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups)
