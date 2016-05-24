@@ -145,6 +145,7 @@ function signup(req, res) {
         req.routeErr = err
         return routeUtils.handleAPIError(req, res, err,err)
       }
+      helpers.firebase.createUser(user)
       helpers.cookies.setCookie("foo", "bar", res)
       helpers.m.setUser(user)
       return routeUtils.handleAPISuccess(req, res, {value: user,message:getSignupMessage(user)})
