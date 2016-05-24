@@ -174,6 +174,27 @@ switch(command) {
     console.log("event::"+JSON.stringify(players))
 
     console.log("players::get"+JSON.stringify(utils._.map(jsonEvent.players,{_id:'_id',uDate:'uDate'})))
+  case "mergeTest":
+    var data = {userName:"harsha",groups:[{groupId:123,name:"g123"},{groupId:456,name:"g456"}]}
+    var data1 = [{groupId:123},{groupId:789}]
+    var keys = utils._.map(data,'groupId')
+    console.log("keys"+keys)
+      console.log(utils._.unionWith(data,data1,function(dataVal,data1Val){
+        return (dataVal.groupId == data1Val.groupId)
+      }))
+
+    var data2 = ["123","789"]
+    utils._.map(data2,function(groupId){
+      if(!utils._.find(data,{groupId:groupId})) data.groups.push({groupId:groupId,groupName:"g"+groupId})
+    })
+
+    utils.l.d("data::",data)
+    break;
+  case "groupPullTest":
+    notifService.getClanMembers(null,"1184379",function(err,users){
+      utils.l.d("users",users)
+      utils.l.d("err",err)
+    })
   default:
     break;
 }

@@ -99,7 +99,7 @@ function getRecipients(recipientType, event, clanId, callback) {
 }
 
 function getClanMembers(event,clanId, callback) {
-	models.user.getByQuery({clanId: event?event.creator.clanId:clanId}, callback)
+	models.user.getByQuery({'groups.groupId':{$in: [event?event.clanId:clanId]}}, callback)
 }
 
 function removeEventPlayersFromClan(clanPlayers, eventPlayers) {
@@ -149,5 +149,6 @@ function getTimeStringForDisplay(date) {
 
 module.exports = {
 	getNotificationDetails: getNotificationDetails,
-	getAggregateNotificationDetails: getAggregateNotificationDetails
+	getAggregateNotificationDetails: getAggregateNotificationDetails,
+	getClanMembers:getClanMembers
 }

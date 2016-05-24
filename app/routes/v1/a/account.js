@@ -21,19 +21,24 @@ function listMyGroups(req,res){
 
 function listGroups(user,callback){
   var groupList = null
+  var userObj = null
   utils.async.waterfall([
       function (callback) {
         models.user.getUserById({id:user._id},callback)
       },
       function(user,callback){
         if(user) {
+          userObj = user
           //TODO: set current page to 1 for now. Change it when we have paging for groups.
           service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, user.psnId,1, callback)
-        }else callback({error:"User doesnot exist/logged in."})
+        }else return callback({error:"User doesnot exist/logged in."})
       },function(groups,callback){
         if(groups) {
           groupList = groups
-          service.eventService.listEventCountByGroups(utils._.map(groups, 'groupId'), callback)
+          models.user.updateUser(mergeGroups(userObj,groups),false,function(err,user){
+            if(user) service.eventService.listEventCountByGroups(utils._.map(groupList, 'groupId'),callback)
+            else return callback(err,null)
+          })
         }else return callback(null, null)
       },function(eventCounts, callback){
         mergeEventStatsWithGroups(eventCounts,groupList, callback)
@@ -98,6 +103,13 @@ function mergeEventStatsWithGroups(eventCountList,groupList, callback){
   return callback(null, groupUpdatedList)
 }
 
+function mergeGroups(user,bungieGroups){
+  var bungieGroupIds = utils._.map(bungieGroups, 'groupId')
+  utils._.map(bungieGroupIds,function(bungieId){
+    if(!utils._.find(user.groups,{groupId:bungieId})) user.groups.push({groupId:bungieId,muteNotification:false})
+  })
+  return user
+}
 /** Routes */
 routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups)
 routeUtils.rGet(router, '/group/search/:groupId', 'searchGroupById', searchGroupReq)

@@ -20,6 +20,7 @@ function roundDateToNearestQuaterHour(dateString) {
 	return new Date(Math.round(date.getTime() / coeff) * coeff)
 }
 
+//TODO: Search for references and remove user object if not used
 function getByQuery(query, user, callback) {
 	Event
 		.find(query)
@@ -94,11 +95,11 @@ function createEvent(data, callback) {
 		},
 		function (user, callback) {
 			utils.l.d("Found user: " + JSON.stringify(user))
-			eventObj.clanId=user.clanId
+			if(!data.clanId) eventObj.clanId=user.clanId
 			if (utils._.isInvalidOrBlank(checkWithDate)) {
-				getByQuery({ eType: data.eType, launchStatus: "now" }, user, utils.firstInArrayCallback(callback))
+				getByQuery({ eType: data.eType, launchStatus: "now",clanId:eventObj.clanId }, null, utils.firstInArrayCallback(callback))
 			} else {
-				getByQuery({ eType: data.eType, launchDate: data.launchDate }, user, utils.firstInArrayCallback(callback))
+				getByQuery({ eType: data.eType, launchDate: data.launchDate,clanId:eventObj.clanId },null, utils.firstInArrayCallback(callback))
 			}
 		},
 		function (event, callback) {

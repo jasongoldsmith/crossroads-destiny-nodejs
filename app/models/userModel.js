@@ -141,10 +141,10 @@ function getUserById(data, callback) {
       },
       function(user, callback) {
         if (!user) {
-          utils.l.i("no user found")
+          utils.l.d("no user found")
           return callback({ error: "user with this id does not exist" }, null)
         } else {
-          utils.l.i("found user: " + JSON.stringify(user))
+          utils.l.d("found user: " + JSON.stringify(user))
           return callback(null, user)
         }
       }
