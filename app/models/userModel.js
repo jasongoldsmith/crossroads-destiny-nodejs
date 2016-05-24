@@ -159,6 +159,7 @@ function listUsers(callback) {
 
 
 function updateUser(data, allowClanUpdate, callback) {
+  utils.l.d("updateUser::data",data)
   utils.async.waterfall([
       function (callback) {
         getById(data.id, callback)

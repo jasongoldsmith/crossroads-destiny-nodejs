@@ -108,6 +108,7 @@ function mergeGroups(user,bungieGroups){
   utils._.map(bungieGroupIds,function(bungieId){
     if(!utils._.find(user.groups,{groupId:bungieId})) user.groups.push({groupId:bungieId,muteNotification:false})
   })
+  utils.l.d("mergeGroups",user)
   return user
 }
 /** Routes */
