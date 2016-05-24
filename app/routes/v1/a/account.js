@@ -91,6 +91,7 @@ function searchGroup(user,groupId,callback){
 }
 
 function mergeEventStatsWithGroups(eventCountList,groupList, callback){
+  var groupUpdatedList = null
   if(eventCountList){
     //groupList = {groupList:groupList,eventStats:eventCounts}
     groupUpdatedList = utils._.map(JSON.parse(JSON.stringify(groupList)),function(group){
@@ -98,7 +99,7 @@ function mergeEventStatsWithGroups(eventCountList,groupList, callback){
       if(eventCount) group.eventCount=eventCount.count
       return group
     })
-  }
+  }else groupUpdatedList = groupList
 
   return callback(null, groupUpdatedList)
 }
