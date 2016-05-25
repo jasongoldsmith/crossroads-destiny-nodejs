@@ -1,6 +1,6 @@
 var Mixpanel = require('mixpanel');
 var utils = require('../utils');
-var mixpanelKey = "11356e28f1441f584be7a0dbed89d8df";
+var mixpanelKey = utils.config.mixpanelKey;
 utils.l.i("Mixpanel key", mixpanelKey);
 var mixpanel = null;
 
