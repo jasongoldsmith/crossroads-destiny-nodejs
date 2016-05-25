@@ -42,10 +42,19 @@ function updateEvent(event, user) {
   })
 }
 
-function updateUser(user) {
-  //var clansRef = usersRef.child(user.clanId)
+function createUser(user) {
   var id = user._id.toString()
-  // We want to remove _id and __v from event as it creates problems while saving in firebase
+  var userObj = getUserObj(user)
+  usersRef.child(id).set(userObj, function (error) {
+    if (error) {
+      utils.l.d("user creation failed in firebase", user)
+    } else {
+      utils.l.d("user was created successfully in firebase", user)
+    }
+  })}
+
+function updateUser(user) {
+  var id = user._id.toString()
   var userObj = getUserObj(user)
   usersRef.child(id).update(userObj, function (error) {
     if (error) {
@@ -56,20 +65,6 @@ function updateUser(user) {
   })
 }
 
-function createUser(user) {
-
-  //var clansRef = usersRef.child(user.clanId)
-  var id = user._id.toString()
-  // We want to remove _id and __v from event as it creates problems while saving in firebase
-  var userObj = getUserObj(user)
-  usersRef.child(id).set(userObj, function (error) {
-    if (error) {
-      utils.l.d("event creation failed in firebase", user)
-    } else {
-      utils.l.d("event was created successfully in firebase", user)
-    }
-  })}
-
 function getEventObj(event) {
   // delete does not work on a mongoose object unless we convert it to a JSON object
   var eventObj = event.toObject()
@@ -78,14 +73,16 @@ function getEventObj(event) {
   return eventObj
 }
 
-function getUserObj(user){
+function getUserObj(user) {
   var userObj = user.toObject()
+  userObj._id = userObj._id.toString()
   delete userObj.passWord
   return userObj
 }
+
 module.exports = {
   createEvent: createEvent,
   updateEvent: updateEvent,
-  updateUser:updateUser,
-  createUser:createUser
+  createUser: createUser,
+  updateUser: updateUser
 }
