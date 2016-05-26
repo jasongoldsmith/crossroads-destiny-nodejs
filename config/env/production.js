@@ -1,6 +1,6 @@
 
 module.exports = {
-  hostName: 'https://crossroadsapp-live.herokuapp.com',
+  hostName: 'https://live.crossroadsapp.co',
   enableNewRelic: true,
   portNum: -1,
   s3: {
@@ -9,5 +9,5 @@ module.exports = {
     momentsBucket: "feighty-moments",
   },
   awsProfileImageUrl: "http://feighty-images.s3.amazonaws.com/",
-  enableBungieIntegration: false
+  enableBungieIntegration: true
 };
