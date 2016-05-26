@@ -160,7 +160,7 @@ function verifyAccount(req,res){
       res.render("account/index",{
         token: token,
         psnId: user.psnId,
-        appName:"TRVLR"
+        appName:utils.config.appName
       })
     }else{
       res.render("account/error")
@@ -195,7 +195,7 @@ function verifyAccountConfirm(req,res){
       if(err) routeUtils.handleAPIError(req,res,err,err)
       else {
         helpers.firebase.updateUser(userObj)
-        res.render("account/verifyConfirm",{appName:"TRVLR"})
+        res.render("account/verifyConfirm",{appName:utils.config.appName})
       }
     }
   )
@@ -244,7 +244,8 @@ function resetPasswordLaunch(req,res){
       res.render("account/resetPassword",{
         token: token,
         psnId: user.psnId,
-        userName: user.userName
+        userName: user.userName,
+        appName:utils.config.appName
       })
     }else{
       res.render("account/error")
@@ -272,7 +273,7 @@ function resetPassword(req,res){
         req.routeErr = err
         return res.render("Unable to reset password at this time. Please try again later.."+err)
       }
-      return res.render("account/resetPasswordConfirm",{appName:"TRVLR"})
+      return res.render("account/resetPasswordConfirm",{appName:utils.config.appName})
     }
   )
 }

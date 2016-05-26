@@ -89,12 +89,12 @@ body{
   border-style: dotted;
   border-color: #ffffff;
   background-color: #000000;
-  height: 14px;
+  height: 24px;
   width: 160px;
 }
 
 .pad{
-  padding-top: 38px;
+  padding-top: 30px;
 }
 .padSm{
   padding-top: 10px;
@@ -153,33 +153,31 @@ body{
 
 .linkBlue{
   font-family: HelveticaNeue-Bold;
-  font-size: 14px;
+  font-size: 16px;
   color: white;
-  border-left: 0px;
-  border-right: 0px;
-  border-top: 0px;
-  border-bottom: 0px;
-  background-color: #0086D0;
-  height: 50px;
+  background: #0086D0;
+  line-height: 50px;
   width: 355px;
   display: block;
+  text-align: center;
+  line-break: strict;
 }
 
 .linkGreyBlue{
   font-family: HelveticaNeue-Bold;
   font-size: 14px;
   color: white;
-  border-left: 0px;
-  border-right: 0px;
-  border-top: 0px;
-  border-bottom: 0px;
-  background-color: #365D65;
-  height: 50px;
+  background: #365D65;
+  line-height: 50px;
   width: 355px;
   display: block;
+  text-align: center;
 }
 
 a:hover, a:active {
   color: white;
 }
 
+.jumbotron {
+  background-color:#18303a;
+}

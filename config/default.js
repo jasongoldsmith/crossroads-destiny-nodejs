@@ -19,6 +19,7 @@ var defaults = {
   enforceSSL: true,
   devMode: false,
   logLevel: 'debug',
+  appName:'TRVLR',
   hostUrl: function() {
     var url = this.hostName;
     if (this.portNum !== -1) {

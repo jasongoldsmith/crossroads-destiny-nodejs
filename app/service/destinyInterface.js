@@ -162,11 +162,11 @@ function bungiePost(url,msgBody,token,bungieMemberShipId,callback){
 function getMessageBody(host,displayName,token,messageType){
   switch (messageType) {
     case utils.constants.bungieMessageTypes.accountVerification:
-      var msg = utils.constants.bungieMessages.accountVerification.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token)
+      var msg = utils.constants.bungieMessages.accountVerification.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token).replace(/%APPNAME%/g,utils.config.appName)
       return msg
       break;
     case utils.constants.bungieMessageTypes.passwordReset:
-      var msg = utils.constants.bungieMessages.passwordReset.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token)
+      var msg = utils.constants.bungieMessages.passwordReset.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token).replace(/%APPNAME%/g,utils.config.appName)
       return msg
       break;
     default:
