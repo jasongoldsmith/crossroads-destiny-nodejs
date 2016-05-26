@@ -139,10 +139,10 @@ function signup(req, res) {
 
   var body = req.body
   var userData = {
-    userName: body.userName.toLowerCase(),
+    userName: body.userName.toLowerCase().trim(),
     passWord: passwordHash.generate(body.passWord),
-    psnId: body.psnId,
-    xboxId: body.xboxId,
+    psnId: body.psnId.toLowerCase().trim(),
+    xboxId: body.xboxId.toLowerCase().trim(),
     imageUrl: body.imageUrl,
     clanId: body.clanId
   }
