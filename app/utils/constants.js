@@ -228,6 +228,12 @@ var eventNotificationTrigger = {
 var userNotificationTrigger = {
   userSignup:'userSignup'
 }
+var freelanceBungieGroup = {
+  "groupId": "clan_id_not_set",
+  "groupName": "Crossroad Freelance group",
+  "avatarPath": "https://www.bungie.net/img/profile/avatars/group/025.png",
+  "clanEnabled": false
+}
 
 module.exports = {
   l: lodash,
@@ -240,5 +246,6 @@ module.exports = {
   eventNotificationTrigger: eventNotificationTrigger,
   userNotificationTrigger: userNotificationTrigger,
   bungieMessageTypes: bungieMessageTypes,
-  bungieMessages: bungieMessages
+  bungieMessages: bungieMessages,
+  freelanceBungieGroup:freelanceBungieGroup
 };

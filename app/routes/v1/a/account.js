@@ -35,7 +35,8 @@ function listGroups(user,callback){
       },function(groups,callback){
         if(groups) {
           groupList = groups
-          models.user.updateUser(mergeGroups(userObj,groups),false,function(err,user){
+          groupList.push(utils.constants.freelanceBungieGroup)
+          models.user.updateUser(mergeGroups(userObj,groupList),false,function(err,user){
             if(user) service.eventService.listEventCountByGroups(utils._.map(groupList, 'groupId'),callback)
             else return callback(err,null)
           })
@@ -111,8 +112,8 @@ function mergeGroups(user,bungieGroups){
     if(!userGroup) return {groupId:bungieId,muteNotification:false}
     else return userGroup
   })
-  groups=updatedGroups
-  utils.l.d("mergeGroups",user)
+
+  utils.l.d("mergeGroups",updatedGroups)
   return {id:user._id,groups:updatedGroups}
 }
 /** Routes */
