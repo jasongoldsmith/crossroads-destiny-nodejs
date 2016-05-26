@@ -142,7 +142,7 @@ function signup(req, res) {
     userName: body.userName.toLowerCase().trim(),
     passWord: passwordHash.generate(body.passWord),
     psnId: body.psnId.toLowerCase().trim(),
-    xboxId: body.xboxId.toLowerCase().trim(),
+    xboxId: body.xboxId,
     imageUrl: body.imageUrl,
     clanId: body.clanId
   }
