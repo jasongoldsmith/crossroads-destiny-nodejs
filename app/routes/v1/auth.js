@@ -10,8 +10,6 @@ var passport = require('passport')
 var passwordHash = require('password-hash')
 
 function login (req, res) {
-  req.assert('userName', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isName()
-  req.assert('passWord', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric()
 
   var outerUser = null
   utils.async.waterfall(
@@ -121,8 +119,24 @@ function reqLoginWrapper(req, reason) {
 }
 
 function signup(req, res) {
-  req.assert('userName', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isName()
-  req.assert('passWord', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric()
+  try {
+    req.assert('userName').notEmpty().isName()
+  } catch(ex) {
+    var err = {
+      error: "username must be between 1 and 50 characters"
+    }
+    return routeUtils.handleAPIError(req, res, err, err)
+  }
+
+  try {
+    req.assert('passWord').notEmpty().isAlphaNumeric()
+  } catch(ex) {
+    var err = {
+      error: "password must be between 1 and 9 characters and must be alphanumeric"
+    }
+    return routeUtils.handleAPIError(req, res, err, err)
+  }
+
   var body = req.body
   var userData = {
     userName: body.userName.toLowerCase(),
@@ -255,6 +269,12 @@ function resetPasswordLaunch(req,res){
 
 function resetPassword(req,res){
   var userName = req.body.userName
+  try {
+    req.assert('passWord').notEmpty().isAlphaNumeric()
+  } catch(ex) {
+    res.render("password must be between 1 and 9 characters and must be alphanumeric")
+  }
+
   var newPassword = passwordHash.generate(req.body.passWord)
   console.log("resetPassword::"+userName)
   utils.async.waterfall([

@@ -1,6 +1,6 @@
 
 module.exports = {
-  hostName: 'https://travelerbackendproduction.herokuapp.com',
+  hostName: 'https://crossroadsapp-live.herokuapp.com',
   enableNewRelic: true,
   portNum: -1,
   s3: {
