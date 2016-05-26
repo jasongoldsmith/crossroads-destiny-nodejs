@@ -7,6 +7,10 @@ module.exports = function (app, passport) {
     res.render('index')
   })
 
+  app.get('/home', function(req, res) {
+    res.render('home/index')
+  })
+
   app.use('/api/v1/auth', require('../routes/v1/auth'))
   app.use('/api/v1/activity', require('../routes/v1/activity'))
   app.use('/api/v1/notification', require('../routes/v1/notification'))
