@@ -4,11 +4,19 @@ var admin = require('../controllers/admin')
 
 module.exports = function (app, passport) {
   app.get('/', function(req, res) {
+    res.render('home/index')
+  })
+
+  app.get('/bo', function(req, res) {
     res.render('index')
   })
 
-  app.get('/home', function(req, res) {
-    res.render('home/index')
+  app.get('/terms', function(req, res) {
+    res.render('home/termsOfService')
+  })
+
+  app.get('/privacy', function(req, res) {
+    res.render('home/privacyPolicy')
   })
 
   app.use('/api/v1/auth', require('../routes/v1/auth'))
