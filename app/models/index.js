@@ -6,6 +6,7 @@ var installation = require('./installationModel')
 var report =  require('./reportModel')
 var notification = require('./notificationModel')
 var notificationTrigger = require('./notificationTriggerModel')
+var tinyUrl = require ('./tinyUrlModel')
 
 module.exports = {
   user: user,
@@ -15,5 +16,6 @@ module.exports = {
   archiveEvent: archiveEvent,
   report: report,
   notification: notification,
-  notificationTrigger: notificationTrigger
+  notificationTrigger: notificationTrigger,
+  tinyUrl: tinyUrl
 }
