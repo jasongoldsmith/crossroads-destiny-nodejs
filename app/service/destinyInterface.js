@@ -2,6 +2,7 @@
 var request = require('request')
 var utils = require('../utils')
 var helpers = require('../helpers')
+var tinyUrlService = require('./tinyUrlService')
 
 var cookieStr=utils.config.bungieCookie
 
@@ -88,10 +89,13 @@ function sendBungieMessage(gamerId, membershipType, messageType,callback){
           //var convUrl = "https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true"
           var convUrl = utils.config.bungieConvURL
           utils.l.d("bungieMemberShipId=" + bungieMemberShipId + "---&&--- psnDisplayName=" + psnDisplayName)
+          var msgTxt =getMessageBody(utils.config.hostUrl(), gamerId, token, messageType)
+          utils.l.d("msgTxt::",msgTxt)
           var msgBody = {
             "membersToId": ["13236427", bungieMemberShipId],
-            "body": getMessageBody(utils.config.hostUrl(), gamerId, token, messageType)
+            "body": msgTxt
           }
+          utils.l.d("msgBody::",msgBody)
           bungiePost(convUrl, msgBody, token,bungieMemberShipId, callback)
         }else{
           callback(null,null)
@@ -137,6 +141,7 @@ function bungieGet(url, callback){
 }
 
 function bungiePost(url,msgBody,token,bungieMemberShipId,callback){
+  utils.l.d("bungiePost::msgBody",msgBody)
   request({
     url: url,
     method: "POST",
@@ -160,13 +165,20 @@ function bungiePost(url,msgBody,token,bungieMemberShipId,callback){
 }
 
 function getMessageBody(host,displayName,token,messageType){
+  var msg = null
   switch (messageType) {
     case utils.constants.bungieMessageTypes.accountVerification:
-      var msg = utils.constants.bungieMessages.accountVerification.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token).replace(/%APPNAME%/g,utils.config.appName)
+      tinyUrlService.createTinyUrl(host+"/api/v1/auth/verify/"+token,function(err, url){
+        msg = utils.constants.bungieMessages.accountVerification.replace(/%URL%/g, url).replace(/%APPNAME%/g,utils.config.appName)
+      })
+      utils.l.d("verify msg to send::"+msg)
       return msg
       break;
     case utils.constants.bungieMessageTypes.passwordReset:
-      var msg = utils.constants.bungieMessages.passwordReset.replace(/%HOST%/g, host).replace(/%TOKEN%/g, token).replace(/%APPNAME%/g,utils.config.appName)
+      tinyUrlService.createTinyUrl(host+"/api/v1/auth/resetPassword/"+token,function(err, url) {
+        msg = utils.constants.bungieMessages.passwordReset.replace(/%URL%/g, url).replace(/%APPNAME%/g, utils.config.appName)
+      })
+      utils.l.d("resetPassword msg to send::"+msg)
       return msg
       break;
     default:

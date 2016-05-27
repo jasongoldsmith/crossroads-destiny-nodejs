@@ -213,8 +213,8 @@ var bungieMessageTypes = {
 }
 
 var bungieMessages = {
-  accountVerification:'Thanks for signing up for %APPNAME%, the Destiny Fireteam Finder mobile app! Click the link below to verify your PSN id. %HOST%/api/v1/auth/verify/%TOKEN%',
-  passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %HOST%/api/v1/auth/resetPassword/%TOKEN% If you did not make this request, please let us know and disregard this message..'
+  accountVerification:'Thanks for signing up for %APPNAME%, the Destiny Fireteam Finder mobile app! Click the link below to verify your PSN id. %URL%',
+  passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL% . If you did not make this request, please let us know and disregard this message..'
 }
 
 var eventNotificationTrigger = {

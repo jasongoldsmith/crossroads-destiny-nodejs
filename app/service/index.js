@@ -6,5 +6,6 @@ module.exports = {
   eventNotificationTriggerService:require('./eventNotificationTriggerService'),
   eventNotificationService:require('./eventNotificationService'),
   eventBasedPushNotificationService:require('./eventBasedPushNotificationService'),
-  eventService:require('./eventService')
+  eventService:require('./eventService'),
+  tinyUrlService:require('./tinyUrlService')
 }

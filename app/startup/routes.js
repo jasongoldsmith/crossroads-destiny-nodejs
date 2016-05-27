@@ -3,10 +3,13 @@ var utils = require('../utils')
 var admin = require('../controllers/admin')
 
 module.exports = function (app, passport) {
+/*
   app.get('/', function(req, res) {
     res.render('home/index')
   })
+*/
 
+  app.use('/',require('../routes/v1/auth'))
   app.get('/bo', function(req, res) {
     res.render('index')
   })
@@ -35,6 +38,7 @@ module.exports = function (app, passport) {
   app.use('/api/v1/a/report', require('../routes/v1/a/report'))
   app.use('/api/v1/a/account', require('../routes/v1/a/account'))
   app.use('/api/v1/a/mixpanel', require('../routes/v1/a/mixPanelDataTracking'))
+  app.use('/account', require('../routes/v1/auth'))
 
   /// catch 404 and forward to error handler
   app.use(function(req, res, next) {

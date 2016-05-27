@@ -297,6 +297,40 @@ function resetPassword(req,res){
     }
   )
 }
+
+function shortURL(req,res){
+  utils.l.d("shortUrl::"+req.param('shortPath')); //Returns a shorter version of http://google.com - http://tinyurl.com/2tx
+  service.tinyUrlService.getLongUrl(req.param('shortPath'),function(err,longURL){
+    if(err || ! longURL){
+      var errorObj = {error:"Invalid Link."}
+      routeUtils.handleAPIError(req,res,errorObj,errorObj)
+    }
+    else {
+      res.writeHead(302, {'Location': longURL});
+      res.end()
+    }
+  })
+}
+
+function createShortURL(longURL,callback){
+  const crypto = require('crypto')
+
+  var shasum = crypto.createHash('sha1');
+  shasum.update((new Date).getTime()+"");
+  var hash = shasum.digest('hex').substring(0, 8);
+  console.log("shahhash::"+hash)
+
+  const hmac = crypto.createHmac('sha256', 'zKcBQ7jIhTy/oXEYLwnMdmgTlbgKxrf+b4rtXosE')
+
+  hmac.update(longURL)
+  var signature = hmac.digest('base64')
+  console.log("signature::"+signature)
+
+}
+
+function home(req,res){
+  res.render('home/index')
+}
 /** Routes */
 routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
@@ -307,5 +341,7 @@ routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
 routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', requestResetPassword, requestResetPassword)
 routeUtils.rPost(router, '/resetPassword/:token', 'resetPassword', resetPassword, resetPassword)
+routeUtils.rGet(router,'/:shortPath','shortURLRedirect',shortURL,shortURL)
+routeUtils.rGet(router,'/','homePage',home,home)
 module.exports = router
 
