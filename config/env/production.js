@@ -1,6 +1,7 @@
 
 module.exports = {
   hostName: 'https://live.crossroadsapp.co',
+  tinyUrlHost:'http://app.crsrd.co/',
   enableNewRelic: true,
   portNum: -1,
   s3: {
