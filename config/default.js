@@ -19,7 +19,7 @@ var defaults = {
   enforceSSL: true,
   devMode: false,
   logLevel: 'debug',
-  appName:'CROSSROADS',
+  appName:'Crossroads',
   hostUrl: function() {
     var url = this.hostName;
     if (this.portNum !== -1) {
@@ -82,7 +82,7 @@ var defaults = {
   destinyGruopsJoinedURL:"https://www.bungie.net/Platform//Group/User/%MEMBERSHIPID%/JoinedV3/%CURRENTPAGE%/",
   accountVerificationSuccess:"Great! Welcome to Traveler! If you have any issues or suggestions you may contact us at gaming@forcecatalyst.com",
   accountVerification:"Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app! Click the link below to verify your PSN id. %HOST%/api/v1/auth/verify/%TOKEN%",
-  firebaseURL: process.env.firebaseURL || "https://traveler-development.firebaseio.com/",
+  firebaseURL: process.env.firebaseURL || "https://crossroadsapp-dev.firebaseio.com/",
   triggerIntervalMinutes: 15,
   triggerReminderInterval: 120,
   triggerUpcomingReminderInterval: -5

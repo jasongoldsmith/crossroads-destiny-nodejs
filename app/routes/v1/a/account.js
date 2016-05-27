@@ -43,6 +43,11 @@ function listGroups(user,callback){
         }else return callback(null, null)
       },function(eventCounts, callback){
         mergeEventStatsWithGroups(eventCounts,groupList, callback)
+      },function(groupEventStatsList,callback){
+        groupList = groupEventStatsList
+        service.authService.listMemberCountByClan(utils._.map(groupList, 'groupId'),callback)
+      },function(memberCounts,callback){
+        mergeMemberStatsWithGroups(memberCounts,groupList,callback)
       }
     ],
   callback
@@ -98,6 +103,20 @@ function mergeEventStatsWithGroups(eventCountList,groupList, callback){
     groupUpdatedList = utils._.map(JSON.parse(JSON.stringify(groupList)),function(group){
       var eventCount = utils._.find(eventCountList,{"_id":group.groupId})
       if(eventCount) group.eventCount=eventCount.count
+      return group
+    })
+  }else groupUpdatedList = groupList
+
+  return callback(null, groupUpdatedList)
+}
+
+function mergeMemberStatsWithGroups(memberCounts,groupList, callback){
+  var groupUpdatedList = null
+  if(memberCounts){
+    //groupList = {groupList:groupList,eventStats:eventCounts}
+    groupUpdatedList = utils._.map(JSON.parse(JSON.stringify(groupList)),function(group){
+      var userCount = utils._.find(memberCounts,{"_id":group.groupId})
+      if(userCount) group.memberCount=userCount.count
       return group
     })
   }else groupUpdatedList = groupList

@@ -181,7 +181,7 @@ function tranformJoinedGroups(bungieGroups,callback){
       return {groupId:group.detail.groupId,
         groupName:group.detail.name,
         avatarPath:utils.config.bungieBaseURL+group.detail.avatarPath,
-        memberCount:group.detail.memberCount,
+        bungieMemberCount:group.detail.memberCount,
         clanEnabled:isClanEnabled(group.detail.clanCallsign)}
     })
     return callback(null,groups)

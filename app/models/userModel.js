@@ -185,6 +185,11 @@ function updateUser(data, allowClanUpdate, callback) {
     callback)
 }
 
+function listMemberCount(id,filter,callback){
+  User
+    .aggregate([{ $match : filter},{$group: {_id : "$"+id, count:  { $sum : 1} }}])
+    .exec(callback)
+}
 
 module.exports = {
   model: User,
@@ -199,5 +204,6 @@ module.exports = {
   getAll: getAll,
   getById: getById,
   updateUser: updateUser,
-  getByQuery:getByQuery
+  getByQuery:getByQuery,
+  listMemberCount:listMemberCount
 }
