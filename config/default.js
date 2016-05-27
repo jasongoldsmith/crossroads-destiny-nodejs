@@ -5,7 +5,7 @@ var lodash = require('lodash');
 var development = require('./env/development');
 var production = require('./env/production');
 var staging = require('./env/staging');
-
+var prodURL = require('./env/prodURL');
 var mongoUri = process.env.MONGOLAB_URI ||
   process.env.MONGOHQ_URL || process.env.MONGO_URL ||
   'mongodb://localhost/travelerbackend';
@@ -37,6 +37,7 @@ var defaults = {
   ENV_STAGING : "staging",
   ENV_DEVELOPMENT: "development",
   ENV_PRODUCTION: "production",
+  ENV_URL_PROD: "prodURL",
   environment: process.env.NODE_ENV || 'development',
   show: function() {
     console.log('environment: ' + this.environment);
@@ -104,5 +105,6 @@ function myConfig(myConfig) {
 module.exports = {
   development: myConfig(development),
   production: myConfig(production),
-  staging: myConfig(staging)
+  staging: myConfig(staging),
+  prodURL: myConfig(prodURL)
 }[currentEnvironment];
