@@ -37,6 +37,7 @@ var defaults = {
   ENV_STAGING : "staging",
   ENV_DEVELOPMENT: "development",
   ENV_PRODUCTION: "production",
+  ENV_URL_PROD: "prodURL",
   environment: process.env.NODE_ENV || 'development',
   show: function() {
     console.log('environment: ' + this.environment);

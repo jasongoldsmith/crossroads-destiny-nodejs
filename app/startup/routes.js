@@ -19,6 +19,10 @@ module.exports = function (app, passport) {
     res.render('home/privacyPolicy')
   })
 
+  app.get('/license', function(req, res) {
+    res.render('home/license')
+  })
+
   app.use('/api/v1/auth', require('../routes/v1/auth'))
   app.use('/api/v1/activity', require('../routes/v1/activity'))
   app.use('/api/v1/notification', require('../routes/v1/notification'))
