@@ -2,7 +2,7 @@ var models = require('../models')
 var utils = require('../utils')
 
 function createTinyUrl(longUrl, callback) {
-  callback(null, 'http://app.crsrd.co/123')
+  callback(null, longUrl)
 }
 
 function getLongUrl(tinyUrl, callback) {

@@ -26,6 +26,10 @@ module.exports = function (app, passport) {
     res.render('home/license')
   })
 
+  app.get('/legal', function(req, res) {
+    res.render('home/legal')
+  })
+
   app.use('/api/v1/auth', require('../routes/v1/auth'))
   app.use('/api/v1/activity', require('../routes/v1/activity'))
   app.use('/api/v1/notification', require('../routes/v1/notification'))
@@ -38,7 +42,6 @@ module.exports = function (app, passport) {
   app.use('/api/v1/a/report', require('../routes/v1/a/report'))
   app.use('/api/v1/a/account', require('../routes/v1/a/account'))
   app.use('/api/v1/a/mixpanel', require('../routes/v1/a/mixPanelDataTracking'))
-  app.use('/account', require('../routes/v1/auth'))
 
   /// catch 404 and forward to error handler
   app.use(function(req, res, next) {

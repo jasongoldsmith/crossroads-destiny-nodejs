@@ -341,7 +341,7 @@ routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
 routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', requestResetPassword, requestResetPassword)
 routeUtils.rPost(router, '/resetPassword/:token', 'resetPassword', resetPassword, resetPassword)
-routeUtils.rGet(router,'/:shortPath','shortURLRedirect',shortURL,shortURL)
+//routeUtils.rGet(router,'/:shortPath','shortURLRedirect',shortURL,shortURL)
 routeUtils.rGet(router,'/','homePage',home,home)
 module.exports = router
 

@@ -151,6 +151,15 @@ body{
   width: 355px;
 }
 
+.linkLegal{
+  font-family: HelveticaNeue;
+  font-size: 12px;
+  color: #0086D0;
+  line-height: 50px;
+  text-align: center;
+  text-underline: dotted;
+}
+
 .linkBlue{
   font-family: HelveticaNeue-Bold;
   font-size: 16px;
