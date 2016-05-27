@@ -1,12 +1,11 @@
 var models = require('../models')
-var utils = require('../utils')
 
 function createTinyUrl(longUrl, callback) {
-  callback(null, longUrl)
+	models.tinyUrl.createTinyUrl(longUrl, callback)
 }
 
 function getLongUrl(tinyUrl, callback) {
-  callback(null, 'https://live.crossroadsapp.co/terms')
+	models.tinyUrl.getLongUrl(tinyUrl, callback)
 }
 
 module.exports = {
