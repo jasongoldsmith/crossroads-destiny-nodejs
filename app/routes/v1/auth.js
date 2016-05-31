@@ -143,6 +143,13 @@ function signup(req, res) {
   }
 
   var body = req.body
+  if(utils._.isInvalidOrBlank(req.body.psnId)) {
+    var err = {
+      error: "Please enter a PSN ID"
+    }
+    return routeUtils.handleAPIError(req, res, err, err)
+  }
+
   var userData = {
     userName: body.userName.toLowerCase().trim(),
     passWord: passwordHash.generate(body.passWord),
