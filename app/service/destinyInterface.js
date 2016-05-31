@@ -136,8 +136,13 @@ function bungieGet(url, callback){
       utils.l.s("Error getting bungie for url "+url+" and error is::----"+error)
       return callback(error,null)
     } else {
-      utils.l.d("Got bungie for "+url)
-      return callback(null,bungieData)
+      var bungieJSON = JSON.parse(bungieData)
+      utils.l.d("Got bungie for "+url,bungieJSON)
+      if(bungieJSON.ErrorStatus == 'Success')
+        return callback(null,bungieData)
+      else{
+        return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)},null )
+      }
     }
   })
 }

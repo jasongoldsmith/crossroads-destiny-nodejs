@@ -5,29 +5,30 @@ var utils = require('../utils')
 function signupUser(userData, callback) {
 	utils.async.waterfall(
 			[
-				function (callback) {
-					models.user.createUserFromData(userData, callback)  // don't send message
-				},
-				function(newuser,callback) {
+				function(callback) {
 					//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
 					// or send notification to both xbox and psn depending on the ID availability
 					if(utils.config.enableBungieIntegration) {
 						console.log("Destiny validation enabled")
 						destinyService.sendBungieMessage(userData.psnId, "PSN", utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
+							utils.l.d('messageResponse',messageResponse)
+							utils.l.d('signupUser::sendBungieMessage::error',error)
 							if (messageResponse) {
 								utils.l.d("messageResponse::token===" + messageResponse.token)
-								newuser.psnVerified = "INITIATED"
-								newuser.psnToken = messageResponse.token
-								newuser.bungieMemberShipId = messageResponse.bungieMemberShipId
+								userData.psnVerified = "INITIATED"
+								userData.psnToken = messageResponse.token
+								userData.bungieMemberShipId = messageResponse.bungieMemberShipId
+								callback(null, userData)
 							} else {
-								newuser.psnVerified = "FAILED_INITIATION"
+								return callback(error, null)
 							}
-							models.user.save(newuser, callback)
 						})
 					}else {
 						console.log("Destiny validation disabled")
-						callback(null, newuser)
+						callback(null, userData)
 					}
+				},function (newUser, callback) {
+					models.user.createUserFromData(newUser, callback)  // don't send message
 				}
 			],
 			callback

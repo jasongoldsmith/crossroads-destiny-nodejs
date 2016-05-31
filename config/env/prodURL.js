@@ -1,6 +1,7 @@
 
 module.exports = {
   hostName: 'http://crsrd-tinyurl.herokuapp.com',
+  tinyUrlHost:"http://crsrd.co",
   enableNewRelic: true,
   enforceSSL:false,
   portNum: -1,

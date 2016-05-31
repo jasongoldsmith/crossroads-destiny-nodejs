@@ -1,5 +1,5 @@
 var lodash = require('./lodash')
-
+var config =  require('config')
 var baseUrl = "http://www.bungie.net/common/destiny_content/icons/"
 var imageFiles = [
   "0f29ac59b0f0cbdbd837e2afc8666915.jpg",
@@ -213,10 +213,20 @@ var bungieMessageTypes = {
 }
 
 var bungieMessages = {
-  accountVerification:'Thanks for signing up for %APPNAME%, the Destiny Fireteam Finder mobile app! Click the link below to verify your PSN id. %URL%',
+  accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder. Click the link below to verify your PSN ID." %URL%',
   passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL% . If you did not make this request, please let us know and disregard this message..'
 }
-
+var bungieErrorMessage= function(messageId) {
+  console.log('bungieErrorMessage::messageId',messageId)
+  switch (messageId) {
+    case "UserCannotResolveCentralAccount":
+      return "The PSNID entered either doesnot exist or is not linked to your bungie profile. Please verify the details provided and try again later."
+      break;
+    default:
+      return "We encountered an error while validating the PSNID provided. Please try again later."
+      break;
+  }
+}
 var eventNotificationTrigger = {
   launchUpcomingEvents:'launchUpcomingEvents',
   launchEventStart:'launchEventStart',
@@ -230,8 +240,8 @@ var userNotificationTrigger = {
 }
 var freelanceBungieGroup = {
   "groupId": "clan_id_not_set",
-  "groupName": "Crossroad Freelance group",
-  "avatarPath": "https://www.bungie.net/img/profile/avatars/group/025.png",
+  "groupName": "Crossroad Freelance",
+  "avatarPath": config.hostName+"/img/imgTravelerLogo.png",
   "clanEnabled": false
 }
 
@@ -247,5 +257,6 @@ module.exports = {
   userNotificationTrigger: userNotificationTrigger,
   bungieMessageTypes: bungieMessageTypes,
   bungieMessages: bungieMessages,
-  freelanceBungieGroup:freelanceBungieGroup
+  freelanceBungieGroup:freelanceBungieGroup,
+  bungieErrorMessage:bungieErrorMessage
 };

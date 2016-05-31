@@ -174,7 +174,8 @@ function verifyAccount(req,res){
       res.render("account/index",{
         token: token,
         psnId: user.psnId,
-        appName:utils.config.appName
+        appName:utils.config.appName,
+        userName:user.userName
       })
     }else{
       res.render("account/error")
