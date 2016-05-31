@@ -220,10 +220,10 @@ var bungieErrorMessage= function(messageId) {
   console.log('bungieErrorMessage::messageId',messageId)
   switch (messageId) {
     case "UserCannotResolveCentralAccount":
-      return "The PSNID entered either doesnot exist or is not linked to your bungie profile. Please verify the details provided and try again later."
+      return "We were unable to find that PSN ID linked to a Bungie account. Please check for any typos and try again."
       break;
     default:
-      return "We encountered an error while validating the PSNID provided. Please try again later."
+      return "Sorry, we were unable to validate your PSN ID. The server may be unavailable. Please try again in a few minutes."
       break;
   }
 }

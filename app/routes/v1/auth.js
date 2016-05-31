@@ -137,7 +137,7 @@ function signup(req, res) {
     return routeUtils.handleAPIError(req, res, err, err)
   }
 
-  if(!req.body.psnId || utils._.isEmpty(req.body.psnId.empty) ){
+  if(!req.body.psnId || utils._.isEmpty(req.body.psnId) ){
     var err = {error: "Please enter a PSN ID"}
     return routeUtils.handleAPIError(req, res, err, err)
   }
