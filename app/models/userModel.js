@@ -67,7 +67,19 @@ function save(user, callback) {
     function(c, callback) {
       getById(c._id, callback)
     }
-  ], callback)
+  ],
+  function(err, user) {
+    if(err) {
+      if(utils.format.isDuplicateMongoKeyError(err)) {
+        var field = utils.format.getDuplicateMongoErrorKey(err)
+        var errmsgTemplate = "That #FIELD# is already taken"
+        return callback({error: errmsgTemplate.replace("#FIELD#", field)}, user)
+      }
+      return callback(err, user)
+    } else {
+      return callback(err, user)
+    }
+  })
 }
 
 

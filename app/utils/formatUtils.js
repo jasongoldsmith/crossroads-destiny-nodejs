@@ -95,6 +95,22 @@ function compareDates(date1, date2) {
   return date1.getDate() - date2.getDate()
 }
 
+function getDuplicateMongoErrorKey(err) {
+    var field = err.message.split('index: travelerbackend.')[1].split('.$')[1]
+    // now we have `email_1 dup key`
+    field = field.split(' dup key')[0]
+    field = field.substring(0, field.lastIndexOf( '_' ))
+    return field
+}
+
+function isDuplicateMongoKeyError(err) {
+  if(err.message.indexOf("duplicate key error") > -1) {
+    return true
+  } else {
+    return false
+  }
+}
+
 module.exports = {
   formatNumber: formatNumber,
   cleanNumber: cleanNumber,
@@ -109,5 +125,7 @@ module.exports = {
   isPhoneNo: isPhoneNo,
   cleanEmail: cleanEmail,
   chanceAlpha: chanceAlpha,
-  compareDates: compareDates
+  compareDates: compareDates,
+  getDuplicateMongoErrorKey: getDuplicateMongoErrorKey,
+  isDuplicateMongoKeyError: isDuplicateMongoKeyError
 };
