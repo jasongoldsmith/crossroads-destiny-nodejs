@@ -35,7 +35,7 @@ function login (req, res) {
         if (err instanceof helpers.errors.ValidationError) {
           req.routeErr = err
         } else {
-          req.routeErr = {error: "the input auth combination is not valid"}
+          req.routeErr = {error: "The username and password do not match our records."}
         }
         return routeUtils.handleAPIError(req, res, req.routeErr,req.routeErr)
       }
@@ -134,6 +134,11 @@ function signup(req, res) {
     var err = {
       error: "password must be between 1 and 9 characters and must be alphanumeric"
     }
+    return routeUtils.handleAPIError(req, res, err, err)
+  }
+
+  if(!req.body.psnId || utils._.isEmpty(req.body.psnId.empty) ){
+    var err = {error: "Please enter a PSN ID"}
     return routeUtils.handleAPIError(req, res, err, err)
   }
 
