@@ -52,7 +52,7 @@ function sendMessage(data, messageCreator, callback) {
 					name : "messageFromPlayer"
 				}
 				var message = messageCreator.psnId + " from " + eventObj.eType.aSubType + ": "  + data.message
-				helpers.pushNotification.sendSinglePushNotification(eventObj, message, notificationObject, installation, null)
+				helpers.pushNotification.sendSinglePushNotification(eventObj, message, notificationObject, null, installation)
 				return callback(null, { messageSent: data.message })
 			}
 		], callback)
