@@ -228,6 +228,36 @@ function verifyAccountConfirm(req,res){
   )
 }
 
+function deleteWrongPsnId(req,res){
+  var token = req.param("token")
+  utils.l.d("deleteWrongPsnId::token=" + token)
+  req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
+  var userObj = null
+  utils.async.waterfall([
+    function(callback) {
+      models.user.getUserByData({psnToken: token}, callback)
+    },
+    function(user, callback) {
+      utils.l.d("user= " + user)
+      if(user) {
+        userObj = user
+        userObj.psnVerified = "DELETED"
+        models.user.deleteUser(user, callback)
+      } else {
+        callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.", null)
+      }
+    }
+  ],
+    function (err, successResp) {
+      if(err) routeUtils.handleAPIError(req, res, err, err)
+      else {
+        helpers.firebase.updateUser(userObj)
+        res.render("index",{appName: utils.config.appName})
+      }
+    }
+  )
+}
+
 function logout(req, res) {
   req.logout()
   routeUtils.handleAPISuccess(req, res, {success: true})
@@ -350,6 +380,7 @@ routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
 routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyAccountConfirm)
+routeUtils.rGet(router, '/deletewrongpsnid/:token', 'deleteWrongPsnId', deleteWrongPsnId)
 routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
 routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', requestResetPassword, requestResetPassword)

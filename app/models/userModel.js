@@ -82,30 +82,28 @@ function save(user, callback) {
   })
 }
 
-
-
-function deleteUser(user, callback) {
+function deleteUser(data, callback) {
   utils.async.waterfall([
-        function(callback) {
-          if (!user) {
-            callback("User is null")
-          }
-          user.remove(function (err, c, numAffected) {
-
-            if (err) {
-              utils.l.s("Got error on removing user", {err: err, user: user})
-            } else if (!c) {
-              utils.l.s("Got null chat on saving user", {user: user})
-            }
-            callback(null, mResult)
-
-          })
+      function(callback) {
+        User.findOne({_id: data.id}, callback)
+      },
+      function(user, callback) {
+        if(!user) {
+          return callback({error: "User with this id does not exist"}, null)
         }
-      ],
-      callback)
-
+        utils.l.d("Deleting the user")
+        user.remove(callback)
+      }
+    ],
+    function(err, user) {
+      if (err) {
+        return callback(err, null)
+      } else {
+        getById(user._id, callback)
+      }
+    }
+  )
 }
-
 
 function handleMissingImageUrl(data, callback) {
   if (!data.imageUrl) {
