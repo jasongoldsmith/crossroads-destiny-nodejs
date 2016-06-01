@@ -152,12 +152,11 @@ body{
   height:307px;
   font-family: HelveticaNeue;
   font-size: 12px;
-  color: white;
   padding-top: 10px;
   padding-left: 10px;
   padding-right: 10px;
   align-self: left;
-  background-color:#365D65;
+  background-color:white;
   overflow-y: scroll;
 
 }

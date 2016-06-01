@@ -19,11 +19,12 @@ module.exports = function (app, passport) {
   })
 
   app.get('/privacy', function(req, res) {
-    res.render('home/privacyPolicy')
+    res.render('home/privacy')
   })
 
   app.get('/license', function(req, res) {
-    res.render('home/license')
+    if(req.adata.os_generic == 'iOS' || req.adata.os_generic == 'Mac OS') res.render('home/license_ios')
+    else  res.render('home/license_android')
   })
 
   app.get('/legal', function(req, res) {

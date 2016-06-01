@@ -120,7 +120,7 @@ function remove(req, res) {
 		}
 	})
 }
-
+//TODO: Refactor if required when user is removed from eventModel
 function listEvents(user, callback) {
 	if(user) models.event.getByQuery({clanId:user.clanId},user, callback)
 	else  models.event.getByQuery({},user, callback)
