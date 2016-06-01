@@ -240,7 +240,7 @@ var userNotificationTrigger = {
 }
 var freelanceBungieGroup = {
   "groupId": "clan_id_not_set",
-  "groupName": "Crossroad Freelance",
+  "groupName": "Crossroads Freelance",
   "avatarPath": config.hostName+"/img/imgTravelerLogo.png",
   "clanEnabled": false
 }

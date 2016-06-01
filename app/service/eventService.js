@@ -1,5 +1,6 @@
 var utils = require('../utils')
 var models = require('../models')
+var eventPushService = require('./eventBasedPushNotificationService')
 
 function clearEventsForPlayer(playerId,callback){
   utils.async.waterfall([
@@ -24,7 +25,7 @@ function leaveEvent(data, callback) {
       function(event, callback) {
         models.user.getById(data.player, function(err, user) {
           if(utils._.isValidNonBlank(user) && utils._.isValidNonBlank(event)) {
-            service.eventBasedPushNotificationService.sendPushNotificationForLeave(event, user)
+            eventPushService.sendPushNotificationForLeave(event, user)
           }
           callback(null, event)
         })
