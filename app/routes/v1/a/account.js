@@ -54,6 +54,52 @@ function listGroups(user,callback){
   )
 }
 
+function resendBungieMessage(req,res){
+  handleResendBungieMessage(req.user, function(err, user) {
+    if (err) {
+      routeUtils.handleAPIError(req, res, err, err)
+    } else {
+      routeUtils.handleAPISuccess(req, res, user)
+    }
+  })
+}
+function handleResendBungieMessage(userData,callback){
+  utils.async.waterfall(
+    [
+      function(callback) {
+        //TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
+        // or send notification to both xbox and psn depending on the ID availability
+        if(utils.config.enableBungieIntegration) {
+          console.log("Destiny validation enabled")
+          service.destinyInerface.sendBungieMessage(userData.psnId, "PSN", utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
+            utils.l.d('handleResendBungieMessage::messageResponse',messageResponse)
+            utils.l.d('handleResendBungieMessage::signupUser::sendBungieMessage::error',error)
+            if (messageResponse) {
+              utils.l.d("messageResponse::token===" + messageResponse.token)
+              var newUserObj = {
+                id:userData._id,
+                psnVerified:"INITIATED",
+                psnToken: messageResponse.token,
+                bungieMemberShipId : messageResponse.bungieMemberShipId
+              }
+              callback(null, newUserObj)
+            } else {
+              return callback(error, null)
+            }
+          })
+        }else {
+          console.log("Destiny validation disabled")
+          callback(null, null)
+        }
+      },function (newUser, callback) {
+        if(newUser) models.user.updateUser(newUser, false, callback)  // don't send message
+        else callback(null, userData)
+      }
+    ],
+    callback
+  )
+}
+
 function searchGroupReq(req,res){
   searchGroup(req.user, req.param('groupId'),function(err, groups) {
     if (err) {
@@ -138,5 +184,6 @@ function mergeGroups(user,bungieGroups){
 /** Routes */
 routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups)
 routeUtils.rGet(router, '/group/search/:groupId', 'searchGroupById', searchGroupReq)
+routeUtils.rGet(router, '/group/resendBungieMessage', 'resendBungieMessage', resendBungieMessage)
 module.exports = router
 
