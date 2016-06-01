@@ -12,7 +12,7 @@ function listMyGroups(req,res){
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {
-      utils.l.d("Bungie groups response ::",groups)
+      //utils.l.d("Got Bungie groups response ::",groups)
       groupsResponse = groups || [{}]
       routeUtils.handleAPISuccess(req, res, groupsResponse)
     }
