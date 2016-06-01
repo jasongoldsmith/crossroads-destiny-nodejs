@@ -122,7 +122,8 @@ function remove(req, res) {
 }
 
 function listEvents(user, callback) {
-	models.event.listEvents(user, callback)
+	if(user) models.event.getByQuery({clanId:user.clanId},user, callback)
+	else  models.event.getByQuery({},user, callback)
 }
 
 function listEventById(data, callback) {
