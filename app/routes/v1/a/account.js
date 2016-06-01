@@ -178,7 +178,6 @@ function mergeGroups(user,bungieGroups){
     else return userGroup
   })
 
-  utils.l.d("mergeGroups",updatedGroups)
   return {id:user._id,groups:updatedGroups}
 }
 /** Routes */

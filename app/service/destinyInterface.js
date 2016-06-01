@@ -137,7 +137,7 @@ function bungieGet(url, callback){
       return callback(error,null)
     } else {
       var bungieJSON = JSON.parse(bungieData)
-      utils.l.d("Got bungie for "+url,bungieJSON)
+      utils.l.d("Got bungie for "+url)
       if(bungieJSON.ErrorStatus == 'Success')
         return callback(null,bungieData)
       else{
