@@ -252,7 +252,7 @@ function deleteWrongPsnId(req,res){
       if(err) routeUtils.handleAPIError(req, res, err, err)
       else {
         helpers.firebase.updateUser(userObj)
-        res.render("index",{appName: utils.config.appName})
+        res.render("home/index",{appName: utils.config.appName})
       }
     }
   )
