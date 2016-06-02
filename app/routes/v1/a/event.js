@@ -73,7 +73,10 @@ function listById(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listById"})
 		} else {
-			routeUtils.handleAPISuccess(req, res, event, {utm_dnt:"listById"})
+			if(!event){
+				err = { error: "Sorry, looks like that event is no longer available."}
+				routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listById"})
+			}else routeUtils.handleAPISuccess(req, res, event, {utm_dnt:"listById"})
 		}
 	})
 }
