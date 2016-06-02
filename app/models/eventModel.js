@@ -95,11 +95,24 @@ function createEvent(data, callback) {
 		},
 		function (user, callback) {
 			utils.l.d("Found user: " + JSON.stringify(user))
-			if(!data.clanId) eventObj.clanId=user.clanId
+			computeEventAttributesIfMissing(eventObj, user)
+
 			if (utils._.isInvalidOrBlank(checkWithDate)) {
-				getByQuery({ eType: data.eType, launchStatus: "now",clanId:eventObj.clanId }, null, utils.firstInArrayCallback(callback))
+				getByQuery({
+						eType: data.eType,
+						launchStatus: utils.constants.eventLaunchStatusList.now,
+						clanId: eventObj.clanId,
+						consoleType: eventObj.consoleType},
+					null,
+					utils.firstInArrayCallback(callback))
 			} else {
-				getByQuery({ eType: data.eType, launchDate: data.launchDate,clanId:eventObj.clanId },null, utils.firstInArrayCallback(callback))
+				getByQuery({
+						eType: data.eType,
+						launchDate: data.launchDate,
+						clanId: eventObj.clanId,
+						consoleType: eventObj.consoleType},
+					null,
+					utils.firstInArrayCallback(callback))
 			}
 		},
 		function (event, callback) {
@@ -250,10 +263,6 @@ function deleteEvent(data, callback) {
 	)
 }
 
-function listEvents(user, callback) {
-	getByQuery({}, user, callback)
-}
-
 function launchEvent(event, callback){
 	utils.l.d("Updating event launch status "+event.eType);
 	utils.async.waterfall([
@@ -265,7 +274,7 @@ function launchEvent(event, callback){
 						return callback("Event does not exist. It is either full or an invalid event is being updated.",null)
 					}
 					utils.l.d("Found event: " + JSON.stringify(event))
-					utils._.extend(event, {launchStatus:utils.constants.eventLaunchStatusList.now})
+					utils._.extend(event, {launchStatus: utils.constants.eventLaunchStatusList.now})
 					update(event,callback)
 				}
 			],function(err, updatedEvent) {
@@ -289,11 +298,20 @@ function listEventCount(id,filter,callback){
 			.exec(callback)
 }
 
+function computeEventAttributesIfMissing(eventObj, user) {
+	if(utils._.isInvalidOrBlank(eventObj.clanId)) {
+		eventObj.clanId = user.clanId
+	}
+
+	if(utils._.isInvalidOrBlank(eventObj.consoleType)) {
+		eventObj.consoleType = user.consoles[0].type
+	}
+}
+
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
 	joinEvent: joinEvent,
-	listEvents: listEvents,
 	leaveEvent: leaveEvent,
 	deleteEvent: deleteEvent,
 	getByQuery: getByQuery,

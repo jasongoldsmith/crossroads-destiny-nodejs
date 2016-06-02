@@ -47,7 +47,7 @@ function join(req, res) {
 
 function list(req, res) {
 	utils.l.d("Event list request")
-	listEvents(req.user, function(err, events) {
+	listEvents(req.user, req.param('consoleType'), function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"list"})
 		} else {
@@ -58,7 +58,7 @@ function list(req, res) {
 
 function listAll(req, res) {
 	utils.l.d("Event listAll request")
-	listEvents(null, function(err, events) {
+	models.event.getByQuery({}, null, function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listAll"})
 		} else {
@@ -123,10 +123,12 @@ function remove(req, res) {
 		}
 	})
 }
-//TODO: Refactor if required when user is removed from eventModel
-function listEvents(user, callback) {
-	if(user) models.event.getByQuery({clanId:user.clanId},null, callback)
-	else  models.event.getByQuery({},user, callback)
+
+function listEvents(user, consoleType, callback) {
+	if(utils._.isInvalidOrBlank(consoleType)) {
+		consoleType = user.consoles[0].type
+	}
+	models.event.getByQuery({clanId: user.clanId, consoleType: consoleType}, null, callback)
 }
 
 function listEventById(data, callback) {
