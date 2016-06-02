@@ -100,7 +100,7 @@ function sendBungieMessage(gamerId, membershipType, messageType,callback){
             bungiePost(convUrl, msgBody, token,bungieMemberShipId, callback)
           })
         }else{
-          callback(null,null)
+          callback({error:utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)},null)
         }
       }
     ],callback
