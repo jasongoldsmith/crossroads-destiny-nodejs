@@ -12,7 +12,6 @@ function listMyGroups(req,res){
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {
-      //utils.l.d("Got Bungie groups response ::",groups)
       groupsResponse = groups || [{}]
       routeUtils.handleAPISuccess(req, res, groupsResponse)
     }
@@ -75,10 +74,11 @@ function handleResendBungieMessage(userData,callback){
             utils.l.d('handleResendBungieMessage::signupUser::sendBungieMessage::error',error)
             if (messageResponse) {
               utils.l.d("messageResponse::token===" + messageResponse.token)
+              userData.consoles[0].verifyStatus = "INITIATED"
+              userData.consoles[0].verifyToken = messageResponse.token
               var newUserObj = {
                 id:userData._id,
-                acctVerified : [{consoleType:userData.consoles[0].consoleType,status:"INITIATED"}],
-                accountVerifyToken : [{consoleType:userData.consoles[0].consoleType,token:messageResponse.token}]
+                consoles:userData.consoles
               }
               callback(null, newUserObj)
             } else {

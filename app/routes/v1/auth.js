@@ -180,7 +180,7 @@ function signup(req, res) {
 
 function verifyAccount(req,res){
   var token = req.param("token")
-  models.user.getUserByData({"accountVerifyToken.token":token},function(err, user){
+  models.user.getUserByData({"consoles.verifyToken":token},function(err, user){
     if(user){
       res.render("account/index",{
         token: token,
@@ -202,13 +202,16 @@ function verifyAccountConfirm(req,res){
   utils.async.waterfall([
     function(callback){
       //models.user.getUserByData({userName:name},callback)
-      models.user.getUserByData({"accountVerifyToken.token":token},callback)
+      models.user.getUserByData({"consoles.verifyToken":token},callback)
     },function(user, callback){
         utils.l.d("user="+user)
       //if(user && ((user.psnId == id || user.xboxId == id) && user.psnToken == token)){
       if(user){
         userObj = user
-        user.psnVerified = "VERIFIED"
+        utils._.map(user.consoles,function(console){
+          if(console.verifyToken == token) console.verifyStatus ="VERIFIED"
+
+        })
         models.user.save(user,function(err,updatedUser){
           callback(null, utils.config.accountVerificationSuccess)
         })
@@ -234,13 +237,17 @@ function deleteWrongPsnId(req,res){
   var userObj = null
   utils.async.waterfall([
     function(callback) {
-      models.user.getUserByData({"accountVerifyToken.token": token}, callback)
+      models.user.getUserByData({"consoles.verifyToken": token}, callback)
     },
     function(user, callback) {
       utils.l.d("user= " + user)
       if(user) {
         userObj = user
-        userObj.psnVerified = "DELETED"
+        utils._.map(userObj.consoles,function(console){
+          if(console.verifyToken == token) console.verifyStatus ="DELETED"
+
+        })
+
         models.user.deleteUser(user, callback)
       } else {
         callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.", null)
@@ -263,7 +270,7 @@ function logout(req, res) {
 }
 
 function getSignupMessage(user){
-  if(user.psnVerified == "INITIATED") return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app! An account verification message has been sent to your bungie.net account. Click the link in the message to verify your PSN id."
+  if(user.consoles[0].verifyStatus == "INITIATED") return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app! An account verification message has been sent to your bungie.net account. Click the link in the message to verify your PSN id."
   else return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app!"
 }
 

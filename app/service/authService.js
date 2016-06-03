@@ -21,9 +21,8 @@ function signupUser(userData, callback) {
 							utils.l.d('signupUser::sendBungieMessage::error',error)
 							if (messageResponse) {
 								utils.l.d("messageResponse::token===" + messageResponse.token)
-								userData.acctVerified = [{consoleType:userData.consoles[0].consoleType,status:"INITIATED"}]
-								userData.accountVerifyToken = [{consoleType:userData.consoles[0].consoleType,token:messageResponse.token}]
-								//userData.bungieMemberShipId = userData.bungieMemberShipId
+								userData.consoles[0].verifyStatus = "INITIATED"
+								userData.consoles[0].verifyToken = messageResponse.token
 								callback(null, userData)
 							} else {
 								return callback(error, null)

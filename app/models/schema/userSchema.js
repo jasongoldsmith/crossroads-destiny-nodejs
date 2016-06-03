@@ -11,31 +11,22 @@ var UserSchema = new Schema({
   date: { type: Date, required: true },
   passWord: { type: String, required: true },
   uniqueID : String,
-  //psnId: { type: String, required: true },
-  consoles: [{consoleType:consoleTypeEnum,consoleId:{type:String}}],
-  //xboxId: String,
+  consoles: [{consoleType:consoleTypeEnum,consoleId:{type:String},verifyStatus:acctVerifyEnum,verifyToken:{type:String}}],
   clanId: { type: String, default: "clan_id_not_set"},
   imageUrl: String,
   uDate: Date,
   signupDate: Date,
   flags: Mixed,
-  //psnVerified:{ type: String, enum: ['VERIFIED','INITIATED','FAILED_INITIATION','NOT_INITIATED'], default: "NOT_INITIATED"},
-  acctVerified: [{consoleType:consoleTypeEnum,status:acctVerifyEnum}],
-  accountVerifyToken:[{consoleType:consoleTypeEnum,token:{type:String}}],
-  //psnToken:{ type: String},
   bungieMemberShipId:{type: String},
   passwordResetToken:{type: String},
   groups:[{type:Mixed}]
 })
 
 UserSchema.index({'userName':1}, {'unique': true})
-//UserSchema.index({'psnId':1}, {'unique': true, 'sparse':true})
-//UserSchema.index({'xboxId':1}, {'unique': true, 'sparse':true})
-//UserSchema.index({'psnToken':1}, {'unique': true, 'sparse':true})
 UserSchema.index({'name':1})
 UserSchema.index({'groups.groupId':1})
-UserSchema.index({'consoles.id':1})
-UserSchema.index({'accountVerifyToken.token':1})
+UserSchema.index({'consoles.consoleId':1})
+UserSchema.index({'consoles.verifyToken':1})
 UserSchema.index({'date': 1})
 UserSchema.index({"__v": 1, "_id": 1})
 
