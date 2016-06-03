@@ -69,7 +69,7 @@ function handleResendBungieMessage(userData,callback){
         //TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
         // or send notification to both xbox and psn depending on the ID availability
         if(utils.config.enableBungieIntegration) {
-          service.destinyInerface.sendBungieMessage(userData.bungieMemberShipId, utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
+          service.destinyInerface.sendBungieMessage(userData.bungieMemberShipId,utils._.get(utils.constants.consoleGenericsId, userData.consoles[0].consoleType), utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
             utils.l.d('handleResendBungieMessage::messageResponse',messageResponse)
             utils.l.d('handleResendBungieMessage::signupUser::sendBungieMessage::error',error)
             if (messageResponse) {

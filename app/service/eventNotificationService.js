@@ -35,14 +35,14 @@ function getAggregateNotificationDetails(clanId,eventCount, notification,callbac
 
 function formatMessage(messageTemplate, event, playerLeft) {
 	messageTemplate =  messageTemplate
-		.replace("#CREATOR#", event.creator.psnId)
+		.replace("#CREATOR#", event.creator.consoles[0].consoleId)
 		.replace("#EVENT_NAME#", getEventName(event.eType))
 		.replace("#TIME#", getTimeStringForDisplay(event.launchDate))
 
 	if(utils._.isValidNonBlank(playerLeft)) {
-		messageTemplate = messageTemplate.replace("#PLAYER#", playerLeft.psnId)
+		messageTemplate = messageTemplate.replace("#PLAYER#", playerLeft.consoles[0].consoleId)
 	} else {
-		messageTemplate = messageTemplate.replace("#PLAYER#", event.players[event.players.length - 1].psnId)
+		messageTemplate = messageTemplate.replace("#PLAYER#", event.players[event.players.length - 1].consoles[0].consoleId)
 	}
 
 	var playersNeeded = event.maxPlayers - event.players.length
@@ -54,8 +54,8 @@ function formatMessage(messageTemplate, event, playerLeft) {
 		})
 
 		var playernames = (utils._.compact(utils._.map(players, function(player) {
-			if(player.psnId != event.creator.psnId) {
-				return player.psnId
+			if(player.consoles[0].consoleId != event.creator.consoles[0].consoleId) {
+				return player.consoles[0].consoleId
 			}
 		}))).join(", ")
 

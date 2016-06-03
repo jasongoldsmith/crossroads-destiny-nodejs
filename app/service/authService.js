@@ -16,7 +16,7 @@ function signupUser(userData, callback) {
 					// or send notification to both xbox and psn depending on the ID availability
 					if(utils.config.enableBungieIntegration) {
 						console.log("Destiny validation enabled")
-						destinyService.sendBungieMessage(userData.bungieMemberShipId, utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
+						destinyService.sendBungieMessage(userData.bungieMemberShipId, utils._.get(utils.constants.consoleGenericsId, userData.consoles[0].consoleType), utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
 							utils.l.d('messageResponse',messageResponse)
 							utils.l.d('signupUser::sendBungieMessage::error',error)
 							if (messageResponse) {
@@ -55,10 +55,10 @@ function userExists(existingUsers,userData,callback){
 		}
 	})
 	if(consoleExists && userNameExists){
-		error = {error:"The User name and gamer tag "+userData.consoles[0].consoleId+" for "+userData.consoles[0].consoleType+" is already taken"}
+		error = {error:"The User name and "+utils._.get(utils.constants.consoleGenericsId,userData.consoles[0].consoleType)+" "+userData.consoles[0].consoleId+" is already taken"}
 	}else{
 		if(userNameExists) error = {error:"That User name is already taken"}
-		if(consoleExists ) error = {error:"That gamer tag "+userData.consoles[0].consoleId+" for "+userData.consoles[0].consoleType+" is already taken"}
+		if(consoleExists ) error = {error:"That "+utils._.get(utils.constants.consoleGenericsId,userData.consoles[0].consoleType)+" "+userData.consoles[0].consoleId+" is already taken"}
 	}
 
 	return callback(error,null)
@@ -72,7 +72,7 @@ function requestResetPassword(userData, callback) {
 					// or send notification to both xbox and psn depending on the ID availability
 					if(utils.config.enableBungieIntegration) {
 						console.log("Destiny validation enabled")
-						destinyService.sendBungieMessage(userData.psnId, "PSN", utils.constants.bungieMessageTypes.passwordReset, function (error, messageResponse) {
+						destinyService.sendBungieMessage(userData.bungieMemberShipId, userData.consoles[0].consoleType, utils.constants.bungieMessageTypes.passwordReset, function (error, messageResponse) {
 							if (messageResponse) {
 								utils.l.d("messageResponse::token===" + messageResponse.token)
 								userData.passwordResetToken = messageResponse.token

@@ -211,23 +211,31 @@ var bungieMemberShipType = {
   XBOXONE:1
 }
 
+var consoleGenericsId = {
+  PSN:"PSN ID",
+  XBOX:"XBOX Gamer tag",
+  PS3:"PSN ID",
+  PS4:"PSN ID",
+  XBOX360:"XBOX Gamer tag",
+  XBOXONE:"XBOX Gamer tag"
+}
 var bungieMessageTypes = {
   accountVerification:'accountVerification',
   passwordReset:'passwordReset'
 }
 
 var bungieMessages = {
-  accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder. Click the link below to verify your PSN ID." %URL%',
+  accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder. Click the link below to verify your %CONSOLETYPE%." %URL%',
   passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL% . If you did not make this request, please let us know and disregard this message..'
 }
 var bungieErrorMessage= function(messageId) {
   console.log('bungieErrorMessage::messageId',messageId)
   switch (messageId) {
     case "UserCannotResolveCentralAccount":
-      return "We were unable to find that PSN ID linked to a Bungie account. Please check for any typos and try again."
+      return "We were unable to find that %CONSOLETYPE% linked to a Bungie account. Please check for any typos and try again."
       break;
     default:
-      return "Sorry, we were unable to validate your PSN ID. The server may be unavailable. Please try again in a few minutes."
+      return "Sorry, we were unable to validate your %CONSOLETYPE%. The server may be unavailable. Please try again in a few minutes."
       break;
   }
 }
@@ -262,5 +270,6 @@ module.exports = {
   bungieMessageTypes: bungieMessageTypes,
   bungieMessages: bungieMessages,
   freelanceBungieGroup:freelanceBungieGroup,
-  bungieErrorMessage:bungieErrorMessage
+  bungieErrorMessage:bungieErrorMessage,
+  consoleGenericsId:consoleGenericsId
 };

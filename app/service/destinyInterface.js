@@ -14,7 +14,7 @@ function getBungieMemberShip(gamerId,membershipType,callback) {
   utils.async.waterfall([
       function (callback) {
         var destinySearchURL = utils.config.bungieDestinySearchByPSNURL.replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(membershipType)).replace(/%MEMBERSHIPID%/g, gamerId);
-        bungieGet(destinySearchURL,callback)
+        bungieGet(destinySearchURL,utils._.get(utils.constants.consoleGenericsId, membershipType),callback)
       },
       function (destinyProfile, callback) {
         var destinyProfileJSON = JSON.parse(destinyProfile)
@@ -25,7 +25,7 @@ function getBungieMemberShip(gamerId,membershipType,callback) {
           utils.l.d("Got destiny profile memberShipId="+memberShipId+" && memberShipType="+memberShipType)
           //var bungieAcctURL ="https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/"+memberShipType+"/"
           var bungieAcctURL =utils.config.bungieUserAccountURL+memberShipId+"/"+memberShipType+"/"
-          bungieGet(bungieAcctURL,callback)
+          bungieGet(bungieAcctURL,utils._.get(utils.constants.consoleGenericsId, utils._.get(utils.constants.consoleGenericsId, membershipType)),callback)
         }else{
           return callback(null,null)
         }
@@ -40,7 +40,7 @@ function getBungieMemberShip(gamerId,membershipType,callback) {
 
           callback(null,{bungieMemberShipId:bungieMemberShipId,psnDisplayName:psnDisplayName})
         }else{
-          callback({error:utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)},null)
+          callback({error:utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus).replace(/%CONSOLETYPE%/g,utils._.get(utils.constants.consoleGenericsId, membershipType))},null)
         }
       }
     ],callback
@@ -54,20 +54,20 @@ function getBungieMemberShip(gamerId,membershipType,callback) {
  *
  * TBD - Change the from ID to traveler account instead of Harsha's account :-)
  * */
-function sendBungieMessage(bungieMemberShipId, messageType,callback){
+function sendBungieMessage(bungieMemberShipId, consoleType, messageType,callback){
   utils.async.waterfall([
       function (callback) {
         var convUrl = utils.config.bungieConvURL
         var token = helpers.uuid.getRandomUUID()
         utils.l.d("bungieMemberShipId=", bungieMemberShipId)
 
-        getMessageBody(utils.config.hostUrl(), token, messageType,function(err,msgTxt){
+        getMessageBody(utils.config.hostUrl(), token, messageType,consoleType,function(err,msgTxt){
           var msgBody = {
             "membersToId": ["13236427", bungieMemberShipId],
             "body": msgTxt
           }
           utils.l.d("msgBody::",msgBody)
-          bungiePost(convUrl, msgBody, token,bungieMemberShipId, callback)
+          bungiePost(convUrl, msgBody, token,bungieMemberShipId,consoleType, callback)
         })
       }
     ],callback
@@ -90,7 +90,7 @@ function listBungieGroupsJoined(destinyMembershipId, currentPage, callback){
 //url: "https://www.bungie.net/Platform/Destiny/2/Account/"+memberShipId,
 //url:"http://www.bungie.net/Platform/User/SearchUsers/?q="+memberShipId,
 //url:"https://www.bungie.net/Platform/User/GetBungieNetUser/",
-function bungieGet(url, callback){
+function bungieGet(url, consoleType,callback){
   request({
     url: url,
     method: "GET",
@@ -108,13 +108,13 @@ function bungieGet(url, callback){
       if(bungieJSON.ErrorStatus == 'Success')
         return callback(null,bungieData)
       else{
-        return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)},null )
+        return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g,consoleType)},null )
       }
     }
   })
 }
 
-function bungiePost(url,msgBody,token,bungieMemberShipId,callback){
+function bungiePost(url,msgBody,token,bungieMemberShipId,consoleType,callback){
   utils.l.d("bungiePost::msgBody",msgBody)
   request({
     url: url,
@@ -137,19 +137,19 @@ function bungiePost(url,msgBody,token,bungieMemberShipId,callback){
       if(bungieJSON.ErrorStatus == 'Success')
         return callback(null,{bungieProfile:bungieData,token:token,bungieMemberShipId:bungieMemberShipId})
       else{
-        return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)},null )
+        return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g,consoleType)},null )
       }
     }
   })
 }
 
-function getMessageBody(host,token,messageType,callback){
+function getMessageBody(host,token,messageType,consoleType,callback){
   var msg = null
   switch (messageType) {
     case utils.constants.bungieMessageTypes.accountVerification:
       tinyUrlService.createTinyUrl(host+"/api/v1/auth/verify/"+token,function(err, url){
         console.log("url from createTinyUrl"+url)
-        msg = utils.constants.bungieMessages.accountVerification.replace(/%URL%/g, url).replace(/%APPNAME%/g,utils.config.appName)
+        msg = utils.constants.bungieMessages.accountVerification.replace(/%URL%/g, url).replace(/%APPNAME%/g,utils.config.appName).replace(/%CONSOLETYPE%/g,consoleType)
         utils.l.d("verify msg to send::"+msg)
         return callback(null,msg)
       })

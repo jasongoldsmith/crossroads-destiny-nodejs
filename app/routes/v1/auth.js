@@ -184,7 +184,8 @@ function verifyAccount(req,res){
     if(user){
       res.render("account/index",{
         token: token,
-        psnId: user.psnId,
+        consoleId: user.consoles[0].consoleId,
+        consoleType: utils._.get(utils.constants.consoleGenericsId, user.consoles[0].consoleType),
         appName:utils.config.appName,
         userName:user.userName
       })
@@ -270,21 +271,22 @@ function logout(req, res) {
 }
 
 function getSignupMessage(user){
-  if(user.consoles[0].verifyStatus == "INITIATED") return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app! An account verification message has been sent to your bungie.net account. Click the link in the message to verify your PSN id."
-  else return "Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app!"
+  if(user.consoles[0].verifyStatus == "INITIATED")
+    return "Thanks for signing up for "+utils.config.appName+", the Destiny Fireteam Finder mobile app! An account verification message has been sent to your bungie.net account. Click the link in the message to verify your "+utils._.get(utils.constants.consoleGenericsId, user.consoles[0].consoleType)+"."
+  else return "Thanks for signing up for "+utils.config.appName+", the Destiny Fireteam Finder mobile app!"
 }
 
 function requestResetPassword(req,res){
-  var psnId = req.body.psnId
-  console.log("requestResetPassword::"+psnId)
+  var userName = req.body.userName
+  console.log("requestResetPassword::"+userName)
   utils.async.waterfall([
       function (callback) {
-        models.user.getUserByData({psnId:psnId},callback)
+        models.user.getUserByData({userName:userName},callback)
       },
       function(user,callback){
         if(user) {
           service.authService.requestResetPassword(user, callback)
-        }else callback({error:"Invalid psnId. Please provide a valid psnId"})
+        }else callback({error:"Invalid User Name. Please provide a valid Crossroads User Name"})
       }
     ],
     function (err, updatedUser) {
@@ -306,7 +308,7 @@ function resetPasswordLaunch(req,res){
     if(user){
       res.render("account/resetPassword",{
         token: token,
-        psnId: user.psnId,
+        consoleId: user.consoles[0].consoleId,
         userName: user.userName,
         appName:utils.config.appName
       })
