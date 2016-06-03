@@ -204,7 +204,11 @@ var eventLaunchStatusList = {
 
 var bungieMemberShipType = {
   PSN:2,
-  XBOX:1
+  XBOX:1,
+  PS3:2,
+  PS4:2,
+  XBOX360:1,
+  XBOXONE:1
 }
 
 var bungieMessageTypes = {

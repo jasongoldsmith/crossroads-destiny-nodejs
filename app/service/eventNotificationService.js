@@ -99,7 +99,8 @@ function getRecipients(recipientType, event, clanId, callback) {
 }
 
 function getClanMembers(event,clanId, callback) {
-	models.user.getByQuery({'groups.groupId':{$in: [event?event.clanId:clanId]}}, callback)
+	if(event) models.user.getByQuery({'groups.groupId':{$in: [event?event.clanId:clanId]},'consoles.consoleType':event.consoleType}, callback)
+	else  models.user.getByQuery({'groups.groupId':{$in: [event?event.clanId:clanId]}}, callback)
 }
 
 function removeEventPlayersFromClan(clanPlayers, eventPlayers) {

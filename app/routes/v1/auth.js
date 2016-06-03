@@ -137,26 +137,25 @@ function signup(req, res) {
     return routeUtils.handleAPIError(req, res, err, err)
   }
 
-  if(!req.body.psnId || utils._.isEmpty(req.body.psnId) ){
-    var err = {error: "Please enter a PSN ID"}
+  if(!req.body.consoles || utils._.isEmpty(req.body.consoles) || utils._.isInvalidOrBlank(req.body.consoles)){
+    var err = {error: "Please enter gamertag and console type"}
+    return routeUtils.handleAPIError(req, res, err, err)
+  }
+
+  if(!req.body.bungieMemberShipId || utils._.isEmpty(req.body.bungieMemberShipId) ){
+    var err = {error: "Please provide bungie membership id."}
     return routeUtils.handleAPIError(req, res, err, err)
   }
 
   var body = req.body
-  if(utils._.isInvalidOrBlank(req.body.psnId)) {
-    var err = {
-      error: "Please enter a PSN ID"
-    }
-    return routeUtils.handleAPIError(req, res, err, err)
-  }
 
   var userData = {
     userName: body.userName.toLowerCase().trim(),
     passWord: passwordHash.generate(body.passWord),
-    psnId: body.psnId.toLowerCase().trim(),
-    xboxId: body.xboxId,
+    consoles: body.consoles,
     imageUrl: body.imageUrl,
-    clanId: body.clanId
+    clanId: body.clanId,
+    bungieMemberShipId: body.bungieMemberShipId
   }
 
   utils.async.waterfall([
@@ -181,7 +180,7 @@ function signup(req, res) {
 
 function verifyAccount(req,res){
   var token = req.param("token")
-  models.user.getUserByData({psnToken:token},function(err, user){
+  models.user.getUserByData({"accountVerifyToken.token":token},function(err, user){
     if(user){
       res.render("account/index",{
         token: token,
@@ -203,7 +202,7 @@ function verifyAccountConfirm(req,res){
   utils.async.waterfall([
     function(callback){
       //models.user.getUserByData({userName:name},callback)
-      models.user.getUserByData({psnToken:token},callback)
+      models.user.getUserByData({"accountVerifyToken.token":token},callback)
     },function(user, callback){
         utils.l.d("user="+user)
       //if(user && ((user.psnId == id || user.xboxId == id) && user.psnToken == token)){
@@ -235,7 +234,7 @@ function deleteWrongPsnId(req,res){
   var userObj = null
   utils.async.waterfall([
     function(callback) {
-      models.user.getUserByData({psnToken: token}, callback)
+      models.user.getUserByData({"accountVerifyToken.token": token}, callback)
     },
     function(user, callback) {
       utils.l.d("user= " + user)
@@ -341,39 +340,25 @@ function resetPassword(req,res){
   )
 }
 
-function shortURL(req,res){
-  utils.l.d("shortUrl::"+req.param('shortPath')); //Returns a shorter version of http://google.com - http://tinyurl.com/2tx
-  service.tinyUrlService.getLongUrl(req.param('shortPath'),function(err,longURL){
-    if(err || ! longURL){
-      var errorObj = {error:"Invalid Link."}
-      routeUtils.handleAPIError(req,res,errorObj,errorObj)
-    }
-    else {
-      res.writeHead(302, {'Location': longURL});
-      res.end()
+function home(req,res){
+  res.render('home/index')
+}
+
+function checkBungieAccount(req,res){
+  service.destinyInerface.getBungieMemberShip(req.body.consoleId,req.body.consoleType,function(err,bungieMember){
+    if (err) {
+      routeUtils.handleAPIError(req, res, err, err)
+    } else {
+      var bungieResponse = {
+        consoleId:bungieMember.psnDisplayName,
+        consoleType:req.body.consoleType,
+        bungieMemberShipId:bungieMember.bungieMemberShipId
+      }
+      routeUtils.handleAPISuccess(req, res, bungieResponse)
     }
   })
 }
 
-function createShortURL(longURL,callback){
-  const crypto = require('crypto')
-
-  var shasum = crypto.createHash('sha1');
-  shasum.update((new Date).getTime()+"");
-  var hash = shasum.digest('hex').substring(0, 8);
-  console.log("shahhash::"+hash)
-
-  const hmac = crypto.createHmac('sha256', 'zKcBQ7jIhTy/oXEYLwnMdmgTlbgKxrf+b4rtXosE')
-
-  hmac.update(longURL)
-  var signature = hmac.digest('base64')
-  console.log("signature::"+signature)
-
-}
-
-function home(req,res){
-  res.render('home/index')
-}
 /** Routes */
 routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
@@ -385,7 +370,7 @@ routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
 routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', requestResetPassword, requestResetPassword)
 routeUtils.rPost(router, '/resetPassword/:token', 'resetPassword', resetPassword, resetPassword)
-//routeUtils.rGet(router,'/:shortPath','shortURLRedirect',shortURL,shortURL)
 routeUtils.rGet(router,'/','homePage',home,home)
+routeUtils.rPost(router, '/checkBungieAccount', 'checkBungieAccount', checkBungieAccount)
 module.exports = router
 

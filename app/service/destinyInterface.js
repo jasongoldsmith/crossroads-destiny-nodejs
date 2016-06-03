@@ -37,13 +37,10 @@ function getBungieMemberShip(gamerId,membershipType,callback) {
           var bungieAcctResp = bungieAcctJson.Response
           var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
           var psnDisplayName = bungieAcctResp.bungieNetUser.psnDisplayName
-          var token = helpers.uuid.getRandomUUID()
-          //var convUrl = "https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true"
-          var convUrl = utils.config.bungieConvURL
-          utils.l.d("bungieMemberShipId=" + bungieMemberShipId + "---&&--- psnDisplayName=" + psnDisplayName)
-          callback(null,{bungieMemberShipId:bungieMemberShipId})
+
+          callback(null,{bungieMemberShipId:bungieMemberShipId,psnDisplayName:psnDisplayName})
         }else{
-          callback(null,null)
+          callback({error:utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)},null)
         }
       }
     ],callback
@@ -57,57 +54,27 @@ function getBungieMemberShip(gamerId,membershipType,callback) {
  *
  * TBD - Change the from ID to traveler account instead of Harsha's account :-)
  * */
-function sendBungieMessage(gamerId, membershipType, messageType,callback){
-
+function sendBungieMessage(bungieMemberShipId, messageType,callback){
   utils.async.waterfall([
       function (callback) {
-        var destinySearchURL = utils.config.bungieDestinySearchByPSNURL.replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(membershipType)).replace(/%MEMBERSHIPID%/g, gamerId);
-        bungieGet(destinySearchURL,callback)
-      },
-      function (destinyProfile, callback) {
-        var destinyProfileJSON = JSON.parse(destinyProfile)
-        if(destinyProfileJSON && destinyProfileJSON.Response){
-          var memberShipType = getBungieMembershipType(membershipType)
-          var memberShipId=  destinyProfileJSON.Response
+        var convUrl = utils.config.bungieConvURL
+        var token = helpers.uuid.getRandomUUID()
+        utils.l.d("bungieMemberShipId=", bungieMemberShipId)
 
-          utils.l.d("Got destiny profile memberShipId="+memberShipId+" && memberShipType="+memberShipType)
-          //var bungieAcctURL ="https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/"+memberShipType+"/"
-          var bungieAcctURL =utils.config.bungieUserAccountURL+memberShipId+"/"+memberShipType+"/"
-          bungieGet(bungieAcctURL,callback)
-        }else{
-          return callback(null,null)
-        }
-      },
-      function (bungieAcct,callback) {
-        var bungieAcctJson =JSON.parse(bungieAcct)
-
-        if(bungieAcctJson && bungieAcctJson.Response && bungieAcctJson.Response.bungieNetUser) {
-          var bungieAcctResp = bungieAcctJson.Response
-          var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
-          var psnDisplayName = bungieAcctResp.bungieNetUser.psnDisplayName
-          var token = helpers.uuid.getRandomUUID()
-          //var convUrl = "https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true"
-          var convUrl = utils.config.bungieConvURL
-          utils.l.d("bungieMemberShipId=" + bungieMemberShipId + "---&&--- psnDisplayName=" + psnDisplayName)
-          //var msgTxt =getMessageBody(utils.config.hostUrl(), gamerId, token, messageType)
-          //utils.l.d("msgTxt::",msgTxt)
-          getMessageBody(utils.config.hostUrl(), gamerId, token, messageType,function(err,msgTxt){
-            var msgBody = {
-              "membersToId": ["13236427", bungieMemberShipId],
-              "body": msgTxt
-            }
-            utils.l.d("msgBody::",msgBody)
-            bungiePost(convUrl, msgBody, token,bungieMemberShipId, callback)
-          })
-        }else{
-          callback({error:utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)},null)
-        }
+        getMessageBody(utils.config.hostUrl(), token, messageType,function(err,msgTxt){
+          var msgBody = {
+            "membersToId": ["13236427", bungieMemberShipId],
+            "body": msgTxt
+          }
+          utils.l.d("msgBody::",msgBody)
+          bungiePost(convUrl, msgBody, token,bungieMemberShipId, callback)
+        })
       }
     ],callback
   )
 }
 
-function listBungieGroupsJoined(destinyMembershipId, psnId,currentPage, callback){
+function listBungieGroupsJoined(destinyMembershipId, currentPage, callback){
   utils.async.waterfall([
     function(callback){
       var destinyGruopsJoinedURL = utils.config.destinyGruopsJoinedURL.replace(/%MEMBERSHIPID%/g,destinyMembershipId).replace(/%CURRENTPAGE%/g,currentPage)
@@ -159,19 +126,24 @@ function bungiePost(url,msgBody,token,bungieMemberShipId,callback){
     },
     body:msgBody,
     json:true
-  }, function(error, response, bungieProfile) {
+  }, function(error, response, bungieData) {
     if(error) {
       utils.l.s("Error posting to bungie::"+error)
       return callback(error, null)
     } else {
-      utils.l.d("response html "+JSON.stringify(bungieProfile))
-      return callback(null,{bungieProfile:bungieProfile,token:token,bungieMemberShipId:bungieMemberShipId})
+      utils.l.d("response html ",bungieData)
+      var bungieJSON = bungieData
+      utils.l.d("Got bungie for "+url)
+      if(bungieJSON.ErrorStatus == 'Success')
+        return callback(null,{bungieProfile:bungieData,token:token,bungieMemberShipId:bungieMemberShipId})
+      else{
+        return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)},null )
+      }
     }
-
   })
 }
 
-function getMessageBody(host,displayName,token,messageType,callback){
+function getMessageBody(host,token,messageType,callback){
   var msg = null
   switch (messageType) {
     case utils.constants.bungieMessageTypes.accountVerification:
@@ -217,7 +189,8 @@ function isClanEnabled(clanCallSign){
 }
 
 function getBungieMembershipType(membershipType){
-  return utils.constants.bungieMemberShipType.PSN
+  utils.l.d("membershipType::"+membershipType,utils._.get(utils.constants.bungieMemberShipType,membershipType))
+  return utils._.get(utils.constants.bungieMemberShipType,membershipType)
 }
 
 module.exports={

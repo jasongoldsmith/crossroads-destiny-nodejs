@@ -30,7 +30,7 @@ function listGroups(user,callback){
         if(user) {
           userObj = user
           //TODO: set current page to 1 for now. Change it when we have paging for groups.
-          service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, user.psnId,1, callback)
+          service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, 1, callback)
         }else return callback({error:"User doesnot exist/logged in."})
       },function(groups,callback){
         if(groups) {
@@ -70,17 +70,15 @@ function handleResendBungieMessage(userData,callback){
         //TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
         // or send notification to both xbox and psn depending on the ID availability
         if(utils.config.enableBungieIntegration) {
-          console.log("Destiny validation enabled")
-          service.destinyInerface.sendBungieMessage(userData.psnId, "PSN", utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
+          service.destinyInerface.sendBungieMessage(userData.bungieMemberShipId, utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
             utils.l.d('handleResendBungieMessage::messageResponse',messageResponse)
             utils.l.d('handleResendBungieMessage::signupUser::sendBungieMessage::error',error)
             if (messageResponse) {
               utils.l.d("messageResponse::token===" + messageResponse.token)
               var newUserObj = {
                 id:userData._id,
-                psnVerified:"INITIATED",
-                psnToken: messageResponse.token,
-                bungieMemberShipId : messageResponse.bungieMemberShipId
+                acctVerified : [{consoleType:userData.consoles[0].consoleType,status:"INITIATED"}],
+                accountVerifyToken : [{consoleType:userData.consoles[0].consoleType,token:messageResponse.token}]
               }
               callback(null, newUserObj)
             } else {
@@ -121,7 +119,7 @@ function searchGroup(user,groupId,callback){
         if(user) {
           userObj = user
           //TODO: set current page to 1 for now. Change it when we have paging for groups.
-          service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, user.psnId,1, callback)
+          service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, 1, callback)
         }else return callback({error:"User doesnot exist/logged in."})
       },function(groups,callback){
         if(groups) {
