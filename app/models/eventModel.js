@@ -304,7 +304,7 @@ function computeEventAttributesIfMissing(eventObj, user) {
 	}
 
 	if(utils._.isInvalidOrBlank(eventObj.consoleType)) {
-		eventObj.consoleType = user.consoles[0].type
+		eventObj.consoleType = user.consoles[0].consoleType
 	}
 }
 
