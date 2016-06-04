@@ -132,27 +132,31 @@ function eventStartReminder(notifTrigger){
 function dailyOneTimeReminder(notifTrigger, callback){
   utils.l.i("Starting trigger dailyOneTimeReminder")
   var date = new Date()
-  date.setHours(0,0,0,0)
+  date.setHours(0, 0, 0, 0)
   var date1 =  utils.moment(date).utc().format()
-  var date2 = utils.moment(date).utc().add(24,"hours").format()
+  var date2 = utils.moment(date).utc().add(24, "hours").format()
 
   utils.async.waterfall([
       function (callback) {
         models.event.getByQuery({
-          launchStatus: utils.constants.eventLaunchStatusList.upcoming,
-          status: {$ne: "full"},
-          launchDate: {$gte: date1, $lte: date2}},
+            launchStatus: utils.constants.eventLaunchStatusList.upcoming,
+            status: {$ne: "full"},
+            launchDate: {$gte: date1, $lte: date2}
+        },
           null, callback)
       },
       function (events, callback) {
-        var totalEventsToLaunch = events?events.length:0
-        if(totalEventsToLaunch>0){
-          if(notifTrigger.isActive && notifTrigger.notifications.length > 0){
-            var eventsByClan = utils._.countBy(events,'creator.clanId')
-            for (var clanId in eventsByClan) {
-              if(eventsByClan[clanId] > 0)
+        var totalEventsToLaunch = events ? events.length: 0
+        if(totalEventsToLaunch > 0) {
+          if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
+            var eventsByClan = utils._.groupBy(events, 'clanId')
+            for(var clanId in eventsByClan) {
+              var eventsCountByConsole = utils._.countBy(eventsByClan[clanId], 'consoleType')
+              for(var consoleType in eventsCountByConsole) {
                 utils.async.map(notifTrigger.notifications,
-                  utils._.partial(createAggregateNotificationAndSend, clanId, eventsByClan[clanId]))
+                  utils._.partial(createAggregateNotificationAndSend, clanId, consoleType,
+                    eventsCountByConsole[consoleType]))
+              }
             }
           }
         }
@@ -307,9 +311,10 @@ function createNotificationAndSend(event, user, notification){
   })
 }
 
-function createAggregateNotificationAndSend(clanId, eventCount, notification){
+function createAggregateNotificationAndSend(clanId, consoleType, eventCount, notification){
   utils.l.d("createAggregateNotificationAndSend::notification::"+JSON.stringify(notification))
-  notificationService.getAggregateNotificationDetails(clanId, eventCount, notification, function(err,notificationResponse){
+  notificationService.getAggregateNotificationDetails(clanId, consoleType, eventCount, notification, function(err,notificationResponse){
+    utils.l.d("notification response object", notificationResponse)
     helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, null, clanId)
   })
 }
