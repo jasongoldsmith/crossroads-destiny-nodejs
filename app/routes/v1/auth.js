@@ -354,6 +354,8 @@ function home(req,res){
 }
 
 function checkBungieAccount(req,res){
+  utils.l.d("consoleId::"+req.body.consoleId+",consoleType::"+req.body.consoleType)
+  utils.l.d("checkBungieAccount",req.body)
   service.destinyInerface.getBungieMemberShip(req.body.consoleId,req.body.consoleType,function(err,bungieMember){
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
