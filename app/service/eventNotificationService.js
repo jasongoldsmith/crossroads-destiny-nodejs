@@ -9,7 +9,7 @@ function getNotificationDetails(event, notification, playerLeft, callback) {
 		message: formatMessage(notification.messageTemplate, event, playerLeft)
 	}
 
-	getRecipients(notification.recipientType, event, null, function(err, recipients) {
+	getRecipients(notification.recipientType, event, null, null, function(err, recipients) {
 		if (err) {
 			return callback(err, null)
 		}
@@ -18,13 +18,13 @@ function getNotificationDetails(event, notification, playerLeft, callback) {
 	})
 }
 
-function getAggregateNotificationDetails(clanId,eventCount, notification,callback){
+function getAggregateNotificationDetails(clanId, consoleType, eventCount, notification, callback) {
 	var notificationObj = {
 		name: notification.name,
 		message: notification.messageTemplate.replace("#EVENT_COUNT#",eventCount)
 	}
 
-	getRecipients(notification.recipientType, null, clanId,function(err, recipients) {
+	getRecipients(notification.recipientType, null, clanId, consoleType, function(err, recipients) {
 		if (err) {
 			return callback(err, null)
 		}
@@ -65,7 +65,7 @@ function formatMessage(messageTemplate, event, playerLeft) {
 	return messageTemplate
 }
 
-function getRecipients(recipientType, event, clanId, callback) {
+function getRecipients(recipientType, event, clanId, consoleType, callback) {
 	var recipients = null
 	switch(recipientType) {
 		case "creator":
@@ -83,7 +83,7 @@ function getRecipients(recipientType, event, clanId, callback) {
 			return callback(null, recipients)
 			break
 		case "clanNotEventMembers":
-			getClanMembers(event, null,function(err, users) {
+			getClanMembers(event, clanId, consoleType, function(err, users) {
 				if(err) {
 					return callback(err, null)
 				}
@@ -93,14 +93,26 @@ function getRecipients(recipientType, event, clanId, callback) {
 			})
 			break
 		case "clan":
-			getClanMembers(event,clanId, callback)
+			getClanMembers(event, clanId, consoleType, callback)
 			break
 	}
 }
 
-function getClanMembers(event,clanId, callback) {
-	if(event) models.user.getByQuery({'groups.groupId':{$in: [event?event.clanId:clanId]},'consoles.consoleType':event.consoleType}, callback)
-	else  models.user.getByQuery({'groups.groupId':{$in: [event?event.clanId:clanId]}}, callback)
+function getClanMembers(event, clanId, consoleType, callback) {
+	if(event) {
+		models.user.getByQuery({
+				'groups.groupId': {$in: [event.clanId]},
+				'consoles.consoleType': event.consoleType
+		},
+			callback)
+	}
+	else  {
+		models.user.getByQuery({
+				'groups.groupId': {$in: [clanId]},
+				'consoles.consoleType': consoleType
+		},
+			callback)
+	}
 }
 
 function removeEventPlayersFromClan(clanPlayers, eventPlayers) {
