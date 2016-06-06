@@ -29,7 +29,7 @@ function listGroups(user,callback){
         if(user) {
           userObj = user
           //TODO: set current page to 1 for now. Change it when we have paging for groups.
-          service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, 1, callback)
+          service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId,userObj.consoles[0].consoleType, 1, callback)
         }else return callback({error:"User doesnot exist/logged in."})
       },function(groups,callback){
         if(groups) {
@@ -119,7 +119,7 @@ function searchGroup(user,groupId,callback){
         if(user) {
           userObj = user
           //TODO: set current page to 1 for now. Change it when we have paging for groups.
-          service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, 1, callback)
+          service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, userObj.consoles[0].consoleType,1, callback)
         }else return callback({error:"User doesnot exist/logged in."})
       },function(groups,callback){
         if(groups) {

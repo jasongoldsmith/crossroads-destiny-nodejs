@@ -74,11 +74,11 @@ function sendBungieMessage(bungieMemberShipId, consoleType, messageType,callback
   )
 }
 
-function listBungieGroupsJoined(destinyMembershipId, currentPage, callback){
+function listBungieGroupsJoined(destinyMembershipId, consoleType, currentPage, callback){
   utils.async.waterfall([
     function(callback){
       var destinyGruopsJoinedURL = utils.config.destinyGruopsJoinedURL.replace(/%MEMBERSHIPID%/g,destinyMembershipId).replace(/%CURRENTPAGE%/g,currentPage)
-      bungieGet(destinyGruopsJoinedURL,callback)
+      bungieGet(destinyGruopsJoinedURL,utils._.get(utils.constants.consoleGenericsId,consoleType),callback)
     },function(bungieGroups,callback){
       tranformJoinedGroups(bungieGroups,callback)
     }
