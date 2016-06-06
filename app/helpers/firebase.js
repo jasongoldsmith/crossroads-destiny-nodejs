@@ -45,7 +45,7 @@ function updateEvent(event, user) {
 function createUser(user) {
   var id = user._id.toString()
   var userObj = getUserObj(user)
-  usersRef.child(id).set(userObj, function (error) {
+  usersRef.child(id).set({value:userObj}, function (error) {
     if (error) {
       utils.l.d("user creation failed in firebase", user)
     } else {
@@ -56,7 +56,7 @@ function createUser(user) {
 function updateUser(user) {
   var id = user._id.toString()
   var userObj = getUserObj(user)
-  usersRef.child(id).update(userObj, function (error) {
+  usersRef.child(id).update({value:userObj}, function (error) {
     if (error) {
       utils.l.d("user creation failed in firebase", user)
     } else {
