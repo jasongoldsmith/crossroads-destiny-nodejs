@@ -361,7 +361,7 @@ function checkBungieAccount(req,res){
       routeUtils.handleAPIError(req, res, err, err)
     } else {
       var bungieResponse = {
-        consoleId:bungieMember.psnDisplayName,
+        consoleId:bungieMember.displayName,
         consoleType:req.body.consoleType,
         bungieMemberShipId:bungieMember.bungieMemberShipId
       }

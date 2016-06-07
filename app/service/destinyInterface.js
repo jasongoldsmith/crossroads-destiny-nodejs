@@ -36,9 +36,10 @@ function getBungieMemberShip(gamerId,membershipType,callback) {
         if(bungieAcctJson && bungieAcctJson.Response && bungieAcctJson.Response.bungieNetUser) {
           var bungieAcctResp = bungieAcctJson.Response
           var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
-          var psnDisplayName = bungieAcctResp.bungieNetUser.psnDisplayName
-
-          callback(null,{bungieMemberShipId:bungieMemberShipId,psnDisplayName:psnDisplayName})
+          var displayName = null
+          if(utils._.get(utils.constants.bungieMemberShipType, membershipType) == utils.constants.bungieMemberShipType.PSN) displayName = bungieAcctResp.bungieNetUser.psnDisplayName
+          else displayName = bungieAcctResp.bungieNetUser.xboxDisplayName
+          callback(null,{bungieMemberShipId:bungieMemberShipId,displayName:displayName})
         }else{
           callback({error:utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus).replace(/%CONSOLETYPE%/g,utils._.get(utils.constants.consoleGenericsId, membershipType))},null)
         }
