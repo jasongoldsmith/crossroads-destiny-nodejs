@@ -5,6 +5,7 @@ var fs = require('fs')
 var passwordHash = require('password-hash')
 var moment = require('moment')
 var temporal = require('temporal')
+var request = require('request')
 
 // internal dependencies
 var routeUtils = require('./app/routes/routeUtils')
@@ -279,6 +280,29 @@ function eventUpcomingReminder() {
     })
 }
 
+function helmetsFinder() {
+  var fs = require("fs")
+  console.log("\n *STARTING* \n")
+
+  // Get content from file
+  var contents = fs.readFileSync("/Users/abichsu/Desktop/Helmets/armor.json")
+  // Define to JSON type
+  var jsonContent = JSON.parse(contents)
+  utils._.forEach(jsonContent.items, function(value, key) {
+    if(value.subType == "Helmet") {
+      request(value.icon, function (error, response, body) {
+
+        if(response.statusCode == 200) {
+          //console.log(value.icon.toString())
+          fs.appendFile('/Users/abichsu/Desktop/Helmets/helmets.txt', "\"" + value.icon.toString() + "\"" + ",\n", function (err) {
+
+          })
+        }
+      })
+    }
+  })
+}
+
 module.exports = {
   updatePassWord: updatePassWord,
   deleteOldFullEvents: deleteOldFullEvents,
@@ -287,5 +311,6 @@ module.exports = {
   eventFullReminder: eventFullReminder,
   eventStartReminder: eventStartReminder,
   dailyOneTimeReminder: dailyOneTimeReminder,
-  eventUpcomingReminder: eventUpcomingReminder
+  eventUpcomingReminder: eventUpcomingReminder,
+  helmetsFinder: helmetsFinder
 }
