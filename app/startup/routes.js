@@ -15,16 +15,26 @@ module.exports = function (app, passport) {
   })
 
   app.get('/terms', function(req, res) {
-    res.render('home/termsOfService')
+    res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/terms'});
+    res.end()
   })
 
   app.get('/privacy', function(req, res) {
-    res.render('home/privacy')
+    res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/privacy'});
+    res.end()
   })
 
   app.get('/license', function(req, res) {
-    if(req.adata.os_generic == 'iOS' || req.adata.os_generic == 'Mac OS') res.render('home/license_ios')
-    else  res.render('home/license_android')
+    if(req.adata.os_generic == 'iOS' || req.adata.os_generic == 'Mac OS'){
+      res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/license_ios'});
+      res.end()
+      //res.render('home/license_ios')
+    }
+    else {
+      res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/license_android'});
+      res.end()
+      //res.render('home/license_android')
+    }
   })
 
   app.get('/legal', function(req, res) {

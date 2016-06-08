@@ -350,7 +350,9 @@ function resetPassword(req,res){
 }
 
 function home(req,res){
-  res.render('home/index')
+  //res.render('home/index')
+  res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/'});
+  res.end()
 }
 
 function checkBungieAccount(req,res){

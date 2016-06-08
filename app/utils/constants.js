@@ -212,12 +212,12 @@ var bungieMemberShipType = {
 }
 
 var consoleGenericsId = {
-  PSN:"PSN ID",
-  XBOX:"XBOX Gamer tag",
-  PS3:"PSN ID",
-  PS4:"PSN ID",
-  XBOX360:"XBOX Gamer tag",
-  XBOXONE:"XBOX Gamer tag"
+  PSN:"PlayStation ID",
+  XBOX:"Xbox Gamertag",
+  PS3:"PlayStation ID",
+  PS4:"PlayStation ID",
+  XBOX360:"Xbox Gamertag",
+  XBOXONE:"Xbox Gamertag"
 }
 var bungieMessageTypes = {
   accountVerification:'accountVerification',
