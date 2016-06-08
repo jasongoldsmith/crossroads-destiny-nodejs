@@ -78,6 +78,9 @@ switch(command) {
   case eventUpcomingReminder:
     jobs.eventUpcomingReminder()
     break
+  case "helmetsFinder":
+    jobs.helmetsFinder()
+    break
   case "momentTest":
     var date = new Date()
     date.setHours(0,0,0,0)
