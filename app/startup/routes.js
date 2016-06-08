@@ -15,7 +15,7 @@ module.exports = function (app, passport) {
   })
 
   app.get('/terms', function(req, res) {
-    res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/terms.html'});
+    res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/terms'});
     res.end()
   })
 
