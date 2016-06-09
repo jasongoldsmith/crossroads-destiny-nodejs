@@ -10,10 +10,10 @@ var service = require('../../../service/index')
 function listMyGroups(req,res){
   listGroups(req.user, function(err, groups) {
     if (err) {
-      routeUtils.handleAPIError(req, res, err, err)
+      routeUtils.handleAPIError(req, res, err, err,{utm_dnt:"listMyGroups"})
     } else {
       groupsResponse = groups || [{}]
-      routeUtils.handleAPISuccess(req, res, groupsResponse)
+      routeUtils.handleAPISuccess(req, res, groupsResponse,{utm_dnt:"listMyGroups"})
     }
   })
 }
@@ -179,7 +179,7 @@ function mergeGroups(user,bungieGroups){
   return {id:user._id,groups:updatedGroups}
 }
 /** Routes */
-routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups)
+routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups,{utm_dnt:"listMyGroups"})
 routeUtils.rGet(router, '/group/search/:groupId', 'searchGroupById', searchGroupReq)
 routeUtils.rGet(router, '/group/resendBungieMessage', 'resendBungieMessage', resendBungieMessage)
 module.exports = router
