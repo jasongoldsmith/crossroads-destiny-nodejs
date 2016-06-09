@@ -36,7 +36,7 @@ function listGroups(user,callback){
           groupList = groups
           groupList.push(utils.constants.freelanceBungieGroup)
           models.user.updateUser(mergeGroups(userObj,groupList),false,function(err,user){
-            if(user) service.eventService.listEventCountByGroups(utils._.map(groupList, 'groupId'),callback)
+            if(user) service.eventService.listEventCountByGroups(utils._.map(groupList, 'groupId'),userObj.consoles[0].consoleType,callback)
             else return callback(err,null)
           })
         }else return callback(null, null)
@@ -124,7 +124,7 @@ function searchGroup(user,groupId,callback){
       },function(groups,callback){
         if(groups) {
           groupList = groups
-          service.eventService.listEventCountByGroups(utils._.map(groups, 'groupId'), callback)
+          service.eventService.listEventCountByGroups(utils._.map(groups, 'groupId'),userObj.consoles[0].consoleType, callback)
         }else return callback(null, null)
       },function(eventCounts, callback){
         mergeEventStatsWithGroups(eventCounts,groupList, callback)
