@@ -81,7 +81,8 @@ function createEvent(data, callback) {
 		var startDate = moment(data.launchDate)
 		var endDate = moment(Date.now())
 		var minutesDiff = Math.abs(endDate.diff(startDate, 'minutes'))
-		if(minutesDiff < 15) {
+		// we have to check for the start date being more than 15 minutes in the past as well
+		if(minutesDiff < 15 || startDate < endDate) {
 			checkWithDate = null
 		} else {
 			data.launchStatus = utils.constants.eventLaunchStatusList.upcoming
