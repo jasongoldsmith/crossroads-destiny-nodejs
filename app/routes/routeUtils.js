@@ -149,7 +149,7 @@ function addTrackingKeyBaseToRequest(trackingKeyBase,trackData) {
     var trackingKey = getTrackingKeyFromRequest(req, RequestTypeMap.REQUEST);
     // Track to mixpanel
     if(trackData && trackData['utm_dnt']) {
-      utils.l.d('routeUtils::addTrackingKeyBaseToRequest::Skipping trackdata[utm_dnt]')
+      //utils.l.d('routeUtils::addTrackingKeyBaseToRequest::Skipping trackdata[utm_dnt]')
       return next();
     }else{
       helpers.m.trackRequest(trackingKey, {}, req, req.user);
