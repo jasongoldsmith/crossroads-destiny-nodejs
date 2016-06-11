@@ -92,6 +92,7 @@ function listBungieGroupsJoined(destinyMembershipId, consoleType, currentPage, c
 //url:"http://www.bungie.net/Platform/User/SearchUsers/?q="+memberShipId,
 //url:"https://www.bungie.net/Platform/User/GetBungieNetUser/",
 function bungieGet(url, consoleType,callback){
+
   request({
     url: url,
     method: "GET",
@@ -104,11 +105,14 @@ function bungieGet(url, consoleType,callback){
       utils.l.s("Error getting bungie for url "+url+" and error is::----"+error)
       return callback(error,null)
     } else {
+
       var bungieJSON = JSON.parse(bungieData)
       utils.l.d("Got bungie for "+url)
       if(bungieJSON.ErrorStatus == 'Success')
         return callback(null,bungieData)
       else{
+        if(bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
+          utils.l.s("bungie message GET error",{url:url,bungieData:bungieData,consoleType:consoleType})
         return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g,consoleType)},null )
       }
     }
@@ -132,12 +136,14 @@ function bungiePost(url,msgBody,token,bungieMemberShipId,consoleType,callback){
       utils.l.s("Error posting to bungie::"+error)
       return callback(error, null)
     } else {
-      utils.l.d("response html ",bungieData)
+      utils.l.d("response::bungieData ",bungieData)
       var bungieJSON = bungieData
       utils.l.d("Got bungie for "+url)
       if(bungieJSON.ErrorStatus == 'Success')
         return callback(null,{bungieProfile:bungieData,token:token,bungieMemberShipId:bungieMemberShipId})
       else{
+        if(bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
+          utils.l.s("bungie message POST error",{errorStatus:bungieJSON.ErrorStatus,url:url,msgBody:msgBody,token:token,bungieMemberShipId:bungieMemberShipId,consoleType:consoleType})
         return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g,consoleType)},null )
       }
     }
