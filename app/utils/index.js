@@ -6,6 +6,15 @@ var Chance = require("chance");
 var chance = new Chance();
 var TIME_ELAPSED_30MIN = 30 * 60 * 1000;
 
+function isJson(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
 function replaceAll(find, replace, str) {
   return str.replace(new RegExp(find, 'g'), replace);
 }
@@ -92,5 +101,6 @@ module.exports = {
   l: log,
   firstInArrayCallback: firstInArrayCallback,
   updateS3Domain: updateS3Domain,
+  isJson:isJson,
   moment:require('moment')
 };

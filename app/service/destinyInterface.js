@@ -105,22 +105,24 @@ function bungieGet(url, consoleType,callback){
       utils.l.s("Error getting bungie for url "+url+" and error is::----"+error)
       return callback(error,null)
     } else {
-
-      var bungieJSON = JSON.parse(bungieData)
-      utils.l.d("Got bungie for "+url)
-      if(bungieJSON.ErrorStatus == 'Success')
-        return callback(null,bungieData)
-      else{
-        if(bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
-          utils.l.s("bungie message GET error",{url:url,bungieData:bungieData,consoleType:consoleType})
-        return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g,consoleType)},null )
+      utils.l.d('bungie GET for url::'+url)
+      if(utils.isJson(bungieData)) {
+        var bungieJSON = JSON.parse(bungieData)
+        if (bungieJSON.ErrorStatus == 'Success')
+          return callback(null, bungieData)
+        else {
+          if (bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
+            utils.l.s("bungie message GET error", {url: url, bungieData: bungieData, consoleType: consoleType})
+          return callback({error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g, consoleType)}, null)
+        }
+      }else{
+        return callback({error: utils.constants.bungieErrorMessage('NotParsableError').replace(/%CONSOLETYPE%/g, consoleType)}, null)
       }
     }
   })
 }
 
 function bungiePost(url,msgBody,token,bungieMemberShipId,consoleType,callback){
-  utils.l.d("bungiePost::msgBody",msgBody)
   request({
     url: url,
     method: "POST",

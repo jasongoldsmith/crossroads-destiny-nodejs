@@ -525,6 +525,15 @@ var bungieErrorMessage= function(messageId) {
     case "UserCannotResolveCentralAccount":
       return "We were unable to find that %CONSOLETYPE% linked to a Bungie account. Please check for any typos and try again."
       break
+    case "NotParsableError":
+      return "We were unable to find that %CONSOLETYPE% linked to a Bungie account. Please check for any typos and try again."
+      break
+    case "DestinyInvalidClaimException" || "DestinyUnexpectedError" || "DestinyShardRelayClientTimeout":
+      return "Sorry, we were unable to validate your %CONSOLETYPE%. The bungie server may be unavailable. Please try again in a few minutes."
+      break;
+    case "WebAuthRequired":
+      return "Sorry, we were unable to validate your %CONSOLETYPE% with bungie. Please try again in a few minutes."
+      break;
     default:
       return "Sorry, we were unable to validate your %CONSOLETYPE%. The server may be unavailable. Please try again in a few minutes."
       break
