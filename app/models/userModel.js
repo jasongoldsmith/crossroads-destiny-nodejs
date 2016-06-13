@@ -194,12 +194,28 @@ function updateUser(data, allowClanUpdate, callback) {
     callback)
 }
 
-function listMemberCount(id,filter,callback){
-  User
-    .aggregate([{ $match : filter},{$group: {_id : "$"+id, count:  { $sum : 1} }}])
-    .exec(callback)
+function listMemberCount(ids,consoleType,callback){
+  utils.async.map(ids,
+     function(id,callback){
+       getUserCount(id,consoleType,callback)
+     },
+    function(err,counts){
+      return callback(null,counts)
+    }
+  )
 }
-
+function getUserCount(id,consoleType,callback){
+  utils.async.waterfall([
+      function(callback){
+        User
+          .count({"groups.groupId":id,"consoles.consoleType":consoleType})
+          .exec(function(err,count){
+            if(!err) return callback(null,{_id:id,count:count})
+          })
+      }
+    ],callback
+  )
+}
 module.exports = {
   model: User,
   getUserById: getUserById,

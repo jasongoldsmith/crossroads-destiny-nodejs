@@ -89,8 +89,8 @@ function requestResetPassword(userData, callback) {
 	)
 }
 
-function listMemberCountByClan(groupIds, callback){
-	models.user.listMemberCount("clanId",{clanId:{$in:groupIds}},callback)
+function listMemberCountByClan(groupIds,consoleType, callback){
+	models.user.listMemberCount(groupIds,consoleType,callback)
 }
 
 module.exports = {

@@ -43,8 +43,7 @@ function listGroups(user,callback){
       },function(eventCounts, callback){
         mergeEventStatsWithGroups(eventCounts,groupList, callback)
       },function(groupEventStatsList,callback){
-        groupList = groupEventStatsList
-        service.authService.listMemberCountByClan(utils._.map(groupList, 'groupId'),callback)
+        service.authService.listMemberCountByClan(utils._.map(groupList, 'groupId'),userObj.consoles[0].consoleType,callback)
       },function(memberCounts,callback){
         mergeMemberStatsWithGroups(memberCounts,groupList,callback)
       }
