@@ -14,6 +14,7 @@ var UserSchema = new Schema({
   consoles: [{consoleType:consoleTypeEnum,consoleId:{type:String},verifyStatus:acctVerifyEnum,verifyToken:{type:String}}],
   clanId: { type: String, default: "clan_id_not_set"},
   imageUrl: String,
+  isLoggedIn: {type: Boolean, default: true},
   uDate: Date,
   signupDate: Date,
   flags: Mixed,
