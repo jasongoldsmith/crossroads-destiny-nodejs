@@ -23,7 +23,7 @@ function login (req, res) {
           if (!user) {
             return callback({error: "Password is incorrect"}, null)
           }
-          //outerUser = user
+          outerUser = user
           callback(null, user)
         })
         passportHandler(req, res)
