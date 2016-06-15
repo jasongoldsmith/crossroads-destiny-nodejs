@@ -93,6 +93,17 @@ function updatePassword(req, res) {
   }
 }
 
+function getUserMetrics(req, res) {
+  utils.l.i("Get user metrics request")
+  models.user.getUserMetrics(function(err, metrics) {
+    if(err) {
+      routeUtils.handleAPIError(req, res, err, err)
+    } else {
+      routeUtils.handleAPISuccess(req, res, metrics)
+    }
+  })
+}
+
 function getUserById(data, callback) {
   models.user.getUserById(data, callback)
 }
@@ -137,4 +148,5 @@ routeUtils.rPost(router, '/listById', 'listById', listById)
 routeUtils.rPost(router, '/update', 'update', update)
 routeUtils.rPost(router, '/updateGroup', 'updateGroup', updateGroup)
 routeUtils.rPost(router, '/updatePassword', 'updatePassword', updatePassword)
+routeUtils.rGet(router, '/getMetrics', 'getUserMetrics', getUserMetrics)
 module.exports = router
