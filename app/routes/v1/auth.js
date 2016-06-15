@@ -27,13 +27,6 @@ function login (req, res) {
         })
         passportHandler(req, res)
       },
-      function (user, callback) {
-        models.user.getById(user._id, function (err, user) {
-          user.isLoggedIn = true
-          outerUser = user
-          models.user.save(user, callback)
-        })
-      },
       reqLoginWrapper(req, "auth.login")
     ],
     function (err) {
@@ -273,13 +266,6 @@ function deleteWrongPsnId(req,res){
 }
 
 function logout(req, res) {
-  var user = req.user
-  user.isLoggedIn = false
-  models.user.save(user, function(err, user) {
-    if(err) {
-      utils.l.d("failed to save ths user object: ", err)
-    }
-  })
   req.logout()
   routeUtils.handleAPISuccess(req, res, {success: true})
 }
