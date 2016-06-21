@@ -523,19 +523,19 @@ var bungieErrorMessage= function(messageId) {
   console.log('bungieErrorMessage::messageId',messageId)
   switch (messageId) {
     case "UserCannotResolveCentralAccount":
-      return "We were unable to find that %CONSOLETYPE% linked to a Bungie account. Please check for any typos and try again."
+      return "We couldn't find a Bungie account linked to %GAMERID%. Please login to Bungie using your %CONSOLETYPE% ID to link your accounts before proceeding on Crossroads."
       break
     case "NotParsableError":
-      return "We were unable to find that %CONSOLETYPE% linked to a Bungie account. Please check for any typos and try again."
+      return "We couldn't find a Bungie account linked to %GAMERID%. Please login to Bungie using your %CONSOLETYPE% ID to link your accounts before proceeding on Crossroads."
       break
     case "DestinyInvalidClaimException" || "DestinyUnexpectedError" || "DestinyShardRelayClientTimeout":
-      return "Sorry, we were unable to validate your %CONSOLETYPE%. The bungie server may be unavailable. Please try again in a few minutes."
+      return "We are unable to contact Bungie.net. Please try again in a few minutes."
       break;
     case "WebAuthRequired":
-      return "Sorry, we were unable to validate your %CONSOLETYPE% with bungie. Please try again in a few minutes."
+      return "We are unable to contact Bungie.net. Please try again in a few minutes."
       break;
     default:
-      return "Sorry, we were unable to validate your %CONSOLETYPE%. The server may be unavailable. Please try again in a few minutes."
+      return "We are unable to contact Bungie.net. Please try again in a few minutes."
       break
   }
 }
