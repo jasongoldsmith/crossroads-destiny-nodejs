@@ -40,6 +40,13 @@ function getByQuery(query, callback) {
     .exec(callback)
 }
 
+function getUserIdsByQuery(query, callback) {
+  User
+    .find(query)
+    .select("_id")
+    .exec(callback)
+}
+
 
 function getById(id, callback) {
   if (!id) return callback("Invalid id:" + id)
@@ -238,6 +245,7 @@ module.exports = {
   getById: getById,
   updateUser: updateUser,
   getByQuery: getByQuery,
+  getUserIdsByQuery: getUserIdsByQuery,
   listMemberCount: listMemberCount,
   getUserMetrics: getUserMetrics
 }
