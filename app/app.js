@@ -4,7 +4,7 @@ var newrelic;
 //  newrelic = require('newrelic');
 //}
 
-console.log("basant***"+config.mongoUri);
+console.log("mongo url***"+config.mongoUri);
 
 var express = require('express'),
   passport = require('passport');

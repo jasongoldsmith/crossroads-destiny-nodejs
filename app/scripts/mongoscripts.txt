@@ -1,0 +1,95 @@
+//Script to find out android xbox360 users
+//-----------BEGIN------------
+function createUserInstalls(){
+    var userIds = db.getCollection('users').find({'consoles.consoleType':'XBOX360'},{'_id':1})
+    var usersList = []
+    userIds.forEach(
+        function(u){
+            usersList.push(u._id)
+        })
+    var installationUsers = db.getCollection('installations').find({'user':{'$in':usersList},'deviceType':'gcm'},{'user':1,'_id':0})
+    var tCol =    db.getCollection('userinstallsarchive')
+    var instList = []
+    var tUsers = db.getCollection('users')
+    installationUsers.forEach(
+        function (d) {
+            instList.push(d.user)
+            tCol.insert(d);
+            //update user to xboxone
+            tUsers.update({'_id':d.user},{"$set":{'consoles.0.consoleType':'XBOXONE'}})
+        }
+    )
+
+    print(instList)
+}
+
+createUserInstalls();
+
+//-----------END------------
+
+//Script to create new notification trigger and notification
+//for eventexpiry and usertimeout
+//-----------BEGIN------------
+{
+    "_id" : ObjectId("5761c35920793c73cdabf2a2"),
+    "name" : "EventExpiredNotification",
+    "messageTemplate" : "Looks like we haven't found a fireteam yet for #EVENT_NAME# so it has been removed due to inactivity. If you're still interested, please add it again.",
+    "recipientType" : "eventMembers",
+    "isActive" : true,
+    "__v" : 0
+}
+
+{
+    "_id" : ObjectId("5769ab061df491f65f3ce67f"),
+    "name" : "UserTimedoutNotification",
+    "messageTemplate" : "Still there? We removed you from #EVENT_NAME# due to inactivity. If you're actually still here, we're sorry. Please join the activity again.",
+    "recipientType" : "knownUsers",
+    "isActive" : true,
+    "__v" : 0
+}
+
+{
+    "_id" : ObjectId("5761c3e820793c73cdabf2a3"),
+    "triggerName" : "eventExpiry",
+    "schedule" : "*/2 * * * *",
+    "type" : "schedule",
+    "isActive" : true,
+    "notifications" : [
+        ObjectId("5761c35920793c73cdabf2a2")
+    ],
+    "__v" : 0
+}
+
+/* 10 */
+{
+    "_id" : ObjectId("5763204ba49d9d0691cd39b3"),
+    "triggerName" : "userTimeout",
+    "schedule" : "*/2 * * * *",
+    "type" : "schedule",
+    "isActive" : true,
+    "notifications" : [
+        ObjectId("5769ab061df491f65f3ce67f")
+    ],
+    "__v" : 0
+}
+//-----------END------------
+
+//Script to create Sysconfig
+//for eventexpirytime and usertimeouttime
+//-----------BEGIN------------
+{
+    "_id" : ObjectId("57687e9cb7f58389cbd4737d"),
+    "key" : "eventExpiryTimeInMins",
+    "description" : "Time to expire events. Use - value.",
+    "value" : "-40",
+    "__v" : 0
+}
+
+{
+    "_id" : ObjectId("5769b0251df491f65f3ce682"),
+    "key" : "userTimeoutInMins",
+    "description" : "Timeout interval for user. Use - value.",
+    "value" : "-20",
+    "__v" : 0
+}
+//-----------END------------

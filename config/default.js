@@ -87,7 +87,9 @@ var defaults = {
   firebaseURL: process.env.firebaseURL || "https://crossroadsapp-dev.firebaseio.com/",
   triggerIntervalMinutes: 15,
   triggerReminderInterval: 120,
-  triggerUpcomingReminderInterval: -5
+  triggerUpcomingReminderInterval: -5,
+  eventExpiryInterval:-40,
+  userTimeoutInterval:-20
 };
 
 /**

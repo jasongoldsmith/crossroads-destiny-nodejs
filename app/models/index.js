@@ -7,6 +7,7 @@ var report =  require('./reportModel')
 var notification = require('./notificationModel')
 var notificationTrigger = require('./notificationTriggerModel')
 var tinyUrl = require ('./tinyUrlModel')
+var sysConfig = require('./sysConfigModel')
 
 module.exports = {
   user: user,
@@ -17,5 +18,6 @@ module.exports = {
   report: report,
   notification: notification,
   notificationTrigger: notificationTrigger,
-  tinyUrl: tinyUrl
+  tinyUrl: tinyUrl,
+  sysConfig:sysConfig
 }

@@ -81,6 +81,17 @@ switch(command) {
   case "helmetsFinder":
     jobs.helmetsFinder()
     break
+  case "eventExpiry":
+    jobs.eventExpiry()
+    break
+  case "userTimeout":
+    jobs.userTimeout()
+    break
+  case "addSysConfig":
+    models.sysConfig.createSysConfig({key:'eventExpiryTimeInMins',description:'Time to expire events. Use - value.',value:'-40'},function(err,sysconf){
+      console.log('addSysConfig::err::'+err)
+      console.log('addSysConfig::sysconf::'+JSON.stringify(sysconf))
+    })
   case "momentTest":
     var date = new Date()
     date.setHours(0,0,0,0)
