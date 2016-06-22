@@ -7,5 +7,6 @@ module.exports = {
   eventNotificationService: require('./eventNotificationService'),
   eventBasedPushNotificationService: require('./eventBasedPushNotificationService'),
   eventService: require('./eventService'),
-  tinyUrlService: require('./tinyUrlService')
+  tinyUrlService: require('./tinyUrlService'),
+  userService: require('./userService')
 }

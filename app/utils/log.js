@@ -75,6 +75,51 @@ function sentryError(err, callback) {
   }
 }
 
+function eventLog(eventList){
+  if(!(eventList instanceof Array)){
+    eventList=[eventList]
+  }
+  var eventLogList = lodash.map(eventList,function(event){
+    var eventLogObj = {}
+    if(event) {
+      eventLogObj._id = event._id
+      eventLogObj.clanId=event.clanId
+      eventLogObj.deleted=event.deleted
+    }
+    if(event && event.players) eventLogObj.players = event.players.length
+    return eventLogObj
+  })
+
+  return JSON.stringify(eventLogList)
+}
+
+function notificationResponse(notifResp){
+  var notifRespObj = {}
+  if(notifResp) {
+    notifRespObj.name = notifResp.name
+    notifRespObj.message = notifResp.message
+    if(notifResp.recipients)
+      notifRespObj.recipients = lodash.map(notifResp.recipients,'_id')
+  }
+
+  return JSON.stringify(notifRespObj)
+}
+
+function userLog(userList){
+  if(!(userList instanceof Array)){
+    userList=[userList]
+  }
+  var userLogList = lodash.map(userList,function(user){
+    var userLogObj = {}
+    if(user) {
+      userLogObj._id = user._id
+      userLogObj.clanId=user.clanId
+    }
+    return userLogObj
+  })
+
+  return JSON.stringify(userLogList)
+}
 module.exports = {
   i: info,
   e: error,
@@ -82,5 +127,8 @@ module.exports = {
   s: severe,
   silly: silly,
   sentryMessage: sentryMessage,
-  sentryError: sentryError
+  sentryError: sentryError,
+  eventLog:eventLog,
+  notificationResponse:notificationResponse,
+  userLog:userLog
 };

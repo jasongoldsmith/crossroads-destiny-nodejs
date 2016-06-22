@@ -19,7 +19,8 @@ var UserSchema = new Schema({
   flags: Mixed,
   bungieMemberShipId:{type: String},
   passwordResetToken:{type: String},
-  groups:[{type:Mixed}]
+  groups:[{type:Mixed}],
+  lastActiveTime:Date
 })
 
 UserSchema.index({'userName':1}, {'unique': true})

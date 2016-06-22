@@ -544,7 +544,9 @@ var eventNotificationTrigger = {
   launchEventStart:'launchEventStart',
   eventStartReminder:'eventStartReminder',
   dailyOneTimeReminder:'dailyOneTimeReminder',
-  launchUpComingReminders:'launchUpComingReminders'
+  launchUpComingReminders:'launchUpComingReminders',
+  eventExpiry:'eventExpiry',
+  userTimeout:'userTimeout'
 }
 
 var userNotificationTrigger = {
@@ -555,6 +557,11 @@ var freelanceBungieGroup = {
   "groupName": "Crossroads Freelance",
   "avatarPath": config.hostName+"/img/iconGroupCrossroadsFreelance.png",
   "clanEnabled": false
+}
+
+var sysConfigKeys = {
+  eventExpiryTimeInMins:"eventExpiryTimeInMins",
+  userTimeoutInMins:"userTimeoutInMins"
 }
 
 module.exports = {
@@ -571,5 +578,6 @@ module.exports = {
   bungieMessages: bungieMessages,
   freelanceBungieGroup:freelanceBungieGroup,
   bungieErrorMessage:bungieErrorMessage,
-  consoleGenericsId:consoleGenericsId
+  consoleGenericsId:consoleGenericsId,
+  sysConfigKeys:sysConfigKeys
 }

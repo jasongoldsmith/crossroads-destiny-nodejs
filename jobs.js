@@ -218,6 +218,88 @@ function eventStartReminder() {
     })
 }
 
+function eventExpiry() {
+  var sysConfigObj = null
+  utils.async.waterfall([
+      function(callback){
+        models.sysConfig.getSysConfig(utils.constants.sysConfigKeys.eventExpiryTimeInMins,callback)
+      },
+      function (sysConfig,callback) {
+        sysConfigObj = sysConfig
+        models.notificationTrigger.getByQuery({
+            type: 'schedule',
+            triggerName: utils.constants.eventNotificationTrigger.eventExpiry,
+            isActive: true
+          },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({error: "Trigger for eventExpiry not found or is not active"}, null)
+        }
+        var stopTime = moment().add(8, 'minutes')
+        var minsToSleep = 2
+
+        service.eventService.expireEvents(notifTrigger,sysConfigObj)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.eventService.expireEvents(notifTrigger,sysConfigObj)
+          if(moment() > stopTime) {
+            this.stop()
+            return callback(null, null)
+          }
+        })
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending eventExpiry notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+      } else {
+        utils.l.i("eventExpiry was successful")
+      }
+    })
+}
+
+function userTimeout() {
+  var sysConfigObj = null;
+  utils.async.waterfall([
+      function(callback){
+        models.sysConfig.getSysConfig(utils.constants.sysConfigKeys.userTimeoutInMins,callback)
+      },
+      function (sysConfig,callback) {
+        sysConfigObj = sysConfig
+        models.notificationTrigger.getByQuery({
+            type: 'schedule',
+            triggerName: utils.constants.eventNotificationTrigger.userTimeout,
+            isActive: true
+          },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({error: "Trigger for userTimeout not found or is not active"}, null)
+        }
+        var stopTime = moment().add(8, 'minutes')
+        var minsToSleep = 2
+
+        service.userService.userTimeout(notifTrigger,sysConfigObj)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.userService.userTimeout(notifTrigger,sysConfigObj)
+          if(moment() > stopTime) {
+            this.stop()
+            return callback(null, null)
+          }
+        })
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending userTimeout notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+      } else {
+        utils.l.i("userTimeout was successful")
+      }
+    })
+}
+
 function dailyOneTimeReminder() {
   utils.async.waterfall([
     function (callback) {
@@ -312,5 +394,7 @@ module.exports = {
   eventStartReminder: eventStartReminder,
   dailyOneTimeReminder: dailyOneTimeReminder,
   eventUpcomingReminder: eventUpcomingReminder,
-  helmetsFinder: helmetsFinder
+  helmetsFinder: helmetsFinder,
+  eventExpiry:eventExpiry,
+  userTimeout:userTimeout
 }

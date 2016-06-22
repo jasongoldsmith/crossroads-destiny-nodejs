@@ -24,12 +24,10 @@ function handleUpcomingEvents(notifTrigger) {
             launchUpcomingEvent(event, notifTrigger, callback)
           }, function(err, eventUpdatedStatus) {
             eventsLaunched = utils._.sum(eventUpdatedStatus)
-            if(eventsLaunched > 0) {
+            if(eventsLaunched > 0)
               return callback(null, { totalEventsToLaunch: totalEventsToLaunch, eventsLaunched: eventsLaunched })
-            }
-            else {
+            else
               return callback({ errorMessage: "Unable to launch any of the events", error: lastError }, null)
-            }
           })
         } else {
           return callback(null,{ totalEventsToLaunch: totalEventsToLaunch, eventsLaunched: 0 })
@@ -305,20 +303,31 @@ function hasNotifStatus(notifStatusList, notifStatus){
 }
 
 function createNotificationAndSend(event, user, notification){
-  utils.l.d("createNotificationAndSend::event="+event+"\nnotification::" + JSON.stringify(notification))
+  //utils.l.d("createNotificationAndSend::event="+utils.l.eventLog(event)+"\nnotification::" + JSON.stringify(notification))
   notificationService.getNotificationDetails(event, notification, user, function(err, notificationResponse) {
-    utils.l.d("notification response object", notificationResponse)
+    //utils.l.d("notification response object", utils.l.notificationResponse(notificationResponse))
     if(err) util.l.s("createNotificationAndSend::Error while creating notificationResponse object" + err)
     helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, event, null)
   })
 }
 
 function createAggregateNotificationAndSend(clanId, consoleType, eventCount, notification){
-  utils.l.d("createAggregateNotificationAndSend::notification::"+JSON.stringify(notification))
+  //utils.l.d("createAggregateNotificationAndSend::notification::"+JSON.stringify(notification))
   notificationService.getAggregateNotificationDetails(clanId, consoleType, eventCount, notification, function(err,notificationResponse){
-    utils.l.d("notification response object", notificationResponse)
+    //utils.l.d("notification response object", utils.l.notificationResponse(notificationResponse))
     helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, null, clanId)
   })
+}
+
+function sendMultipleNotifications(eventList, playerList, notification){
+  //utils.l.d("createNotificationAndSend::event="+utils.l.eventLog(eventList)+"\nnotification::" + JSON.stringify(notification))
+  utils._.map(eventList,function(event) {
+      notificationService.getNotificationDetails(event, notification, playerList, function (err, notificationResponse) {
+        //utils.l.d("notification response object", utils.l.notificationResponse(notificationResponse))
+        if (err) util.l.s("createNotificationAndSend::Error while creating notificationResponse object" + err)
+        helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, event, null)
+      })
+    })
 }
 
 module.exports ={
@@ -329,5 +338,7 @@ module.exports ={
   launchUpComingReminders: launchUpComingReminders,
   handleNewEvents: handleNewEvents,
   handleJoinEvent: handleJoinEvent,
-  handleLeaveEvent: handleLeaveEvent
+  handleLeaveEvent: handleLeaveEvent,
+  createNotificationAndSend:createNotificationAndSend,
+  sendMultipleNotifications:sendMultipleNotifications
 }
