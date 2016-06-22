@@ -40,6 +40,13 @@ function getByQuery(query, callback) {
     .exec(callback)
 }
 
+function getUserIdsByQuery(query, callback) {
+  User
+    .find(query)
+    .select("_id")
+    .exec(callback)
+}
+
 
 function getById(id, callback) {
   if (!id) return callback("Invalid id:" + id)
@@ -204,6 +211,7 @@ function listMemberCount(ids,consoleType,callback){
     }
   )
 }
+
 function getUserCount(id,consoleType,callback){
   utils.async.waterfall([
       function(callback){
@@ -216,6 +224,13 @@ function getUserCount(id,consoleType,callback){
     ],callback
   )
 }
+
+function getUserMetrics(callback) {
+  User.aggregate([{
+    "$group": {"_id": {"consoleType": "$consoles.consoleType", "verifyStatus":"$consoles.verifyStatus"},
+    "count": {"$sum": 1}}}], callback)
+}
+
 module.exports = {
   model: User,
   getUserById: getUserById,
@@ -229,6 +244,8 @@ module.exports = {
   getAll: getAll,
   getById: getById,
   updateUser: updateUser,
-  getByQuery:getByQuery,
-  listMemberCount:listMemberCount
+  getByQuery: getByQuery,
+  getUserIdsByQuery: getUserIdsByQuery,
+  listMemberCount: listMemberCount,
+  getUserMetrics: getUserMetrics
 }

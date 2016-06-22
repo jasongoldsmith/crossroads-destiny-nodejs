@@ -4,47 +4,71 @@ var utils = require('../utils')
 var helpers = require('../helpers')
 var tinyUrlService = require('./tinyUrlService')
 
-var cookieStr=utils.config.bungieCookie
+var cookieStr = utils.config.bungieCookie
 
 /*Get bungienet profile
 * 1. Make destinySearch call for displayname
 * 2. Using the result from search take membershipType and call GetBungieAccount API to bungie membershipcode
 * */
-function getBungieMemberShip(gamerId,membershipType,callback) {
+function getBungieMemberShip(gamerId, membershipType, callback) {
   utils.async.waterfall([
       function (callback) {
-        var destinySearchURL = utils.config.bungieDestinySearchByPSNURL.replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(membershipType)).replace(/%MEMBERSHIPID%/g, gamerId);
-        bungieGet(destinySearchURL,utils._.get(utils.constants.consoleGenericsId, membershipType),callback)
+        var destinySearchURL = utils.config.bungieDestinySearchByPSNURL
+                                .replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(membershipType))
+                                .replace(/%MEMBERSHIPID%/g, gamerId);
+
+        bungieGet(destinySearchURL, gamerId,
+          utils._.get(utils.constants.consoleGenericsId, membershipType),
+          callback)
       },
       function (destinyProfile, callback) {
         var destinyProfileJSON = JSON.parse(destinyProfile)
-        if(destinyProfileJSON && destinyProfileJSON.Response){
+        if(destinyProfileJSON && destinyProfileJSON.Response) {
           var memberShipType = getBungieMembershipType(membershipType)
-          var memberShipId=  destinyProfileJSON.Response
+          var memberShipId = destinyProfileJSON.Response
 
-          utils.l.d("Got destiny profile memberShipId="+memberShipId+" && memberShipType="+memberShipType)
+          utils.l.d("Got destiny profile memberShipId = " + memberShipId + " && memberShipType=" + memberShipType)
           //var bungieAcctURL ="https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/"+memberShipType+"/"
-          var bungieAcctURL =utils.config.bungieUserAccountURL+memberShipId+"/"+memberShipType+"/"
-          bungieGet(bungieAcctURL,utils._.get(utils.constants.consoleGenericsId, utils._.get(utils.constants.consoleGenericsId, membershipType)),callback)
-        }else{
-          return callback(null,null)
+          var bungieAcctURL = utils.config.bungieUserAccountURL+memberShipId + "/" + memberShipType + "/"
+          bungieGet(bungieAcctURL, gamerId,
+            utils._.get(utils.constants.consoleGenericsId, utils._.get(utils.constants.consoleGenericsId, membershipType)),
+            callback)
+        } else {
+          return callback(null, null)
         }
       },
-      function (bungieAcct,callback) {
+      function (bungieAcct, callback) {
         var bungieAcctJson =JSON.parse(bungieAcct)
 
-        if(bungieAcctJson && bungieAcctJson.Response && bungieAcctJson.Response.bungieNetUser) {
+        if(bungieAcctJson && bungieAcctJson.Response) {
+          if(utils._.isInvalidOrBlank(bungieAcctJson.Response.bungieNetUser)) {
+            return callback(
+              {
+                error: "It looks like your Bungie account may be set to private or the server is busy. Please ensure your account is public and try again in a few minutes."
+              },
+              null)
+          }
           var bungieAcctResp = bungieAcctJson.Response
           var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
           var displayName = null
-          if(utils._.get(utils.constants.bungieMemberShipType, membershipType) == utils.constants.bungieMemberShipType.PSN) displayName = bungieAcctResp.bungieNetUser.psnDisplayName
-          else displayName = bungieAcctResp.bungieNetUser.xboxDisplayName
-          callback(null,{bungieMemberShipId:bungieMemberShipId,displayName:displayName})
-        }else{
-          callback({error:utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus).replace(/%CONSOLETYPE%/g,utils._.get(utils.constants.consoleGenericsId, membershipType))},null)
+          if(utils._.get(utils.constants.bungieMemberShipType, membershipType) == utils.constants.bungieMemberShipType.PSN) {
+            displayName = bungieAcctResp.bungieNetUser.psnDisplayName
+          }
+          else {
+            displayName = bungieAcctResp.bungieNetUser.xboxDisplayName
+          }
+          return callback(null, {bungieMemberShipId: bungieMemberShipId, displayName: displayName})
+        } else {
+          return callback(
+            {
+              error: utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)
+                      .replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, membershipType))
+                      .replace(/%GAMERID%/g, gamerId)
+            },
+            null)
         }
       }
-    ],callback
+    ], callback
   )
 }
 
@@ -71,19 +95,19 @@ function sendBungieMessage(bungieMemberShipId, consoleType, messageType,callback
           bungiePost(convUrl, msgBody, token,bungieMemberShipId,consoleType, callback)
         })
       }
-    ],callback
+    ], callback
   )
 }
 
 function listBungieGroupsJoined(destinyMembershipId, consoleType, currentPage, callback){
   utils.async.waterfall([
-    function(callback){
-      var destinyGruopsJoinedURL = utils.config.destinyGruopsJoinedURL.replace(/%MEMBERSHIPID%/g,destinyMembershipId).replace(/%CURRENTPAGE%/g,currentPage)
-      bungieGet(destinyGruopsJoinedURL,utils._.get(utils.constants.consoleGenericsId,consoleType),callback)
-    },function(bungieGroups,callback){
-      tranformJoinedGroups(bungieGroups,callback)
+    function(callback) {
+      var destinyGruopsJoinedURL = utils.config.destinyGruopsJoinedURL.replace(/%MEMBERSHIPID%/g, destinyMembershipId).replace(/%CURRENTPAGE%/g,currentPage)
+      bungieGet(destinyGruopsJoinedURL, null, utils._.get(utils.constants.consoleGenericsId,consoleType), callback)
+    },function(bungieGroups, callback) {
+      tranformJoinedGroups(bungieGroups, callback)
     }
-  ],callback)
+  ], callback)
 }
 
 //url: "https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/2/",
@@ -91,7 +115,7 @@ function listBungieGroupsJoined(destinyMembershipId, consoleType, currentPage, c
 //url: "https://www.bungie.net/Platform/Destiny/2/Account/"+memberShipId,
 //url:"http://www.bungie.net/Platform/User/SearchUsers/?q="+memberShipId,
 //url:"https://www.bungie.net/Platform/User/GetBungieNetUser/",
-function bungieGet(url, consoleType,callback){
+function bungieGet(url, gamerId, consoleType, callback){
 
   request({
     url: url,
@@ -108,15 +132,28 @@ function bungieGet(url, consoleType,callback){
       utils.l.d('bungie GET for url::'+url)
       if(utils.isJson(bungieData)) {
         var bungieJSON = JSON.parse(bungieData)
+        utils.l.d("bungie error status: "+bungieJSON.ErrorStatus)
         if (bungieJSON.ErrorStatus == 'Success')
           return callback(null, bungieData)
         else {
           if (bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
             utils.l.s("bungie message GET error", {url: url, bungieData: bungieData, consoleType: consoleType})
-          return callback({error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g, consoleType)}, null)
+          return callback(
+            {
+              error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)
+                      .replace(/%CONSOLETYPE%/g, consoleType)
+                      .replace(/%GAMERID%/g, gamerId)
+            },
+            null)
         }
-      }else{
-        return callback({error: utils.constants.bungieErrorMessage('NotParsableError').replace(/%CONSOLETYPE%/g, consoleType)}, null)
+      } else {
+        return callback(
+          {
+            error: utils.constants.bungieErrorMessage('NotParsableError')
+                    .replace(/%CONSOLETYPE%/g, consoleType)
+                    .replace(/%GAMERID%/g, gamerId)
+          },
+          null)
       }
     }
   })
@@ -128,25 +165,44 @@ function bungiePost(url,msgBody,token,bungieMemberShipId,consoleType,callback){
     method: "POST",
     headers: {
       'x-api-key': utils.config.bungieAPIToken,
-      'x-csrf':utils.config.bungieCSRFToken,
-      'cookie':cookieStr
+      'x-csrf': utils.config.bungieCSRFToken,
+      'cookie': cookieStr
     },
     body:msgBody,
     json:true
   }, function(error, response, bungieData) {
     if(error) {
-      utils.l.s("Error posting to bungie::"+error)
+      utils.l.s("Error posting to bungie::" + error)
       return callback(error, null)
     } else {
-      utils.l.d("response::bungieData ",bungieData)
+      utils.l.d("response::bungieData ", bungieData)
       var bungieJSON = bungieData
       utils.l.d("Got bungie for "+url)
       if(bungieJSON.ErrorStatus == 'Success')
-        return callback(null,{bungieProfile:bungieData,token:token,bungieMemberShipId:bungieMemberShipId})
+        return callback(null,
+          {
+            bungieProfile: bungieData,
+            token: token,
+            bungieMemberShipId: bungieMemberShipId
+          }
+        )
       else{
         if(bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
-          utils.l.s("bungie message POST error",{errorStatus:bungieJSON.ErrorStatus,url:url,msgBody:msgBody,token:token,bungieMemberShipId:bungieMemberShipId,consoleType:consoleType})
-        return callback({error:utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g,consoleType)},null )
+          utils.l.s("bungie message POST error",
+            {
+              errorStatus: bungieJSON.ErrorStatus,
+              url: url, msgBody: msgBody,
+              token: token,
+              bungieMemberShipId: bungieMemberShipId,
+              consoleType: consoleType
+            }
+          )
+        return callback(
+          {
+            error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)
+                    .replace(/%CONSOLETYPE%/g,consoleType)
+          },
+          null)
       }
     }
   })
@@ -156,54 +212,60 @@ function getMessageBody(host,token,messageType,consoleType,callback){
   var msg = null
   switch (messageType) {
     case utils.constants.bungieMessageTypes.accountVerification:
-      tinyUrlService.createTinyUrl(host+"/api/v1/auth/verify/"+token,function(err, url){
-        console.log("url from createTinyUrl"+url)
-        msg = utils.constants.bungieMessages.accountVerification.replace(/%URL%/g, url).replace(/%APPNAME%/g,utils.config.appName).replace(/%CONSOLETYPE%/g,consoleType)
-        utils.l.d("verify msg to send::"+msg)
-        return callback(null,msg)
+      tinyUrlService.createTinyUrl(host + "/api/v1/auth/verify/" + token, function(err, url) {
+        console.log("url from createTinyUrl" + url)
+        msg = utils.constants.bungieMessages.accountVerification
+                .replace(/%URL%/g, url)
+                .replace(/%APPNAME%/g, utils.config.appName)
+                .replace(/%CONSOLETYPE%/g, consoleType)
+        utils.l.d("verify msg to send::" + msg)
+        return callback(null, msg)
       })
-      break;
+      break
     case utils.constants.bungieMessageTypes.passwordReset:
       tinyUrlService.createTinyUrl(host+"/api/v1/auth/resetPassword/"+token,function(err, url) {
-        msg = utils.constants.bungieMessages.passwordReset.replace(/%URL%/g, url).replace(/%APPNAME%/g, utils.config.appName)
-        utils.l.d("resetPassword msg to send::"+msg)
-        return callback(null,msg)
+        msg = utils.constants.bungieMessages.passwordReset.replace(/%URL%/g, url)
+                .replace(/%APPNAME%/g, utils.config.appName)
+        utils.l.d("resetPassword msg to send::" + msg)
+        return callback(null, msg)
       })
-      break;
+      break
     default:
-      break;
+      break
   }
 }
 
 function tranformJoinedGroups(bungieGroups,callback){
   var bungieGroupsJson = JSON.parse(bungieGroups)
-  if(bungieGroupsJson && bungieGroupsJson.Response && bungieGroupsJson.Response.results){
+  if(bungieGroupsJson && bungieGroupsJson.Response && bungieGroupsJson.Response.results) {
     var groups = utils._.map(bungieGroupsJson.Response.results,function(group){
-      return {groupId:group.detail.groupId,
-        groupName:group.detail.name,
-        avatarPath:utils.config.bungieBaseURL+group.detail.avatarPath,
-        bungieMemberCount:group.detail.memberCount,
-        clanEnabled:isClanEnabled(group.detail.clanCallsign)}
+      return {
+        groupId:group.detail.groupId,
+        groupName: group.detail.name,
+        avatarPath: utils.config.bungieBaseURL+group.detail.avatarPath,
+        bungieMemberCount: group.detail.memberCount,
+        clanEnabled: isClanEnabled(group.detail.clanCallsign)}
     })
-    return callback(null,groups)
-  }return callback(null, null)
+    return callback(null, groups)
+  }
+  return callback(null, null)
 }
 
-function isClanEnabled(clanCallSign){
-  if(utils._.isUndefined(clanCallSign) || utils._.isEmpty(clanCallSign)){
+function isClanEnabled(clanCallSign) {
+  if(utils._.isUndefined(clanCallSign) || utils._.isEmpty(clanCallSign)) {
     return false
-  }else{
+  } else {
     return true
   }
 }
 
-function getBungieMembershipType(membershipType){
-  utils.l.d("membershipType::"+membershipType,utils._.get(utils.constants.bungieMemberShipType,membershipType))
-  return utils._.get(utils.constants.bungieMemberShipType,membershipType)
+function getBungieMembershipType(membershipType) {
+  utils.l.d("membershipType::" + membershipType, utils._.get(utils.constants.bungieMemberShipType, membershipType))
+  return utils._.get(utils.constants.bungieMemberShipType, membershipType)
 }
 
-module.exports={
-  getBungieMemberShip:getBungieMemberShip,
-  sendBungieMessage:sendBungieMessage,
-  listBungieGroupsJoined:listBungieGroupsJoined
+module.exports = {
+  getBungieMemberShip: getBungieMemberShip,
+  sendBungieMessage: sendBungieMessage,
+  listBungieGroupsJoined: listBungieGroupsJoined
 }

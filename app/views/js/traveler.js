@@ -1,6 +1,7 @@
 (function(angular) {
   'use strict';
-  var app = angular.module('travelerAdmin', ["ngRoute","auth","home","navigation","reportManager","xeditable","angularUtils.directives.dirPagination","autocomplete"])
+  var app = angular.module('travelerAdmin', ["ngRoute","auth","home","navigation","reportManager",
+		"xeditable","angularUtils.directives.dirPagination","metrics"])
     app.run(function(editableOptions) {
 	  editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
 	});
@@ -27,6 +28,9 @@
 		}).when('/report', {
 			templateUrl : 'js/report/reportList.html',
 			controller : 'reportManager'
+		}).when('/metrics', {
+			templateUrl : 'js/metrics/metrics.html',
+			controller : 'metrics'
 		}).otherwise('/');
 
 		$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -35,7 +39,7 @@
 
 		// Initialize auth module with the home page and login/logout path
 		// respectively
-		auth.init('/report', '/login', '/logout');
+		auth.init('/report', '/login', '/logout', 'metrics');
 	});
  
   app.controller('appController',['$scope',function($scope){
