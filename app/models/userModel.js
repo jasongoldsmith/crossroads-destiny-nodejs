@@ -43,7 +43,7 @@ function getByQuery(query, callback) {
 function getUserIdsByQuery(query, callback) {
   User
     .find(query)
-    .select("_id")
+    .select({_id:1,isLoggedIn:1})
     .exec(callback)
 }
 
