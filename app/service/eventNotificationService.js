@@ -109,20 +109,16 @@ function getRecipients(recipientType, event, clanId, consoleType, callback) {
 }
 
 function getClanMembers(event, clanId, consoleType, callback) {
-	if(event) {
-		models.user.getUserIdsByQuery({
-				'groups.groupId': {$in: [event.clanId]},
-				'consoles.consoleType': event.consoleType
+	var clanId = event ? event.clanId : clanId
+	var consoleType = event ? event.consoleType : consoleType
+
+	models.user.getUserIdsByQuery(
+		{
+			'groups': {'$elemMatch': { 'groupId': clanId, 'muteNotification': false}},
+			'consoles.consoleType': consoleType
 		},
-			callback)
-	}
-	else  {
-		models.user.getUserIdsByQuery({
-				'groups.groupId': {$in: [clanId]},
-				'consoles.consoleType': consoleType
-		},
-			callback)
-	}
+		callback
+	)
 }
 
 function removeEventPlayersFromClan(clanPlayers, eventPlayers) {
