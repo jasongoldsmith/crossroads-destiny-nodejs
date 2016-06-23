@@ -2,20 +2,26 @@ var utils = require('../utils')
 var models = require('../models')
 var moment = require('moment')
 
-function getNotificationDetails(event, notification, playerLeft, callback) {
+//for recipientType = knownUsers passin playerList as recipient list otherwise playerList will be playersLeft
+function getNotificationDetails(event, notification, playerList, callback) {
 
 	var notificationObj = {
 		name: notification.name,
-		message: formatMessage(notification.messageTemplate, event, playerLeft)
+		message: (notification.recipientType == 'knownUsers') ? formatMessage(notification.messageTemplate, event, null) : formatMessage(notification.messageTemplate, event, playerList)
 	}
 
-	getRecipients(notification.recipientType, event, null, null, function(err, recipients) {
-		if (err) {
-			return callback(err, null)
-		}
-		notificationObj.recipients = recipients
+	if(notification.recipientType == 'knownUsers'){
+		notificationObj.recipients = playerList
 		return callback(null, notificationObj)
-	})
+	} else {
+		getRecipients(notification.recipientType, event, null, null, function (err, recipients) {
+			if (err) {
+				return callback(err, null)
+			}
+			notificationObj.recipients = recipients
+			return callback(null, notificationObj)
+		})
+	}
 }
 
 function getAggregateNotificationDetails(clanId, consoleType, eventCount, notification, callback) {
@@ -34,19 +40,23 @@ function getAggregateNotificationDetails(clanId, consoleType, eventCount, notifi
 }
 
 function formatMessage(messageTemplate, event, playerLeft) {
-	messageTemplate =  messageTemplate
-		.replace("#CREATOR#", event.creator.consoles[0].consoleId)
-		.replace("#EVENT_NAME#", getEventName(event.eType))
-		.replace("#TIME#", getTimeStringForDisplay(event.launchDate))
+	if(messageTemplate.indexOf("#CREATOR#") >= 0 )
+		messageTemplate =  messageTemplate.replace("#CREATOR#", event.creator.consoles[0].consoleId)
+	if(messageTemplate.indexOf("#EVENT_NAME#") >= 0 )
+		messageTemplate =  messageTemplate.replace("#EVENT_NAME#", getEventName(event.eType))
+	if(messageTemplate.indexOf("#TIME#") >= 0 )
+		messageTemplate =  messageTemplate.replace("#TIME#", getTimeStringForDisplay(event.launchDate))
 
-	if(utils._.isValidNonBlank(playerLeft)) {
+	if(utils._.isValidNonBlank(playerLeft) && messageTemplate.indexOf("#PLAYER#") >= 0) {
 		messageTemplate = messageTemplate.replace("#PLAYER#", playerLeft.consoles[0].consoleId)
-	} else {
+	} else if(messageTemplate.indexOf("#PLAYER#") >= 0 ){
 		messageTemplate = messageTemplate.replace("#PLAYER#", event.players[event.players.length - 1].consoles[0].consoleId)
 	}
 
-	var playersNeeded = event.maxPlayers - event.players.length
-	messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED#", "" + playersNeeded)
+	if(messageTemplate.indexOf("#PLAYERS_NEEDED#") >= 0 ) {
+		var playersNeeded = event.maxPlayers - event.players.length
+		messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED#", "" + playersNeeded)
+	}
 
 	if(messageTemplate.indexOf("#EVENT_PLAYERS#") >= 0 ) {
 		var players = utils._.filter(event.players, function(player) {

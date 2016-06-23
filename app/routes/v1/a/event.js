@@ -88,20 +88,8 @@ function leave(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
-			// Adding event id in delete request since it helps the client identify which event was deleted
-			if(utils._.isInvalidOrBlank(event)) {
-				event =  {
-					_id : req.body.eId
-				}
-				// When the event has been deleted we want to make all fields null in firebase
-				helpers.firebase.createEvent(event, req.user)
-			} else {
-				// We do not want to track events if they are created by test users
-				if (event.creator.clanId != "forcecatalyst") {
-					helpers.m.incrementEventsLeft(req.body.player)
-				}
-				helpers.firebase.updateEvent(event, req.user)
-			}
+			//Send just event id if the event is deleted for backward compatibility
+			event  = utils._.isValidNonBlank(event) && event.deleted ? {_id : req.body.eId}:event
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})

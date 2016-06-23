@@ -10,7 +10,6 @@ var userModel = require ('./userModel')
 
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
-
 function roundDateToNearestQuaterHour(dateString) {
 	if(utils._.isInvalidOrBlank(dateString)) {
 		dateString = new Date()
@@ -36,6 +35,14 @@ function getByQuery(query, user, callback) {
 			}
 			callback(null, events)
 		})
+}
+function getEventsByQuery(query, callback) {
+	Event
+			.find(query)
+			.populate("eType")
+			.populate("creator", "-passWord")
+			.populate("players", "-passWord")
+			.exec(callback)
 }
 
 function getById(id, callback) {
@@ -186,7 +193,7 @@ function joinEvent(data, callback) {
 function leaveEvent(data, callback) {
 	utils.async.waterfall([
 		function(callback) {
-			Event.findOne({_id: data.eId}, callback)
+			Event.findOne({_id: data.eId}).populate("eType").exec(callback)
 		},
 		function(event, callback) {
 			handleNoEventFound(event, callback)
@@ -202,7 +209,12 @@ function leaveEvent(data, callback) {
 		function(event, callback) {
 			if(event.players.length == 1) {
 				utils.l.d("Just one player in the event; deleting the event")
-				event.remove(callback)
+				//Handle concurrency. If the event was found and removed before reaching this point
+				event.remove(function(err,eventRemoved){
+					utils.l.d('trying to remove event::'+JSON.stringify(data),err)
+					if(err) return callback(null,null)
+					else callback(null,eventRemoved)
+				})
 			} else {
 				var player = utils._.remove(event.players, function(player) {
 					if (player.toString() == data.player.toString()) {
@@ -233,9 +245,19 @@ function leaveEvent(data, callback) {
 	],
 		function(err, event) {
 			if (err) {
+				utils.l.d('error removing event::'+JSON.stringify(data),err)
 				return callback(err, null)
 			} else {
-				getById(event._id, callback)
+				getById(event._id, function(err,eventUpdated){
+					if(!utils._.isValidNonBlank(eventUpdated)){
+						var eventObj = event.toObject()
+						eventObj.deleted=true
+						utils.l.d('updated event with delete flag',utils.l.eventLog(eventObj))
+						return callback(err,eventObj)
+					}else{
+						return callback(err,eventUpdated)
+					}
+				})
 			}
 		}
 	)
@@ -289,8 +311,8 @@ function launchEvent(event, callback){
 	)
 }
 
-function listEventsByUser(userId,callback){
-	getByQuery({players:{$in:[userId]}}, null, callback)
+function listEventsByUser(userId,launchStatus,callback){
+	getByQuery({players:{$in:[userId]},launchStatus:launchStatus}, null, callback)
 }
 
 function listEventCount(id,filter,callback){
@@ -309,6 +331,9 @@ function computeEventAttributesIfMissing(eventObj, user) {
 	}
 }
 
+function removeEvent(event,callback){
+	event.remove(callback)
+}
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
@@ -316,9 +341,11 @@ module.exports = {
 	leaveEvent: leaveEvent,
 	deleteEvent: deleteEvent,
 	getByQuery: getByQuery,
+	getEventsByQuery:getEventsByQuery,
 	getById: getById,
 	launchEvent: launchEvent,
 	update:update,
 	listEventsByUser:listEventsByUser,
-	listEventCount: listEventCount
+	listEventCount: listEventCount,
+	removeEvent:removeEvent
 }

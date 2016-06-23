@@ -37,11 +37,11 @@ function sendMessage(data, messageCreator, callback) {
 				models.event.getById(data.eId, callback)
 			},
 			function (event, callback) {
-				utils.l.d("Event to send in payload: " + JSON.stringify(event))
-				if(utils._.isInvalidOrBlank(event)) {
-					return callback({ error: "no event found" }, null)
-				}
-				eventObj = event
+				utils.l.d("Event to send in payload: " , utils.l.eventLog(event))
+				if(utils._.isInvalidOrBlank(event)) return callback({ error: "no event found" }, null)
+				else models.event.update(event,callback)
+			},function(eventDB, callback){
+				eventObj = eventDB
 				models.user.getUserById(data, callback)
 			},
 			function (user, callback) {
