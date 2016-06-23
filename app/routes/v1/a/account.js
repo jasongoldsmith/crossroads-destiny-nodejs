@@ -178,6 +178,7 @@ function searchGroup(user, groupId, callback){
 }
 
 function muteGroupNotifications(req, res) {
+  utils.l.d("mute group notification request" + JSON.stringify(req.body))
   handleMuteGroupNotifications(req.user, req.body, function(err, group) {
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
