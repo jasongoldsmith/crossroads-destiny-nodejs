@@ -47,8 +47,9 @@ function sendMultiplePushNotifications(installations, data, alert, notificationR
 
 function sendMultiplePushNotificationsForUsers(notification, data, clanId) {
   models = require('../models')
-  utils.l.d("sendMultiplePushNotificationsForUsers::notification::", {notification:notification.name,message:notification.message})
+  utils.l.d("sendMultiplePushNotificationsForUsers::notification::",{notification:notification.name,message:notification.message})
 
+  notification.recipients = utils._.filter(notification.recipients, 'isLoggedIn')
   utils.async.map(notification.recipients, models.installation.getInstallationByUser, function(err, installations) {
     sendMultiplePushNotifications(installations, data, notification.message, notification, clanId)
   })

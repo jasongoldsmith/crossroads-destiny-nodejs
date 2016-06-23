@@ -136,6 +136,7 @@ body{
   font-family: HelveticaNeue;
   font-size: 13px;
   color: #0086D0;
+  text-decoration: underline;
 }
 
 .containerTerms{
@@ -144,7 +145,7 @@ body{
   font-family: HelveticaNeue;
   font-size: 13px;
   color: white;
-  padding-top: 20px;
+  padding-top: 10px;
   align-self: left;
 }
 
@@ -211,6 +212,16 @@ body{
   font-size: 16px;
   color: white;
   background: #0086D0;
+  line-height: 50px;
+  width: 355px;
+  display: block;
+}
+
+.linkGreyBlueCenter{
+  font-family: HelveticaNeue-Bold;
+  font-size: 16px;
+  color: white;
+  background: #365D65;
   line-height: 50px;
   width: 355px;
   display: block;

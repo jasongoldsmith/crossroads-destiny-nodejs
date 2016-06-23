@@ -3,10 +3,10 @@ var models = require('../models')
 var helpers = require('../helpers')
 var eventPushService = require('./eventBasedPushNotificationService')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
-function clearEventsForPlayer(playerId,callback){
+function clearEventsForPlayer(playerId,launchStatus,callback){
   utils.async.waterfall([
     function(callback){
-      models.event.listEventsByUser(playerId,callback)
+      models.event.listEventsByUser(playerId,launchStatus,callback)
     },function(eventList,callback){
       //mapSeries used to avoid the consurrency situation in the same session.
       utils.async.mapSeries(eventList,function(event,callback){

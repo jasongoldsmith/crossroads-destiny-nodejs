@@ -523,10 +523,10 @@ var bungieErrorMessage= function(messageId) {
   console.log('bungieErrorMessage::messageId',messageId)
   switch (messageId) {
     case "UserCannotResolveCentralAccount":
-      return "We couldn't find a Bungie account linked to %GAMERID%. Please login to Bungie using your %CONSOLETYPE% ID to link your accounts before proceeding on Crossroads."
+      return "We couldn't find a Bungie account linked to %GAMERID%. Please login to Bungie using your %CONSOLETYPE% to link your accounts before proceeding on Crossroads."
       break
     case "NotParsableError":
-      return "We couldn't find a Bungie account linked to %GAMERID%. Please login to Bungie using your %CONSOLETYPE% ID to link your accounts before proceeding on Crossroads."
+      return "We couldn't find a Bungie account linked to %GAMERID%. Please login to Bungie using your %CONSOLETYPE% to link your accounts before proceeding on Crossroads."
       break
     case "DestinyInvalidClaimException" || "DestinyUnexpectedError" || "DestinyShardRelayClientTimeout":
       return "We are unable to contact Bungie.net. Please try again in a few minutes."

@@ -39,6 +39,7 @@ function getByQuery(query, user, callback) {
 function getEventsByQuery(query, callback) {
 	Event
 			.find(query)
+			.populate("eType")
 			.populate("creator", "-passWord")
 			.populate("players", "-passWord")
 			.exec(callback)
@@ -310,8 +311,8 @@ function launchEvent(event, callback){
 	)
 }
 
-function listEventsByUser(userId,callback){
-	getByQuery({players:{$in:[userId]}}, null, callback)
+function listEventsByUser(userId,launchStatus,callback){
+	getByQuery({players:{$in:[userId]},launchStatus:launchStatus}, null, callback)
 }
 
 function listEventCount(id,filter,callback){

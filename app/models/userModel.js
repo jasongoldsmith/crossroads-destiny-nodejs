@@ -43,7 +43,7 @@ function getByQuery(query, callback) {
 function getUserIdsByQuery(query, callback) {
   User
     .find(query)
-    .select("_id")
+    .select({_id:1,isLoggedIn:1})
     .exec(callback)
 }
 
@@ -62,6 +62,8 @@ function getByIds(ids, callback) {
 function save(user, callback) {
   utils.async.waterfall([
     function(callback) {
+      // We need this as groups is mixed type
+      user.markModified('groups')
       user.save(function(err, c, numAffected) {
         if (err) {
           utils.l.s("Got error on saving user", {err: err, user: user})

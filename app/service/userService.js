@@ -45,10 +45,10 @@ function timeoutUser(user,notifTrigger,callback){
       //remove user from all events
       //TODO: Change clearEventsForPlayer to send one push notificaiton or remove the notification part
       //TODO: Clarify if we should not notify the creator
-      eventService.clearEventsForPlayer(user._id,callback)
+      eventService.clearEventsForPlayer(user._id,utils.constants.eventLaunchStatusList.now, callback)
     }
   ],function(err,eventsLeft){
-    utils.l.d('timeoutUser::eventsLeft',utils.l.eventLog(eventsLeft))
+    utils.l.d('timeoutUser::'+utils.l.userLog(user)+"\n\teventsLeft::\n\t",utils.l.eventLog(eventsLeft))
     if(!err){
       if(eventsLeft && eventsLeft.length > 0) utils.async.map(notifTrigger.notifications, utils._.partial(eventNotificationTriggerService.sendMultipleNotifications,eventsLeft,[user]))
       return callback(null,user)
