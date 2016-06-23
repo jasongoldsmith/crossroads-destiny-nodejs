@@ -51,9 +51,9 @@ function login (req, res) {
 }
 
 function boLogin (req, res) {
-  req.assert('userName', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isName()
-  req.assert('passWord', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric()
-  console.log("In boLogin")
+  //req.assert('userName', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isName()
+  //req.assert('passWord', "Name must be between 1 and 50 alphanumeric, alpha if one character, no special characters/space").notEmpty().isAlphaNumeric()
+  utils.l.d("In boLogin")
   var outerUser = null
   utils.async.waterfall(
     [
