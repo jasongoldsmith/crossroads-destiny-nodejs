@@ -201,7 +201,11 @@ function handleMuteGroupNotifications(user, data, callback) {
 
       utils._.map(userObj.groups, function(group) {
         if(group.groupId.toString() == data.groupId.toString()) {
-          group.muteNotification = data.muteNotification
+          if(data.muteNotification === "true" || data.muteNotification == true) {
+            group.muteNotification = true
+          } else {
+            group.muteNotification = false
+          }
           models.user.save(userObj, function(err, user) {
             if(err) {
               return callback(err, null)
