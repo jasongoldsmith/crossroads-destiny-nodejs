@@ -300,6 +300,48 @@ function userTimeout() {
     })
 }
 
+function preUserTimeout() {
+  var sysConfigObj = null;
+  utils.async.waterfall([
+      function(callback){
+        models.sysConfig.getSysConfigList([utils.constants.sysConfigKeys.userTimeoutInMins,
+          utils.constants.sysConfigKeys.preUserTimeoutInMins],callback)
+      },
+      function (sysConfig,callback) {
+        sysConfigObj = sysConfig
+        models.notificationTrigger.getByQuery({
+            type: 'schedule',
+            triggerName: utils.constants.eventNotificationTrigger.preUserTimeout,
+            isActive: true
+          },
+          utils.firstInArrayCallback(callback))
+      },
+      function(notifTrigger, callback) {
+        if(!notifTrigger) {
+          return callback({error: "Trigger for preUserTimeout not found or is not active"}, null)
+        }
+        var stopTime = moment().add(8, 'minutes')
+        var minsToSleep = 2
+
+        service.userService.preUserTimeout(notifTrigger,sysConfigObj)
+        temporal.loop(minsToSleep * 60 * 1000, function() {
+          service.userService.preUserTimeout(notifTrigger,sysConfigObj)
+          if(moment() > stopTime) {
+            this.stop()
+            return callback(null, null)
+          }
+        })
+      }
+    ],
+    function (err, events) {
+      if (err) {
+        utils.l.s("Error sending preUserTimeout notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+      } else {
+        utils.l.i("preUserTimeout was successful")
+      }
+    })
+}
+
 function dailyOneTimeReminder() {
   utils.async.waterfall([
     function (callback) {
@@ -396,5 +438,6 @@ module.exports = {
   eventUpcomingReminder: eventUpcomingReminder,
   helmetsFinder: helmetsFinder,
   eventExpiry:eventExpiry,
-  userTimeout:userTimeout
+  userTimeout:userTimeout,
+  preUserTimeout:preUserTimeout
 }

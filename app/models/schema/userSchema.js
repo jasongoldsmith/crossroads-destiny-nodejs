@@ -21,7 +21,8 @@ var UserSchema = new Schema({
   passwordResetToken:{type: String},
   groups:[{type:Mixed}],
   lastActiveTime:Date,
-  isLoggedIn: {type: Boolean, default: true}
+  isLoggedIn: {type: Boolean, default: true},
+  notifStatus:[{type: String}],
 })
 
 UserSchema.index({'userName':1}, {'unique': true})

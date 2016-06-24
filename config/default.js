@@ -89,7 +89,8 @@ var defaults = {
   triggerReminderInterval: 120,
   triggerUpcomingReminderInterval: -5,
   eventExpiryInterval:-40,
-  userTimeoutInterval:-20
+  userTimeoutInterval:-20,
+  preUserTimeoutInterval:-5
 };
 
 /**
