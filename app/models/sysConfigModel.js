@@ -45,6 +45,19 @@ function getSysConfig(key, callback) {
   })
 }
 
+function getSysConfigList(keys,callback){
+  SysConfig.find({key:{"$in": keys}}, function (err, sysConfig) {
+    if(err) {
+      return callback(err, null)
+    }
+    if(!sysConfig) {
+      return callback({error: "Unable to lookup. Invalid keys"}, null)
+    } else {
+      return callback(null, sysConfig)
+    }
+  })
+}
+
 function updateSysConfig(sysConfigData, callback) {
   utils.async.waterfall([
     function(callback) {
@@ -74,5 +87,6 @@ module.exports = {
   model: SysConfig,
   updateSysConfig: updateSysConfig,
   getSysConfig: getSysConfig,
-  createSysConfig:createSysConfig
+  createSysConfig:createSysConfig,
+  getSysConfigList:getSysConfigList
 }

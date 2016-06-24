@@ -56,6 +56,12 @@ function formatMessage(messageTemplate, event, playerLeft) {
 	if(messageTemplate.indexOf("#PLAYERS_NEEDED#") >= 0 ) {
 		var playersNeeded = event.maxPlayers - event.players.length
 		messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED#", "" + playersNeeded)
+
+		if(messageTemplate.indexOf("#PLAYERS_NEEDED_TXT#") >= 0){
+			if(playersNeeded > 1) messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "more players" )
+			else messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "player")
+		}
+
 	}
 
 	if(messageTemplate.indexOf("#EVENT_PLAYERS#") >= 0 ) {

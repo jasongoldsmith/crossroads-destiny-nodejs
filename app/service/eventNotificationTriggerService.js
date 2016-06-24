@@ -321,7 +321,7 @@ function createAggregateNotificationAndSend(clanId, consoleType, eventCount, not
   })
 }
 
-function sendMultipleNotifications(eventList, playerList, notification){
+function sendMultipleEventNotifications(eventList, playerList, notification){
   //utils.l.d("createNotificationAndSend::event="+utils.l.eventLog(eventList)+"\nnotification::" + JSON.stringify(notification))
   utils._.map(eventList,function(event) {
       notificationService.getNotificationDetails(event, notification, playerList, function (err, notificationResponse) {
@@ -342,5 +342,5 @@ module.exports ={
   handleJoinEvent: handleJoinEvent,
   handleLeaveEvent: handleLeaveEvent,
   createNotificationAndSend:createNotificationAndSend,
-  sendMultipleNotifications:sendMultipleNotifications
+  sendMultipleEventNotifications:sendMultipleEventNotifications
 }

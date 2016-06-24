@@ -20,8 +20,9 @@ var UserSchema = new Schema({
   bungieMemberShipId:{type: String},
   passwordResetToken:{type: String},
   groups:[{type:Mixed}],
+  lastActiveTime:Date,
   isLoggedIn: {type: Boolean, default: true},
-  lastActiveTime:Date
+  notifStatus:[{type: String}]
 })
 
 UserSchema.index({'userName':1}, {'unique': true})

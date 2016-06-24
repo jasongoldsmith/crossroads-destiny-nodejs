@@ -546,7 +546,8 @@ var eventNotificationTrigger = {
   dailyOneTimeReminder:'dailyOneTimeReminder',
   launchUpComingReminders:'launchUpComingReminders',
   eventExpiry:'eventExpiry',
-  userTimeout:'userTimeout'
+  userTimeout:'userTimeout',
+  preUserTimeout:'preUserTimeout'
 }
 
 var userNotificationTrigger = {
@@ -561,7 +562,8 @@ var freelanceBungieGroup = {
 
 var sysConfigKeys = {
   eventExpiryTimeInMins:"eventExpiryTimeInMins",
-  userTimeoutInMins:"userTimeoutInMins"
+  userTimeoutInMins:"userTimeoutInMins",
+  preUserTimeoutInMins:"preUserTimeoutInMins"
 }
 
 module.exports = {
