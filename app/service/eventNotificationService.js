@@ -87,7 +87,8 @@ function getRecipients(recipientType, event, clanId, consoleType, callback) {
 			return callback(null, recipients)
 			break
 		case "eventMembersMinusPlayerJoined":
-			event.players.pop()
+			//TODO: Commenting to fix the issue with player being removed. Need to address this by passing in players to exclude.
+			//event.players.pop()
 			recipients = event.players
 			return callback(null, recipients)
 			break
