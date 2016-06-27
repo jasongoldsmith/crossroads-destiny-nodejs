@@ -102,6 +102,8 @@ function handleAPIResponse(req, res, responseCode, responseType, data, trackingD
     ],
     function(err, user) {
       if (err) {
+        utils.l.d("error in the API response", err)
+        utils.l.d("error in the API response for user", user)
         responseCode = 500;
         req.routeErr = err;
       }

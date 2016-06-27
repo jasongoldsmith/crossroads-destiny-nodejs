@@ -63,6 +63,7 @@ module.exports = function (app, passport) {
   // no stacktraces leaked to user
   app.use(function(err, req, res, next) {
     utils.l.sentryError(err)
+    utils.l.d("unhandled error: ", err)
     res.status(err.status || 500)
     routeUtils.handleAPIError(req, res, err)
   })
