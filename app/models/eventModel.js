@@ -225,7 +225,7 @@ function leaveEvent(data, callback) {
 				utils.l.d("removing player")
 				event.players.remove(player)
 
-				if(event.creator == data.player) {
+				if(event.creator.toString() == data.player.toString()) {
 					utils.l.d("player is also the creator; changing the creator to the first user in the list")
 					event.creator = event.players[0]
 				}
