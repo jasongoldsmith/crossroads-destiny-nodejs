@@ -57,10 +57,9 @@ function notifyPreUserTimeout(user,notifTrigger,callback){
         callback(null, user)
       }else return callback(null, null)
     },function (user,callback){
-      utils.l.d('notifyPreUserTimeout::updating notifStatus on user',user)
       if(user && !hasNotifStatus(user.notifStatus,"preUserTimeout")) {
         user.notifStatus.push("preUserTimeout")
-        utils.l.d('notifyPreUserTimeout::updating notifStatus::preUserTimeout on user',user)
+        utils.l.d('notifyPreUserTimeout::updating notifStatus::preUserTimeout on user',utils.l.userLog(user))
         models.user.save(user,callback)
       }else return callback(null,null)
     }

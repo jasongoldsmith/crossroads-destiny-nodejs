@@ -58,8 +58,8 @@ function formatMessage(messageTemplate, event, playerLeft) {
 		messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED#", "" + playersNeeded)
 
 		if(messageTemplate.indexOf("#PLAYERS_NEEDED_TXT#") >= 0){
-			if(playersNeeded > 1) messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "more players" )
-			else messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "player")
+			if(playersNeeded > 1) messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "more players" )
+			else messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "player")
 		}
 
 	}

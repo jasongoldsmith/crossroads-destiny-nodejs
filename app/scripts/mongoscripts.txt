@@ -102,7 +102,7 @@ createUserInstalls();
 {
     "_id" : ObjectId("576d7d567aa4b0116550ce17"),
     "name" : "PreUserTimedoutNotification",
-    "messageTemplate" : "We are looking for #PLAYRES_NEEDED# #PLAYERS_NEEDED_TXT# for #EVENT_NAME#. If you are still interested, please tap to confirm.",
+    "messageTemplate" : "We are looking for #PLAYERS_NEEDED# #PLAYERS_NEEDED_TXT# for #EVENT_NAME#. If you are still interested, please tap to confirm.",
     "recipientType" : "knownUsers",
     "isActive" : true,
     "__v" : 0
