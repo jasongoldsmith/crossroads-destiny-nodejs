@@ -243,6 +243,7 @@ function handleJoinEvent(event, notifTrigger, callback) {
     if(event.launchStatus == utils.constants.eventLaunchStatusList.now &&
       event.players.length > 1 && event.players.length < event.maxPlayers) {
       utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,null))
+      utils.l.d('event in join notification::',event)
       event.notifStatus.push("Join")
       models.event.update(event,callback)
     } else {
