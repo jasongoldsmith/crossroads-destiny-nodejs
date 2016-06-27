@@ -30,6 +30,7 @@ createUserInstalls();
 //Script to create new notification trigger and notification
 //for eventexpiry and usertimeout
 //-----------BEGIN------------
+//---NOTIFICATION------
 {
     "_id" : ObjectId("5761c35920793c73cdabf2a2"),
     "name" : "EventExpiredNotification",
@@ -48,6 +49,7 @@ createUserInstalls();
     "__v" : 0
 }
 
+//------NOTIFICATIONTRIGGER-------
 {
     "_id" : ObjectId("5761c3e820793c73cdabf2a3"),
     "triggerName" : "eventExpiry",
@@ -90,6 +92,44 @@ createUserInstalls();
     "key" : "userTimeoutInMins",
     "description" : "Timeout interval for user. Use - value.",
     "value" : "-20",
+    "__v" : 0
+}
+//-----------END------------
+
+//Script to create notification for preUserTimeoutNotification
+//-----------BEGIN------------
+//-----------NOTIFICATION------------
+{
+    "_id" : ObjectId("576d7d567aa4b0116550ce17"),
+    "name" : "PreUserTimedoutNotification",
+    "messageTemplate" : "We are looking for #PLAYRES_NEEDED# #PLAYERS_NEEDED_TXT# for #EVENT_NAME#. If you are still interested, please tap to confirm.",
+    "recipientType" : "knownUsers",
+    "isActive" : true,
+    "__v" : 0
+}
+
+//-----------NOTIFICATIONTRIGGER------------
+{
+    "_id" : ObjectId("576d7d227aa4b0116550ce16"),
+    "triggerName" : "preUserTimeout",
+    "schedule" : "*/2 * * * *",
+    "type" : "schedule",
+    "isActive" : true,
+    "notifications" : [
+        ObjectId("576d7d567aa4b0116550ce17")
+    ],
+    "__v" : 0
+}
+//-----------END------------
+
+//Script to create Sysconfig
+//for preUserTimeoutNotification
+//-----------BEGIN------------
+{
+    "_id" : ObjectId("576d7bc57aa4b0116550ce15"),
+    "key" : "preUserTimeoutInMins",
+    "description" : "Time in mins before which user being timedout due to inactivity. Use - value.",
+    "value" : "-2",
     "__v" : 0
 }
 //-----------END------------
