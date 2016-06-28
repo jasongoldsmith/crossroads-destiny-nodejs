@@ -101,7 +101,7 @@ function createEvent(data, callback) {
 			userModel.getById(data.creator, callback)
 		},
 		function (user, callback) {
-			utils.l.d("Found user: " + JSON.stringify(user))
+			utils.l.d("Found user: " + utils.l.userLog(user))
 			computeEventAttributesIfMissing(eventObj, user)
 
 			if (utils._.isInvalidOrBlank(checkWithDate)) {

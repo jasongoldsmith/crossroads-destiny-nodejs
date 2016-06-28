@@ -163,7 +163,7 @@ function getUserById(data, callback) {
           utils.l.d("no user found")
           return callback({ error: "user with this id does not exist" }, null)
         } else {
-          utils.l.d("found user: " + JSON.stringify(user))
+          utils.l.d("found user: " + utils.l.userLog(user))
           return callback(null, user)
         }
       }
@@ -190,7 +190,7 @@ function updateUser(data, allowClanUpdate, callback) {
           if(!allowClanUpdate && (data.clanId && data.clanId != user.clanId)) {
             return callback({ error: "ClanId Update is not allowed." }, null)
           }else {
-            utils.l.i("found user: " + JSON.stringify(user))
+            utils.l.i("found user: " + utils.l.userLog(user))
             if (data.passWord) {
               data.passWord = passwordHash.generate(data.passWord)
             }
