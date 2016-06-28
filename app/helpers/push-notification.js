@@ -55,9 +55,17 @@ function sendMultiplePushNotificationsForUsers(notification, data, clanId) {
 }
 
 function getPayload(event, notificationResponse, clanId) {
+  var activityId = null
+  if(utils._.isValidNonBlank(event) && (event.deleted)){
+    if(utils._.isValidNonBlank(event.eType) && utils._.isValidNonBlank(event.eType._id))
+      activityId = event.eType._id
+    else
+      activityId = event.eType
+  }
   var payload = {
     notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
-    eventId: utils._.isValidNonBlank(event) ? event._id : null,
+    eventId: utils._.isValidNonBlank(event) && (!event.deleted)? event._id : null,
+    activityId: activityId,
     eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
     eventName: utils._.isValidNonBlank(event) ? event.eType.aSubType : null,
     eventClanId: utils._.isValidNonBlank(event) ? event.clanId : clanId,
