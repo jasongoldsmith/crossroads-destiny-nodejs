@@ -82,7 +82,8 @@ module.exports = function (app, passport) {
     if (!req.isAuthenticated()) {
       return routeUtils.handleAPIUnauthorized(req, res)
     }else{
-      models.user.setFields(req.user.id, {lastActiveTime:new Date(),notifStatus:[]},function(err,user){
+      //models.user.setFields(req.user.id, {lastActiveTime:new Date(),notifStatus:[]},function(err,user){
+      models.user.findByUserIdAndUpdate(req.user.id, {lastActiveTime:new Date(),notifStatus:[]},function(err,user){
         if(err){
           utils.l.d("error in the authenticated API request", err)
           utils.l.d("error in the authenticated API request for user", user)
