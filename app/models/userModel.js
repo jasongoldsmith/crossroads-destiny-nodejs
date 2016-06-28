@@ -233,6 +233,10 @@ function getUserMetrics(callback) {
     "count": {"$sum": 1}}}], callback)
 }
 
+function findByUserIdAndUpdate(id,data,callback){
+  User.findByIdAndUpdate(id,{ "$set": data},callback)
+}
+
 module.exports = {
   model: User,
   getUserById: getUserById,
@@ -249,5 +253,6 @@ module.exports = {
   getByQuery: getByQuery,
   getUserIdsByQuery: getUserIdsByQuery,
   listMemberCount: listMemberCount,
-  getUserMetrics: getUserMetrics
+  getUserMetrics: getUserMetrics,
+  findByUserIdAndUpdate:findByUserIdAndUpdate
 }
