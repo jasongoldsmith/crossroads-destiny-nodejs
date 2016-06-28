@@ -34,7 +34,7 @@ createUserInstalls();
 {
     "_id" : ObjectId("5761c35920793c73cdabf2a2"),
     "name" : "EventExpiredNotification",
-    "messageTemplate" : "Looks like we haven't found a fireteam yet for #EVENT_NAME# so it has been removed due to inactivity. If you're still interested, please add it again.",
+    "messageTemplate" : "Apologies, Guardian! Not enough players joined #EVENT_NAME# so it was removed. If you're still looking, please add it again.",
     "recipientType" : "eventMembers",
     "isActive" : true,
     "__v" : 0
@@ -43,7 +43,7 @@ createUserInstalls();
 {
     "_id" : ObjectId("5769ab061df491f65f3ce67f"),
     "name" : "UserTimedoutNotification",
-    "messageTemplate" : "Still there? We removed you from #EVENT_NAME# due to inactivity. If you're actually still here, we're sorry. Please join the activity again.",
+    "messageTemplate" : "Still there? We removed you from #EVENT_NAME# due to inactivity. If you're still interested, please rejoin.",
     "recipientType" : "knownUsers",
     "isActive" : true,
     "__v" : 0
