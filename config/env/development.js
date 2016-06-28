@@ -1,4 +1,3 @@
-
 module.exports = {
   hostName: 'https://travelerbackend.herokuapp.com',
   devMode: true,
@@ -8,5 +7,4 @@ module.exports = {
   sendEmail: true,
   logLevel: 'debug',
   enableBungieIntegration: true,
-  logLevel: 'debug'
-};
+}

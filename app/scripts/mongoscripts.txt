@@ -25,6 +25,29 @@ function createUserInstalls(){
 
 createUserInstalls();
 
+//Script to find out users based on console type
+//-----------BEGIN------------
+function createUserInstalls(){
+    var userIds = db.getCollection('users').find({'consoles.consoleType':'XBOX360', 'consoles.verifyStatus':'INITIATED'},{'_id':1})
+    var usersList = []
+    userIds.forEach(
+        function(u){
+            usersList.push(u._id)
+        })
+    var installationUsers = db.getCollection('installations').find({'user':{'$in':usersList},'deviceType':'gcm'},{'user':1,'_id':0})
+
+    var instList = []
+    installationUsers.forEach(
+        function (d) {
+            instList.push(d.user)
+        }
+    )
+
+    print(instList)
+}
+
+createUserInstalls();
+
 //-----------END------------
 
 //Script to create new notification trigger and notification

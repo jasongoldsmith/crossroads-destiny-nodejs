@@ -10,6 +10,7 @@ var request = require('request')
 // internal dependencies
 var routeUtils = require('./app/routes/routeUtils')
 var utils = require('./app/utils/index')
+var tUtils = require ('./app/tests/utils/index')
 var models = require('./app/models/index')
 var helpers = require('./app/helpers')
 var service = require ('./app/service')
@@ -427,6 +428,158 @@ function helmetsFinder() {
   })
 }
 
+function createLoadTestUsers() {
+  var minstoSleep = 1
+  var counter = 1
+  var totalUsers = 10000
+  var step = 100
+  temporal.loop(minstoSleep * 60 * 1000, function() {
+    var batchStop = counter + step - 1
+    createUserAndInstallation(counter, batchStop)
+    if(batchStop >= totalUsers) {
+      utils.l.i("Created all users")
+      this.stop()
+    } else {
+      counter = counter + step
+    }
+  })
+}
+
+function createUserAndInstallation(counter, totalUsers) {
+  var baseUrl = "https://travelerbackendproduction.herokuapp.com"
+
+  var userData = {
+    userName: "loadTestUser"+counter,
+    passWord: "password",
+    consoles: [{
+      "consoleType": "PS4",
+      "consoleId": "loadTestUser"+counter
+    }],
+    bungieMemberShipId: "13366437"
+  }
+  var myCookies = {}
+  var userLoginResponse = {}
+
+  utils.async.waterfall([
+    function(callback) {
+      tUtils.tPost(
+        baseUrl,
+        {path: "/api/v1/auth/register", data: userData},
+        {status: 200},
+        callback)
+    },
+    function(res, callback) {
+      var loginData = {
+        userName: userData.userName,
+        passWord: userData.passWord
+      }
+      tUtils.tPost(
+        baseUrl,
+        {path: "/api/v1/auth/login", data: loginData},
+        {status: 200},
+        callback)
+    },
+    function(res, callback) {
+      userLoginResponse = JSON.parse(res.text)
+      var installationData = {
+        deviceToken: "054f1fd8f081b985331c7745adaea5205b2d691eccd253b386e6ba28e63e6598"
+      }
+      myCookies = tUtils.getCookiesFromRes(res)
+      tUtils.tPost(
+        baseUrl,
+        {
+          path: "/api/v1/a/installation/ios",
+          data: installationData,
+          cookies: myCookies
+        },
+        {status: 200},
+        callback)
+    },
+    function(res, callback) {
+      tUtils.tGet(
+        baseUrl,
+        {
+          path: "/api/v1/a/account/group/list",
+          cookies: myCookies
+        },
+        {status: 200},
+        callback)
+    },
+/*    function(res, callback) {
+      tUtils.tGet(
+        baseUrl,
+        {
+          path: "/api/v1/a/event/list",
+          cookies: myCookies
+        },
+        {status: 200},
+        callback)
+    },
+    function(res, callback) {
+      tUtils.tGet(
+        baseUrl,
+        {
+          path: "/api/v1/a/event/list",
+          cookies: myCookies
+        },
+        {status: 200},
+        callback)
+    },
+    function(res, callback) {
+      tUtils.tGet(
+        baseUrl,
+        {
+          path: "/api/v1/a/event/list",
+          cookies: myCookies
+        },
+        {status: 200},
+        callback)
+    },*/
+    function(res, callback) {
+      if(counter == totalUsers) {
+        //utils.l.i("user from response", userLoginResponse)
+        var playerId = userLoginResponse.value._id
+        var eventData = {
+          "eType":"56df6ab3dac7e703003a101f",
+          "minPlayers":1,
+          "maxPlayers":3,
+          "creator": playerId,
+          "players": [playerId],
+          "launchDate": getNewDate(counter)
+        }
+
+        tUtils.tPost(
+          baseUrl,
+          {
+            path: "/api/v1/a/event/create",
+            data: eventData,
+            cookies: myCookies
+          },
+          {status: 200},
+          callback)
+      } else {
+        callback(null, res)
+      }
+    }
+  ],
+    function (err, res) {
+      if(err) {
+        utils.l.d("Error in creating user::" + JSON.stringify(err) + "::" + JSON.stringify(res))
+      } else {
+        utils.l.d("user was created successfully", JSON.stringify(res))
+        if(counter < totalUsers) {
+          createUserAndInstallation(++counter, totalUsers)
+        } else {
+          utils.l.i("Created all batch users: ", counter)
+        }
+      }
+    })
+}
+
+function getNewDate(minutes) {
+  return new Date(Date.now() + (minutes * 60000)).toISOString()
+}
+
 module.exports = {
   updatePassWord: updatePassWord,
   deleteOldFullEvents: deleteOldFullEvents,
@@ -439,5 +592,6 @@ module.exports = {
   helmetsFinder: helmetsFinder,
   eventExpiry:eventExpiry,
   userTimeout:userTimeout,
-  preUserTimeout:preUserTimeout
+  preUserTimeout:preUserTimeout,
+  createLoadTestUsers: createLoadTestUsers
 }

@@ -1,4 +1,3 @@
-
 module.exports = {
   hostName: 'https://travelerbackendproduction.herokuapp.com',
   enableNewRelic: true,
@@ -10,5 +9,6 @@ module.exports = {
   },
   awsProfileImageUrl: "http://feighty-images.s3.amazonaws.com/",
   enableBungieIntegration: false,
-  logLevel: 'debug'
-};
+  logLevel: 'debug',
+  devMode: true,
+}
