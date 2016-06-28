@@ -94,7 +94,7 @@ function handleAPIResponse(req, res, responseCode, responseType, data, trackingD
     [
       function(callback) {
         if (req.isAuthenticated()) {
-          models.user.setFields(req.user.id, {lastActiveTime:new Date(),notifStatus:[]},callback);
+          models.user.getById(req.user.id,callback);
         } else {
           return callback(null, null);
         }

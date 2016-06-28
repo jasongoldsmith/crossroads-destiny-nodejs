@@ -180,19 +180,26 @@ function launchUpComingReminders(notifTrigger){
             if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
               var raidLf2mfNotif = utils._.find(notifTrigger.notifications, {"name": "RaidEventLf2mNotification"})
               var eventLf1mNotif = utils._.find(notifTrigger.notifications, {"name": "EventLf1mNotification"})
+              var eventUdpated = false;
               if(event.eType.aType == "Raid"
                 && ((event.maxPlayers - event.players.length) == 2)
                 && !hasNotifStatus(event.notifStatus,"RaidEventLf2mNotification")) {
                 createNotificationAndSend(event, null, raidLf2mfNotif)
                 event.notifStatus.push("RaidEventLf2mNotification")
+                eventUdpated=true
               }
 
               if((event.maxPlayers - event.players.length) == 1
                 && !hasNotifStatus(event.notifStatus,"EventLf1mNotification")) {
                 createNotificationAndSend(event,null,eventLf1mNotif)
                 event.notifStatus.push("EventLf1mNotification")
+                eventUdpated=true
               }
-              models.event.update(event, callback)
+
+              if(!eventUdpated)
+                callback(null,event)
+              else
+                models.event.update(event, callback)
             } else {
               return callback(null, null)
             }

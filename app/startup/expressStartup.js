@@ -19,6 +19,7 @@ var utils = require('../utils');
 var middlewares = require('./middlewares');
 
 var routeUtils = require('../routes/routeUtils');
+var models = require('../models')
 
 module.exports = function (app, passport) {
   app.use(compression({
@@ -80,6 +81,13 @@ module.exports = function (app, passport) {
 
     if (!req.isAuthenticated()) {
       return routeUtils.handleAPIUnauthorized(req, res)
+    }else{
+      models.user.setFields(req.user.id, {lastActiveTime:new Date(),notifStatus:[]},function(err,user){
+        if(err){
+          utils.l.d("error in the authenticated API request", err)
+          utils.l.d("error in the authenticated API request for user", user)
+        }
+      });
     }
     //if (!req.user.isNormal()) {
     //  return res.redirect('/');
