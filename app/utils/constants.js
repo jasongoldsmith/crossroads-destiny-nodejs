@@ -493,6 +493,13 @@ var eventLaunchStatusList = {
     upcoming:'upcoming'
 }
 
+var eventStatus = {
+  new:'new',
+  open:'open',
+  full:'full',
+  can_join:'can_join'
+}
+
 var bungieMemberShipType = {
   PSN:2,
   XBOX:1,
@@ -581,5 +588,6 @@ module.exports = {
   freelanceBungieGroup:freelanceBungieGroup,
   bungieErrorMessage:bungieErrorMessage,
   consoleGenericsId:consoleGenericsId,
-  sysConfigKeys:sysConfigKeys
+  sysConfigKeys:sysConfigKeys,
+  eventStatus:eventStatus
 }
