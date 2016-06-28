@@ -106,6 +106,7 @@ function archiveEvent(event,notifTrigger,callback){
   ],function(err,eventRemoveStatus){
     utils.l.d('eventRemoved',utils.l.eventLog(eventRemoveStatus))
     if(!err){
+      event.deleted=true
       if(notifTrigger.isActive && notifTrigger.notifications.length > 0)
         utils.async.map(notifTrigger.notifications, utils._.partial(eventNotificationTriggerService.createNotificationAndSend,event,null))
       //utils.l.d("event after remove::",event)

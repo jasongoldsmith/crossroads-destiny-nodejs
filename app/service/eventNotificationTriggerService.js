@@ -223,7 +223,7 @@ function launchUpComingReminders(notifTrigger){
 // Event based Notifications
 
 function handleNewEvents(event, notifTrigger, callback) {
-  utils.l.d("Running trigger handleNewEvents for event", event)
+  utils.l.d("Running trigger handleNewEvents for event", utils.l.eventLog(event))
   if(notifTrigger.isActive) {
     var newEventNotif = null
     if (event.launchStatus == utils.constants.eventLaunchStatusList.upcoming
@@ -245,7 +245,7 @@ function handleNewEvents(event, notifTrigger, callback) {
 }
 
 function handleJoinEvent(event, notifTrigger, callback) {
-  utils.l.d("Running trigger for event join", event)
+  utils.l.d("Running trigger for event join", utils.l.eventLog(event))
   if(notifTrigger.isActive) {
     if(event.launchStatus == utils.constants.eventLaunchStatusList.now &&
       event.players.length > 1 && event.players.length < event.maxPlayers) {
@@ -262,7 +262,7 @@ function handleJoinEvent(event, notifTrigger, callback) {
 }
 
 function handleLeaveEvent(event, user, notifTrigger, callback) {
-  utils.l.d("Running trigger for event leave", event)
+  utils.l.d("Running trigger for event leave", utils.l.eventLog(event))
   if(notifTrigger.isActive) {
     if(event.launchStatus == utils.constants.eventLaunchStatusList.now) {
       utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,user))
