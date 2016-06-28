@@ -87,12 +87,13 @@ module.exports = function (app, passport) {
           utils.l.d("error in the authenticated API request", err)
           utils.l.d("error in the authenticated API request for user", user)
         }
+        next();
       });
     }
     //if (!req.user.isNormal()) {
     //  return res.redirect('/');
     //}
-    next();
+
   });
   app.use(middlewares.visitTracker());
 };

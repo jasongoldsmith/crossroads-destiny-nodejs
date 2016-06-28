@@ -194,31 +194,37 @@ function handleMuteGroupNotifications(user, data, callback) {
       models.user.getById(user._id, callback)
     },
     function (userObj, callback) {
-      var userGroup = utils._.find(userObj.groups, {groupId: data.groupId})
-      if(utils._.isInvalidOrBlank(userGroup)) {
-        return callback({error: "You do not belong to this group anymore"}, null)
-      }
-
-      utils._.map(userObj.groups, function(group) {
-        if(group.groupId.toString() == data.groupId.toString()) {
-          if(data.muteNotification === "true" || data.muteNotification == true) {
-            group.muteNotification = true
-          } else {
-            group.muteNotification = false
-          }
-          models.user.save(userObj, function(err, user) {
-            if(err) {
-              return callback(err, null)
-            } else {
-              return callback(null, group)
-            }
-          })
+      muteGroup(userObj,data,callback)
+    },function(updatedUser,callback){
+      models.user.save(updatedUser, function(err, user) {
+        if(err) {
+          return callback(err, null)
+        } else {
+          return callback(null, data)
         }
       })
     }
   ], callback)
 }
 
+function muteGroup(user,data,callback){
+  var userGroup = utils._.find(user.groups, {groupId: data.groupId})
+  if(utils._.isInvalidOrBlank(userGroup)) {
+    return callback({error: "You do not belong to this group anymore"}, null)
+  }
+
+  utils._.map(user.groups, function(group) {
+    if(group.groupId.toString() == data.groupId.toString()) {
+      if(data.muteNotification === "true" || data.muteNotification == true) {
+        group.muteNotification = true
+      }else {
+        group.muteNotification = false
+      }
+    }
+  })
+
+  return callback(null,user)
+}
 function mergeEventStatsWithGroups(eventCountList, groupList, callback){
   var groupUpdatedList = null
   if (eventCountList) {
