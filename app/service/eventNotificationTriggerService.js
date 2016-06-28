@@ -280,7 +280,9 @@ function handleLeaveEvent(event, user, notifTrigger, callback) {
 
 function launchUpcomingEvent(event, notifTrigger, callback){
   utils.async.waterfall([
-    function (callback) {
+    function(callback){
+      models.user.findUsersByIdAndUpdate(getEventPlayerIds(event),{lastActiveTime:new Date(),notifStatus:[]}, callback)
+    },function (users,callback) {
       utils.l.d("launchEvent:: " + event.eventType + ",launchDate: " + event.launchDate)
       models.event.launchEvent(event, callback)
       //TODO: Make a firebase API to notify
@@ -341,6 +343,26 @@ function sendMultipleEventNotifications(eventList, playerList, notification){
         helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, event, null)
       })
     })
+}
+
+function getEventPlayerIds(event){
+  var playerIds = []
+
+  if(event && event.players){
+    if(event.players.length > 0 && event.players[0]._id)
+      playerIds = utils._.map(event.players,"_id")
+    else if(event.players.length > 0)
+      playerIds = event.players
+  }
+
+  if(playerIds && playerIds.length == 0){
+    if(event.creator && event.creator._id)
+      playerIds.push(event.creator._id)
+    else playerIds.push(event.creator)
+  }
+
+  utils.l.d("playerIds to activate",playerIds)
+  return playerIds
 }
 
 module.exports ={

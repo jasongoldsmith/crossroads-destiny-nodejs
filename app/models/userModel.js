@@ -237,6 +237,12 @@ function findByUserIdAndUpdate(id,data,callback){
   User.findByIdAndUpdate(id,{ "$set": data},callback)
 }
 
+function findUsersByIdAndUpdate(idList,data,callback){
+  utils.l.d('updatingUsers',idList)
+  utils.l.d('dataToupdate',data)
+  User.update({_id:{"$in":idList}},{ "$set": data},{ multi: true },callback)
+}
+
 module.exports = {
   model: User,
   getUserById: getUserById,
@@ -254,5 +260,6 @@ module.exports = {
   getUserIdsByQuery: getUserIdsByQuery,
   listMemberCount: listMemberCount,
   getUserMetrics: getUserMetrics,
-  findByUserIdAndUpdate:findByUserIdAndUpdate
+  findByUserIdAndUpdate:findByUserIdAndUpdate,
+  findUsersByIdAndUpdate:findUsersByIdAndUpdate
 }
