@@ -66,7 +66,7 @@ function getPayload(event, notificationResponse, clanId) {
   }
   var payload = {
     notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
-    eventId: utils._.isValidNonBlank(event) && (!event.deleted)? event._id : null,
+    eventId: utils._.isValidNonBlank(event) ? event._id : null,
     activityId: activityId,
     eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
     eventName: utils._.isValidNonBlank(event) ? event.eType.aSubType : null,
