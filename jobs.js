@@ -48,9 +48,9 @@ function deleteOldFullEvents() {
     },
     function (events, callback) {
       utils._.forEach(events, function(event) {
-        utils.l.i("job archiving event: ", event)
+        utils.l.d("job archiving event: ", event)
         models.archiveEvent.createArchiveEvent(event, callback)
-        utils.l.i("job removing event: ", event)
+        utils.l.d("job removing event: ", event)
         event.remove(callback)
       })
     }
@@ -74,9 +74,9 @@ function deleteOldStaleEvents() {
         utils._.forEach(events, function(event) {
           var launchDate = new Date(moment.tz(event.launchDate, 'America/Los_Angeles').format())
           if(utils.format.compareDates(currentTime, launchDate) > 0) {
-            utils.l.i("job archiving event: ", event)
+            utils.l.d("job archiving event: ", event)
             models.archiveEvent.createArchiveEvent(event, callback)
-            utils.l.i("job removing event: ", event)
+            utils.l.d("job removing event: ", event)
             event.remove(callback)
           }
         })

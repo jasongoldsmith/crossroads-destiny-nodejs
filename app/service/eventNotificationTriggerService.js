@@ -38,7 +38,7 @@ function handleUpcomingEvents(notifTrigger) {
       if (err) {
         utils.l.s("Error launching events::" + JSON.stringify(err) + "::" + JSON.stringify(eventsLaunchUpdate))
       } else {
-        utils.l.i("Events launched successfully::" + JSON.stringify(eventsLaunchUpdate))
+        utils.l.d("Events launched successfully::" + JSON.stringify(eventsLaunchUpdate))
       }
       utils.l.i("Completed the job to launch events::"+utils.moment().utc().format())
     }

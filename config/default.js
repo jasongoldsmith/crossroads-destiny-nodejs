@@ -18,7 +18,7 @@ var defaults = {
   enableNewRelic: false,
   enforceSSL: true,
   devMode: false,
-  logLevel: 'debug',
+  logLevel: 'info',
   appName:'Crossroads',
   tinyUrlHost:'http://dev.crsrd.co/',
   hostUrl: function() {
