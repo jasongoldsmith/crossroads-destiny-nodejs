@@ -44,7 +44,7 @@ function getBungieMemberShip(gamerId, membershipType, callback) {
           if(utils._.isInvalidOrBlank(bungieAcctJson.Response.bungieNetUser)) {
             return callback(
               {
-                error: "It looks like your Bungie account may be set to private or the server is busy. Please ensure your account is public and try again in a few minutes."
+                error: "Your public Bungie profile is not displaying your linked gaming account. Please set it to public and try again."
               },
               null)
           }
