@@ -126,7 +126,7 @@ function handleMissingImageUrl(data, callback) {
     roundRobinCounterModel.updateCounter(roundRobinCount, function(err, counter) {
       return callback(null, data)
     })
-		}
+		}else return callback(null,data)
 }
 
 function createUserFromData(data, callback) {

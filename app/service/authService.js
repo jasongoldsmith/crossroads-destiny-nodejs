@@ -10,29 +10,43 @@ function signupUser(userData, callback) {
 				},
 				function(existingUsers, callback){
 					userExists(existingUsers,userData,callback)
-				},
-				function(user, callback) {
+				},function(user,callback) {
+					if(utils.config.enableBungieIntegration) {
+						destinyService.getBungieHelmet(userData.consoles[0].consoleId,userData.consoles[0].consoleType,function(err,helmetURL){
+							if(!err) {
+								userData.imageUrl = utils.config.bungieBaseURL +"/"+helmetURL
+								callback(null,userData)
+							}else callback(null,userData)
+						})
+					}else {
+						callback(null, userData)
+					}
+				},function(user, callback) {
 					//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
 					// or send notification to both xbox and psn depending on the ID availability
 					if(utils.config.enableBungieIntegration) {
-						console.log("Destiny validation enabled")
-						destinyService.sendBungieMessage(userData.bungieMemberShipId, utils._.get(utils.constants.consoleGenericsId, userData.consoles[0].consoleType), utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
-							utils.l.d('messageResponse',messageResponse)
-							utils.l.d('signupUser::sendBungieMessage::error',error)
-							if (messageResponse) {
-								utils.l.d("messageResponse::token===" + messageResponse.token)
-								userData.consoles[0].verifyStatus = "INITIATED"
-								userData.consoles[0].verifyToken = messageResponse.token
-								callback(null, userData)
-							} else {
-								return callback(error, null)
-							}
-						})
+						utils.l.d("Destiny validation enabled",userData)
+						destinyService.sendBungieMessage(userData.bungieMemberShipId,
+								utils._.get(utils.constants.consoleGenericsId, userData.consoles[0].consoleType),
+								utils.constants.bungieMessageTypes.accountVerification,
+								function (error, messageResponse) {
+										utils.l.d('messageResponse',messageResponse)
+										utils.l.d('signupUser::sendBungieMessage::error',error)
+									if (messageResponse) {
+										utils.l.d("messageResponse::token===" + messageResponse.token)
+										userData.consoles[0].verifyStatus = "INITIATED"
+										userData.consoles[0].verifyToken = messageResponse.token
+										callback(null, userData)
+									} else {
+										return callback(error, null)
+									}
+							})
 					}else {
 						console.log("Destiny validation disabled")
 						callback(null, userData)
 					}
 				},function (newUser, callback) {
+					utils.l.d("creating user")
 					models.user.createUserFromData(newUser, callback)  // don't send message
 				}
 			],
@@ -72,7 +86,10 @@ function requestResetPassword(userData, callback) {
 					// or send notification to both xbox and psn depending on the ID availability
 					if(utils.config.enableBungieIntegration) {
 						console.log("Destiny validation enabled")
-						destinyService.sendBungieMessage(userData.bungieMemberShipId, userData.consoles[0].consoleType, utils.constants.bungieMessageTypes.passwordReset, function (error, messageResponse) {
+						destinyService.sendBungieMessage(userData.bungieMemberShipId,
+								userData.consoles[0].consoleType,
+								utils.constants.bungieMessageTypes.passwordReset,
+								function (error, messageResponse) {
 							if (messageResponse) {
 								utils.l.d("messageResponse::token===" + messageResponse.token)
 								userData.passwordResetToken = messageResponse.token

@@ -18,6 +18,34 @@ function listMyGroups(req, res) {
   })
 }
 
+function updateHelmet(req,res){
+  handlUpdateHelmet(req.user, function(err, updateResponse) {
+    if (err) {
+      routeUtils.handleAPISuccess(req, res, err, err)
+    } else {
+      routeUtils.handleAPISuccess(req, res, updateResponse)
+    }
+  })
+}
+
+function handlUpdateHelmet(user,callback){
+  var newHelmetURL = null
+  utils.async.waterfall([
+    function(callback){
+      service.destinyInerface.getBungieHelmet(user.consoles[0].consoleId,user.consoles[0].consoleType,callback)
+    },function(helmetURL, callback){
+      newHelmetURL = helmetURL
+      models.user.updateUser({id:user._id,imageUrl:utils.config.bungieBaseURL +helmetURL},false,callback)
+    }
+  ],function(err,user){
+    if(!err && newHelmetURL)
+      return callback(null,{status:"Success",helmetUrl:utils.config.bungieBaseURL + newHelmetURL,message:"Successfully updated helmet"})
+    else
+      return callback(null,{status:"Failed",helmetUrl:user.imageUrl,message:"We were unable to update your helmet. Please try again later."})
+  })
+
+}
+
 function listGroups(user, callback) {
   var groupList = null
   var userObj = null
@@ -291,5 +319,6 @@ routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups, {utm_dnt:"l
 routeUtils.rGet(router, '/group/search/:groupId', 'searchGroupById', searchGroupReq)
 routeUtils.rGet(router, '/group/resendBungieMessage', 'resendBungieMessage', resendBungieMessage)
 routeUtils.rPost(router, '/group/mute', 'muteGroupNotification', muteGroupNotifications)
+routeUtils.rPost(router, '/updateHelmet', 'updateHelmet', updateHelmet)
 module.exports = router
 

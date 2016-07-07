@@ -81,6 +81,7 @@ var defaults = {
   bungieDestinySearchByPSNURL:"https://www.bungie.net/Platform/Destiny/%MEMBERSHIPTYPE%/Stats/GetMembershipIdByDisplayName/%MEMBERSHIPID%?ignorecase=true",
   bungieUserAccountURL:"https://www.bungie.net/Platform/User/GetBungieAccount/",
   bungieConvURL:"https://www.bungie.net/Platform/Message/CreateConversation/?lc=en&fmt=true&lcin=true",
+  bungieItemsURL:"https://www.bungie.net/Platform/Destiny/%MEMBERSHIPTYPE%/Account/%MEMBERSHIPID%/Character/%CHARACTERID%/Inventory/Summary?definitions=true",
   destinyGruopsJoinedURL:"https://www.bungie.net/Platform/Group/User/%MEMBERSHIPID%/",
   accountVerificationSuccess:"Great! Welcome to Traveler! If you have any issues or suggestions you may contact us at gaming@forcecatalyst.com",
   accountVerification:"Thanks for signing up for Traveler, the Destiny Fireteam Finder mobile app! Click the link below to verify your PSN id. %HOST%/api/v1/auth/verify/%TOKEN%",

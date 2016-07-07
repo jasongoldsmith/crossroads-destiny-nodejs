@@ -562,7 +562,7 @@ var userNotificationTrigger = {
 }
 var freelanceBungieGroup = {
   "groupId": "clan_id_not_set",
-  "groupName": "Crossroads Freelance",
+  "groupName": "Freelance Lobby",
   "avatarPath": config.hostName+"/img/iconGroupCrossroadsFreelance.png",
   "clanEnabled": false
 }
