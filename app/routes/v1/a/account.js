@@ -18,17 +18,17 @@ function listMyGroups(req, res) {
   })
 }
 
-function updateHelmet(req,res){
+function updateHelmet(req, res) {
   handlUpdateHelmet(req.user, function(err, updateResponse) {
     if (err) {
-      routeUtils.handleAPISuccess(req, res, err, err)
+      routeUtils.handleAPIError(req, res, err, err)
     } else {
       routeUtils.handleAPISuccess(req, res, updateResponse)
     }
   })
 }
 
-function handlUpdateHelmet(user,callback){
+function handlUpdateHelmet(user, callback) {
   var newHelmetURL = null
   utils.async.waterfall([
     function(callback){
@@ -37,13 +37,17 @@ function handlUpdateHelmet(user,callback){
       newHelmetURL = helmetURL
       models.user.updateUser({id:user._id,imageUrl:utils.config.bungieBaseURL +helmetURL},false,callback)
     }
-  ],function(err,user){
+  ],function(err, user){
     if(!err && newHelmetURL)
-      return callback(null,{status:"Success",helmetUrl:utils.config.bungieBaseURL + newHelmetURL,message:"Successfully updated helmet"})
+      return callback(null,
+        {
+          status:"Success",
+          helmetUrl: utils.config.bungieBaseURL + newHelmetURL,
+          message: "Successfully updated helmet"
+        })
     else
-      return callback(null,{status:"Failed",helmetUrl:user.imageUrl,message:"We were unable to update your helmet. Please try again later."})
+      return callback(null, {error: "We were unable to update your helmet. Please try again later." })
   })
-
 }
 
 function listGroups(user, callback) {
