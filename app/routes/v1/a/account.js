@@ -107,7 +107,7 @@ function listUserGroups(userGroup,user,callback){
         utils.l.d("Groups does not exists. Fetching from bungie")
         service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, user.consoles[0].consoleType, 1, function(err, groups){
           if(groups)
-            models.userGroup.updateUserGroup(user._id,groups,callback)
+            models.userGroup.updateUserGroup(user._id,{groups:groups},callback)
           else callback(err,userGroup)
         })
       }
