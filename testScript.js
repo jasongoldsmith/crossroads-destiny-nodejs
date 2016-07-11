@@ -109,14 +109,24 @@ switch(command) {
   case "characterTest":
     var charObj = require("/Users/dasasr/projects/traveler/bungie/characters.json");
     var characterId = "2305843009392124098"
+    var membershipId = "4611686018460471566" //"4611686018460342882"
+   // var destinyAcct = utils._.filter(charObj.Response.destinyAccounts.userInfo,{"membershipId":"4611686018446478621"})
+
     //var destinyAcct = utils._.find(charObj,{"Response.destinyAccounts.characters.characterId":characterId})
-/*
-    var destinyAcct = utils._.find(charObj, utils._.flow(
-      utils._.property('Response.destinyAccounts.characters'),
-      utils._.partialRight(utils._.some, { characterId: characterId })
-    ));
-*/
-    var characters = utils._.map(charObj.Response.destinyAccounts,"characters")
+/*    var destinyAcct = utils._.find(charObj, utils._.flow(
+      utils._.property('Response.destinyAccounts'),
+      utils._.partialRight(utils._.some, { "userInfo.membershipId": "4611686018446478621" })
+    ));*/
+
+    var characters = null
+      utils._.map(charObj.Response.destinyAccounts, function(account){
+        utils.l.d('account.userInfo.membershipId',account.userInfo.membershipId)
+      if(account.userInfo.membershipId.toString() == membershipId.toString())
+        characters= account.characters
+    })
+
+    //utils.l.d("destinyAcct",destinyAcct)
+    //var characters = utils._.map(charObj.Response.destinyAccounts,"characters")
     var sortedChars = utils._.sortBy(utils._.flatMap(characters),function(character){
       return utils.moment(character.dateLastPlayed)
     })

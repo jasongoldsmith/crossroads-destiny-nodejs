@@ -112,9 +112,9 @@ function getBungieHelmet(consoleId,consoleType,callback){
           if(utils._.isInvalidOrBlank(bungieAcctJson.Response.destinyAccounts)) {
             return callback({error: "It looks like your Bungie account may be set to private or the server is busy. Please ensure your account is public and try again in a few minutes."},null)
           }
-          var bungieCharacters = utils._.map(bungieAcctJson.Response.destinyAccounts,"characters")
+          //var bungieCharacters = utils._.map(bungieAcctJson.Response.destinyAccounts,"characters")
 
-          var character = getRecentlyPlayedCharacter(bungieCharacters)
+          var character = getRecentlyPlayedCharacter(bungieAcctJson,memberShipId,memberShipType)
           callback(null, character)
         } else {
           return callback({error: utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)
@@ -336,7 +336,16 @@ function getBungieMembershipType(membershipType) {
   return utils._.get(utils.constants.bungieMemberShipType, membershipType)
 }
 
-function getRecentlyPlayedCharacter(characters){
+function getRecentlyPlayedCharacter(bungieAcctJson,memberShipId,memberShipType){
+  //var characters = utils._.map(bungieAcctJson.Response.destinyAccounts,"characters")
+  var characters = null
+  utils._.map(bungieAcctJson.Response.destinyAccounts, function(account){
+    utils.l.d('account.userInfo.membershipId',account.userInfo.membershipId)
+    if(account.userInfo.membershipId.toString() == memberShipId.toString())
+      characters= account.characters
+  })
+
+
   var sortedChars = utils._.sortBy(utils._.flatMap(characters),function(character){
     return utils.moment(character.dateLastPlayed)
   })
