@@ -106,7 +106,24 @@ switch(command) {
     })
     utils.l.d("mapVal"+JSON.stringify(mapVal))
     utils.l.d("mapVal",utils._.compact(utils._.values(mapVal)))
+  case "characterTest":
+    var charObj = require("/Users/dasasr/projects/traveler/bungie/characters.json");
+    var characterId = "2305843009392124098"
+    //var destinyAcct = utils._.find(charObj,{"Response.destinyAccounts.characters.characterId":characterId})
+/*
+    var destinyAcct = utils._.find(charObj, utils._.flow(
+      utils._.property('Response.destinyAccounts.characters'),
+      utils._.partialRight(utils._.some, { characterId: characterId })
+    ));
+*/
+    var characters = utils._.map(charObj.Response.destinyAccounts,"characters")
+    var sortedChars = utils._.sortBy(utils._.flatMap(characters),function(character){
+      return utils.moment(character.dateLastPlayed)
+    })
 
+    var lastCharacter = utils._.last(sortedChars)
+    utils.l.d('lastCharacter',{characterId:lastCharacter.characterId,membershipId:lastCharacter.membershipId,membershipType:lastCharacter.membershipType})
+    break;
   default:
     return;
 }

@@ -39,7 +39,6 @@ function getBungieMemberShip(gamerId, membershipType, callback) {
           var memberShipId = destinyProfileJSON.Response
 
           utils.l.d("Got destiny profile memberShipId = " + memberShipId + " && memberShipType=" + memberShipType)
-          //var bungieAcctURL ="https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/"+memberShipType+"/"
           var bungieAcctURL = utils.config.bungieUserAccountURL+memberShipId + "/" + memberShipType + "/"
           bungieGet(bungieAcctURL, gamerId,
             utils._.get(utils.constants.consoleGenericsId, utils._.get(utils.constants.consoleGenericsId, membershipType)),
@@ -115,20 +114,20 @@ function getBungieHelmet(consoleId,consoleType,callback){
           }
           var bungieCharacters = utils._.map(bungieAcctJson.Response.destinyAccounts,"characters")
 
-          var characterId = getRecentlyPlayedCharacter(bungieCharacters)
-          callback(null, characterId)
+          var character = getRecentlyPlayedCharacter(bungieCharacters)
+          callback(null, character)
         } else {
           return callback({error: utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)
                 .replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, consoleType))
                 .replace(/%GAMERID%/g, gamerId)
             },null)
         }
-      },function(characterId, callback){
+      },function(character, callback){
         //var bungieItemsURL = "https://www.bungie.net/Platform/Destiny/" + memberShipType+"/Account/"+memberShipId+"/Character/"+characterId+"/Inventory/Summary?definitions=true"
         var bungieItemsURL = utils.config.bungieItemsURL
-          .replace(/%MEMBERSHIPTYPE%/g, memberShipType)
-          .replace(/%MEMBERSHIPID%/g, memberShipId)
-          .replace(/%CHARACTERID%/g, characterId);
+          .replace(/%MEMBERSHIPTYPE%/g, character.membershipType)
+          .replace(/%MEMBERSHIPID%/g, character.membershipId)
+          .replace(/%CHARACTERID%/g, character.characterId);
 
         bungieGet(bungieItemsURL, consoleId,utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
       },function(itemDefinitions, callback){
@@ -343,7 +342,7 @@ function getRecentlyPlayedCharacter(characters){
   })
 
   var lastCharacter = utils._.last(sortedChars)
-  if(lastCharacter) return lastCharacter.characterId
+  if(lastCharacter) return {characterId:lastCharacter.characterId,membershipId:lastCharacter.membershipId,membershipType:lastCharacter.membershipType}
   else return null;
 
 }

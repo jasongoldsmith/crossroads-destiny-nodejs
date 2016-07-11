@@ -8,7 +8,7 @@ var notification = require('./notificationModel')
 var notificationTrigger = require('./notificationTriggerModel')
 var tinyUrl = require ('./tinyUrlModel')
 var sysConfig = require('./sysConfigModel')
-
+var userGroup = require('./userGroupModel')
 module.exports = {
   user: user,
   activity: activity,
@@ -19,5 +19,6 @@ module.exports = {
   notification: notification,
   notificationTrigger: notificationTrigger,
   tinyUrl: tinyUrl,
-  sysConfig:sysConfig
+  sysConfig:sysConfig,
+  userGroup:userGroup
 }
