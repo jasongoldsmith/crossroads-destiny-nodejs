@@ -39,7 +39,6 @@ function getBungieMemberShip(gamerId, membershipType, callback) {
           var memberShipId = destinyProfileJSON.Response
 
           utils.l.d("Got destiny profile memberShipId = " + memberShipId + " && memberShipType=" + memberShipType)
-          //var bungieAcctURL ="https://www.bungie.net/Platform/User/GetBungieAccount/"+memberShipId+"/"+memberShipType+"/"
           var bungieAcctURL = utils.config.bungieUserAccountURL+memberShipId + "/" + memberShipType + "/"
           bungieGet(bungieAcctURL, gamerId,
             utils._.get(utils.constants.consoleGenericsId, utils._.get(utils.constants.consoleGenericsId, membershipType)),
@@ -310,7 +309,7 @@ function getMessageBody(host,token,messageType,consoleType,callback){
 
 function tranformJoinedGroups(bungieGroups,callback){
   var bungieGroupsJson = JSON.parse(bungieGroups)
-  if(bungieGroupsJson && bungieGroupsJson.Response && bungieGroupsJson.Response.resulOts) {
+  if(bungieGroupsJson && bungieGroupsJson.Response && bungieGroupsJson.Response.results) {
     var groups = utils._.map(bungieGroupsJson.Response.results,function(group){
       return {
         groupId:group.detail.groupId,

@@ -46,7 +46,7 @@ function handlUpdateHelmet(user, callback) {
           message: "Successfully updated helmet"
         })
     else
-      return callback(null, {error: "We were unable to update your helmet. Please try again later." })
+      return callback({error:"We were unable to update your helmet. Please try again later."},null)
   })
 }
 
@@ -56,16 +56,15 @@ function listGroups(user, callback) {
   utils.async.waterfall([
     function (callback) {
       models.user.getUserById({id: user._id}, callback)
-    },
-    function(user,callback) {
-      if(user) {
+    },function(user,callback){
+      if(user){
         userObj = user
-        //TODO: set current page to 1 for now. Change it when we have paging for groups.
-        service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId,
-          userObj.consoles[0].consoleType, 1, callback)
-      } else {
-        return callback({error: "User doesnot exist/logged in."})
+        models.userGroup.getByUser(user._id,callback)
       }
+      else return callback({error: "User doesnot exist/logged in."})
+    },
+    function(userGroup,callback) {
+      listUserGroups(userGroup,user,callback)
     },
     function(groups, callback) {
       if(groups) {
@@ -97,6 +96,29 @@ function listGroups(user, callback) {
       mergeMemberStatsWithGroups(memberCounts, groupList, callback)
     }
   ], callback)
+}
+
+function listUserGroups(userGroup,user,callback){
+  utils.async.waterfall([
+    function(callback) {
+      var groupsObj = (userGroup && userGroup.groups) ? userGroup.groups : []
+      var dateUpdated = userGroup ? utils.moment(userGroup.uDate).utc().add("24","hours") : utils.moment().utc()
+      utils.l.d("dateUpdated",dateUpdated)
+      if (groupsObj.length>0 && dateUpdated >= utils.moment().utc()) {
+        utils.l.d("Groups already exists.")
+        callback (null,userGroup)
+      } else {
+        utils.l.d("Groups does not exists. Fetching from bungie")
+        service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, user.consoles[0].consoleType, 1, function(err, groups){
+          if(groups)
+            models.userGroup.updateUserGroup(user._id,groups,callback)
+          else callback(err,userGroup)
+        })
+      }
+    },function(updatedUserGroup, callback){
+      callback(null,(updatedUserGroup && updatedUserGroup.groups) ? updatedUserGroup.groups : [])
+    }
+  ],callback)
 }
 
 function resendBungieMessage(req, res) {

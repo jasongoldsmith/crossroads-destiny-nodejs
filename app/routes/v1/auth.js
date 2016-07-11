@@ -274,14 +274,21 @@ function deleteWrongPsnId(req,res){
 
 function logout(req, res) {
   var user = req.user
-  user.isLoggedIn = false
-  models.user.save(user, function(err, user) {
+  utils.async.waterfall([
+    function(callback){
+      user.isLoggedIn = false
+      models.user.save(user,callback)
+    },function(user,callback){
+      models.userGroup.updateUserGroup(user._id,[],callback)
+    }
+  ],function(err,userGroup){
     if(err) {
       utils.l.d("failed to save ths user object: ", err)
     }
+
+    req.logout()
+    routeUtils.handleAPISuccess(req, res, {success: true})
   })
-  req.logout()
-  routeUtils.handleAPISuccess(req, res, {success: true})
 }
 
 function getSignupMessage(user){
