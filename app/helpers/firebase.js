@@ -1,6 +1,16 @@
 var utils = require('../utils')
 var Firebase = require("firebase")
-var firebaseRef = new Firebase(utils.config.firebaseURL)
+
+Firebase.initializeApp({
+  serviceAccount: {
+    "project_id": "crossroadsapp-dev",
+    "client_email": "local-machine@crossroadsapp-dev.iam.gserviceaccount.com",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQCu/CaUmyq5ymnS\noOhifh8XqvfC504DyRMXTXB+4uXUScdqKTSlZrE/ziu2srEJstRo5tPAwERjh/Pm\nmA25eIplWHNsPeQF+/5eC/JhGqXfk+G+DOs2TcL7hBiwJpcoNyFdecmLfak7mvgz\nvVcMWln08jH/ie/eB8N9z2nwICkkFFvhlA+T00HvP0BwaU1yAHcf4/zJh6X7+yF9\nRU0qE/ekgB3INFSG/DTLQYUsziaxJkowx0oH6YGhJkmOrGD2rwZ3Pk7IEgTBLV8j\nmgjW/m9B4eb2ufIv4vZhbY/Zr520IAIy4kpaWpXTSXwRmc2pt9ifzS2U1veJxRp9\nTrJvOf//AgMBAAECggEBAIc1AF6NMstSMsh0WntYNpAkI8Mu1OIp6R11UbpJegq5\nY2ONKUewfL7vgGlv00nKK0RPL0ldhrpdX0FLNjecg1thp/X4MIvLNbXXh1YusAJ8\nks41zz0rgsCzRhw+BUgmqRpAM1IcK7qJuMTJxUwfOCkDR0zLeVNXLl+094d6Yi+k\nXu8xraGklgvQIidSmW3uTXMXuzib/ELOWMgNhm1KlzSB9uKIRRMjzeueDouJE7o0\nWrzqUwd/QYBUkzPB1WQt4AHSD7sPQ5BCy3Xiq1rgaAYl00mHG8VX403W/8tfL6cZ\ndAxnS2tUOiG84d+GBakImZv+eRif0QI6sV3ReF9y91kCgYEA6P0MDK7rjkO5Lg9d\nR4JNe41o4GVdnuXT/bAKHslEHpSh20zeRrdcSKJ6PgqZ8v1HhGMefHqf4DTA88mU\nmJcSpSl/vWBl8jpKQQnOKKPWr32lzUPdjSIrDMItBybe5hycyW/Hme3DatAPD2E5\nOhIkte2wnPaYrgJFdKY0YZDPY8MCgYEAwESGaN1m20wWTWNsm5LAh3u0mBwzGk7l\nhysfmLWLlRoS/ZG4fALuty045FVFNPw6RT+Y9amLutV7XR5muhofhrCaLS5juLSB\nVmysgDSNQHLhDPJ7JITr1U+WcnkeQv4qtg+M1z8WtUr9S/afWTEhhwrSvEqKp+Sc\nP4qzlEm12xUCgYEApF5ZUN1aq0wV6WvHd/pyZVbXBXAdw0sK6q92BFAjcZuUMJ2j\nNqqHPWr66KgcAfQzry8qQ9FS1x8AfTzaS2hRLBoB132ZjnEXD5k2Sy+C9t2iyhQ1\nyiqvyll24NPIbvkCl433eB3oPoO4DDaf49sG8R5V+fZyslhB3dCfpbE+zncCgYEA\nm+13DEiyiBtW4wBFLo5/seDzf4EvOKDPqSWiBFkHkK6KxDaP5ZMDQm9cemFlNSlx\noIOJa4JLHgTQfZ6QNVHGS5eiEg5TNZK+afbMl1UHUUNZnQRyNhXOpTpciw4LKs2y\nmeBWmqJBqlncvuSOKumbhUeTzLyvYqYWybmVFigJYlkCgYEArrLlwKC0kdDv/7Le\nn88NSDGLjjjrs7aUA266pkZDfYp5N4ALTnibNKSHIi5AyJD3Zgi+pQAbO7CulJ1W\n3o2Q2+7iZZAEM8tlRXFWTTH5yOmTYiAM9904OQWfIVokMBG6tYnGGHUmno4oOWSR\n+G+q4x34dJMsZMCYPpGR2wHtWVE=\n-----END PRIVATE KEY-----\n",
+  },
+  databaseURL: "https://crossroadsapp-dev.firebaseio.com"
+});
+
+var firebaseRef = Firebase.database().ref()
 
 var eventsRef = firebaseRef.child("events")
 var usersRef = firebaseRef.child("users")
