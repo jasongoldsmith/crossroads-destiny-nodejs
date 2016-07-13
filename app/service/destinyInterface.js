@@ -5,17 +5,23 @@ var models = require('../models')
 var helpers = require('../helpers')
 var tinyUrlService = require('./tinyUrlService')
 
-function bungieCookie(){
-  models.sysConfig.getSysConfig("bungieCookie",function(err,sysConfig){
+function getBungieCookie(callback) {
+  models.sysConfig.getSysConfig(utils.constants.sysConfigKeys.bungieCookie, function(err, sysConfig) {
     if(!err && sysConfig) {
-      utils.l.d("got cookie from sysconfig"+sysConfig.value)
-      return sysConfig.value
+      utils.l.d("got cookie from sysconfig: ", sysConfig.value)
+      return callback(sysConfig.value.toString())
     }
-    else return utils.config.bungieCookie
+    else {
+      var cookieStr = utils.config.bungieCookie
+      if(utils._.isValidNonBlank(cookieStr)) {
+        utils.l.d("got cookie from defaults: ", cookieStr)
+      } else {
+        utils.l.s("unable to get bungie cookie value")
+      }
+    }
+    return callback(cookieStr)
   })
 }
-
-var cookieStr = utils.config.bungieCookie
 
 /*Get bungienet profile
 * 1. Make destinySearch call for displayname
@@ -231,53 +237,62 @@ function bungieGet(url, gamerId, consoleType, callback){
   })
 }
 
-function bungiePost(url,msgBody,token,bungieMemberShipId,consoleType,callback){
-  request({
-    url: url,
-    method: "POST",
-    headers: {
-      'x-api-key': utils.config.bungieAPIToken,
-      'x-csrf': utils.config.bungieCSRFToken,
-      'cookie': cookieStr
+function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callback) {
+  utils.async.waterfall([
+    function (callback) {
+      getBungieCookie(function(bungieCookie) {
+        return callback(null, bungieCookie)
+      })
     },
-    body:msgBody,
-    json:true
-  }, function(error, response, bungieData) {
-    if(error) {
-      utils.l.s("Error posting to bungie::" + error)
-      return callback(error, null)
-    } else {
-      utils.l.d("response::bungieData ", bungieData)
-      var bungieJSON = bungieData
-      utils.l.d("Got bungie for "+url)
-      if(bungieJSON.ErrorStatus == 'Success')
-        return callback(null,
-          {
-            bungieProfile: bungieData,
-            token: token,
-            bungieMemberShipId: bungieMemberShipId
+    function (bungieCookie, callback) {
+      request({
+        url: url,
+        method: "POST",
+        headers: {
+          'x-api-key': utils.config.bungieAPIToken,
+          'x-csrf': utils.config.bungieCSRFToken,
+          'cookie': bungieCookie
+        },
+        body:msgBody,
+        json:true
+      }, function(error, response, bungieData) {
+        if(error) {
+          utils.l.s("Error posting to bungie::" + error)
+          return callback(error, null)
+        } else {
+          utils.l.d("response::bungieData ", bungieData)
+          var bungieJSON = bungieData
+          utils.l.d("Got bungie for "+url)
+          if(bungieJSON.ErrorStatus == 'Success')
+            return callback(null,
+              {
+                bungieProfile: bungieData,
+                token: token,
+                bungieMemberShipId: bungieMemberShipId
+              }
+            )
+          else{
+            if(bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
+              utils.l.s("bungie message POST error",
+                {
+                  errorStatus: bungieJSON.ErrorStatus,
+                  url: url, msgBody: msgBody,
+                  token: token,
+                  bungieMemberShipId: bungieMemberShipId,
+                  consoleType: consoleType
+                }
+              )
+            return callback(
+              {
+                error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)
+                  .replace(/%CONSOLETYPE%/g, consoleType)
+              },
+              null)
           }
-        )
-      else{
-        if(bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
-          utils.l.s("bungie message POST error",
-            {
-              errorStatus: bungieJSON.ErrorStatus,
-              url: url, msgBody: msgBody,
-              token: token,
-              bungieMemberShipId: bungieMemberShipId,
-              consoleType: consoleType
-            }
-          )
-        return callback(
-          {
-            error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)
-                    .replace(/%CONSOLETYPE%/g,consoleType)
-          },
-          null)
-      }
+        }
+      })
     }
-  })
+  ], callback)
 }
 
 function getMessageBody(host,token,messageType,consoleType,callback){

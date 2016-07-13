@@ -570,7 +570,8 @@ var freelanceBungieGroup = {
 var sysConfigKeys = {
   eventExpiryTimeInMins:"eventExpiryTimeInMins",
   userTimeoutInMins:"userTimeoutInMins",
-  preUserTimeoutInMins:"preUserTimeoutInMins"
+  preUserTimeoutInMins:"preUserTimeoutInMins",
+  bungieCookie: "bungieCookie"
 }
 
 module.exports = {
