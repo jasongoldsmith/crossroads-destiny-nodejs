@@ -8,6 +8,12 @@ var activitySchema = require('./schema/activitySchema')
 // Model initialization
 var Activity = mongoose.model('Activity', activitySchema.schema)
 
+function getByQuery(query, callback) {
+	Activity
+		.find(query)
+		.exec(callback)
+}
+
 function createActivity(data, callback) {
 	var activityObj = new Activity(data)
 	utils.async.waterfall([
@@ -17,10 +23,10 @@ function createActivity(data, callback) {
 		},
 		function (activity, callback) {
 			if (!activity) {
-				utils.l.i("no activity found, saving activity")
+				utils.l.d("no activity found, saving activity")
 				activityObj.save(callback)
 			} else {
-				utils.l.i("found activity: " + activity)
+				utils.l.d("found activity: " + activity)
 				return callback(null, activity)
 			}
 		}
@@ -28,7 +34,11 @@ function createActivity(data, callback) {
 }
 
 function listActivities(callback) {
-	Activity.find({ isActive : {$ne: false} }, callback)
+	Activity.find({isActive: {$ne: false}}, callback)
+}
+
+function listAdActivities(callback) {
+	Activity.find({isActive: {$ne: false}, isAdCard: true}, callback)
 }
 
 function listAllActivities(callback) {
@@ -42,10 +52,10 @@ function listActivityById(data, callback) {
 		},
 		function(activity, callback) {
 			if (!activity) {
-				utils.l.i("no activity found")
-				return callback({ error: "activity with this id does not exist" }, null)
+				utils.l.d("no activity found")
+				return callback({error: "activity with this id does not exist"}, null)
 			} else {
-				utils.l.i("found activity: " + JSON.stringify(activity))
+				utils.l.d("found activity: " + JSON.stringify(activity))
 				return callback(null, activity)
 			}
 		}
@@ -59,10 +69,10 @@ function updateActivity(data, callback) {
 		},
 		function(activity, callback) {
 			if (!activity) {
-				utils.l.i("no activity found")
+				utils.l.d("no activity found")
 				return callback({ error: "activity with this id does not exist" }, null)
 			} else {
-				utils.l.i("found activity: " + JSON.stringify(activity))
+				utils.l.d("found activity: " + JSON.stringify(activity))
 				utils._.extend(activity, data)
 				activity.save(callback)
 			}
@@ -72,9 +82,8 @@ function updateActivity(data, callback) {
 
 module.exports = {
 	model: Activity,
+	getByQuery: getByQuery,
 	createActivity: createActivity,
-	listActivities: listActivities,
-	listAllActivities: listAllActivities,
 	listActivityById: listActivityById,
 	updateActivity: updateActivity
 }
