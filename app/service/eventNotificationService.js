@@ -1,7 +1,6 @@
 var utils = require('../utils')
 var models = require('../models')
 var moment = require('moment')
-
 //for recipientType = knownUsers passin playerList as recipient list otherwise playerList will be playersLeft
 function getNotificationDetails(event, notification, playerList, callback) {
 
@@ -41,16 +40,16 @@ function getAggregateNotificationDetails(clanId, consoleType, eventCount, notifi
 
 function formatMessage(messageTemplate, event, playerLeft) {
 	if(messageTemplate.indexOf("#CREATOR#") >= 0 )
-		messageTemplate =  messageTemplate.replace("#CREATOR#", event.creator.consoles[0].consoleId)
+		messageTemplate =  messageTemplate.replace("#CREATOR#", utils.primaryConsole(event.creator).consoleId)
 	if(messageTemplate.indexOf("#EVENT_NAME#") >= 0 )
 		messageTemplate =  messageTemplate.replace("#EVENT_NAME#", getEventName(event.eType))
 	if(messageTemplate.indexOf("#TIME#") >= 0 )
 		messageTemplate =  messageTemplate.replace("#TIME#", getTimeStringForDisplay(event.launchDate))
 
 	if(utils._.isValidNonBlank(playerLeft) && messageTemplate.indexOf("#PLAYER#") >= 0) {
-		messageTemplate = messageTemplate.replace("#PLAYER#", playerLeft.consoles[0].consoleId)
+		messageTemplate = messageTemplate.replace("#PLAYER#", utils.primaryConsole(playerLeft).consoleId)
 	} else if(messageTemplate.indexOf("#PLAYER#") >= 0 ){
-		messageTemplate = messageTemplate.replace("#PLAYER#", event.players[event.players.length - 1].consoles[0].consoleId)
+		messageTemplate = messageTemplate.replace("#PLAYER#", utils.primaryConsole(event.players[event.players.length - 1]).consoleId)
 	}
 
 	if(messageTemplate.indexOf("#PLAYERS_NEEDED#") >= 0 ) {
@@ -70,8 +69,9 @@ function formatMessage(messageTemplate, event, playerLeft) {
 		})
 
 		var playernames = (utils._.compact(utils._.map(players, function(player) {
-			if(player.consoles[0].consoleId != event.creator.consoles[0].consoleId) {
-				return player.consoles[0].consoleId
+			var primaryPlayerConsole = utils.primaryConsole(player)
+			if(primaryPlayerConsole.consoleId != utils.primaryConsole(event.creator).consoleId) {
+				return primaryPlayerConsole.consoleId
 			}
 		}))).join(", ")
 

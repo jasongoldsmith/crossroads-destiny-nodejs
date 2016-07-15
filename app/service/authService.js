@@ -87,7 +87,7 @@ function requestResetPassword(userData, callback) {
 					if(utils.config.enableBungieIntegration) {
 						console.log("Destiny validation enabled")
 						destinyService.sendBungieMessage(userData.bungieMemberShipId,
-								userData.consoles[0].consoleType,
+								utils.primaryConsole(userData).consoleType,
 								utils.constants.bungieMessageTypes.passwordReset,
 								function (error, messageResponse) {
 							if (messageResponse) {

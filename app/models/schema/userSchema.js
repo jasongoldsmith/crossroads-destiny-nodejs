@@ -11,7 +11,7 @@ var UserSchema = new Schema({
   date: { type: Date, required: true },
   passWord: { type: String, required: true },
   uniqueID : String,
-  consoles: [{consoleType:consoleTypeEnum,consoleId:{type:String},verifyStatus:acctVerifyEnum,verifyToken:{type:String}}],
+  consoles: [{consoleType:consoleTypeEnum,consoleId:{type:String},verifyStatus:acctVerifyEnum,verifyToken:{type:String},isPrimary:{type:Boolean,default:true}}],
   clanId: { type: String, default: "clan_id_not_set"},
   imageUrl: String,
   uDate: Date,

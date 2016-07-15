@@ -51,7 +51,7 @@ function sendMessage(data, messageCreator, callback) {
 				var notificationObject = {
 					name : "messageFromPlayer"
 				}
-				var message = messageCreator.consoles[0].consoleId + " from " + eventObj.eType.aSubType + ": "  + data.message
+				var message = utils.primaryConsole(messageCreator).consoleId + " from " + eventObj.eType.aSubType + ": "  + data.message
 				helpers.pushNotification.sendSinglePushNotification(eventObj, message, notificationObject, null, installation)
 				return callback(null, { messageSent: data.message })
 			}

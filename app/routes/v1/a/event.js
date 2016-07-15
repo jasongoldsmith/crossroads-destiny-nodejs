@@ -114,7 +114,7 @@ function remove(req, res) {
 
 function listEvents(user, consoleType, callback) {
 	if(utils._.isInvalidOrBlank(consoleType)) {
-		consoleType = user.consoles[0].consoleType
+		consoleType = utils.primaryConsole(user).consoleType
 	}
 	models.event.getByQuery({clanId: user.clanId, consoleType: consoleType}, null, callback)
 }

@@ -32,7 +32,8 @@ function handlUpdateHelmet(user, callback) {
   var newHelmetURL = null
   utils.async.waterfall([
     function(callback){
-      service.destinyInerface.getBungieHelmet(user.consoles[0].consoleId,user.consoles[0].consoleType,callback)
+      var primaryConsole = utils.primaryConsole(user)
+      service.destinyInerface.getBungieHelmet(primaryConsole.consoleId,primaryConsole.consoleType,callback)
     },function(helmetURL, callback){
       newHelmetURL = helmetURL
       models.user.updateUser({id:user._id,imageUrl:utils.config.bungieBaseURL +helmetURL},false,callback)
@@ -75,7 +76,7 @@ function listGroups(user, callback) {
 
           if (user) {
             service.eventService.listEventCountByGroups(utils._.map(groupList, 'groupId'),
-              userObj.consoles[0].consoleType, callback)
+              utils.primaryConsole(userObj).consoleType, callback)
           } else {
             return callback(err, null)
           }
@@ -90,7 +91,7 @@ function listGroups(user, callback) {
     function(groupEventStatsList,callback) {
       groupList = groupEventStatsList
       service.authService.listMemberCountByClan(utils._.map(groupList, 'groupId'),
-        userObj.consoles[0].consoleType, callback)
+      utils.primaryConsole(userObj).consoleType, callback)
     },
     function(memberCounts, callback) {
       mergeMemberStatsWithGroups(memberCounts, groupList, callback)
@@ -109,7 +110,7 @@ function listUserGroups(userGroup,user,callback){
         callback (null,userGroup)
       } else {
         utils.l.d("Groups does not exists. Fetching from bungie")
-        service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, user.consoles[0].consoleType, 1, function(err, groups){
+        service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId, utils.primaryConsole(user).consoleType, 1, function(err, groups){
           if(groups)
             models.userGroup.updateUserGroup(user._id,groups,callback)
           else callback(err,userGroup)
@@ -137,16 +138,17 @@ function handleResendBungieMessage(userData,callback){
       //TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
       // or send notification to both xbox and psn depending on the ID availability
       if(utils.config.enableBungieIntegration) {
+        var primaryConsole = utils.primaryConsole(userData)
         service.destinyInerface.sendBungieMessage(userData.bungieMemberShipId,
-          utils._.get(utils.constants.consoleGenericsId, userData.consoles[0].consoleType),
+          utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType),
           utils.constants.bungieMessageTypes.accountVerification, function (error, messageResponse) {
 
             utils.l.d('handleResendBungieMessage::messageResponse', messageResponse)
             utils.l.d('handleResendBungieMessage::signupUser::sendBungieMessage::error', error)
             if (messageResponse) {
               utils.l.d("messageResponse::token===" + messageResponse.token)
-              userData.consoles[0].verifyStatus = "INITIATED"
-              userData.consoles[0].verifyToken = messageResponse.token
+              primaryConsole.verifyStatus = "INITIATED"
+              primaryConsole.verifyToken = messageResponse.token
               var newUserObj = {
                 id: userData._id,
                 consoles: userData.consoles
@@ -194,7 +196,7 @@ function searchGroup(user, groupId, callback){
         userObj = user
         //TODO: set current page to 1 for now. Change it when we have paging for groups.
         service.destinyInerface.listBungieGroupsJoined(user.bungieMemberShipId,
-          userObj.consoles[0].consoleType,1, callback)
+          utils.primaryConsole(userObj).consoleType,1, callback)
       } else {
         return callback({error: "User does not exist/logged in."}, null)
       }
@@ -206,7 +208,7 @@ function searchGroup(user, groupId, callback){
 
         addMuteFlagToGroupObject(userObj, groupList)
         service.eventService.listEventCountByGroups(utils._.map(groups, 'groupId'),
-          userObj.consoles[0].consoleType, callback)
+          utils.primaryConsole(userObj).consoleType, callback)
       } else {
         return callback({error: "You do not belong to this group anymore"}, null)
       }

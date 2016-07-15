@@ -82,6 +82,12 @@ function updateS3Domain(data) {
   }
 }
 
+function primaryConsole(userObj){
+  var primaryConsole = utils._.find(userObj.consoles,{"isPrimary":true})
+  if(!primaryConsole)
+    primaryConsole = userObj.consoles[0]
+  return primaryConsole
+}
 
 module.exports = {
   format: require('./formatUtils'),
@@ -102,5 +108,6 @@ module.exports = {
   firstInArrayCallback: firstInArrayCallback,
   updateS3Domain: updateS3Domain,
   isJson:isJson,
+  primaryConsole:primaryConsole,
   moment:require('moment')
 };

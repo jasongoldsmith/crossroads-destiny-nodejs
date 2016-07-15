@@ -188,10 +188,11 @@ function verifyAccount(req,res){
   var token = req.param("token")
   models.user.getUserByData({"consoles.verifyToken":token},function(err, user){
     if(user){
+      var primaryConsole = utils.primaryConsole(user)
       res.render("account/index",{
         token: token,
-        consoleId: user.consoles[0].consoleId,
-        consoleType: utils._.get(utils.constants.consoleGenericsId, user.consoles[0].consoleType),
+        consoleId: primaryConsole.consoleId,
+        consoleType: utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType),
         appName:utils.config.appName,
         userName:user.userName
       })
@@ -292,8 +293,9 @@ function logout(req, res) {
 }
 
 function getSignupMessage(user){
-  if(user.consoles[0].verifyStatus == "INITIATED")
-    return "Thanks for signing up for "+utils.config.appName+", the Destiny Fireteam Finder mobile app! An account verification message has been sent to your bungie.net account. Click the link in the message to verify your "+utils._.get(utils.constants.consoleGenericsId, user.consoles[0].consoleType)+"."
+  var primaryConsole = utils.primaryConsole(user)
+  if(primaryConsole.verifyStatus == "INITIATED")
+    return "Thanks for signing up for "+utils.config.appName+", the Destiny Fireteam Finder mobile app! An account verification message has been sent to your bungie.net account. Click the link in the message to verify your "+utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType)+"."
   else return "Thanks for signing up for "+utils.config.appName+", the Destiny Fireteam Finder mobile app!"
 }
 
@@ -329,7 +331,7 @@ function resetPasswordLaunch(req,res){
     if(user){
       res.render("account/resetPassword",{
         token: token,
-        consoleId: user.consoles[0].consoleId,
+        consoleId: utils.primaryConsole(user).consoleId,
         userName: user.userName,
         appName:utils.config.appName
       })

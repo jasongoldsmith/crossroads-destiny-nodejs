@@ -6,7 +6,6 @@ var moment = require('moment')
 // Activity Schema
 var eventSchema = require('./schema/eventSchema')
 var userModel = require ('./userModel')
-//mongoose.set('debug',true)
 
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
@@ -328,7 +327,7 @@ function computeEventAttributesIfMissing(eventObj, user) {
 	}
 
 	if(utils._.isInvalidOrBlank(eventObj.consoleType)) {
-		eventObj.consoleType = user.consoles[0].consoleType
+		eventObj.consoleType = utils.primaryConsole(user).consoleType
 	}
 }
 

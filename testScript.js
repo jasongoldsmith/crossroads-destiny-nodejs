@@ -18,6 +18,7 @@ var dailyOneTimeReminder = "dailyOneTimeReminder"
 var eventUpcomingReminder = "eventUpcomingReminder"
 
 var destinyService = require('./app/service/destinyInterface')
+var userService = require('./app/service/userService')
 var authService = require('./app/service/authService')
 var notifService = require('./app/service/eventNotificationService')
 
@@ -133,6 +134,11 @@ switch(command) {
 
     var lastCharacter = utils._.last(sortedChars)
     utils.l.d('lastCharacter',{characterId:lastCharacter.characterId,membershipId:lastCharacter.membershipId,membershipType:lastCharacter.membershipType})
+    break;
+  case "consoleTest":
+    var userObj = require("/Users/dasasr/projects/traveler/tmp/user.json");
+    var console = utils.primaryConsole(userObj).consoleType
+    utils.l.d("primary console",console)
     break;
   default:
     return;
