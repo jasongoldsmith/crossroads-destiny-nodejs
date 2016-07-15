@@ -7,7 +7,7 @@ var helpers = require('../../../helpers')
 var service = require('../../../service')
 
 function create(req, res) {
-	utils.l.d("Event create request: " + JSON.stringify(req.body))
+	utils.l.i("Event create request: " + JSON.stringify(req.body))
 	createEvent(req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -27,7 +27,7 @@ function create(req, res) {
 }
 
 function join(req, res) {
-	utils.l.d("Event join request: " + JSON.stringify(req.body))
+	utils.l.i("Event join request: " + JSON.stringify(req.body))
 	joinEvent(req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -46,7 +46,7 @@ function join(req, res) {
 }
 
 function list(req, res) {
-	utils.l.d("Event list request")
+	utils.l.i("Event list request")
 	listEvents(req.user, req.param('consoleType'), function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"list"})
@@ -57,7 +57,7 @@ function list(req, res) {
 }
 
 function listAll(req, res) {
-	utils.l.d("Event listAll request")
+	utils.l.i("Event listAll request")
 	models.event.getByQuery({}, null, function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listAll"})
@@ -68,7 +68,7 @@ function listAll(req, res) {
 }
 
 function listById(req, res) {
-	utils.l.d("Get event by id request" + JSON.stringify(req.body))
+	utils.l.i("Get event by id request" + JSON.stringify(req.body))
 	listEventById(req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listById"})
@@ -82,7 +82,7 @@ function listById(req, res) {
 }
 
 function leave(req, res) {
-	utils.l.d("Event leave request: " + JSON.stringify(req.body))
+	utils.l.i("Event leave request: " + JSON.stringify(req.body))
 
 	service.eventService.leaveEvent(req.body, function(err, event) {
 		if (err) {
@@ -96,7 +96,7 @@ function leave(req, res) {
 }
 
 function remove(req, res) {
-	utils.l.d("Event delete request")
+	utils.l.i("Event delete request")
 	deleteEvent(req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)

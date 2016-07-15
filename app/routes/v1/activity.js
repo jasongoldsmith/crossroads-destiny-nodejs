@@ -77,15 +77,15 @@ function createActivity(data, callback) {
 }
 
 function listActivities(callback) {
-	models.activity.getByQuery({isActive: {$ne: false}}, callback)
+	models.activity.listActivities(callback)
 }
 
 function listAdActivities(callback) {
-	models.activity.getByQuery({isActive: {$ne: false}, isAdCard: true}, callback)
+	models.activity.listAdActivities(callback)
 }
 
 function listAllActivities(callback) {
-	models.activity.getByQuery({}, callback)
+	models.activity.listActivities(callback)
 }
 
 function listActivityById(data, callback) {
