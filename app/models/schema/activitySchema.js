@@ -11,7 +11,13 @@ var activitySchema = new Schema({
 	aIconUrl: String,
 	isActive: {type: Boolean, default: true},
 	isFeatured: {type: Boolean, default: false},
-	isAdCard: {type: Boolean, default: false},
+	adCard: {
+		isAdCard: {type: Boolean, default: false},
+		adCardBaseUrl: String,
+		adCardImagePath: String,
+		adCardHeader: String,
+		adCardSubHeader: String,
+	},
 	location: String,
 	minPlayers: {type : Number, required : true},
 	maxPlayers: {type : Number, required : true}

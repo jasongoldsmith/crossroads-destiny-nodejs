@@ -38,7 +38,7 @@ function listActivities(callback) {
 }
 
 function listAdActivities(callback) {
-	getByQuery({isActive: {$ne: false}, isAdCard: true}, callback)
+	getByQuery({isActive: {$ne: false}, "adCard.isAdCard": true}, callback)
 }
 
 function listAllActivities(callback) {
