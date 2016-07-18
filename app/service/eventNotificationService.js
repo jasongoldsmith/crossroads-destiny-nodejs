@@ -40,16 +40,16 @@ function getAggregateNotificationDetails(clanId, consoleType, eventCount, notifi
 
 function formatMessage(messageTemplate, event, playerLeft) {
 	if(messageTemplate.indexOf("#CREATOR#") >= 0 )
-		messageTemplate =  messageTemplate.replace("#CREATOR#", utils.primaryConsole(event.creator).consoleId)
+		messageTemplate =  messageTemplate.replace("#CREATOR#", utils.consoleByType(event.creator,event.console).consoleId)
 	if(messageTemplate.indexOf("#EVENT_NAME#") >= 0 )
 		messageTemplate =  messageTemplate.replace("#EVENT_NAME#", getEventName(event.eType))
 	if(messageTemplate.indexOf("#TIME#") >= 0 )
 		messageTemplate =  messageTemplate.replace("#TIME#", getTimeStringForDisplay(event.launchDate))
 
 	if(utils._.isValidNonBlank(playerLeft) && messageTemplate.indexOf("#PLAYER#") >= 0) {
-		messageTemplate = messageTemplate.replace("#PLAYER#", utils.primaryConsole(playerLeft).consoleId)
+		messageTemplate = messageTemplate.replace("#PLAYER#", utils.consoleByType(playerLeft,event.console).consoleId)
 	} else if(messageTemplate.indexOf("#PLAYER#") >= 0 ){
-		messageTemplate = messageTemplate.replace("#PLAYER#", utils.primaryConsole(event.players[event.players.length - 1]).consoleId)
+		messageTemplate = messageTemplate.replace("#PLAYER#", utils.consoleByType(event.players[event.players.length - 1],event.console).consoleId)
 	}
 
 	if(messageTemplate.indexOf("#PLAYERS_NEEDED#") >= 0 ) {
@@ -60,7 +60,6 @@ function formatMessage(messageTemplate, event, playerLeft) {
 			if(playersNeeded > 1) messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "more players" )
 			else messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "player")
 		}
-
 	}
 
 	if(messageTemplate.indexOf("#EVENT_PLAYERS#") >= 0 ) {
@@ -69,9 +68,9 @@ function formatMessage(messageTemplate, event, playerLeft) {
 		})
 
 		var playernames = (utils._.compact(utils._.map(players, function(player) {
-			var primaryPlayerConsole = utils.primaryConsole(player)
-			if(primaryPlayerConsole.consoleId != utils.primaryConsole(event.creator).consoleId) {
-				return primaryPlayerConsole.consoleId
+			var playerConsole = utils.consoleByType(player,event.console)
+			if(playerConsole.consoleId != utils.consoleByType(event.creator,event.console).consoleId) {
+				return playerConsole.consoleId
 			}
 		}))).join(", ")
 

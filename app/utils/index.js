@@ -89,6 +89,13 @@ function primaryConsole(userObj){
   return primaryConsole
 }
 
+function consoleByType(userObj,consoleType){
+  var consoleObj = utils._.find(userObj.consoles,{"consoleType":consoleType})
+  if(!consoleObj)
+    consoleObj = userObj.consoles[0]
+  return consoleObj
+}
+
 module.exports = {
   format: require('./formatUtils'),
   mongo: require('./mongoUtils'),
@@ -109,5 +116,6 @@ module.exports = {
   updateS3Domain: updateS3Domain,
   isJson:isJson,
   primaryConsole:primaryConsole,
+  consoleByType:consoleByType,
   moment:require('moment')
 };
