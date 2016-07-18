@@ -1,8 +1,8 @@
 var config = require('config');
 var newrelic;
-//if (config.enableNewRelic) {
-//  newrelic = require('newrelic');
-//}
+if (config.enableNewRelic) {
+  newrelic = require('newrelic');
+}
 
 console.log("mongo url***"+config.mongoUri);
 
@@ -11,9 +11,9 @@ var express = require('express'),
 
 var app = express();
 
-//if (newrelic) {
-//  app.locals.newrelic = newrelic;
-//}
+if (newrelic) {
+  app.locals.newrelic = newrelic;
+}
 
 app.locals.utils = require('./utils');
 app.locals.moment = app.locals.utils.m.moment;

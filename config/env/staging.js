@@ -11,4 +11,5 @@ module.exports = {
   enableBungieIntegration: false,
   logLevel: 'debug',
   devMode: true,
+  enableNewRelic:true
 }
