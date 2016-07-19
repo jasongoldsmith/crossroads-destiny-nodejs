@@ -311,8 +311,8 @@ function launchEvent(event, callback){
 	)
 }
 
-function listEventsByUser(userId,launchStatus,callback){
-	getByQuery({players:{$in:[userId]},launchStatus:launchStatus}, null, callback)
+function listEventsByUser(userId, callback) {
+	getByQuery({players: {$in: [userId]}}, null, callback)
 }
 
 function listEventCount(id,filter,callback){

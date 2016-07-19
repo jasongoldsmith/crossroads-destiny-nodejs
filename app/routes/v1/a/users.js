@@ -104,6 +104,63 @@ function getUserMetrics(req, res) {
   })
 }
 
+function addConsole(req, res) {
+  var newConsoleType = req.body.consoleType ? req.body.consoleType.toString().toUpperCase() : null
+
+  if(!newConsoleType) {
+    var err = {error: "new console type is needed"}
+    routeUtils.handleAPIError(req, res, err, err)
+  } else if((newConsoleType == 'PS3' && utils._.isValidNonBlank(utils.getUserConsoleObject(req.user, "PS4")))
+  || (newConsoleType == 'XBOX360' && utils._.isValidNonBlank(utils.getUserConsoleObject(req.user, "XBOXONE")))) {
+    var err = {error: "You cannot downgrade your console"}
+    routeUtils.handleAPIError(req, res, err, err)
+  } else if(newConsoleType == 'PS4' && utils._.isValidNonBlank(utils.getUserConsoleObject(req.user, "PS3"))) {
+    service.userService.upgradeConsole(req.user, "PS3", newConsoleType, function (err, user) {
+      if (err) {
+        routeUtils.handleAPIError(req, res, err, err)
+      } else {
+        routeUtils.handleAPISuccess(req, res, user)
+      }
+    })
+  } else if(newConsoleType == 'XBOXONE' && utils._.isValidNonBlank(utils.getUserConsoleObject(req.user, "XBOX360"))) {
+    service.userService.upgradeConsole(req.user, "XBOX360", newConsoleType, function (err, user) {
+      if (err) {
+        routeUtils.handleAPIError(req, res, err, err)
+      } else {
+        routeUtils.handleAPISuccess(req, res, user)
+      }
+    })
+  } else {
+    if(utils._.isInvalidOrBlank(req.body.consoleId)) {
+      var err = {error: "console id is needed for adding a new console"}
+      routeUtils.handleAPIError(req, res, err, err)
+    } else {
+      service.userService.addConsole(req.user, req.body, function (err, user) {
+        if (err) {
+          routeUtils.handleAPIError(req, res, err, err)
+        } else {
+          routeUtils.handleAPISuccess(req, res, user)
+        }
+      })
+    }
+  }
+}
+
+function changePrimaryConsole(req, res) {
+  if(!req.body.consoleType) {
+    var err = {error: "console type is needed"}
+    routeUtils.handleAPIError(req, res, err, err)
+  } else {
+    service.userService.changePrimaryConsole(req.user, req.body.consoleType.toString().toUpperCase(), function (err, user) {
+      if (err) {
+        routeUtils.handleAPIError(req, res, err, err)
+      } else {
+        routeUtils.handleAPISuccess(req, res, user)
+      }
+    })
+  }
+}
+
 function getUserById(data, callback) {
   models.user.getUserById(data, callback)
 }
@@ -148,5 +205,7 @@ routeUtils.rPost(router, '/listById', 'listById', listById)
 routeUtils.rPost(router, '/update', 'update', update)
 routeUtils.rPost(router, '/updateGroup', 'updateGroup', updateGroup)
 routeUtils.rPost(router, '/updatePassword', 'updatePassword', updatePassword)
+routeUtils.rPost(router, '/addConsole', 'addUserConsole', addConsole)
+routeUtils.rPost(router, '/changePrimaryConsole', 'changePrimaryConsole', changePrimaryConsole)
 routeUtils.rGet(router, '/getMetrics', 'getUserMetrics', getUserMetrics)
 module.exports = router

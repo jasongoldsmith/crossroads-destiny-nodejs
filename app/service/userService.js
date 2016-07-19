@@ -2,6 +2,7 @@ var models = require('../models')
 var utils = require('../utils')
 var eventService = require('./eventService')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
+var destinyInterface = require('./destinyInterface')
 
 function preUserTimeout(notifTrigger,sysConfig){
   utils.l.d("Starting preUserTimeout")
@@ -138,7 +139,72 @@ function hasNotifStatus(notifStatusList, notifStatus){
   else return false
 }
 
+function upgradeConsole(user, oldConsoleType, newConsoleType, callback) {
+  var consoleObject = utils.getUserConsoleObject(user, oldConsoleType)
+  utils.async.waterfall([
+    function (callback) {
+      if (utils._.isInvalidOrBlank(consoleObject)) {
+        var errMsg = "#CONSOLE_TYPE# not found for user"
+        return callback ({error: errMsg.replace("#CONSOLE_TYPE#", oldConsoleType)}, null)
+      } else {
+        eventService.clearEventsForPlayer(user._id, null, callback)
+      }
+    },
+    function (events, callback) {
+      consoleObject.consoleType = newConsoleType
+      updateUser(user, callback)
+    }
+  ], callback)
+}
+
+function addConsole(user, console, callback) {
+  utils.async.waterfall([
+    function (callback) {
+      destinyInterface.getBungieMemberShip(console.consoleId, console.consoleType, callback)
+    },
+    function (bungieMember, callback) {
+      if(bungieMember.bungieMemberShipId.toString() != user.bungieMemberShipId.toString()) {
+        var errMsgTemplate = "Oops!/n We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account." +
+          " Make sure your profile is public and try again."
+        var errMsg = errMsgTemplate
+          .replace("#CONSOLE_TYPE#", console.consoleType)
+          .replace("#CONSOLE_ID#", console.consoleId)
+        return callback({error: errMsg}, null)
+      } else {
+        console.verifyStatus = "VERIFIED"
+        console.clanTag = bungieMember.clanTag
+        console.destinyMembershipId = bungieMember.destinyProfile.memberShipId
+        user.consoles.push(console)
+        updateUser(user, callback)
+      }
+    }
+  ], callback)
+
+}
+
+function changePrimaryConsole(user, consoleType, callback) {
+  var consoleObject = utils.getUserConsoleObject(user, consoleType)
+  if(utils._.isInvalidOrBlank(consoleObject)) {
+    var errMsg = "#CONSOLE_TYPE# not found for user"
+    return callback ({error: errMsg.replace("#CONSOLE_TYPE#", consoleType)}, null)
+  }
+
+  var oldPrimaryConsoles = utils._.filter(user.consoles, 'isPrimary')
+  utils._.forEach(oldPrimaryConsoles, function (console) {
+    console.isPrimary = false
+  })
+  consoleObject.isPrimary = true
+  updateUser(user, callback)
+}
+
+function updateUser(user, callback) {
+  models.user.save(user, callback)
+}
+
 module.exports = {
   userTimeout: userTimeout,
-  preUserTimeout:preUserTimeout
+  preUserTimeout: preUserTimeout,
+  upgradeConsole: upgradeConsole,
+  addConsole: addConsole,
+  changePrimaryConsole: changePrimaryConsole
 }

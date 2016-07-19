@@ -82,25 +82,30 @@ function updateS3Domain(data) {
   }
 }
 
-function primaryConsoleIndex(userObj){
-  var primaryConsoleIndex = lodash.findIndex(userObj.consoles,{"isPrimary":true})
+
+function primaryConsoleIndex(userObj) {
+  var primaryConsoleIndex = lodash.findIndex(userObj.consoles, {"isPrimary": true})
   if(primaryConsoleIndex < 0)
     primaryConsoleIndex = 0
   return primaryConsoleIndex
 }
 
-function primaryConsole(userObj){
-  var primaryConsole = lodash.find(userObj.consoles,{"isPrimary":true})
+function primaryConsole(userObj) {
+  var primaryConsole = lodash.find(userObj.consoles, {"isPrimary": true})
   if(!primaryConsole)
     primaryConsole = userObj.consoles[0]
   return primaryConsole
 }
 
-function consoleByType(userObj,consoleType){
-  var consoleObj = lodash.find(userObj.consoles,{"consoleType":consoleType})
-  if(!consoleObj)
+function consoleByType(userObj, consoleType) {
+  var consoleObj = lodash.find(userObj.consoles, {"consoleType": consoleType})
+  if (!consoleObj)
     consoleObj = {}
   return consoleObj
+}
+
+function getUserConsoleObject(userObj, consoleType) {
+  return lodash.find(userObj.consoles, {"consoleType": consoleType})
 }
 
 module.exports = {
@@ -121,9 +126,10 @@ module.exports = {
   l: log,
   firstInArrayCallback: firstInArrayCallback,
   updateS3Domain: updateS3Domain,
-  isJson:isJson,
-  primaryConsole:primaryConsole,
-  consoleByType:consoleByType,
-  primaryConsoleIndex:primaryConsoleIndex,
+  isJson: isJson,
+  primaryConsole: primaryConsole,
+  consoleByType: consoleByType,
+  primaryConsoleIndex: primaryConsoleIndex,
+  getUserConsoleObject: getUserConsoleObject,
   moment:require('moment')
 };

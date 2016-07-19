@@ -1,26 +1,39 @@
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 var Mixed = Schema.Types.Mixed
-var consoleTypeEnum = {type:String, enum: ['PS4','XBOX360','XBOXONE','PS3']}
-var acctVerifyEnum = {type:String, enum: ['VERIFIED','INITIATED','FAILED_INITIATION','NOT_INITIATED'], default: "NOT_INITIATED"}
+var consoleTypeEnum = {type: String, enum: ['PS4','XBOX360','XBOXONE','PS3']}
+var acctVerifyEnum = {
+  type: String,
+  enum: ['VERIFIED','INITIATED','FAILED_INITIATION','NOT_INITIATED'],
+  default: "NOT_INITIATED"
+}
 
 var UserSchema = new Schema({
   name: String,
   profileUrl : String,
-  userName: { type: String, required: true },
-  date: { type: Date, required: true },
-  passWord: { type: String, required: true },
+  userName: {type: String, required: true},
+  date: {type: Date, required: true},
+  passWord: {type: String, required: true},
   uniqueID : String,
-  consoles: [{consoleType:consoleTypeEnum,consoleId:{type:String},verifyStatus:acctVerifyEnum,verifyToken:{type:String},isPrimary:{type:Boolean,default:false},clanTag:{type:String},imageUrl:{type:String},destinyMembershipId:{type:String}}],
-  clanId: { type: String, default: "clan_id_not_set"},
+  consoles: [{
+    consoleType: consoleTypeEnum,
+    consoleId: {type: String},
+    verifyStatus: acctVerifyEnum,
+    verifyToken: {type: String},
+    clanTag: String,
+    destinyMembershipId: String,
+    imageUrl: String,
+    isPrimary: {type: Boolean, default: false}
+  }],
+  clanId: {type: String, default: "clan_id_not_set"},
   imageUrl: String,
   uDate: Date,
   signupDate: Date,
   flags: Mixed,
   bungieMemberShipId:{type: String},
   passwordResetToken:{type: String},
-  groups:[{type:Mixed}],
-  lastActiveTime:Date,
+  groups:[{type: Mixed}],
+  lastActiveTime: Date,
   isLoggedIn: {type: Boolean, default: true},
   notifStatus:[{type: String}]
 })
