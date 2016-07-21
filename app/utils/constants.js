@@ -523,8 +523,8 @@ var bungieMessageTypes = {
 }
 
 var bungieMessages = {
-  accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder! Click the link below to verify your %CONSOLETYPE%. %URL%',
-  passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL% . If you did not make this request, please let us know and disregard this message..'
+  accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder! Click the link to verify your %CONSOLETYPE%. %URL%',
+  passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL%. If you did not make this request, please let us know and disregard this message.'
 }
 var bungieErrorMessage= function(messageId) {
   console.log('bungieErrorMessage::messageId',messageId)

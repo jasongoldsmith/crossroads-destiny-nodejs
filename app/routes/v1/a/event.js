@@ -172,12 +172,12 @@ function clearEventsForPlayer(req,res){
 	})
 }
 
-routeUtils.rPost(router, '/create', 'create', create)
-routeUtils.rPost(router, '/join', 'join', join)
-routeUtils.rGet(router, '/list', 'list', list, {utm_dnt:"androidAppVersion"})
-routeUtils.rGet(router, '/listAll', 'listAll', listAll, {utm_dnt:"androidAppVersion"})
-routeUtils.rPost(router, '/listById', 'listById', listById)
-routeUtils.rPost(router, '/leave', 'leave', leave)
-routeUtils.rPost(router, '/delete', 'remove', remove)
+routeUtils.rPost(router, '/create', 'createEvent', create)
+routeUtils.rPost(router, '/join', 'joinEvent', join)
+routeUtils.rGet(router, '/list', 'listEvents', list, {utm_dnt:"androidAppVersion"})
+routeUtils.rGet(router, '/listAll', 'listAllEvents', listAll, {utm_dnt:"androidAppVersion"})
+routeUtils.rPost(router, '/listById', 'listEventById', listById)
+routeUtils.rPost(router, '/leave', 'leaveEvent', leave)
+routeUtils.rPost(router, '/delete', 'removeEvent', remove)
 routeUtils.rPost(router, '/clear', 'clearEventsForPlayer', clearEventsForPlayer)
 module.exports = router

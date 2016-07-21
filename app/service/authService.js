@@ -12,9 +12,14 @@ function signupUser(userData, callback) {
 					userExists(existingUsers,userData,callback)
 				},function(user,callback) {
 					if(utils.config.enableBungieIntegration) {
-						destinyService.getBungieHelmet(userData.consoles[0].consoleId,userData.consoles[0].consoleType,function(err,helmetURL){
+						destinyService.getBungieHelmet(userData.consoles[0].consoleId,userData.consoles[0].consoleType,function(err,helmet){
 							if(!err) {
-								userData.imageUrl = utils.config.bungieBaseURL +"/"+helmetURL
+								userData.imageUrl = utils.config.bungieBaseURL +"/"+helmet.helmetURL
+								//TODO: add imageUrl and clanTag in the consoles object of userSchema.
+								userData.consoles[0].imageUrl = utils.config.bungieBaseURL +"/"+helmet.helmetURL
+								userData.consoles[0].destinyMembershipId = helmet.destinyProfile.memberShipId
+								userData.consoles[0].clanTag = helmet.clanTag
+								userData.consoles[0].isPrimary = true
 								callback(null,userData)
 							}else callback(null,userData)
 						})

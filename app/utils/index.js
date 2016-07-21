@@ -82,17 +82,24 @@ function updateS3Domain(data) {
   }
 }
 
+function primaryConsoleIndex(userObj){
+  var primaryConsoleIndex = lodash.findIndex(userObj.consoles,{"isPrimary":true})
+  if(primaryConsoleIndex < 0)
+    primaryConsoleIndex = 0
+  return primaryConsoleIndex
+}
+
 function primaryConsole(userObj){
-  var primaryConsole = utils._.find(userObj.consoles,{"isPrimary":true})
+  var primaryConsole = lodash.find(userObj.consoles,{"isPrimary":true})
   if(!primaryConsole)
     primaryConsole = userObj.consoles[0]
   return primaryConsole
 }
 
 function consoleByType(userObj,consoleType){
-  var consoleObj = utils._.find(userObj.consoles,{"consoleType":consoleType})
+  var consoleObj = lodash.find(userObj.consoles,{"consoleType":consoleType})
   if(!consoleObj)
-    consoleObj = userObj.consoles[0]
+    consoleObj = {}
   return consoleObj
 }
 
@@ -117,5 +124,6 @@ module.exports = {
   isJson:isJson,
   primaryConsole:primaryConsole,
   consoleByType:consoleByType,
+  primaryConsoleIndex:primaryConsoleIndex,
   moment:require('moment')
 };

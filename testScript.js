@@ -139,6 +139,7 @@ switch(command) {
     var userObj = require("/Users/dasasr/projects/traveler/tmp/user.json");
     var console = utils.primaryConsole(userObj).consoleType
     utils.l.d("primary console",console)
+    utils.l.d("index of primary console",utils.primaryConsoleIndex(userObj))
     break;
   default:
     return;

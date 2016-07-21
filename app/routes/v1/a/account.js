@@ -34,9 +34,13 @@ function handlUpdateHelmet(user, callback) {
     function(callback){
       var primaryConsole = utils.primaryConsole(user)
       service.destinyInerface.getBungieHelmet(primaryConsole.consoleId,primaryConsole.consoleType,callback)
-    },function(helmetURL, callback){
-      newHelmetURL = helmetURL
-      models.user.updateUser({id:user._id,imageUrl:utils.config.bungieBaseURL +helmetURL},false,callback)
+    },function(helmet, callback){
+      var primaryConsoleIndex = utils.primaryConsoleIndex(user)
+      newHelmetURL = helmet.helmetURL
+      user.consoles[primaryConsoleIndex].clanTag = helmet.clanTag
+      user.consoles[primaryConsoleIndex].imageUrl = newHelmetURL
+      user.consoles[primaryConsoleIndex].destinyMembershipId = helmet.destinyProfile.memberShipId
+      models.user.updateUser({id:user._id,imageUrl:utils.config.bungieBaseURL+newHelmetURL,consoles:user.consoles},false,callback)
     }
   ],function(err, user){
     if(!err && newHelmetURL)

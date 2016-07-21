@@ -388,7 +388,9 @@ function checkBungieAccount(req,res){
       var bungieResponse = {
         consoleId:req.body.consoleId,
         consoleType:req.body.consoleType,
-        bungieMemberShipId:bungieMember.bungieMemberShipId
+        bungieMemberShipId:bungieMember.bungieMemberShipId,
+        clanTag:bungieMember.clanTag,
+        destinyMembershipId:bungieMember.destinyProfile.memberShipId
       }
       routeUtils.handleAPISuccess(req, res, bungieResponse)
     }

@@ -218,7 +218,7 @@ function getUserCount(id,consoleType,callback){
   utils.async.waterfall([
       function(callback){
         User
-          .count({"groups.groupId":id,"consoles.consoleType":consoleType})
+          .count({"groups.groupId":id,"consoles.consoleType":consoleType,"consoles.verifyStatus":"VERIFIED"})
           .exec(function(err,count){
             if(!err) return callback(null,{_id:id,count:count})
           })
