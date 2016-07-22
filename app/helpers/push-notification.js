@@ -25,7 +25,7 @@ PushNotification.init({
 })
 
 function sendSinglePushNotification(data, alert, notificationResponse, clanId, installation) {
-  utils.l.i("sending notification installation::"+installation+"\nalert::"+alert)
+  utils.l.d("sending notification installation::"+installation+"\nalert::"+alert)
   var payload = getPayload(data, notificationResponse, clanId)
 
   if(utils._.isInvalidOrBlank(installation) || utils._.isInvalidOrBlank(installation.deviceToken)
