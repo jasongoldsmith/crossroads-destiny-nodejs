@@ -11,5 +11,6 @@ module.exports = {
   },
   awsProfileImageUrl: "http://feighty-images.s3.amazonaws.com/",
   enableBungieIntegration: true,
-  logLevel: 'info'
+  logLevel: 'info',
+  enableNewRelic:true
 };
