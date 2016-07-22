@@ -156,3 +156,8 @@ createUserInstalls();
     "__v" : 0
 }
 //-----------END------------
+
+//-----------BEGIN----------
+//-----------SET isPrimary for all----------
+db.getCollection('users').update({},{ "$set": {"consoles.0.isPrimary":true}},{"upsert":true,'multi':true})
+//-----------END------------
