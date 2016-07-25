@@ -161,3 +161,40 @@ createUserInstalls();
 //-----------SET isPrimary for all----------
 db.getCollection('users').update({},{ "$set": {"consoles.0.isPrimary":true}},{"upsert":true,'multi':true})
 //-----------END------------
+
+//-----------BEGIN----------
+//-----------Get group count for users after certain date----------
+function createUserGroupFlatmap(){
+    var usersList = db.getCollection('users').find({"date":{"$gt":ISODate("2016-04-22T00:00:00.000Z")}})
+
+    var tGroupsByUser = db.getCollection('groupsByUser')
+    usersList.forEach(
+        function (user) {
+        	var groups = user.groups
+        	groups.forEach(
+        		function(group){
+		        	var userGroup = {}
+		        	userGroup.userId = user._id
+		        	userGroup.userName= user.userName
+		        	userGroup.groupId = group.groupId
+		        	userGroup.clanId=user.clanId
+		        	userGroup.consoles=user.consoles
+		        	tGroupsByUser.insert(userGroup)
+        		}
+        	)
+        }
+    )
+
+   var groupCounts = db.getCollection('groupsByUser').aggregate([{
+    "$group": {"_id":  "$groupId",
+    "count": {"$sum": 1}}}])
+
+    groupCounts.forEach(
+        function(groupByUser){
+            print(groupByUser)
+        }
+    )
+}
+
+createUserGroupFlatmap()
+//-----------END------------

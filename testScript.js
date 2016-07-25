@@ -137,10 +137,23 @@ switch(command) {
     break;
   case "consoleTest":
     var userObj = require("/Users/dasasr/projects/traveler/tmp/user.json");
-    var console = utils.primaryConsole(userObj).consoleType
-    utils.l.d("primary console",console)
+    var consoleObj = utils.primaryConsole(userObj).consoleType
+    utils.l.d("primary console",consoleObj)
     utils.l.d("index of primary console",utils.primaryConsoleIndex(userObj))
     break;
+  case "reduceTest":
+    var userGroups = require("/Users/dasasr/projects/traveler/usergroups_7222016.json");
+    var userGroupFlat = utils._.flatMap(userGroups.users,function(userGroup){
+      var userId = userGroup._id
+      var results = []
+      utils._.map(userGroup.groups,function(group){
+        result = userId+","
+        result = result + group.groupId
+        results.push(result)
+      })
+      return results
+    })
+    console.log(userGroupFlat)
   default:
     return;
 }
