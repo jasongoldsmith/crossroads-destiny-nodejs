@@ -77,7 +77,7 @@ function handleNoEventFound(event, callback) {
 	}
 }
 
-function createEvent(data, callback) {
+function createEvent(user, data, callback) {
 	var checkWithDate = data.launchDate
 	if(data.launchDate) {
 		data.launchDate = roundDateToNearestQuaterHour(data.launchDate)
@@ -98,10 +98,7 @@ function createEvent(data, callback) {
 
 	var eventObj = new Event(data)
 	utils.async.waterfall([
-		function(callback) {
-			userModel.getById(data.creator, callback)
-		},
-		function (user, callback) {
+		function (callback) {
 			utils.l.d("Found user: " + utils.l.userLog(user))
 			computeEventAttributesIfMissing(eventObj, user)
 
@@ -126,10 +123,12 @@ function createEvent(data, callback) {
 		function (event, callback) {
 			if (!event) {
 				utils.l.d ("no event found, creating a new event")
+				eventObj.creator = user._id.toString()
+				eventObj.players = user._id.toString()
 				eventObj.save(callback)
 			} else {
 				var playerAlreadyExists = utils._.some(event.players, function (player) {
-					return player._id.toString() == data.creator.toString()
+					return player._id.toString() == user._id.toString()
 				})
 
 				if (playerAlreadyExists) {
@@ -141,7 +140,7 @@ function createEvent(data, callback) {
 						eventObj.save(callback)
 					} else {
 						utils.l.d("found an already existing event, adding the new player to the event")
-						event.players.push(data.creator)
+						event.players.push(user._id.toString())
 						update(event, callback)
 					}
 				}
@@ -158,7 +157,7 @@ function createEvent(data, callback) {
 	)
 }
 
-function joinEvent(data, callback) {
+function joinEvent(user, data, callback) {
 	utils.async.waterfall([
 		function (callback) {
 			Event.findOne({_id: data.eId}, callback)
@@ -167,14 +166,14 @@ function joinEvent(data, callback) {
 			handleNoEventFound(event, callback)
 		},
 		function(event, callback) {
-			if (checkIfPlayerAlreadyExists(event, data.player)) {
+			if (checkIfPlayerAlreadyExists(event, user._id)) {
 				utils.l.d("player already exists, sending the event as it is")
 				return callback(null, event)
 			} else {
 				if (event.status == "full") {
 					return callback({ error: "Sorry, that event is full. Please refresh."}, null)
 				} else {
-					event.players.push(data.player)
+					event.players.push(user._id)
 					update(event, callback)
 				}
 			}
@@ -190,7 +189,7 @@ function joinEvent(data, callback) {
 	)
 }
 
-function leaveEvent(data, callback) {
+function leaveEvent(user, data, callback) {
 	utils.async.waterfall([
 		function(callback) {
 			Event.findOne({_id: data.eId}).populate("eType").exec(callback)
@@ -199,7 +198,7 @@ function leaveEvent(data, callback) {
 			handleNoEventFound(event, callback)
 		},
 		function(event, callback) {
-			if(!checkIfPlayerAlreadyExists(event, data.player)) {
+			if(!checkIfPlayerAlreadyExists(event, user._id.toString())) {
 				utils.l.d("player is not part of the event")
 				return callback({ error: "Something went wrong! You are trying to leave an event that you are not attending." }, null)
 			} else {
@@ -217,7 +216,7 @@ function leaveEvent(data, callback) {
 				})
 			} else {
 				var player = utils._.remove(event.players, function(player) {
-					if (player.toString() == data.player.toString()) {
+					if (player.toString() == user._id.toString()) {
 						utils.l.d("player found")
 						return player
 					}
@@ -225,7 +224,7 @@ function leaveEvent(data, callback) {
 				utils.l.d("removing player")
 				event.players.remove(player)
 
-				if(event.creator.toString() == data.player.toString()) {
+				if(event.creator.toString() == user._id.toString()) {
 					utils.l.d("player is also the creator; changing the creator to the first user in the list")
 					event.creator = event.players[0]
 				}

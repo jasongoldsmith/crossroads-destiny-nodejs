@@ -19,13 +19,13 @@ function sendPushNotificationForNewCreate(event) {
 	})
 }
 
-function sendPushNotificationForJoin(event) {
+function sendPushNotificationForJoin(event, playerList) {
 	utils.async.waterfall([
 		function (callback) {
 			models.notificationTrigger.getByQuery({triggerName: "Join"}, utils.firstInArrayCallback(callback))
 		},
 		function (notificationTrigger, callback) {
-			notificationTriggerService.handleJoinEvent(event, notificationTrigger, callback)
+			notificationTriggerService.handleJoinEvent(event, notificationTrigger, playerList, callback)
 		}
 	], function (err, updatedEvent) {
 		if (err) {

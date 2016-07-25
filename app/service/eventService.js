@@ -29,20 +29,20 @@ function clearEventsForPlayer(playerId, launchStatus, callback){
   ], callback)
 }
 
-function leaveEvent(data, callback) {
-  handleLeaveEvent(data,false,callback)
+function leaveEvent(user, data, callback) {
+  handleLeaveEvent(user, data, false, callback)
 }
 
-function handleLeaveEvent(data,userTimeout,callback) {
+function handleLeaveEvent(user, data, userTimeout, callback) {
   utils.l.d('handleLeaveEvent::',data)
   var userObj = null
   utils.async.waterfall(
     [
       function(callback) {
-        models.event.leaveEvent(data, callback)
+        models.event.leaveEvent(user, data, callback)
       },
       function(event, callback) {
-        models.user.getById(data.player, function(err, user) {
+        models.user.getById(user._id.toString(), function(err, user) {
 
           if(utils._.isValidNonBlank(user)) {
             userObj = user
@@ -59,7 +59,7 @@ function handleLeaveEvent(data,userTimeout,callback) {
         } else {
           // We do not want to track events if they are created by test users
           if (event.creator.clanId != "forcecatalyst") {
-            helpers.m.incrementEventsLeft(data.player)
+            helpers.m.incrementEventsLeft(user._id.toString())
           }
           helpers.firebase.updateEventV2(event, userObj,userTimeout)
         }

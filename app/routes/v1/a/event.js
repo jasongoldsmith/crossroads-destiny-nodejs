@@ -8,7 +8,7 @@ var service = require('../../../service')
 
 function create(req, res) {
 	utils.l.i("Event create request: " + JSON.stringify(req.body))
-	createEvent(req.body, function(err, event) {
+	createEvent(req.user, req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
@@ -28,14 +28,14 @@ function create(req, res) {
 
 function join(req, res) {
 	utils.l.i("Event join request: " + JSON.stringify(req.body))
-	joinEvent(req.body, function(err, event) {
+	joinEvent(req.user, req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
 			// We do not want to track events if they are created by test users
 			if (event.creator.clanId != "forcecatalyst") {
 				var player = utils._.find(event.players, function(player) {
-					return player._id == req.body.player
+					return player._id.toString() == req.user._id.toString()
 				})
 				helpers.m.incrementEventsJoined(player)
 			}
@@ -84,7 +84,7 @@ function listById(req, res) {
 function leave(req, res) {
 	utils.l.i("Event leave request: " + JSON.stringify(req.body))
 
-	service.eventService.leaveEvent(req.body, function(err, event) {
+	service.eventService.leaveEvent(req.user, req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
@@ -123,40 +123,45 @@ function listEventById(data, callback) {
 	models.event.getById(data.id, callback)
 }
 
-function createEvent(data, callback) {
+function createEvent(user, data, callback) {
 	utils.async.waterfall(
 		[
 			function(callback) {
-				models.event.createEvent(data, callback)
+				models.event.createEvent(user, data, callback)
 			},
 			function(event, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event)
+				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event, getNotificationPlayerListForJoin(user, event))
 				service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(event)
 				callback(null, event)
 			}
 		], callback)
 }
 
-function joinEvent(data, callback) {
+function joinEvent(user, data, callback) {
 	utils.async.waterfall(
 		[
 			function(callback) {
-				models.event.joinEvent(data, callback)
+				models.event.joinEvent(user, data, callback)
 			},
 			function(event, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event)
+
+				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event, getNotificationPlayerListForJoin(user, event))
 				callback(null, event)
 			}
 		], callback)
 }
 
-
+function getNotificationPlayerListForJoin(user, event) {
+	return utils._.filter(event.players, function(player) {
+		return player._id.toString() != user._id.toString()
+	})
+}
 
 function deleteEvent(data, callback) {
 	models.event.deleteEvent(data, callback)

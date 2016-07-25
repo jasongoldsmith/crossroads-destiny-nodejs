@@ -244,12 +244,12 @@ function handleNewEvents(event, notifTrigger, callback) {
   }
 }
 
-function handleJoinEvent(event, notifTrigger, callback) {
+function handleJoinEvent(event, notifTrigger, playerList, callback) {
   utils.l.d("Running trigger for event join", utils.l.eventLog(event))
   if(notifTrigger.isActive) {
     if(event.launchStatus == utils.constants.eventLaunchStatusList.now &&
       event.players.length > 1 && event.players.length < event.maxPlayers) {
-      utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend,event,null))
+      utils.async.map(notifTrigger.notifications,utils._.partial(createNotificationAndSend, event, playerList))
       utils.l.d('event in join notification::',event)
       event.notifStatus.push("Join")
       models.event.update(event,callback)
