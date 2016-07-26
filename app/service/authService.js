@@ -5,7 +5,7 @@ var utils = require('../utils')
 function signupUser(signupData, callback) {
 	utils.async.waterfall([
 		function(callback){
-			models.user.getByQuery({userName: signupData.userName}, utils._.firstInArrayCallback(callback))
+			models.user.getByQuery({userName: signupData.userName}, utils.firstInArrayCallback(callback))
 		},
 		function(user, callback) {
 			if(utils._.isValidNonBlank(user)) {
