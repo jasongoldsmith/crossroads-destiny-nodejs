@@ -44,8 +44,9 @@ function updatePassWord() {
 function deleteOldFullEvents() {
   utils.async.waterfall([
     function (callback) {
-      var date = new Date()
-      models.event.getByQuery({ "status":"full", launchDate:{ $lt: date }}, null, callback)
+      // We need to clear full events 30 minutes after being full https://trello.com/c/vtXM5Dk9
+      var date = moment().subtract(30, 'minutes')
+      models.event.getByQuery({ status: "full", updated: {$lt: date}}, null, callback)
     },
     function (events, callback) {
       utils._.forEach(events, function(event) {
