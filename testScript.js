@@ -142,7 +142,7 @@ switch(command) {
     utils.l.d("index of primary console",utils.primaryConsoleIndex(userObj))
     break;
   case "reduceTest":
-    var userGroups = require("/Users/dasasr/projects/traveler/usergroups_7222016.json");
+    var userGroups = require("/Users/dasasr/projects/traveler/tmp/usergroups.json");
     var userGroupFlat = utils._.flatMap(userGroups.users,function(userGroup){
       var userId = userGroup._id
       var results = []
