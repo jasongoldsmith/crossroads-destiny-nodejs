@@ -383,23 +383,41 @@ function home(req,res){
   res.end()
 }
 
-function checkBungieAccount(req,res){
-  utils.l.d("consoleId::"+req.body.consoleId+",consoleType::"+req.body.consoleType)
-  utils.l.d("checkBungieAccount",req.body)
-  service.destinyInerface.getBungieMemberShip(req.body.consoleId,req.body.consoleType,function(err,bungieMember){
-    if (err) {
-      routeUtils.handleAPIError(req, res, err, err)
-    } else {
-      var bungieResponse = {
-        consoleId:req.body.consoleId,
-        consoleType:req.body.consoleType,
-        bungieMemberShipId:bungieMember.bungieMemberShipId,
-        clanTag:bungieMember.clanTag,
-        destinyMembershipId:bungieMember.destinyProfile.memberShipId
+function checkBungieAccount(req, res) {
+  utils.l.d("consoleId:: " + req.body.consoleId + ", consoleType:: " + req.body.consoleType)
+  utils.l.d("checkBungieAccount", req.body)
+  utils.async.waterfall([
+    function(callback) {
+      models.user.getByQuery({
+        consoles: {
+          $elemMatch: {
+            consoleType: req.body.consoleType,
+            consoleId: req.body.consoleId
+          }
+        }
+      }, utils.firstInArrayCallback(callback))
+    },
+    function (user, callback) {
+      if(utils._.isValidNonBlank(user)) {
+        var errMsgTemplate = "The #CONSOLE_GENERICS# #CONSOLE_ID# is already taken"
+        var error = {
+          error: errMsgTemplate
+            .replace("#CONSOLE_GENERICS#", utils._.get(utils.constants.consoleGenericsId, req.body.consoleType))
+            .replace("#CONSOLE_ID#", req.body.consoleId)
+        }
+        return callback(error, null)
       }
-      routeUtils.handleAPISuccess(req, res, bungieResponse)
+      service.userService.checkBungieAccount(req.body, callback)
     }
-  })
+  ],
+    function(err, bungieMember) {
+      if (err) {
+        routeUtils.handleAPIError(req, res, err, err)
+      } else {
+        routeUtils.handleAPISuccess(req, res, bungieMember)
+      }
+    }
+  )
 }
 
 /** Routes */

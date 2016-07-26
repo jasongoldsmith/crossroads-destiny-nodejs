@@ -2,121 +2,102 @@ var models = require('../models')
 var destinyService = require('./destinyInterface')
 var utils = require('../utils')
 
-function signupUser(userData, callback) {
-	utils.async.waterfall(
-			[
-				function(callback){
-					models.user.getByQuery({"$or":[{"userName":userData.userName},{"consoles.consoleType":userData.consoles[0].consoleType,"consoles.consoleId":userData.consoles[0].consoleId}]},callback)
-				},
-				function(existingUsers, callback){
-					userExists(existingUsers,userData,callback)
-				},function(user,callback) {
-					if(utils.config.enableBungieIntegration) {
-						destinyService.getBungieHelmet(userData.consoles[0].consoleId,userData.consoles[0].consoleType,function(err,helmet){
-							if(!err) {
-								userData.imageUrl = utils.config.bungieBaseURL +"/"+helmet.helmetURL
-								//TODO: add imageUrl and clanTag in the consoles object of userSchema.
-								userData.consoles[0].imageUrl = utils.config.bungieBaseURL +"/"+helmet.helmetURL
-								userData.consoles[0].destinyMembershipId = helmet.destinyProfile.memberShipId
-								userData.consoles[0].clanTag = helmet.clanTag
-								userData.consoles[0].isPrimary = true
-								callback(null,userData)
-							}else callback(null,userData)
-						})
-					}else {
-						callback(null, userData)
-					}
-				},function(user, callback) {
-					//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
-					// or send notification to both xbox and psn depending on the ID availability
-					if(utils.config.enableBungieIntegration) {
-						utils.l.d("Destiny validation enabled",userData)
-						destinyService.sendBungieMessage(userData.bungieMemberShipId,
-								utils._.get(utils.constants.consoleGenericsId, userData.consoles[0].consoleType),
-								utils.constants.bungieMessageTypes.accountVerification,
-								function (error, messageResponse) {
-										utils.l.d('messageResponse',messageResponse)
-										utils.l.d('signupUser::sendBungieMessage::error',error)
-									if (messageResponse) {
-										utils.l.d("messageResponse::token===" + messageResponse.token)
-										userData.consoles[0].verifyStatus = "INITIATED"
-										userData.consoles[0].verifyToken = messageResponse.token
-										callback(null, userData)
-									} else {
-										return callback(error, null)
-									}
-							})
-					}else {
-						console.log("Destiny validation disabled")
-						callback(null, userData)
-					}
-				},function (newUser, callback) {
-					utils.l.d("creating user")
-					models.user.createUserFromData(newUser, callback)  // don't send message
+function signupUser(signupData, callback) {
+	utils.async.waterfall([
+		function(callback){
+			models.user.getByQuery({userName: signupData.userName}, utils._.firstInArrayCallback(callback))
+		},
+		function(user, callback) {
+			if(utils._.isValidNonBlank(user)) {
+				return callback({error: "That User name is already taken"}, null)
+			} else if(utils.config.enableBungieIntegration) {
+				destinyService.getBungieHelmet(
+					signupData.consoles[0].consoleId,
+					signupData.consoles[0].consoleType,
+					function(err, helmet) {
+						if(err) {
+							return callback(err, null)
+						} else {
+							signupData.imageUrl = utils.config.bungieBaseURL + "/" +helmet.helmetURL
+							//TODO: add imageUrl and clanTag in the consoles object of userSchema.
+							signupData.consoles[0].imageUrl = utils.config.bungieBaseURL + "/" +helmet.helmetURL
+							signupData.consoles[0].destinyMembershipId = helmet.destinyProfile.memberShipId
+							signupData.consoles[0].clanTag = helmet.clanTag
+							signupData.consoles[0].isPrimary = true
+							return callback(null, signupData)
+						}
+					})
+				} else {
+					return callback(null, signupData)
 				}
-			],
-			callback
-	)
-}
-
-function userExists(existingUsers,userData,callback){
-	var consoleExists = false;
-	var userNameExists = false;
-	var error = null
-	utils._.map(existingUsers,function(user){
-		user=JSON.parse(JSON.stringify(user))
-		var existingConsole = utils._.find(user.consoles,userData.consoles[0])
-		if(existingConsole && !consoleExists){
-			consoleExists = true
+			},
+		function(user, callback) {
+			//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
+			// or send notification to both xbox and psn depending on the ID availability
+			if(utils.config.enableBungieIntegration) {
+				utils.l.d("Destiny validation enabled", signupData)
+				destinyService.sendBungieMessage(
+					signupData.bungieMemberShipId,
+					utils._.get(utils.constants.consoleGenericsId, signupData.consoles[0].consoleType),
+					utils.constants.bungieMessageTypes.accountVerification,
+					function (error, messageResponse) {
+						utils.l.d('messageResponse', messageResponse)
+						utils.l.d('signupUser::sendBungieMessage::error', error)
+						if (messageResponse) {
+							utils.l.d("messageResponse::token===" + messageResponse.token)
+							signupData.consoles[0].verifyStatus = "INITIATED"
+							signupData.consoles[0].verifyToken = messageResponse.token
+							return callback(null, signupData)
+						} else {
+							return callback(error, null)
+						}
+					})
+			} else {
+				utils.l.i("Destiny validation disabled")
+				return callback(null, signupData)
+			}
+		},
+		function (newUser, callback) {
+			utils.l.d("creating user", utils.l.userLog(newUser))
+			models.user.createUserFromData(newUser, callback)  // don't send message
 		}
-		if(user.userName == userData.userName && !userNameExists){
-			userNameExists = true
-		}
-	})
-	if(consoleExists && userNameExists){
-		error = {error:"The User name and "+utils._.get(utils.constants.consoleGenericsId,userData.consoles[0].consoleType)+" "+userData.consoles[0].consoleId+" is already taken"}
-	}else{
-		if(userNameExists) error = {error:"That User name is already taken"}
-		if(consoleExists ) error = {error:"That "+utils._.get(utils.constants.consoleGenericsId,userData.consoles[0].consoleType)+" "+userData.consoles[0].consoleId+" is already taken"}
-	}
-
-	return callback(error,null)
+	], callback)
 }
 
 function requestResetPassword(userData, callback) {
-	utils.async.waterfall(
-			[
-				function(callback) {
-					//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
-					// or send notification to both xbox and psn depending on the ID availability
-					if(utils.config.enableBungieIntegration) {
-						console.log("Destiny validation enabled")
-						destinyService.sendBungieMessage(userData.bungieMemberShipId,
-								utils.primaryConsole(userData).consoleType,
-								utils.constants.bungieMessageTypes.passwordReset,
-								function (error, messageResponse) {
-							if (messageResponse) {
-								utils.l.d("messageResponse::token===" + messageResponse.token)
-								userData.passwordResetToken = messageResponse.token
-							}
-							models.user.save(userData, callback)
-						})
-					}else {
-						console.log("Destiny validation disabled")
-						callback(null, userData)
-					}
-				}
-			],
-			callback
-	)
+	utils.async.waterfall([
+		function(callback) {
+			//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
+			// or send notification to both xbox and psn depending on the ID availability
+			if(utils.config.enableBungieIntegration) {
+				utils.l.i("Destiny validation enabled")
+				destinyService.sendBungieMessage(
+					userData.bungieMemberShipId,
+					utils.primaryConsole(userData).consoleType,
+					utils.constants.bungieMessageTypes.passwordReset,
+					function (err, messageResponse) {
+						if(err) {
+							return callback(err, null)
+						} else {
+							utils.l.d("messageResponse::token=== " + messageResponse.token)
+							userData.passwordResetToken = messageResponse.token
+						}
+						models.user.save(userData, callback)
+					})
+			} else {
+				utils.l.i("Destiny validation disabled")
+				return callback(null, userData)
+			}
+		}
+	], callback)
 }
 
-function listMemberCountByClan(groupIds,consoleType, callback){
-	models.user.listMemberCount(groupIds,consoleType,callback)
+function listMemberCountByClan(groupIds,consoleType, callback) {
+	models.user.listMemberCount(groupIds, consoleType, callback)
 }
 
 module.exports = {
 	signupUser: signupUser,
 	requestResetPassword: requestResetPassword,
-	listMemberCountByClan:listMemberCountByClan
+	listMemberCountByClan: listMemberCountByClan
 }

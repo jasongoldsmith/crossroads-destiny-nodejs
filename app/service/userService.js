@@ -201,10 +201,28 @@ function updateUser(user, callback) {
   models.user.save(user, callback)
 }
 
+function checkBungieAccount(console, callback) {
+  destinyInterface.getBungieMemberShip(console.consoleId, console.consoleType, function(err, bungieResponse) {
+    if (err) {
+      return callback(err, null)
+    } else {
+      var bungieMember = {
+        consoleId: console.consoleId,
+        consoleType: console.consoleType,
+        bungieMemberShipId: bungieResponse.bungieMemberShipId,
+        clanTag: bungieResponse.clanTag,
+        destinyMembershipId: bungieResponse.destinyProfile.memberShipId
+      }
+      return callback(null, bungieMember)
+    }
+  })
+}
+
 module.exports = {
   userTimeout: userTimeout,
   preUserTimeout: preUserTimeout,
   upgradeConsole: upgradeConsole,
   addConsole: addConsole,
-  changePrimaryConsole: changePrimaryConsole
+  changePrimaryConsole: changePrimaryConsole,
+  checkBungieAccount: checkBungieAccount
 }
