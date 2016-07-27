@@ -6,6 +6,7 @@ var activitySchema = new Schema({
 	aSubType: String,
 	aCheckpoint: String,
 	aDifficulty: String,
+	tag: String,
 	aLight: Number,
 	aLevel: Number,
 	aIconUrl: String,
