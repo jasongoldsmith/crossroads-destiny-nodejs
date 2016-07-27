@@ -85,7 +85,7 @@ function listAdActivities(callback) {
 }
 
 function listAllActivities(callback) {
-	models.activity.listActivities(callback)
+	models.activity.listAllActivities(callback)
 }
 
 function listActivityById(data, callback) {
