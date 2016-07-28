@@ -1,7 +1,7 @@
 (function(angular) {
   'use strict';
   var app = angular.module('travelerAdmin', ["ngRoute","auth","home","navigation","reportManager",
-		"xeditable","angularUtils.directives.dirPagination","metrics"])
+		"xeditable","angularUtils.directives.dirPagination","metrics","datamanager"])
     app.run(function(editableOptions) {
 	  editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
 	});
@@ -31,6 +31,9 @@
 		}).when('/metrics', {
 			templateUrl : 'js/metrics/metrics.html',
 			controller : 'metrics'
+		}).when('/manageActivities',{
+			templateUrl : 'js/datamanager/activityList.html',
+			controller : 'activityController'
 		}).otherwise('/');
 
 		$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
