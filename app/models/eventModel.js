@@ -25,6 +25,7 @@ function getByQuery(query, user, callback) {
 		.populate("eType")
 		.populate("creator", "-passWord")
 		.populate("players", "-passWord")
+		.populate("comments.user", "-passWord")
 		.sort({launchDate:"ascending"})
 		.exec(function (err, events) {
 			if (user) {
@@ -333,6 +334,25 @@ function computeEventAttributesIfMissing(eventObj, user) {
 function removeEvent(event,callback){
 	event.remove(callback)
 }
+
+function updateEvent(data, callback) {
+	utils.async.waterfall([
+		function (callback) {
+			Event.findOne({_id: data.id}, callback)
+		},
+		function(event, callback) {
+			if (!event) {
+				utils.l.d("no event found")
+				return callback({ error: "event with this id does not exist" }, null)
+			} else {
+				utils.l.d("found event: " + JSON.stringify(event))
+				utils._.extend(event, data)
+				event.save(callback)
+			}
+		}
+	], callback)
+}
+
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
@@ -346,5 +366,6 @@ module.exports = {
 	update:update,
 	listEventsByUser:listEventsByUser,
 	listEventCount: listEventCount,
-	removeEvent:removeEvent
+	removeEvent: removeEvent,
+	updateEvent: updateEvent
 }

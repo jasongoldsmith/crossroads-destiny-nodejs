@@ -127,9 +127,27 @@ function archiveEvent(event,notifTrigger,callback){
   })
 }
 
+function addComment(user, data, callback) {
+  utils.async.waterfall([
+    function(callback) {
+      models.event.getById(data.eId, callback)
+    },
+    function(event, callback) {
+      var comment = {
+        user: user._id,
+        text: data.text,
+      }
+      event.comments.push(comment)
+      models.event.updateEvent(event, callback)
+    }
+  ], callback)
+
+}
+
 module.exports = {
   leaveEvent:leaveEvent,
   clearEventsForPlayer:clearEventsForPlayer,
   listEventCountByGroups: listEventCountByGroups,
-  expireEvents:expireEvents
+  expireEvents: expireEvents,
+  addComment: addComment
 }

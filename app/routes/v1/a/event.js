@@ -167,7 +167,7 @@ function deleteEvent(data, callback) {
 	models.event.deleteEvent(data, callback)
 }
 
-function clearEventsForPlayer(req,res){
+function clearEventsForPlayer(req, res) {
 	service.eventService.clearEventsForPlayer(req.body.playerId, function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -175,6 +175,18 @@ function clearEventsForPlayer(req,res){
 			routeUtils.handleAPISuccess(req, res, events)
 		}
 	})
+}
+
+function addComment(req, res) {
+	service.eventService.addComment(req.user, req.body, function (err, event) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			helpers.firebase.updateEventV2(event, req.user, true)
+			routeUtils.handleAPISuccess(req, res, event)
+		}
+	})
+
 }
 
 routeUtils.rPost(router, '/create', 'createEvent', create)
@@ -185,4 +197,5 @@ routeUtils.rPost(router, '/listById', 'listEventById', listById)
 routeUtils.rPost(router, '/leave', 'leaveEvent', leave)
 routeUtils.rPost(router, '/delete', 'removeEvent', remove)
 routeUtils.rPost(router, '/clear', 'clearEventsForPlayer', clearEventsForPlayer)
+routeUtils.rPost(router, '/addComment', 'addComment', addComment)
 module.exports = router
