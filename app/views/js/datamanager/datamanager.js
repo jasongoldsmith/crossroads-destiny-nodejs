@@ -48,7 +48,7 @@ angular.module('datamanager', ['ngRoute', 'auth']).controller('activityControlle
 		);
 
 
-angular.module('reportManager').controller('ModalInstanceCtrl', function ($scope, $http, $compile, $window, $uibModalInstance, items) {
+angular.module('datamanager').controller('ModalInstanceCtrl', function ($scope, $http, $compile, $window, $uibModalInstance, items) {
 
 	$scope.activityDetails = items;
 
