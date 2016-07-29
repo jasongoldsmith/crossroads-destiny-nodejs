@@ -46,7 +46,7 @@ function deleteOldFullEvents() {
     function (callback) {
       // We need to clear full events 30 minutes after being full https://trello.com/c/vtXM5Dk9
       var date = moment().subtract(30, 'minutes')
-      models.event.getByQuery({ status: "full", updated: {$lt: date}}, null, callback)
+      models.event.getByQuery({ status: "full", launchStatus:"now", updated: {$lt: date}}, null, callback)
     },
     function (events, callback) {
       utils._.forEach(events, function(event) {
