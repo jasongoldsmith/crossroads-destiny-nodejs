@@ -186,7 +186,17 @@ function addComment(req, res) {
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
+}
 
+function reportComment(req, res) {
+	service.eventService.reportComment(req.body, function (err, event) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			helpers.firebase.updateEventV2(event, req.user, true)
+			routeUtils.handleAPISuccess(req, res, event)
+		}
+	})
 }
 
 routeUtils.rPost(router, '/create', 'createEvent', create)
@@ -197,5 +207,6 @@ routeUtils.rPost(router, '/listById', 'listEventById', listById)
 routeUtils.rPost(router, '/leave', 'leaveEvent', leave)
 routeUtils.rPost(router, '/delete', 'removeEvent', remove)
 routeUtils.rPost(router, '/clear', 'clearEventsForPlayer', clearEventsForPlayer)
-routeUtils.rPost(router, '/addComment', 'addComment', addComment)
+routeUtils.rPost(router, '/addComment', 'addEventComment', addComment)
+routeUtils.rPost(router, '/reportComment', 'reportEventComment', reportComment)
 module.exports = router

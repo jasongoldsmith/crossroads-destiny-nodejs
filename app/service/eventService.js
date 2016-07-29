@@ -141,7 +141,26 @@ function addComment(user, data, callback) {
       models.event.updateEvent(event, callback)
     }
   ], callback)
+}
 
+function reportComment(data, callback) {
+  utils.async.waterfall([
+    function(callback) {
+      models.event.getById(data.eId, callback)
+    },
+    function(event, callback) {
+      var commentObj = utils._.find(event.comments, function(comment) {
+        return comment._id.toString() == data.commentId.toString()
+      })
+
+      if(utils._.isInvalidOrBlank(commentObj)) {
+        return callback({error: "Comment was not found"}, null)
+      } else {
+        commentObj.isReported = true
+        models.event.updateEvent(event, callback)
+      }
+    }
+  ], callback)
 }
 
 module.exports = {
@@ -149,5 +168,6 @@ module.exports = {
   clearEventsForPlayer:clearEventsForPlayer,
   listEventCountByGroups: listEventCountByGroups,
   expireEvents: expireEvents,
-  addComment: addComment
+  addComment: addComment,
+  reportComment: reportComment
 }
