@@ -17,7 +17,7 @@ function listById(req, res) {
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {
-      routeUtils.handleAPISuccess(req, res, user)
+      routeUtils.handleAPISuccess(req, res,  {value: user})
     }
   })
 }

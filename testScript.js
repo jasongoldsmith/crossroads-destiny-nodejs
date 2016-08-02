@@ -154,6 +154,11 @@ switch(command) {
       return results
     })
     console.log(userGroupFlat)
+    break;
+  case "momentTest":
+    var estTime = utils.moment.tz(Date.now(), 'America/New_York').utc().format()
+    console.log("estTime::"+estTime)
+    break;
   default:
     return;
 }

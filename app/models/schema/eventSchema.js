@@ -23,7 +23,8 @@ var eventSchema = new Schema({
 			created: {type: Date, default: Date.now},
 			isReported: {type: Boolean, default: false}
 		}
-	]
+	],
+	activityTag:{type:String}
 })
 
 eventSchema.index({'eType': 1})
