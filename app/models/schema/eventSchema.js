@@ -15,6 +15,7 @@ var eventSchema = new Schema({
 	launchDate: { type: Date, default: Date.now },
 	notifStatus:[{type: String}],
 	clanId: {type: String},
+	clanName: {type: String},
 	consoleType: {type: String, enum: ['PS3', 'PS4', 'XBOX360', 'XBOXONE']},
 	comments: [
 		{

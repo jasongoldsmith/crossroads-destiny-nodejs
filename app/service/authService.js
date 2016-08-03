@@ -58,6 +58,7 @@ function signupUser(signupData, callback) {
 			}
 		},
 		function (newUser, callback) {
+			newUser.clanName=utils.constants.freelanceBungieGroup.groupName
 			utils.l.d("creating user", utils.l.userLog(newUser))
 			models.user.createUserFromData(newUser, callback)  // don't send message
 		}

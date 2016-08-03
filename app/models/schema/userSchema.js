@@ -26,6 +26,7 @@ var UserSchema = new Schema({
     isPrimary: {type: Boolean, default: false}
   }],
   clanId: {type: String, default: "clan_id_not_set"},
+  clanName: {type: String},
   imageUrl: String,
   uDate: Date,
   signupDate: Date,
