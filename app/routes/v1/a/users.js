@@ -119,7 +119,7 @@ function addConsole(req, res) {
       if (err) {
         routeUtils.handleAPIError(req, res, err, err)
       } else {
-        routeUtils.handleAPISuccess(req, res, user)
+        routeUtils.handleAPISuccess(req, res, {value:user})
       }
     })
   } else if(newConsoleType == 'XBOXONE' && utils._.isValidNonBlank(utils.getUserConsoleObject(req.user, "XBOX360"))) {
@@ -127,7 +127,7 @@ function addConsole(req, res) {
       if (err) {
         routeUtils.handleAPIError(req, res, err, err)
       } else {
-        routeUtils.handleAPISuccess(req, res, user)
+        routeUtils.handleAPISuccess(req, res, {value:user})
       }
     })
   } else {
@@ -139,7 +139,7 @@ function addConsole(req, res) {
         if (err) {
           routeUtils.handleAPIError(req, res, err, err)
         } else {
-          routeUtils.handleAPISuccess(req, res, user)
+          routeUtils.handleAPISuccess(req, res, {value:user})
         }
       })
     }
@@ -155,7 +155,7 @@ function changePrimaryConsole(req, res) {
       if (err) {
         routeUtils.handleAPIError(req, res, err, err)
       } else {
-        routeUtils.handleAPISuccess(req, res, user)
+        routeUtils.handleAPISuccess(req, res, {value:user})
       }
     })
   }
