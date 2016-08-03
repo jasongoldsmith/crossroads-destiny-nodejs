@@ -110,6 +110,9 @@ function addConsole(req, res) {
   if(!newConsoleType) {
     var err = {error: "new console type is needed"}
     routeUtils.handleAPIError(req, res, err, err)
+  } else if(utils._.isValidNonBlank(utils.getUserConsoleObject(req.user, newConsoleType))) {
+    var err = {error: "You already own this console"}
+    routeUtils.handleAPIError(req, res, err, err)
   } else if((newConsoleType == 'PS3' && utils._.isValidNonBlank(utils.getUserConsoleObject(req.user, "PS4")))
   || (newConsoleType == 'XBOX360' && utils._.isValidNonBlank(utils.getUserConsoleObject(req.user, "XBOXONE")))) {
     var err = {error: "You cannot downgrade your console"}
