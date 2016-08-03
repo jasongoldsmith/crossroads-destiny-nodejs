@@ -23,7 +23,7 @@ function getFeed(user, consoleType, callback) {
 
 function getEvents(user, consoleType, callback) {
 	if(utils._.isInvalidOrBlank(consoleType)) {
-		consoleType = user.consoles[0].consoleType
+		consoleType = utils.primaryConsole(user).consoleType
 	}
 
 	models.event.getByQuery(
