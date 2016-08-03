@@ -120,6 +120,12 @@ function IsUserPartOfTheEvent(user, event) {
   }
 }
 
+function getNotificationPlayerListForEventExceptUser(user, event) {
+  return lodash.filter(event.players, function(player) {
+    return player._id.toString() != user._id.toString()
+  })
+}
+
 module.exports = {
   format: require('./formatUtils'),
   mongo: require('./mongoUtils'),
@@ -144,5 +150,6 @@ module.exports = {
   primaryConsoleIndex: primaryConsoleIndex,
   getUserConsoleObject: getUserConsoleObject,
   IsUserPartOfTheEvent: IsUserPartOfTheEvent,
+  getNotificationPlayerListForEventExceptUser: getNotificationPlayerListForEventExceptUser,
   moment:require('moment')
 };

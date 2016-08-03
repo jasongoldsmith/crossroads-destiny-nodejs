@@ -53,8 +53,26 @@ function sendPushNotificationForLeave(event, user) {
 	})
 }
 
+function sendPushNotificationForAddComment(event, playerList, comment) {
+	utils.async.waterfall([
+		function (callback) {
+			models.notificationTrigger.getByQuery({triggerName: "AddComment"}, utils.firstInArrayCallback(callback))
+		},
+		function (notificationTrigger, callback) {
+			notificationTriggerService.handleAddComment(event, notificationTrigger, playerList, comment, callback)
+		}
+	], function (err, updatedEvent) {
+		if (err) {
+			utils.l.s("Error in sendPushNotificationForAddComment::"+err+"::"+JSON.stringify(updatedEvent))
+		} else {
+			utils.l.d("sendPushNotificationForAddComment successful::", updatedEvent)
+		}
+	})
+}
+
 module.exports ={
 	sendPushNotificationForNewCreate: sendPushNotificationForNewCreate,
 	sendPushNotificationForJoin: sendPushNotificationForJoin,
-	sendPushNotificationForLeave: sendPushNotificationForLeave
+	sendPushNotificationForLeave: sendPushNotificationForLeave,
+	sendPushNotificationForAddComment: sendPushNotificationForAddComment
 }

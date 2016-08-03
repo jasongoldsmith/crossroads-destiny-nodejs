@@ -2,11 +2,13 @@ var utils = require('../utils')
 var models = require('../models')
 var moment = require('moment')
 //for recipientType = knownUsers passin playerList as recipient list otherwise playerList will be playersLeft
-function getNotificationDetails(event, notification, playerList, callback) {
+function getNotificationDetails(event, notification, playerList, comment, callback) {
 
 	var notificationObj = {
 		name: notification.name,
-		message: (notification.recipientType == 'knownUsers') ? formatMessage(notification.messageTemplate, event, null) : formatMessage(notification.messageTemplate, event, playerList)
+		message: (notification.recipientType == 'knownUsers')
+			? formatMessage(notification.messageTemplate, event, null, comment)
+			: formatMessage(notification.messageTemplate, event, playerList, comment)
 	}
 
 	if(notification.recipientType == 'knownUsers'){
@@ -38,13 +40,15 @@ function getAggregateNotificationDetails(clanId, consoleType, eventCount, notifi
 	})
 }
 
-function formatMessage(messageTemplate, event, playerLeft) {
+function formatMessage(messageTemplate, event, playerLeft, comment) {
 	if(messageTemplate.indexOf("#CREATOR#") >= 0 )
 		messageTemplate =  messageTemplate.replace("#CREATOR#", utils.consoleByType(event.creator,event.consoleType).consoleId)
 	if(messageTemplate.indexOf("#EVENT_NAME#") >= 0 )
 		messageTemplate =  messageTemplate.replace("#EVENT_NAME#", getEventName(event.eType))
 	if(messageTemplate.indexOf("#TIME#") >= 0 )
 		messageTemplate =  messageTemplate.replace("#TIME#", getTimeStringForDisplay(event.launchDate))
+	if(messageTemplate.indexOf("#COMMENT#") >= 0 )
+		messageTemplate =  messageTemplate.replace("#COMMENT#", comment)
 
 	if(utils._.isValidNonBlank(playerLeft) && messageTemplate.indexOf("#PLAYER#") >= 0) {
 		messageTemplate = messageTemplate.replace("#PLAYER#", utils.consoleByType(playerLeft,event.consoleType).consoleId)

@@ -119,7 +119,8 @@ function archiveEvent(event,notifTrigger,callback){
     if(!err){
       event.deleted=true
       if(notifTrigger.isActive && notifTrigger.notifications.length > 0)
-        utils.async.map(notifTrigger.notifications, utils._.partial(eventNotificationTriggerService.createNotificationAndSend,event,null))
+        utils.async.map(notifTrigger.notifications,
+          utils._.partial(eventNotificationTriggerService.createNotificationAndSend, event, null, null))
       //utils.l.d("event after remove::",event)
       helpers.firebase.createEventV2({_id : event._id, clanId : event.clanId}, null,true)
       return callback(null,event)
@@ -133,14 +134,38 @@ function addComment(user, data, callback) {
       models.event.getById(data.eId, callback)
     },
     function(event, callback) {
+      if(utils._.isInvalidOrBlank(event)) {
+        utils.l.i("No such event found", event)
+       return callback({error: "This event does has been deleted"}, null)
+      }
       var comment = {
         user: user._id,
         text: data.text,
       }
       event.comments.push(comment)
-      models.event.updateEvent(event, callback)
+      models.event.updateEvent(event, function(err, updatedEvent) {
+        if(err) {
+          utils.l.s("There was a problem in adding the comment to the database", err)
+          return callback({error: "There was some problem in adding the comment"}, null)
+        } else {
+          return callback(null, updatedEvent)
+        }
+      })
     }
-  ], callback)
+  ],
+    function(err, event) {
+      if(err) {
+        return callback(err, null)
+      } else {
+        utils.l.d("comment was added successfully to event", data.text)
+        utils.l.eventLog(event)
+        eventPushService.sendPushNotificationForAddComment(event,
+          utils.getNotificationPlayerListForEventExceptUser(user, event),
+          createCommentTextForPush(user, event, data.text))
+        helpers.firebase.updateEventV2(event, user, true)
+        return callback(null, event)
+      }
+    })
 }
 
 function reportComment(user, data, callback) {
@@ -166,10 +191,27 @@ function reportComment(user, data, callback) {
         return callback({error: "Comment was not found"}, null)
       } else {
         commentObj.isReported = true
-        models.event.updateEvent(event, callback)
+        models.event.updateEvent(event, function(err, updatedEvent) {
+          if(err) {
+            utils.l.s("There was a problem in reporting the comment to the database", err)
+            return callback({error: "There was some problem in reporting the comment"}, null)
+          } else {
+            return callback(null, updatedEvent)
+          }
+        })
       }
     }
-  ], callback)
+  ],
+    function (err, event) {
+      if(err) {
+        return callback(err, null)
+      } else {
+        utils.l.d("comment was successfully reported", data.text)
+        utils.l.eventLog(event)
+        helpers.firebase.updateEventV2(event, user, true)
+        return callback(null, event)
+      }
+    })
 }
 
 function handleUserCommentReports(user, event, callback) {
@@ -230,9 +272,13 @@ function handleUserCommentReports(user, event, callback) {
   ], callback)
 }
 
+function createCommentTextForPush(user, event, comment) {
+  return utils.consoleByType(user, event.consoleType).consoleId + ": " + comment
+}
+
 module.exports = {
-  leaveEvent:leaveEvent,
-  clearEventsForPlayer:clearEventsForPlayer,
+  leaveEvent: leaveEvent,
+  clearEventsForPlayer: clearEventsForPlayer,
   listEventCountByGroups: listEventCountByGroups,
   expireEvents: expireEvents,
   addComment: addComment,

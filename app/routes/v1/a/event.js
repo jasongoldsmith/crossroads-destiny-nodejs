@@ -133,7 +133,8 @@ function createEvent(user, data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event, getNotificationPlayerListForJoin(user, event))
+				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event,
+					utils.getNotificationPlayerListForEventExceptUser(user, event))
 				service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(event)
 				callback(null, event)
 			}
@@ -151,16 +152,11 @@ function joinEvent(user, data, callback) {
           return callback(null, null)
         }
 
-				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event, getNotificationPlayerListForJoin(user, event))
+				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event,
+					utils.getNotificationPlayerListForEventExceptUser(user, event))
 				callback(null, event)
 			}
 		], callback)
-}
-
-function getNotificationPlayerListForJoin(user, event) {
-	return utils._.filter(event.players, function(player) {
-		return player._id.toString() != user._id.toString()
-	})
 }
 
 function deleteEvent(data, callback) {
@@ -182,7 +178,6 @@ function addComment(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
-			helpers.firebase.updateEventV2(event, req.user, true)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
@@ -193,7 +188,6 @@ function reportComment(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
-			helpers.firebase.updateEventV2(event, req.user, true)
 			routeUtils.handleAPISuccess(req, res, event)
 		}
 	})
