@@ -39,7 +39,11 @@ var UserSchema = new Schema({
   notifStatus:[{type: String}],
   lastCommentReportedTime: Date,
   commentsReported: {type: Number, default: 0},
-  hasReachedMaxReportedComments: {type: Boolean, default: false}
+  hasReachedMaxReportedComments: {type: Boolean, default: false},
+  legal:{
+    termsVersion:{type:String,default:"0.0"},
+    privacyVersion:{type:String,default:"0.0"}
+  }
 })
 
 UserSchema.index({'userName':1}, {'unique': true})

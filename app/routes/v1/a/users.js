@@ -165,7 +165,13 @@ function changePrimaryConsole(req, res) {
 }
 
 function getUserById(data, callback) {
-  models.user.getUserById(data, callback)
+  utils.async.waterfall([
+    function(callback){
+      models.user.getUserById(data, callback)
+    },function(user, callback){
+      service.authService.addLegalAttributes(user,callback)
+    }
+  ],callback)
 }
 
 function listUsers(callback) {
@@ -203,11 +209,39 @@ function updateUserPassword(data, callback) {
   ], callback)
 }
 
+function acceptLegal(req,res){
+  handleAcceptLegal(req.user, function(err, user) {
+    if (err) {
+      routeUtils.handleAPIError(req, res, err, err)
+    } else {
+      var userResp = service.userService.setLegalAttributes(user)
+      routeUtils.handleAPISuccess(req, res,  {value: userResp})
+    }
+  })
+}
+
+function handleAcceptLegal(user, callback){
+  utils.async.waterfall([
+    function(callback){
+      models.user.getUserById({id:user._id}, callback)
+    },function(user, callback){
+      models.sysConfig.getSysConfigList([utils.constants.sysConfigKeys.termsVersion,utils.constants.sysConfigKeys.privacyPolicyVersion],callback)
+    },function(sysConfigs, callback){
+      var termsVersionObj =  utils._.find(sysConfigs, {"key": utils.constants.sysConfigKeys.termsVersion})
+      var privacyObj = utils._.find(sysConfigs, {"key": utils.constants.sysConfigKeys.privacyPolicyVersion})
+
+      updateUser({id:user._id,legal:{termsVersion:termsVersionObj.value.toString(),privacyVersion:privacyObj.value.toString()}},callback)
+    }
+  ],callback)
+}
+
+
 routeUtils.rGet(router, '/self', 'GetSelfUser', getSelfUser)
 routeUtils.rGet(router, '/list', 'list', list)
 routeUtils.rPost(router, '/listById', 'listById', listById)
 routeUtils.rPost(router, '/update', 'update', update)
 routeUtils.rPost(router, '/updateGroup', 'updateGroup', updateGroup)
+routeUtils.rPost(router, '/acceptLegal', 'acceptLegal', acceptLegal)
 routeUtils.rPost(router, '/updatePassword', 'updatePassword', updatePassword)
 routeUtils.rPost(router, '/addConsole', 'addUserConsole', addConsole)
 routeUtils.rPost(router, '/changePrimaryConsole', 'changePrimaryConsole', changePrimaryConsole)

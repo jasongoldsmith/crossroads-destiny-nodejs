@@ -57,10 +57,14 @@ function signupUser(signupData, callback) {
 				return callback(null, signupData)
 			}
 		},
-		function (newUser, callback) {
+		function(newUser,callback){
 			newUser.clanName=utils.constants.freelanceBungieGroup.groupName
-			utils.l.d("creating user", utils.l.userLog(newUser))
-			models.user.createUserFromData(newUser, callback)  // don't send message
+			getCurrentLegalObject(function(err,legal){
+				newUser.legal = legal
+				utils.l.d('signup::getCurrentLegalObject',newUser)
+				utils.l.d("creating user", utils.l.userLog(newUser))
+				models.user.createUserFromData(newUser, callback)  // don't send message
+			})
 		}
 	], callback)
 }
@@ -93,12 +97,38 @@ function requestResetPassword(userData, callback) {
 	], callback)
 }
 
+function addLegalAttributes(user,callback){
+	var userLegal = JSON.parse(JSON.stringify(user))
+	models.sysConfig.getSysConfigList([utils.constants.sysConfigKeys.termsVersion,utils.constants.sysConfigKeys.privacyPolicyVersion], function(err, sysConfigs) {
+		var termsVersionObj =  utils._.find(sysConfigs, {"key": utils.constants.sysConfigKeys.termsVersion})
+		var privacyObj = utils._.find(sysConfigs, {"key": utils.constants.sysConfigKeys.privacyPolicyVersion})
+		if(userLegal.legal.termsVersion != termsVersionObj.value.toString()) userLegal.legal.termsNeedsUpdate = true
+		else userLegal.legal.termsNeedsUpdate = false
+
+		if(userLegal.legal.privacyVersion != privacyObj.value.toString()) userLegal.legal.privacyNeedsUpdate = true
+		else userLegal.legal.privacyNeedsUpdate = false
+
+		return callback(null,userLegal)
+	})
+}
+
 function listMemberCountByClan(groupIds,consoleType, callback) {
 	models.user.listMemberCount(groupIds, consoleType, callback)
+}
+
+function getCurrentLegalObject(callback){
+		models.sysConfig.getSysConfigList([utils.constants.sysConfigKeys.termsVersion,utils.constants.sysConfigKeys.privacyPolicyVersion],function(err, sysConfigs){
+			var termsVersionObj =  utils._.find(sysConfigs, {"key": utils.constants.sysConfigKeys.termsVersion})
+			var privacyObj = utils._.find(sysConfigs, {"key": utils.constants.sysConfigKeys.privacyPolicyVersion})
+			var legal = {termsVersion:termsVersionObj.value.toString(),
+										privacyVersion:privacyObj.value.toString()}
+			return callback(null, legal)
+		})
 }
 
 module.exports = {
 	signupUser: signupUser,
 	requestResetPassword: requestResetPassword,
-	listMemberCountByClan: listMemberCountByClan
+	listMemberCountByClan: listMemberCountByClan,
+	addLegalAttributes:addLegalAttributes
 }

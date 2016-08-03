@@ -218,11 +218,21 @@ function checkBungieAccount(console, callback) {
   })
 }
 
+
+function setLegalAttributes(user){
+  var userWithLegalResp = JSON.parse(JSON.stringify(user))
+  userWithLegalResp.legal.termsNeedsUpdate = false
+  userWithLegalResp.legal.privacyNeedsUpdate = false
+
+  return userWithLegalResp
+}
+
 module.exports = {
   userTimeout: userTimeout,
   preUserTimeout: preUserTimeout,
   upgradeConsole: upgradeConsole,
   addConsole: addConsole,
   changePrimaryConsole: changePrimaryConsole,
-  checkBungieAccount: checkBungieAccount
+  checkBungieAccount: checkBungieAccount,
+  setLegalAttributes:setLegalAttributes
 }

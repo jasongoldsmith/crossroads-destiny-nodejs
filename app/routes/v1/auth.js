@@ -12,7 +12,7 @@ var passwordHash = require('password-hash')
 function login (req, res) {
 
   var outerUser = null
-  utils.async.waterfall(
+    utils.async.waterfall(
     [
       helpers.req.handleVErrorWrapper(req),
       function(callback) {
@@ -30,11 +30,13 @@ function login (req, res) {
       function (user, callback) {
         models.user.getById(user._id, function (err, user) {
           user.isLoggedIn = true
-          outerUser = user
+           service.authService.addLegalAttributes(user, function(err, data){
+             outerUser = data
+          })
           models.user.save(user, callback)
         })
-      },
-      reqLoginWrapper(req, "auth.login")
+      }
+      ,reqLoginWrapper(req, "auth.login")
     ],
     function (err) {
       if (err) {
@@ -179,7 +181,7 @@ function signup(req, res) {
       helpers.firebase.createUser(user)
       helpers.cookies.setCookie("foo", "bar", res)
       helpers.m.setUser(user)
-      return routeUtils.handleAPISuccess(req, res, {value: user,message:getSignupMessage(user)})
+      return routeUtils.handleAPISuccess(req, res, {value: service.userService.setLegalAttributes(user),message:getSignupMessage(user)})
     }
   )
 }

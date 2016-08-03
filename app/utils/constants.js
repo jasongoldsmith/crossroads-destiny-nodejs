@@ -572,6 +572,8 @@ var sysConfigKeys = {
   userTimeoutInMins:"userTimeoutInMins",
   preUserTimeoutInMins:"preUserTimeoutInMins",
   bungieCookie: "bungieCookie",
+  termsVersion: "termsVersion",
+  privacyPolicyVersion: "privacyPolicyVersion",
   commentsReportMaxValue: "commentsReportMaxValue",
   commentsReportCoolingOffPeriod: "commentsReportCoolingOffPeriod"
 }
