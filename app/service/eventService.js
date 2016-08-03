@@ -143,10 +143,19 @@ function addComment(user, data, callback) {
   ], callback)
 }
 
-function reportComment(data, callback) {
+function reportComment(user, data, callback) {
   utils.async.waterfall([
     function(callback) {
       models.event.getById(data.eId, callback)
+    },
+    function(event, callback){
+      if(utils._.isInvalidOrBlank(event)) {
+        return callback({ error:"Event was not found" }, null)
+      } else if(!utils.IsUserPartOfTheEvent(user, event)) {
+        return callback({error: "You are not allowed to comment because you are not part of this event" }, null)
+      } else {
+        handleUserCommentReports(user, event, callback)
+      }
     },
     function(event, callback) {
       var commentObj = utils._.find(event.comments, function(comment) {
@@ -159,6 +168,64 @@ function reportComment(data, callback) {
         commentObj.isReported = true
         models.event.updateEvent(event, callback)
       }
+    }
+  ], callback)
+}
+
+function handleUserCommentReports(user, event, callback) {
+  utils.async.waterfall([
+    function(callback) {
+      var keys = [
+        utils.constants.sysConfigKeys.commentsReportMaxValue,
+        utils.constants.sysConfigKeys.commentsReportCoolingOffPeriod
+      ]
+      models.sysConfig.getSysConfigList(keys, callback)
+    },
+    function(commentsReportFrequency, callback) {
+      if(utils._.isInvalidOrBlank(commentsReportFrequency)) {
+        utils.l.d("report misuse values not found in the database")
+        return callback({error: "There was a problem in reporting the comment"}, null)
+      }
+
+      var maxAllowedComments = utils._.find(commentsReportFrequency, function (value) {
+        return value.key.toString() == utils.constants.sysConfigKeys.commentsReportMaxValue.toString()
+      })
+
+      if(user.commentsReported < parseInt(maxAllowedComments.value)) {
+        user.commentsReported++
+        user.lastCommentReportedTime = Date.now()
+        user.hasReachedMaxReportedComments = false
+      } else {
+        var lastCommentReportedTime = utils.moment(user.lastCommentReportedTime).utc()
+        var currentTIme = utils.moment().utc()
+        var timeDiff = currentTIme.diff(lastCommentReportedTime, 'minutes')
+
+        var coolingOffPeriod = utils._.find(commentsReportFrequency, function (value) {
+          return value.key.toString() == utils.constants.sysConfigKeys.commentsReportCoolingOffPeriod.toString()
+        })
+
+        if(timeDiff > parseInt(coolingOffPeriod.value)) {
+          user.commentsReported = 1
+          user.lastCommentReportedTime = Date.now()
+          user.hasReachedMaxReportedComments = false
+        } else {
+          user.commentsReported++
+          user.lastCommentReportedTime = Date.now()
+          user.hasReachedMaxReportedComments = true
+        }
+      }
+
+      models.user.save(user, function(err, user) {
+        if(err) {
+          utils.l.d("There was a problem in saving the user", user)
+          return callback({error: "There was a problem in reporting the comment"}, null)
+        } else {
+          utils.l.d("last reported comment was successfully updated on user")
+          utils.l.userLog(user)
+        }
+        helpers.firebase.updateUser(user)
+        return callback(null, event)
+      })
     }
   ], callback)
 }

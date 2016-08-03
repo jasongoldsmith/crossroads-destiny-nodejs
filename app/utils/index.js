@@ -108,6 +108,18 @@ function getUserConsoleObject(userObj, consoleType) {
   return lodash.find(userObj.consoles, {"consoleType": consoleType})
 }
 
+function IsUserPartOfTheEvent(user, event) {
+  var player = lodash.find(event.players, function(player) {
+    return player._id.toString() == user._id.toString()
+  })
+
+  if(player) {
+    return true
+  } else {
+    return false
+  }
+}
+
 module.exports = {
   format: require('./formatUtils'),
   mongo: require('./mongoUtils'),
@@ -131,5 +143,6 @@ module.exports = {
   consoleByType: consoleByType,
   primaryConsoleIndex: primaryConsoleIndex,
   getUserConsoleObject: getUserConsoleObject,
+  IsUserPartOfTheEvent: IsUserPartOfTheEvent,
   moment:require('moment')
 };

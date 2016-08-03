@@ -35,7 +35,10 @@ var UserSchema = new Schema({
   groups:[{type: Mixed}],
   lastActiveTime: Date,
   isLoggedIn: {type: Boolean, default: true},
-  notifStatus:[{type: String}]
+  notifStatus:[{type: String}],
+  lastCommentReportedTime: Date,
+  commentsReported: {type: Number, default: 0},
+  hasReachedMaxReportedComments: {type: Boolean, default: false}
 })
 
 UserSchema.index({'userName':1}, {'unique': true})

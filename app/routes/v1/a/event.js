@@ -189,7 +189,7 @@ function addComment(req, res) {
 }
 
 function reportComment(req, res) {
-	service.eventService.reportComment(req.body, function (err, event) {
+	service.eventService.reportComment(req.user, req.body, function (err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {

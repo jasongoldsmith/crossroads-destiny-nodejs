@@ -571,7 +571,9 @@ var sysConfigKeys = {
   eventExpiryTimeInMins:"eventExpiryTimeInMins",
   userTimeoutInMins:"userTimeoutInMins",
   preUserTimeoutInMins:"preUserTimeoutInMins",
-  bungieCookie: "bungieCookie"
+  bungieCookie: "bungieCookie",
+  commentsReportMaxValue: "commentsReportMaxValue",
+  commentsReportCoolingOffPeriod: "commentsReportCoolingOffPeriod"
 }
 
 module.exports = {
