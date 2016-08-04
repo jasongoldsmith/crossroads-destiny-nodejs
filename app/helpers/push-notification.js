@@ -83,8 +83,8 @@ function getPayload(data, notificationResponse, clanId) {
     eventClanName: utils._.isValidNonBlank(event) ? event.clanName : null,
     eventClanImageUrl: utils._.isValidNonBlank(event) ? event.clanImageUrl : null,
     eventConsole: utils._.isValidNonBlank(event) ? event.consoleType : null,
-    messengerConsoleId: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).consoleId : null,
-    messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl : null,
+    messengerConsoleId: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).consoleId.toString() : null,
+    messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl.toString() : null,
     isTrackable: true
   }
   utils.l.d("payload", payload)
