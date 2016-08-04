@@ -326,6 +326,10 @@ function computeEventAttributesIfMissing(eventObj, user) {
 		eventObj.clanName = user.clanName
 	}
 
+	if(utils._.isInvalidOrBlank(eventObj.clanImageUrl)) {
+		eventObj.clanImageUrl = user.clanImageUrl
+	}
+
 	if(utils._.isInvalidOrBlank(eventObj.consoleType)) {
 		eventObj.consoleType = utils.primaryConsole(user).consoleType
 	}

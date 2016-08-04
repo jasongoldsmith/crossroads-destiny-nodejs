@@ -71,6 +71,9 @@ function getPayload(event, notificationResponse, clanId) {
     eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
     eventName: utils._.isValidNonBlank(event) ? event.eType.aSubType : null,
     eventClanId: utils._.isValidNonBlank(event) ? event.clanId : clanId,
+    eventClanName: utils._.isValidNonBlank(event) ? event.clanName : "",
+    eventClanImageUrl: utils._.isValidNonBlank(event) ? event.clanImageUrl : "",
+    eventConsole: utils._.isValidNonBlank(event) ? event.consoleType : "",
     isTrackable: true
   }
   utils.l.d("payload", payload)

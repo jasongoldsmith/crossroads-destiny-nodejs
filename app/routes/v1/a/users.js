@@ -185,7 +185,8 @@ function updateUser(data, callback) {
 //TODO: GroupID is set in clanID field. Need to change it later.
 function updateUserGroup(data, callback) {
   var clanName = utils._.isInvalidOrBlank(data.clanName)?data.clanName:""
-  models.user.updateUser({id: data.id, clanId: data.clanId, clanName:clanName}, true, callback)
+  var clanImageUrl = utils._.isInvalidOrBlank(data.clanImageUrl)?data.clanImageUrl:""
+  models.user.updateUser({id: data.id, clanId: data.clanId, clanName:clanName, clanImageUrl:clanImageUrl}, true, callback)
 }
 
 function updateUserPassword(data, callback) {

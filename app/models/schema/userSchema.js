@@ -27,6 +27,7 @@ var UserSchema = new Schema({
   }],
   clanId: {type: String, default: "clan_id_not_set"},
   clanName: {type: String},
+  clanImageUrl: {type:String},
   imageUrl: String,
   uDate: Date,
   signupDate: Date,
