@@ -36,24 +36,30 @@ function sendMessage(data, messageCreator, callback) {
 			function(callback) {
 				models.event.getById(data.eId, callback)
 			},
-			function (event, callback) {
-				eventObj = event
-				utils.l.d("Event to send in payload: " , utils.l.eventLog(event))
-				if(utils._.isInvalidOrBlank(event)) return callback({ error: "no event found" }, null)
-				else models.event.update(event,callback)
-			},function(eventDB, callback){
-				models.user.getUserById(data, callback)
+			function(event, callback) {
+				if(!event) {
+					utils.l.i("No event found in database", data.eId)
+					return callback({error: "This event has been deleted"}, null)
+				} else {
+					eventObj = event
+					models.user.getUserById(data, callback)
+				}
 			},
 			function (user, callback) {
-				models.installation.getInstallationByUser(user, callback)
+				if(!user) {
+					return callback({error: "There was an issue in sending the message"}, null)
+				} else {
+					models.installation.getInstallationByUser(user, callback)
+				}
 			},
 			function (installation, callback) {
 				var notificationObject = {
-					name : "messageFromPlayer"
+					name: "messageFromPlayer"
 				}
-				var message = utils.primaryConsole(messageCreator).consoleId + " from " + eventObj.eType.aSubType + ": "  + data.message
+				var message = utils.primaryConsole(messageCreator).consoleId + " from "
+					+ eventObj.eType.aSubType + ": "  + data.message
 				helpers.pushNotification.sendSinglePushNotification(eventObj, message, notificationObject, null, installation)
-				return callback(null, { messageSent: data.message })
+				return callback(null, {messageSent: data.message })
 			}
 		], callback)
 }
@@ -70,7 +76,6 @@ function sendCustomMessageToAllUsers(data, callback) {
 			var notificationObject = {
 				name : "customMessageFromFounders"
 			}
-
 			utils.async.map(users, models.installation.getInstallationByUser, function(err, installations) {
 				helpers.pushNotification.sendMultiplePushNotifications(installations, null, data.message, notificationObject, null)
 			})
