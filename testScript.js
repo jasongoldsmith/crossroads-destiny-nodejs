@@ -159,6 +159,11 @@ switch(command) {
     var estTime = utils.moment.tz(Date.now(), 'America/New_York').utc().format()
     console.log("estTime::"+estTime)
     break;
+  case "messageFormat":
+    var evt = require("/Users/dasasr/projects/traveler/tmp/event.json");
+    var message = notifService.formatMessage("#PLAYERS_PREFIX_TXT##PLAYERS_COUNT_NEEDED##PLAYERS_NEEDED_TXT##EVENT_NAME#. If you are still interested, please tap to confirm.",evt,null,null)
+    console.log("message::"+message)
+    break
   default:
     return;
 }

@@ -59,10 +59,23 @@ function formatMessage(messageTemplate, event, playerLeft, comment) {
 	if(messageTemplate.indexOf("#PLAYERS_NEEDED#") >= 0 ) {
 		var playersNeeded = event.maxPlayers - event.players.length
 		messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED#", "" + playersNeeded)
+	}
+
+	if(messageTemplate.indexOf("#PLAYERS_COUNT_NEEDED#") >= 0 ) {
+		var playersNeeded = event.maxPlayers - event.players.length
 
 		if(messageTemplate.indexOf("#PLAYERS_NEEDED_TXT#") >= 0){
-			if(playersNeeded > 1) messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "more players" )
-			else messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "player")
+			if(playersNeeded > 1) {
+				messageTemplate = messageTemplate.replace("#PLAYERS_COUNT_NEEDED#", "" + playersNeeded)
+				messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", " more players for ").replace("#PLAYERS_PREFIX_TXT#", "We are looking for ")
+			}else if(playersNeeded == 1) {
+				messageTemplate = messageTemplate.replace("#PLAYERS_COUNT_NEEDED#", "" + playersNeeded)
+				messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", " player for ").replace("#PLAYERS_PREFIX_TXT#", "We are looking for ")
+			}
+			else {
+				messageTemplate = messageTemplate.replace("#PLAYERS_COUNT_NEEDED#", "")
+				messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "").replace("#PLAYERS_PREFIX_TXT#", "Your fireteam is ready for ")
+			}
 		}
 	}
 
@@ -184,5 +197,6 @@ function getTimeStringForDisplay(date) {
 module.exports = {
 	getNotificationDetails: getNotificationDetails,
 	getAggregateNotificationDetails: getAggregateNotificationDetails,
-	getClanMembers:getClanMembers
+	getClanMembers:getClanMembers,
+	formatMessage:formatMessage
 }
