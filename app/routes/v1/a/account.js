@@ -38,7 +38,7 @@ function handlUpdateHelmet(user, callback) {
       var primaryConsoleIndex = utils.primaryConsoleIndex(user)
       newHelmetURL = helmet.helmetURL
       user.consoles[primaryConsoleIndex].clanTag = helmet.clanTag
-      user.consoles[primaryConsoleIndex].imageUrl = newHelmetURL
+      user.consoles[primaryConsoleIndex].imageUrl = utils.config.bungieBaseURL + newHelmetURL
       user.consoles[primaryConsoleIndex].destinyMembershipId = helmet.destinyProfile.memberShipId
       models.user.updateUser({id:user._id,imageUrl:utils.config.bungieBaseURL+newHelmetURL,consoles:user.consoles},false,callback)
     }
