@@ -164,8 +164,7 @@ function addConsole(user, console, callback) {
     },
     function (bungieMember, callback) {
       if(bungieMember.bungieMemberShipId.toString() != user.bungieMemberShipId.toString()) {
-        var errMsgTemplate = "Oops!/n We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account." +
-          " Make sure your profile is public and try again."
+        var errMsgTemplate = utils.constants.bungieMessages.addConsoleErrorMsg
         var errMsg = errMsgTemplate
           .replace("#CONSOLE_TYPE#", console.consoleType)
           .replace("#CONSOLE_ID#", console.consoleId)

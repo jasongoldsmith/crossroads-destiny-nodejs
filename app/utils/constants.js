@@ -524,7 +524,8 @@ var bungieMessageTypes = {
 
 var bungieMessages = {
   accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder! Click the link to verify your %CONSOLETYPE%. %URL%',
-  passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL%. If you did not make this request, please let us know and disregard this message.'
+  passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL%. If you did not make this request, please let us know and disregard this message.',
+  addConsoleErrorMsg: "Oops! We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account. Make sure your profile is public and try again."
 }
 var bungieErrorMessage= function(messageId) {
   console.log('bungieErrorMessage::messageId',messageId)
