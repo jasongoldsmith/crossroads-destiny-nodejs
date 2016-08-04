@@ -164,7 +164,7 @@ function deleteEvent(data, callback) {
 }
 
 function clearEventsForPlayer(req, res) {
-	service.eventService.clearEventsForPlayer(req.body.playerId, function(err, events) {
+	service.eventService.clearEventsForPlayer(req.user, null, null, function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {

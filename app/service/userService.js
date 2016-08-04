@@ -115,7 +115,7 @@ function timeoutUser(user,notifTrigger,callback){
       //remove user from all events
       //TODO: Change clearEventsForPlayer to send one push notificaiton or remove the notification part
       //TODO: Clarify if we should not notify the creator
-      eventService.clearEventsForPlayer(user._id,utils.constants.eventLaunchStatusList.now, callback)
+      eventService.clearEventsForPlayer(user, utils.constants.eventLaunchStatusList.now, null, callback)
     }
   ],function(err,eventsLeft){
     utils.l.d('timeoutUser::'+utils.l.userLog(user)+"\n\teventsLeft::\n\t",utils.l.eventLog(eventsLeft))
@@ -147,7 +147,7 @@ function upgradeConsole(user, oldConsoleType, newConsoleType, callback) {
         var errMsg = "#CONSOLE_TYPE# not found for user"
         return callback ({error: errMsg.replace("#CONSOLE_TYPE#", oldConsoleType)}, null)
       } else {
-        eventService.clearEventsForPlayer(user._id, null, callback)
+        eventService.clearEventsForPlayer(user, null, oldConsoleType, callback)
       }
     },
     function (events, callback) {

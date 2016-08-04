@@ -311,10 +311,6 @@ function launchEvent(event, callback){
 	)
 }
 
-function listEventsByUser(userId, callback) {
-	getByQuery({players: {$in: [userId]}}, null, callback)
-}
-
 function listEventCount(id,filter,callback){
 	Event
 			.aggregate([{ $match : filter},{$group: {_id : "$"+id, count:  { $sum : 1} }}])
@@ -368,7 +364,6 @@ module.exports = {
 	getById: getById,
 	launchEvent: launchEvent,
 	update:update,
-	listEventsByUser:listEventsByUser,
 	listEventCount: listEventCount,
 	removeEvent: removeEvent,
 	updateEvent: updateEvent

@@ -4,25 +4,15 @@ var helpers = require('../helpers')
 var eventPushService = require('./eventBasedPushNotificationService')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
 
-function clearEventsForPlayer(playerId, launchStatus, callback){
+function clearEventsForPlayer(user, launchStatus, consoleType, callback){
 
   utils.async.waterfall([
     function(callback){
-      models.event.listEventsByUser(playerId, function(err, eventList) {
-        if(err) {
-          return callback(err, null)
-        } else {
-          if(utils._.isValidNonBlank(launchStatus)) {
-            return callback(null, utils._.filter(eventList, {launchStatus: launchStatus}))
-          } else {
-            return callback(null, eventList)
-          }
-        }
-      })
+      models.event.getByQuery(getEventsByPlayerQuery(user._id.toString(), consoleType, launchStatus), null, callback)
     },function(eventList, callback) {
       //mapSeries used to avoid the consurrency situation in the same session.
       utils.async.mapSeries(eventList, function(event, callback){
-          handleLeaveEvent({eId: event._id,player: playerId}, true, callback)
+          handleLeaveEvent(user, {eId: event._id.toString()}, true, callback)
       },
       callback)
     }
@@ -274,6 +264,15 @@ function handleUserCommentReports(user, event, callback) {
 
 function createCommentTextForPush(user, event, comment) {
   return utils.consoleByType(user, event.consoleType).consoleId + ": " + comment
+}
+
+function getEventsByPlayerQuery(playerId,consoleType,launchStatus){
+  var query = {players: playerId}
+  if(consoleType)
+    query.consoleType = consoleType
+  if(launchStatus)
+    query.launchStatus = launchStatus
+  return query
 }
 
 module.exports = {
