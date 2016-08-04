@@ -56,7 +56,16 @@ function sendMultiplePushNotificationsForUsers(notification, data, clanId) {
   })
 }
 
-function getPayload(event, notificationResponse, clanId) {
+function getPayload(data, notificationResponse, clanId) {
+  var event = null
+  var user = null
+  if(notificationResponse.name.toString() == "messageFromPlayer") {
+    event = data.event
+    user = data.user
+  } else {
+    event = data
+  }
+
   var activityId = null
   if(utils._.isValidNonBlank(event) && (event.deleted)){
     if(utils._.isValidNonBlank(event.eType) && utils._.isValidNonBlank(event.eType._id))
@@ -71,9 +80,11 @@ function getPayload(event, notificationResponse, clanId) {
     eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
     eventName: utils._.isValidNonBlank(event) ? event.eType.aSubType : null,
     eventClanId: utils._.isValidNonBlank(event) ? event.clanId : clanId,
-    eventClanName: utils._.isValidNonBlank(event) ? event.clanName : "",
-    eventClanImageUrl: utils._.isValidNonBlank(event) ? event.clanImageUrl : "",
-    eventConsole: utils._.isValidNonBlank(event) ? event.consoleType : "",
+    eventClanName: utils._.isValidNonBlank(event) ? event.clanName : null,
+    eventClanImageUrl: utils._.isValidNonBlank(event) ? event.clanImageUrl : null,
+    eventConsole: utils._.isValidNonBlank(event) ? event.consoleType : null,
+    messengerConsoleId: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).consoleId : null,
+    messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl : null,
     isTrackable: true
   }
   utils.l.d("payload", payload)
