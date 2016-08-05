@@ -231,7 +231,8 @@ function getBungieHelmet(consoleId, consoleType, callback){
       utils.l.d("clanTag",clanTag)
       var character = getRecentlyPlayedCharacter(accountDetails.destinyAccounts, destinyProfile.memberShipId, destinyProfile.memberShipType)
       utils.l.d("recent character",character)
-      callback(null, character)
+      if(character) callback(null, character)
+      else callback({error:"Looks like you do not have any destiny account."},null)
     },function(character, callback){
       //var bungieItemsURL = "https://www.bungie.net/Platform/Destiny/" + memberShipType+"/Account/"+memberShipId+"/Character/"+characterId+"/Inventory/Summary?definitions=true"
       var bungieItemsURL = utils.config.bungieItemsURL
