@@ -31,7 +31,6 @@ function sendToAll(req, res) {
 
 function sendMessage(data, messageCreator, callback) {
 	var eventObj = null
-	var userObj = null
 	utils.async.waterfall(
 		[
 			function(callback) {
@@ -50,7 +49,6 @@ function sendMessage(data, messageCreator, callback) {
 				if(!user) {
 					return callback({error: "There was an issue in sending the message"}, null)
 				} else {
-					userObj = user
 					models.installation.getInstallationByUser(user, callback)
 				}
 			},
@@ -62,7 +60,7 @@ function sendMessage(data, messageCreator, callback) {
 					+ eventObj.eType.aSubType + ": "  + data.message
 
 				var payload = {
-					user: userObj,
+					user: messageCreator,
 					event: eventObj
 				}
 				helpers.pushNotification.sendSinglePushNotification(payload, message, notificationObject, null, installation)

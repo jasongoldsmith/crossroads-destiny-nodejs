@@ -59,6 +59,8 @@ function sendMultiplePushNotificationsForUsers(notification, data, clanId) {
 function getPayload(data, notificationResponse, clanId) {
   var event = null
   var user = null
+
+  // If it is a message from a player we need the user object as well
   if(notificationResponse.name.toString() == "messageFromPlayer") {
     event = data.event
     user = data.user
@@ -73,6 +75,7 @@ function getPayload(data, notificationResponse, clanId) {
     else
       activityId = event.eType
   }
+
   var payload = {
     notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
     eventId: utils._.isValidNonBlank(event) ? event._id : null,
@@ -83,7 +86,8 @@ function getPayload(data, notificationResponse, clanId) {
     eventClanName: utils._.isValidNonBlank(event) ? event.clanName : null,
     eventClanImageUrl: utils._.isValidNonBlank(event) ? event.clanImageUrl : null,
     eventConsole: utils._.isValidNonBlank(event) ? event.consoleType : null,
-    messengerConsoleId: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).consoleId.toString() : null,
+    //TODO: change this to the sender's consoleId when we implement ia-app notifications
+    messengerConsoleId: utils._.isValidNonBlank(user) ? "Message" : null,
     messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl.toString() : null,
     isTrackable: true
   }
