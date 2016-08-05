@@ -302,21 +302,27 @@ function getSignupMessage(user){
 }
 
 function requestResetPassword(req,res){
+  var useGamerTag = false
   utils.async.waterfall([
       function (callback) {
         var userName = req.body.userName
         var consoleType = req.body.consoleType
         var consoleId = req.body.consoleId
         utils.l.d("requestResetPassword::userName="+userName+",consoleType="+consoleType+",consoleId="+consoleId)
-        if(utils._.isValidNonBlank(consoleType))
-          models.user.getUserByData({"consoles.consoleId":consoleId,"consoles.consoleType":consoleType},callback)
+        if(utils._.isValidNonBlank(consoleType)) {
+          useGamerTag = true
+          models.user.getUserByData({"consoles.consoleId": consoleId, "consoles.consoleType": consoleType}, callback)
+        }
         else
           models.user.getUserByData({userName:userName},callback)
       },
       function(user,callback){
         if(user) {
           service.authService.requestResetPassword(user, callback)
-        }else callback({error:"Invalid User Name. Please provide a valid Crossroads User Name"})
+        }else {
+         if(useGamerTag) callback({error: "Please provide a valid gamertag."})
+          else callback({error: "Please provide a valid Crossroads Username."})
+        }
       }
     ],
     function (err, updatedUser) {

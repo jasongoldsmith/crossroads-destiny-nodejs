@@ -38,9 +38,9 @@ function save(userGroup, callback) {
       userGroup.markModified('groups')
       userGroup.save(function (err, c, numAffected) {
         if (err) {
-          utils.l.s("Got error on saving userGroup", {err: err, userGroup: userGroup})
+          utils.l.i("Got error on saving userGroup", {err: err, userGroup: userGroup})
         } else if (!c) {
-          utils.l.s("Got null on saving userGroup", {userGroup: userGroup})
+          utils.l.i("Got null on saving userGroup", {userGroup: userGroup})
         }
         return callback(err, c)
       })
