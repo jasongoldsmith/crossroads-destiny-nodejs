@@ -18,7 +18,27 @@ angular.module('datamanager', ['ngRoute', 'auth']).controller('activityControlle
 					$scope.$emit('UNLOAD')
 				});
 
-				$scope.animationsEnabled = true;
+			$scope.getSchema = function(schemaType,objectName){
+
+				var userSchema = {
+					editorSchema:[{lable:objectName+"._id",model:objectName+"._id"},
+						{lable:objectName+".userName",model:objectName+".userName"},
+						{lable:objectName+".imageUrl",model:objectName+".imageUrl"},
+						{lable:objectName+".consoles._id",model:objectName+".consoles._id"},
+						{lable:objectName+".consoles.consoleType",model:objectName+".consoles.consoleType"}
+					],
+					tableSchema:[{lable:"Id",model:objectName+"._id"},
+						{lable:"UserName",model:objectName+".userName"},
+						{lable:"ImageUrl",model:objectName+".imageUrl"},
+						{lable:"Console Type",model:objectName+".consoles.consoleType"}
+					]
+				}
+
+				if(schemaType == "userSchema") return userSchema;
+				else return {}
+			}
+
+			$scope.animationsEnabled = true;
 
 			$scope.updateActivity = function (activityId,activity) {
 				var modalInstance = $uibModal.open({
@@ -52,14 +72,17 @@ angular.module('datamanager').controller('ModalInstanceCtrl', function ($scope, 
 
 	$scope.activityDetails = items;
 
-	console.log("cust oder data::"+items.data);
-
 	$scope.ok = function () {
 		$uibModalInstance.close();
 	};
 
 	$scope.updateActivity = function (){
-		var activityObj = {
+		var activityObj = $scope.activityDetails
+		activityObj.id = $scope.activityDetails._id
+		
+		if($scope.activityDetails.modifiers && $scope.activityDetails.modifiers != "")
+			activityObj.modifiers = $scope.activityDetails.modifiers.split(',')
+/*		var activityObj = {
 			id:$scope.activityDetails._id,
 			aType: $scope.activityDetails.aType,
 			aSubType: $scope.activityDetails.aSubType,
@@ -80,7 +103,7 @@ angular.module('datamanager').controller('ModalInstanceCtrl', function ($scope, 
 						adCardSubHeader: $scope.activityDetails.adCard.adCardSubHeader,
 			},
 			location: $scope.activityDetails.location
-		}
+		}*/
 		console.log("updated activity::"+JSON.stringify(activityObj))
 		var headers = {"Content-Type":"application/json"};
 		$http({method: "POST", url: "/api/v1/activity/update", data:activityObj, config: headers}).
