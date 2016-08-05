@@ -198,3 +198,18 @@ function createUserGroupFlatmap(){
 
 createUserGroupFlatmap()
 //-----------END------------
+
+//-----------BEGIN----------
+//-----------Update image url in console for all users----------
+function createUserGroupFlatmap(){
+    var usersList = db.getCollection('users').find({})
+    var tUsers = db.getCollection('users')
+    usersList.forEach(
+        function (user) {
+            tUsers.update({'_id':user._id},{"$set":{'consoles.0.imageUrl':user.imageUrl}},{"upsert":true,'multi':true})
+        }
+    )
+}
+
+createUserGroupFlatmap()
+//-----------END------------
