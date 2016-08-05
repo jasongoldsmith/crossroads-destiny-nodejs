@@ -79,7 +79,7 @@ angular.module('datamanager').controller('ModalInstanceCtrl', function ($scope, 
 	$scope.updateActivity = function (){
 		var activityObj = $scope.activityDetails
 		activityObj.id = $scope.activityDetails._id
-		
+
 		if($scope.activityDetails.modifiers && $scope.activityDetails.modifiers != "")
 			activityObj.modifiers = $scope.activityDetails.modifiers.split(',')
 /*		var activityObj = {

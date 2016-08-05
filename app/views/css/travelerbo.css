@@ -45,3 +45,7 @@ th {
 .myrow p:last-child {
   margin-bottom: 0; /* optional */
 }
+
+.table-info{
+  background-color: #18303a;
+}
