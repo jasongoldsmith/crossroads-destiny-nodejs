@@ -88,7 +88,7 @@ function getPayload(data, notificationResponse, clanId) {
     eventConsole: utils._.isValidNonBlank(event) ? event.consoleType : null,
     //TODO: change this to the sender's consoleId when we implement ia-app notifications
     messengerConsoleId: utils._.isValidNonBlank(user) ? "Message" : null,
-    messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl.toString() : null,
+    messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl : null,
     isTrackable: true
   }
   utils.l.d("payload", payload)
