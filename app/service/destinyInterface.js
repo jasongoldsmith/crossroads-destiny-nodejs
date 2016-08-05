@@ -5,21 +5,41 @@ var models = require('../models')
 var helpers = require('../helpers')
 var tinyUrlService = require('./tinyUrlService')
 
-function getBungieCookie(callback) {
-  models.sysConfig.getSysConfig(utils.constants.sysConfigKeys.bungieCookie, function(err, sysConfig) {
-    if(!err && sysConfig) {
-      utils.l.d("got cookie from sysconfig: ", sysConfig.value)
-      return callback(sysConfig.value.toString())
+function getBungieVariables(callback) {
+  var keys = [
+    utils.constants.sysConfigKeys.bungieCookie,
+    utils.constants.sysConfigKeys.bungieCsrfToken
+  ]
+  var bungieVariables = {}
+  models.sysConfig.getSysConfigList(keys, function(err, sysConfigList) {
+    if(!err && sysConfigList) {
+      var bungieCookie = utils._.find(sysConfigList, function(sysConfig) {
+        return sysConfig.key.toString() == utils.constants.sysConfigKeys.bungieCookie
+      })
+      var bungieCsrfToken = utils._.find(sysConfigList, function(sysConfig) {
+        return sysConfig.key.toString() == utils.constants.sysConfigKeys.bungieCsrfToken
+      })
+      utils.l.d("got bungie cookie from sysconfig: ", bungieCookie.value)
+      utils.l.d("got bungie csrf token from sysconfig: ", bungieCsrfToken.value)
+      bungieVariables.bungieCookie = bungieCookie.value.toString()
+      bungieVariables.bungieCsrfToken = bungieCsrfToken.value.toString()
     }
     else {
-      var cookieStr = utils.config.bungieCookie
-      if(utils._.isValidNonBlank(cookieStr)) {
-        utils.l.d("got cookie from defaults: ", cookieStr)
+      bungieVariables.bungieCookie = utils.config.bungieCookie
+      bungieVariables.bungieCsrfToken = utils.config.bungieCSRFToken
+      if(utils._.isValidNonBlank(utils.config.bungieCookie)) {
+        utils.l.d("got cookie from defaults: ", utils.config.bungieCookie)
       } else {
         utils.l.s("unable to get bungie cookie value")
       }
+
+      if(utils._.isValidNonBlank(utils.config.bungieCSRFToken)) {
+        utils.l.d("got csrf token from defaults: ", utils.config.bungieCSRFToken)
+      } else {
+        utils.l.s("unable to get bungie csrf value")
+      }
     }
-    return callback(cookieStr)
+    return callback(bungieVariables)
   })
 }
 
@@ -386,18 +406,18 @@ function bungieGet(url, gamerId, consoleType, callback){
 function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callback) {
   utils.async.waterfall([
     function (callback) {
-      getBungieCookie(function(bungieCookie) {
-        return callback(null, bungieCookie)
+      getBungieVariables(function(bungieVariables) {
+        return callback(null, bungieVariables)
       })
     },
-    function (bungieCookie, callback) {
+    function (bungieVariables, callback) {
       request({
         url: url,
         method: "POST",
         headers: {
           'x-api-key': utils.config.bungieAPIToken,
-          'x-csrf': utils.config.bungieCSRFToken,
-          'cookie': bungieCookie
+          'x-csrf': bungieVariables.bungieCsrfToken,
+          'cookie': bungieVariables.bungieCookie
         },
         body:msgBody,
         json:true
