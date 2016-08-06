@@ -76,21 +76,41 @@ function getPayload(data, notificationResponse, clanId) {
       activityId = event.eType
   }
 
-  var payload = {
-    notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
-    eventId: utils._.isValidNonBlank(event) ? event._id : null,
-    activityId: activityId,
-    eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
-    eventName: utils._.isValidNonBlank(event) ? event.eType.aSubType : null,
-    eventClanId: utils._.isValidNonBlank(event) ? event.clanId : clanId,
-    eventClanName: utils._.isValidNonBlank(event) ? event.clanName : null,
-    eventClanImageUrl: utils._.isValidNonBlank(event) ? event.clanImageUrl : null,
-    eventConsole: utils._.isValidNonBlank(event) ? event.consoleType : null,
-    //TODO: change this to the sender's consoleId when we implement ia-app notifications
-    messengerConsoleId: utils._.isValidNonBlank(user) ? "Message" : null,
-    messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl : null,
-    isTrackable: true
+  var payload = null
+  if(notificationResponse.name.toString() == "customMessageFromFounders") {
+    payload =   {
+      notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
+      eventId: utils._.isValidNonBlank(event) ? event._id : null,
+      activityId: activityId,
+      eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
+      eventName: " ",
+      eventClanId: utils._.isValidNonBlank(event) ? event.clanId : clanId,
+      eventClanName: " ",
+      eventClanImageUrl: utils._.isValidNonBlank(event) ? event.clanImageUrl : null,
+      eventConsole: "ANNOUNCEMENT",
+      //TODO: change this to the sender's consoleId when we implement ia-app notifications
+      messengerConsoleId: utils._.isValidNonBlank(user) ? "Message" : null,
+      messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl : null,
+      isTrackable: true
+    }
+  }else{
+    payload =   {
+      notificationName: utils._.isValidNonBlank(notificationResponse) ? notificationResponse.name : null,
+      eventId: utils._.isValidNonBlank(event) ? event._id : null,
+      activityId: activityId,
+      eventUpdated: utils._.isValidNonBlank(event) ? event.updated : null,
+      eventName: utils._.isValidNonBlank(event) ? event.eType.aSubType : null,
+      eventClanId: utils._.isValidNonBlank(event) ? event.clanId : clanId,
+      eventClanName: utils._.isValidNonBlank(event) ? event.clanName : null,
+      eventClanImageUrl: utils._.isValidNonBlank(event) ? event.clanImageUrl : null,
+      eventConsole: utils._.isValidNonBlank(event) ? event.consoleType : null,
+      //TODO: change this to the sender's consoleId when we implement ia-app notifications
+      messengerConsoleId: utils._.isValidNonBlank(user) ? "Message" : null,
+      messengerImageUrl: utils._.isValidNonBlank(user) ? utils.primaryConsole(user).imageUrl : null,
+      isTrackable: true
+    }
   }
+
   utils.l.d("payload", payload)
   return payload
 }

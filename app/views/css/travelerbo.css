@@ -54,3 +54,8 @@ th {
   background-color: #18303a;
   color: white
 }
+
+.element-container{
+  height: 600px;
+  overflow: scroll;
+}
