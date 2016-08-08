@@ -19,7 +19,7 @@ function createActivity(data, callback) {
 	utils.async.waterfall([
 		function (callback) {
 			Activity.findOne({ aType: data.aType, aSubType: data.aSubType, aCheckpoint: data.aCheckpoint,
-				aDifficulty: data.aDifficulty, aLevel: data.aLevel}, callback)
+				aDifficulty: data.aDifficulty, aLevel: data.aLevel, tag: data.tag}, callback)
 		},
 		function (activity, callback) {
 			if (!activity) {
@@ -33,8 +33,8 @@ function createActivity(data, callback) {
 	], callback)
 }
 
-function listActivities(callback) {
-	getByQuery({isActive: {$ne: false}}, callback)
+function listActivities(activityType, callback) {
+	getByQuery(constructFindActivityQuery(activityType), callback)
 }
 
 function listAdActivities(callback) {
@@ -78,6 +78,16 @@ function updateActivity(data, callback) {
 			}
 		}
 	], callback)
+}
+
+function constructFindActivityQuery(activityType) {
+	var query = {
+		isActive : {$ne: false}
+	}
+	if(activityType) {
+		query.aType = activityType
+	}
+	return query
 }
 
 module.exports = {
