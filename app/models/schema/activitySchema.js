@@ -9,23 +9,23 @@ var activitySchema = new Schema({
 	aDifficulty: String,
 	tag: String,
 	aDisplayName: String,
+	aDescription:String,
+	aStory:String,
 	aModifiers: [{
 		aModifierName: String,
 		aModifierInfo: String,
-		aModifierIconURL: String,
+		aModifierIconUrl: String,
 		isActive: Boolean
 	}],
 	aBonus:[{
-		aBonusName:String,
-		aBonusInfo:String,
-		aBonusIconURL:String,
-		isActive:Boolean
+		aBonusName: String,
+		aBonusInfo: String,
+		aBonusIconUrl: String,
+		isActive: Boolean
 	}],
 	aLocation : {
-		aDirectorLocation:String,
-		aSubLocation:String,
-		aDescription:String,
-		aStory:String
+		aDirectorLocation: String,
+		aSubLocation: String,
 	},
 	aLight: Number,
 	aLevel: Number,
