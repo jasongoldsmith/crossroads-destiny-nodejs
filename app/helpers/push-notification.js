@@ -9,8 +9,8 @@ var models = require('../models')
 
 PushNotification.init({
   apn: {
-    cert: (process.env.NODE_ENV == 'production' ? path.resolve('./keys/prod/cert.pem'): path.resolve('./keys/cert.pem')),
-    key:  (process.env.NODE_ENV == 'production' ? path.resolve('./keys/prod/key.pem'): path.resolve('./keys/key.pem')),
+    cert: (process.env.NODE_ENV == 'production' ? fs.readFileSync('./keys/prod/cert.pem'): fs.readFileSync('./keys/cert.pem')),
+    key:  (process.env.NODE_ENV == 'production' ? fs.readFileSync('./keys/prod/key.pem'): fs.readFileSync('./keys/key.pem')),
     production: (process.env.NODE_ENV === 'production'),
     gateway: (process.env.NODE_ENV == 'production' ? "gateway.push.apple.com": "gateway.sandbox.push.apple.com")
 
@@ -51,7 +51,7 @@ function sendMultiplePushNotificationsForUsers(notification, data, clanId) {
   utils.l.d("sendMultiplePushNotificationsForUsers::notification::", {notification:notification.name,message:notification.message})
 
   notification.recipients = utils._.filter(notification.recipients, 'isLoggedIn')
-  utils.async.mapSeries(notification.recipients, models.installation.getInstallationByUser, function(err, installations) {
+  utils.async.map(notification.recipients, models.installation.getInstallationByUser, function(err, installations) {
     sendMultiplePushNotifications(installations, data, notification.message, notification, clanId)
   })
 }
