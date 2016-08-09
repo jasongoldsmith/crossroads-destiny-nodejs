@@ -175,7 +175,7 @@ switch(command) {
       ar.aType=a.aType
       ar.aSubType=a.aSubType
       ar.aCheckpoint= a.aCheckpoint
-      ar.aCheckpointOrder = a.aCheckpointOrder
+      ar.aCheckpointOrder = a.aCheckpointOrder?a.aCheckpointOrder:0
       ar.aDifficulty = a.aDifficulty
       ar.aModifiers = []
       var modifierItems = a.aModifier.toString().split(',')
@@ -215,8 +215,8 @@ switch(command) {
       location.aSubLocation = a.aSubLocation
       ar.aDescription = a.aDescription
       ar.aStory = a.aStory
-      ar.aLight= a.aLight
-      ar.aLevel= a.aLevel
+      ar.aLight= a.aLight ? a.aLight:0
+      ar.aLevel= a.aLevel? a.aLevel:0
       ar.aIconUrl= a.aIconUrl
       ar.isActive= a.isActive
       ar.isFeatured= a.isFeatured
@@ -239,16 +239,36 @@ switch(command) {
       ar.maxPlayers= a.maxPlayers
 
       //loop through tags for aType
+      ar.tag=""
       var tagJson = utils._.find(tags,{aType: a.aType})
       var tagItems = tagJson.Tags.toString().split(',')
       utils._.map(tagItems, function(tagName){
-        var arLocal = ar
-        arLocal.tag = tagName
+        utils.l.d("tagName::"+tagName.trim())
+        var arLocal = JSON.parse(JSON.stringify(ar));
+        arLocal.tag = tagName.trim()
         activitiesResp.push(arLocal)
       })
     })
-    utils.l.d("activitiesResp",activitiesResp)
+    //utils.l.d("activitiesResp",activitiesResp)
+    utils._.map(activitiesResp,function(activityData){
+      models.activity.createActivity(activityData,function(err, data){
+      })
+    })
   break;
+  case "pushTest" :
+    var alert ="sreeharshadasa need(s) 2 more for King's Fall - Normal, Warpriest. View details…"
+    var eventJSON = require("/Users/dasasr/projects/traveler/tmp/devdata/event.json")
+    var installJSON = require("/Users/dasasr/projects/traveler/tmp/devdata/installation.json")
+    var notifResp = require("/Users/dasasr/projects/traveler/tmp/devdata/notifResp.json")
+    var count = 1
+/*
+    while( count < 2000) {
+      helpers.pushNotification.sendSinglePushNotification(eventJSON, alert, notifResp, null, installJSON)
+      count++
+    }
+*/
+    helpers.pushNotification.sendMultiplePushNotificationsForUsers(notifResp,eventJSON,null)
+    break
   default:
     return;
 }

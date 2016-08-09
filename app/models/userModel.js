@@ -184,13 +184,13 @@ function updateUser(data, allowClanUpdate, callback) {
       },
       function(user, callback) {
         if (!user) {
-          utils.l.i("no user found")
+          utils.l.d("no user found")
           return callback({ error: "user with this id does not exist" }, null)
         } else {
           if(!allowClanUpdate && (data.clanId && data.clanId != user.clanId)) {
             return callback({ error: "ClanId Update is not allowed." }, null)
           }else {
-            utils.l.i("found user: " + utils.l.userLog(user))
+            utils.l.d("found user: " + utils.l.userLog(user))
             if (data.passWord) {
               data.passWord = passwordHash.generate(data.passWord)
             }

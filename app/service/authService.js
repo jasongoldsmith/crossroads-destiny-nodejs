@@ -53,7 +53,7 @@ function signupUser(signupData, callback) {
 						}
 					})
 			} else {
-				utils.l.i("Destiny validation disabled")
+				utils.l.d("Destiny validation disabled")
 				return callback(null, signupData)
 			}
 		},
@@ -75,7 +75,7 @@ function requestResetPassword(userData, callback) {
 			//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
 			// or send notification to both xbox and psn depending on the ID availability
 			if(utils.config.enableBungieIntegration) {
-				utils.l.i("Destiny validation enabled")
+				utils.l.d("Destiny validation enabled")
 				destinyService.sendBungieMessage(
 					userData.bungieMemberShipId,
 					utils.primaryConsole(userData).consoleType,
@@ -90,7 +90,7 @@ function requestResetPassword(userData, callback) {
 						models.user.save(userData, callback)
 					})
 			} else {
-				utils.l.i("Destiny validation disabled")
+				utils.l.d("Destiny validation disabled")
 				return callback(null, userData)
 			}
 		}

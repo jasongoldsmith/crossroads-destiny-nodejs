@@ -7,7 +7,7 @@ var routeUtils = require('../routeUtils')
 var models = require('../../models')
 
 function create(req, res) {
-	utils.l.i("Activity create request: " + JSON.stringify(req.body))
+	utils.l.d("Activity create request: " + JSON.stringify(req.body))
 	createActivity(req.body, function(err, activity) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -19,7 +19,7 @@ function create(req, res) {
 
 function list(req, res) {
 	var activityType = req.param("aType")
-	utils.l.i("Activity list request", activityType)
+	utils.l.d("Activity list request", activityType)
 	listActivities(activityType, function(err, activities) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -30,7 +30,7 @@ function list(req, res) {
 }
 
 function listAll(req, res) {
-	utils.l.i("Activity list all request")
+	utils.l.d("Activity list all request")
 	listAllActivities(function(err, activities) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -41,7 +41,7 @@ function listAll(req, res) {
 }
 
 function listAd(req, res) {
-	utils.l.i("Ad Activities list request")
+	utils.l.d("Ad Activities list request")
 	listAdActivities(function(err, activities) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -52,7 +52,7 @@ function listAd(req, res) {
 }
 
 function listById(req, res) {
-	utils.l.i("Get activity by id request" + JSON.stringify(req.body))
+	utils.l.d("Get activity by id request" + JSON.stringify(req.body))
 	listActivityById(req.body, function(err, activity) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -63,7 +63,7 @@ function listById(req, res) {
 }
 
 function update(req, res) {
-	utils.l.i("Update activity request" + JSON.stringify(req.body))
+	utils.l.d("Update activity request" + JSON.stringify(req.body))
 	updateActivity(req.body, function(err, activity) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)

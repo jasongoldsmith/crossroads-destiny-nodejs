@@ -29,7 +29,7 @@ function list(req, res) {
 }
 
 function listAll(req, res) {
-	utils.l.i("Notification list all request")
+	utils.l.d("Notification list all request")
 	listAllNotifications(function(err, notifications) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -40,7 +40,7 @@ function listAll(req, res) {
 }
 
 function listById(req, res) {
-	utils.l.i("Get notification by id request" + JSON.stringify(req.body))
+	utils.l.d("Get notification by id request" + JSON.stringify(req.body))
 	listNotificationById(req.body, function(err, notification) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -51,7 +51,7 @@ function listById(req, res) {
 }
 
 function update(req, res) {
-	utils.l.i("Update notification request" + JSON.stringify(req.body))
+	utils.l.d("Update notification request" + JSON.stringify(req.body))
 	updateNotification(req.body, function(err, notification) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)

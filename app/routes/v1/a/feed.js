@@ -7,7 +7,7 @@ var helpers = require('../../../helpers')
 var service = require('../../../service')
 
 function getFeed(req, res) {
-	utils.l.i("Get feed request for user: " + JSON.stringify(req.user)
+	utils.l.d("Get feed request for user: " + JSON.stringify(req.user)
 		+ " with console type: " + req.param('consoleType'))
 	service.feedService.getFeed(req.user, req.param('consoleType'), function(err, feed) {
 		if (err) {
