@@ -303,11 +303,11 @@ function getSignupMessage(user){
 
 function requestResetPassword(req,res){
   var useGamerTag = false
+  var userName = req.body.userName
+  var consoleType = req.body.consoleType
+  var consoleId = req.body.consoleId
   utils.async.waterfall([
       function (callback) {
-        var userName = req.body.userName
-        var consoleType = req.body.consoleType
-        var consoleId = req.body.consoleId
         utils.l.d("requestResetPassword::userName="+userName+",consoleType="+consoleType+",consoleId="+consoleId)
         if(utils._.isValidNonBlank(consoleType)) {
           useGamerTag = true
