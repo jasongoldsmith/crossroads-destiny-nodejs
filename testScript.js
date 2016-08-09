@@ -164,6 +164,91 @@ switch(command) {
     var message = notifService.formatMessage("#PLAYERS_PREFIX_TXT##PLAYERS_COUNT_NEEDED##PLAYERS_NEEDED_TXT##EVENT_NAME#. If you are still interested, please tap to confirm.",evt,null,null)
     console.log("message::"+message)
     break
+  case "activityData":
+    var activities = require('/Users/dasasr/projects/traveler/admin/activities.json')
+    var mods = require('/Users/dasasr/projects/traveler/admin/modifiers.json')
+    var tags = require('/Users/dasasr/projects/traveler/admin/tags.json')
+
+    var activitiesResp = []
+    utils._.map(activities, function(a){
+      var ar = {}
+      ar.aType=a.aType
+      ar.aSubType=a.aSubType
+      ar.aCheckpoint= a.aCheckpoint
+      ar.aCheckpointOrder = a.aCheckpointOrder
+      ar.aDifficulty = a.aDifficulty
+      ar.aModifiers = []
+      var modifierItems = a.aModifier.toString().split(',')
+      var modResp = []
+      //loop through modifiers for each modifier
+      utils._.map(modifierItems,function(modifier){
+        var m = utils._.find(mods,{Type:"aModifier",Name:modifier.trim()})
+        if(m) {
+          var mResp = {}
+          mResp.aModifierName = m.Name
+          mResp.aModifierInfo = m.Description
+          mResp.aModifierIconURL = m.Icon
+          mResp.isActive = true
+          modResp.push(mResp)
+        }
+      })
+      ar.aModifiers = modResp
+
+      var bonusLst = a.aBonus.toString().split(',')
+      var bonusLstResp = []
+      //loop through bonusLst for each bonus
+      utils._.map(bonusLst,function(bonus){
+        var m = utils._.find(mods,{Type:"aBonus",Name:bonus.trim()})
+        if(m) {
+          var bResp = {}
+          bResp.aBonusName = m.Name
+          bResp.aBonusInfo = m.Description
+          bResp.aBonusIconURL = m.Icon
+          bResp.isActive = true
+          bonusLstResp.push(bResp)
+        }
+      })
+      ar.aBonus = bonusLstResp
+
+      var location = {}
+      location.aDirectorLocation= a.aDirectorLocation
+      location.aSubLocation = a.aSubLocation
+      ar.aDescription = a.aDescription
+      ar.aStory = a.aStory
+      ar.aLight= a.aLight
+      ar.aLevel= a.aLevel
+      ar.aIconUrl= a.aIconUrl
+      ar.isActive= a.isActive
+      ar.isFeatured= a.isFeatured
+      var adCard = {}
+      adCard.isAdCard= a.isAdCard
+/*
+      adCard.adCardBaseUrl= a.adCardBaseUrl
+      adCard.adCardImagePath
+      adCard.adCardHeader
+      adCard.adCardSubHeader
+*/
+      ar.adCard = adCard
+      var img = {}
+/*
+      img.aImageBaseUrl
+      img.aImageImagePath
+*/
+      ar.aImage= img
+      ar.minPlayers= a.minPlayers
+      ar.maxPlayers= a.maxPlayers
+
+      //loop through tags for aType
+      var tagJson = utils._.find(tags,{aType: a.aType})
+      var tagItems = tagJson.Tags.toString().split(',')
+      utils._.map(tagItems, function(tagName){
+        var arLocal = ar
+        arLocal.tag = tagName
+        activitiesResp.push(arLocal)
+      })
+    })
+    utils.l.d("activitiesResp",activitiesResp)
+  break;
   default:
     return;
 }

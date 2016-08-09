@@ -320,7 +320,7 @@ function requestResetPassword(req,res){
         if(user) {
           service.authService.requestResetPassword(user, callback)
         }else {
-         if(useGamerTag) callback({error: "Please provide a valid gamertag."})
+         if(useGamerTag) callback({error: "Please provide a valid "+ utils._.get(utils.constants.consoleGenericsId, consoleType)})
           else callback({error: "Please provide a valid Crossroads Username."})
         }
       }
