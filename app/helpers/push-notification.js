@@ -6,6 +6,7 @@ var path = require('path')
 var sound = "default"
 var config = require('config')
 var models = require('../models')
+var fs = require('fs')
 
 PushNotification.init({
   apn: {
