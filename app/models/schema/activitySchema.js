@@ -37,12 +37,13 @@ var activitySchema = new Schema({
 		adCardBaseUrl: String,
 		adCardImagePath: String,
 		adCardHeader: String,
-		adCardSubHeader: String,
+		adCardSubHeader: String
 	},
 	aImage: {
 		aImageBaseUrl: String,
 		aImageImagePath: String
 	},
+	aCardOrder:{type: Number},
 	minPlayers: {type : Number, required : true},
 	maxPlayers: {type : Number, required : true}
 })

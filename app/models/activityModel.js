@@ -26,15 +26,15 @@ function createActivity(data, callback) {
 				utils.l.d("no activity found, saving activity")
 				activityObj.save(callback)
 			} else {
-				utils.l.d("found activity: " + activity)
+				uts.l.d("found activity: " + activity)
 				return callback(null, activity)
 			}
 		}
 	], callback)
 }
 
-function listActivities(activityType, callback) {
-	getByQuery(constructFindActivityQuery(activityType), callback)
+function listActivities(activityType, includeTags, callback) {
+	getByQuery(constructFindActivityQuery(activityType,includeTags), callback)
 }
 
 function listAdActivities(callback) {
@@ -80,12 +80,17 @@ function updateActivity(data, callback) {
 	], callback)
 }
 
-function constructFindActivityQuery(activityType) {
+function constructFindActivityQuery(activityType,includeTags) {
 	var query = {
 		isActive : {$ne: false}
 	}
 	if(activityType) {
 		query.aType = activityType
+	}
+
+	includeTags = includeTags && (includeTags==true || includeTags=="true") ?true:false
+	if(!includeTags){
+		query.tag=""
 	}
 	return query
 }

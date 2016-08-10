@@ -167,7 +167,7 @@ switch(command) {
   case "activityData":
     var activities = require('/Users/dasasr/projects/traveler/admin/activities.json')
     var mods = require('/Users/dasasr/projects/traveler/admin/modifiers.json')
-    var tags = require('/Users/dasasr/projects/traveler/admin/tags.json')
+    //var tags = require('/Users/dasasr/projects/traveler/admin/tags.json')
 
     var activitiesResp = []
     utils._.map(activities, function(a){
@@ -217,31 +217,29 @@ switch(command) {
       ar.aStory = a.aStory
       ar.aLight= a.aLight ? a.aLight:0
       ar.aLevel= a.aLevel? a.aLevel:0
-      ar.aIconUrl= a.aIconUrl
-      ar.isActive= a.isActive
-      ar.isFeatured= a.isFeatured
+      ar.aIconUrl= a.aIconURL
+      ar.isActive= a.isActive?a.isActive:false
+      ar.isFeatured= a.isFeatured?a.isFeatured:false
       var adCard = {}
-      adCard.isAdCard= a.isAdCard
-/*
-      adCard.adCardBaseUrl= a.adCardBaseUrl
-      adCard.adCardImagePath
-      adCard.adCardHeader
-      adCard.adCardSubHeader
-*/
+      adCard.isAdCard= a.adCard.isAdCard ? a.adCard.isAdCard :false
+      adCard.adCardBaseUrl= a.adCard.adCardBaseUrl
+      adCard.adCardImagePath= a.adCard.adCardImagePath
+      adCard.adCardHeader= a.adCard.adCardHeader
+      adCard.adCardSubHeader= a.adCard.adCardSubHeader
       ar.adCard = adCard
       var img = {}
-/*
-      img.aImageBaseUrl
-      img.aImageImagePath
-*/
+      img.aImageBaseUrl= a.aBackground.aBackgroundBaseUrl
+      img.aImageImagePath= a.aBackground.aBackgroundImagePath
       ar.aImage= img
       ar.minPlayers= a.minPlayers
       ar.maxPlayers= a.maxPlayers
+      ar.aCardOrder = a.aCardOrder
 
       //loop through tags for aType
       ar.tag=""
-      var tagJson = utils._.find(tags,{aType: a.aType})
-      var tagItems = tagJson.Tags.toString().split(',')
+      //var tagJson = utils._.find(tags,{aType: a.aType})
+      var tagItems = a.tag.toString().split(',')
+      tagItems.push("")
       utils._.map(tagItems, function(tagName){
         utils.l.d("tagName::"+tagName.trim())
         var arLocal = JSON.parse(JSON.stringify(ar));

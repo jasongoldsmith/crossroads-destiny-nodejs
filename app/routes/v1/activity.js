@@ -19,8 +19,9 @@ function create(req, res) {
 
 function list(req, res) {
 	var activityType = req.param("aType")
+	var includeTags=req.param("includeTags")
 	utils.l.d("Activity list request", activityType)
-	listActivities(activityType, function(err, activities) {
+	listActivities(activityType, includeTags,function(err, activities) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
@@ -77,8 +78,8 @@ function createActivity(data, callback) {
 	models.activity.createActivity(data, callback)
 }
 
-function listActivities(activityType, callback) {
-	models.activity.listActivities(activityType, callback)
+function listActivities(activityType, includeTags,callback) {
+	models.activity.listActivities(activityType,includeTags, callback)
 }
 
 function listAdActivities(callback) {
