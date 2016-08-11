@@ -135,8 +135,8 @@ function createEvent(user, data, callback) {
         }
 				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event,
 					utils.getNotificationPlayerListForEventExceptUser(user, event))
-				service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(event)
-				callback(null, event)
+				models.notificationQueue.addToQueue(event, null, null, utils.constants.notificationQueueTypeEnum.newCreate)
+				return callback(null, event)
 			}
 		], callback)
 }

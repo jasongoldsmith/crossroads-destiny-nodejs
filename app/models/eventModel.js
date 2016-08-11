@@ -342,7 +342,7 @@ function removeEvent(event,callback){
 function updateEvent(data, callback) {
 	utils.async.waterfall([
 		function (callback) {
-			Event.findOne({_id: data.id}, callback)
+			Event.findOne({_id: data._id.toString()}, callback)
 		},
 		function(event, callback) {
 			if (!event) {
@@ -354,7 +354,14 @@ function updateEvent(data, callback) {
 				event.save(callback)
 			}
 		}
-	], callback)
+	],
+		function (err, updatedEvent) {
+			if (err) {
+				return callback({error: "We are experiencing some issues. Please try again later"}, null)
+			} else {
+				getById(updatedEvent._id, callback)
+			}
+	})
 }
 
 module.exports = {

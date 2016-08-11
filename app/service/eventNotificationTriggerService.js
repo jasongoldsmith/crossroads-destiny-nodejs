@@ -231,13 +231,13 @@ function handleNewEvents(event, notifTrigger, callback) {
       newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NewCreateForUpcoming"})
       event.notifStatus.push("NewCreateForUpcoming")
       createNotificationAndSend(event, null, null, newEventNotif)
-      models.event.update(event,callback)
+      models.event.updateEvent(event,callback)
     } else if (event.launchStatus == utils.constants.eventLaunchStatusList.now
       && !hasNotifStatus(event.notifStatus,"NoSignupNotification")) {
       newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NoSignupNotification"})
       event.notifStatus.push("NoSignupNotification")
       createNotificationAndSend(event, null, null, newEventNotif)
-      models.event.update(event,callback)
+      models.event.updateEvent(event,callback)
     }
   } else {
     return callback(null, {message: "handleNewEvents Trigger is not active"})

@@ -406,6 +406,39 @@ function eventUpcomingReminder() {
     })
 }
 
+function eventNewCreateNotification() {
+  var stopTime = moment().add(9, 'minutes')
+  var minsToSleep = 1
+  eventNewCreateNotificationHandler()
+  temporal.loop(minsToSleep * 60 * 1000, function() {
+    eventNewCreateNotificationHandler()
+    if(moment() > stopTime) {
+      utils.l.i("eventNewCreateNotification was successful")
+      this.stop()
+    }
+  })
+}
+
+function eventNewCreateNotificationHandler() {
+  utils.async.waterfall([
+      function (callback) {
+        models.notificationQueue.getNotificationFromQueue(utils.constants.notificationQueueTypeEnum.newCreate, callback)
+      },
+      function (notificationQueue, callback) {
+        utils.async.mapSeries(notificationQueue, function (notificationQueueObj, callback) {
+          utils.l.i("notificationQueueObj", notificationQueueObj)
+          service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(notificationQueueObj.event)
+          notificationQueueObj.remove(callback)
+        }, callback)
+      }
+    ],
+    function (err, notificationQueue) {
+      if(err) {
+        utils.l.s("Error sending in eventNewCreateNotificationHandler::" + JSON.stringify(err) + "::" + JSON.stringify(notificationQueue))
+      }
+    })
+}
+
 function helmetsFinder() {
   var fs = require("fs")
   console.log("\n *STARTING* \n")
@@ -594,5 +627,6 @@ module.exports = {
   eventExpiry:eventExpiry,
   userTimeout:userTimeout,
   preUserTimeout:preUserTimeout,
-  createLoadTestUsers: createLoadTestUsers
+  createLoadTestUsers: createLoadTestUsers,
+  eventNewCreateNotification: eventNewCreateNotification
 }

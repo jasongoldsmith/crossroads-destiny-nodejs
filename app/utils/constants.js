@@ -580,6 +580,13 @@ var sysConfigKeys = {
   commentsReportCoolingOffPeriod: "commentsReportCoolingOffPeriod"
 }
 
+var notificationQueueTypeEnum = {
+  join: "Join",
+  leave: "Leave",
+  newCreate: "NewCreate",
+  addComment: "AddComment"
+}
+
 module.exports = {
   l: lodash,
   baseUrl: baseUrl,
@@ -592,9 +599,10 @@ module.exports = {
   userNotificationTrigger: userNotificationTrigger,
   bungieMessageTypes: bungieMessageTypes,
   bungieMessages: bungieMessages,
-  freelanceBungieGroup:freelanceBungieGroup,
-  bungieErrorMessage:bungieErrorMessage,
-  consoleGenericsId:consoleGenericsId,
-  sysConfigKeys:sysConfigKeys,
-  eventStatus:eventStatus
+  freelanceBungieGroup: freelanceBungieGroup,
+  bungieErrorMessage: bungieErrorMessage,
+  consoleGenericsId: consoleGenericsId,
+  sysConfigKeys: sysConfigKeys,
+  eventStatus: eventStatus,
+  notificationQueueTypeEnum: notificationQueueTypeEnum
 }
