@@ -93,8 +93,8 @@ switch(command) {
   case "createLoadTestUsers":
     jobs.createLoadTestUsers()
     break
-  case "eventNewCreateNotification":
-    jobs.eventNewCreateNotification()
+  case "eventBasedNotifications":
+    jobs.eventBasedNotifications()
     break
   case "addSysConfig":
     models.sysConfig.createSysConfig({key:'eventExpiryTimeInMins',description:'Time to expire events. Use - value.',value:'-40'},function(err,sysconf){

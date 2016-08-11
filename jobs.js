@@ -406,12 +406,12 @@ function eventUpcomingReminder() {
     })
 }
 
-function eventNewCreateNotification() {
+function eventBasedNotifications() {
   var stopTime = moment().add(9, 'minutes')
   var minsToSleep = 1
-  eventNewCreateNotificationHandler()
+  eventBasedNotificationsHandler()
   temporal.loop(minsToSleep * 60 * 1000, function() {
-    eventNewCreateNotificationHandler()
+    eventBasedNotificationsHandler()
     if(moment() > stopTime) {
       utils.l.i("eventNewCreateNotification was successful")
       this.stop()
@@ -419,15 +419,27 @@ function eventNewCreateNotification() {
   })
 }
 
-function eventNewCreateNotificationHandler() {
+function eventBasedNotificationsHandler() {
   utils.async.waterfall([
       function (callback) {
-        models.notificationQueue.getNotificationFromQueue(utils.constants.notificationQueueTypeEnum.newCreate, callback)
+        models.notificationQueue.getByQuery({}, callback)
       },
       function (notificationQueue, callback) {
         utils.async.mapSeries(notificationQueue, function (notificationQueueObj, callback) {
           utils.l.i("notificationQueueObj", notificationQueueObj)
-          service.eventBasedPushNotificationService.sendPushNotificationForNewCreate(notificationQueueObj.event)
+          models.event.getById(notificationQueueObj.eventId.toString(), function (err, event) {
+            if (err) {
+              return callback(err, null)
+            } else if (!event) {
+              utils.l.d("Event has been deleted", notificationQueueObj.eventId)
+              return callback(null, null)
+            } else {
+              var userList = notificationQueueObj.notificationInformation ? notificationQueueObj.notificationInformation.userList : null
+              var comment = notificationQueueObj.notificationInformation ? notificationQueueObj.notificationInformation.comment : null
+              service.eventBasedPushNotificationService
+                [utils.constants.notificationQueueTypeEnum[notificationQueueObj.notificationType]](event, userList, comment)
+            }
+          })
           notificationQueueObj.remove(callback)
         }, callback)
       }
@@ -628,5 +640,5 @@ module.exports = {
   userTimeout:userTimeout,
   preUserTimeout:preUserTimeout,
   createLoadTestUsers: createLoadTestUsers,
-  eventNewCreateNotification: eventNewCreateNotification
+  eventBasedNotifications: eventBasedNotifications
 }

@@ -9,7 +9,6 @@ function getFeed(user, consoleType, callback) {
 		},
 		function (events, callback) {
 			var feedObject = {}
-			utils.l.i("inside second function")
 			feedObject.currentEvents = utils._.filter(events, {launchStatus: "now"})
 			feedObject.futureEvents = utils._.filter(events, {launchStatus: "upcoming"})
 			getAdActivites(function(err, adActivities) {

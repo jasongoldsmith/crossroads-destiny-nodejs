@@ -1,12 +1,12 @@
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 var Mixed = Schema.Types.Mixed
+var utils = require('../../utils')
 
 var notificationQueueSchema = new Schema({
-	event: {type: Mixed},
-	userList: [{type: Mixed}],
-	comment: String,
-	notificationType: {type: String, enum: ['Join', 'Leave', 'NewCreate', 'AddComment']}
+	eventId: {type: Schema.Types.ObjectId, ref: 'Event', required: true},
+	notificationInformation: {type: Mixed},
+	notificationType: {type: String, enum: Object.keys(utils.constants.notificationQueueTypeEnum)}
 })
 
 module.exports = {

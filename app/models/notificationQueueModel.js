@@ -13,11 +13,10 @@ function getByQuery(query, callback) {
 		.exec(callback)
 }
 
-function addToQueue(event, userList, comment, notificationType) {
+function addToQueue(eventId, notificationInformation, notificationType) {
 	var notificationQueueData = {
-		event: event ? event.toObject() : null,
-		userList: userList ? userList.toObject() : null,
-		comment: comment,
+		eventId: eventId,
+		notificationInformation: notificationInformation,
 		notificationType: notificationType
 	}
 	var notificationQueueObj = new NotificationQueue(notificationQueueData)
@@ -31,11 +30,7 @@ function addToQueue(event, userList, comment, notificationType) {
 	})
 }
 
-function getNotificationFromQueue(notificationType, callback) {
-	getByQuery({notificationType: notificationType}, callback)
-}
-
 module.exports = {
 	addToQueue: addToQueue,
-	getNotificationFromQueue: getNotificationFromQueue
+	getByQuery: getByQuery
 }

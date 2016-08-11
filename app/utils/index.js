@@ -126,6 +126,14 @@ function getNotificationPlayerListForEventExceptUser(user, event) {
   })
 }
 
+function convertMongooseArrayToPlainArray(mongooseArray) {
+  var plainArray = []
+  lodash.forEach(mongooseArray, function(element) {
+    plainArray.push(element.toObject())
+  })
+  return plainArray
+}
+
 module.exports = {
   format: require('./formatUtils'),
   mongo: require('./mongoUtils'),
@@ -151,5 +159,6 @@ module.exports = {
   getUserConsoleObject: getUserConsoleObject,
   IsUserPartOfTheEvent: IsUserPartOfTheEvent,
   getNotificationPlayerListForEventExceptUser: getNotificationPlayerListForEventExceptUser,
+  convertMongooseArrayToPlainArray: convertMongooseArrayToPlainArray,
   moment:require('moment')
 };

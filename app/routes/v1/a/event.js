@@ -133,9 +133,16 @@ function createEvent(user, data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event,
-					utils.getNotificationPlayerListForEventExceptUser(user, event))
-				models.notificationQueue.addToQueue(event, null, null, utils.constants.notificationQueueTypeEnum.newCreate)
+				if(event.players.length == 1) {
+
+					models.notificationQueue.addToQueue(event._id, null, "newCreate")
+				} else {
+					var notificationInformation = {
+						userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event))
+					}
+					models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
+				}
+
 				return callback(null, event)
 			}
 		], callback)
@@ -151,10 +158,11 @@ function joinEvent(user, data, callback) {
         if(utils._.isInvalid(event)) {
           return callback(null, null)
         }
-
-				service.eventBasedPushNotificationService.sendPushNotificationForJoin(event,
-					utils.getNotificationPlayerListForEventExceptUser(user, event))
-				callback(null, event)
+				var notificationInformation = {
+					userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event))
+				}
+				models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
+				return callback(null, event)
 			}
 		], callback)
 }

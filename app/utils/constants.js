@@ -580,11 +580,12 @@ var sysConfigKeys = {
   commentsReportCoolingOffPeriod: "commentsReportCoolingOffPeriod"
 }
 
+// These keys map to the method names in eventBasedPushNotification
 var notificationQueueTypeEnum = {
-  join: "Join",
-  leave: "Leave",
-  newCreate: "NewCreate",
-  addComment: "AddComment"
+  join: "sendPushNotificationForJoin",
+  leave: "sendPushNotificationForLeave",
+  newCreate: "sendPushNotificationForNewCreate",
+  addComment: "sendPushNotificationForAddComment"
 }
 
 module.exports = {

@@ -42,7 +42,7 @@ function sendPushNotificationForLeave(event, user) {
 			models.notificationTrigger.getByQuery({triggerName: "Leave"}, utils.firstInArrayCallback(callback))
 		},
 		function (notificationTrigger, callback) {
-			notificationTriggerService.handleLeaveEvent(event, user, notificationTrigger, callback)
+			notificationTriggerService.handleLeaveEvent(event, user[0], notificationTrigger, callback)
 		}
 	], function (err, updatedEvent) {
 		if (err) {

@@ -36,7 +36,13 @@ function handleLeaveEvent(user, data, userTimeout, callback) {
 
           if(utils._.isValidNonBlank(user)) {
             userObj = user
-            if(!userTimeout && utils._.isValidNonBlank(event) && !event.deleted) eventPushService.sendPushNotificationForLeave(event, user)
+            if(!userTimeout && utils._.isValidNonBlank(event) && !event.deleted) {
+              var playerLeft = [user]
+              var notificationInformation = {
+                userList: utils.convertMongooseArrayToPlainArray(playerLeft)
+              }
+              models.notificationQueue.addToQueue(event._id, notificationInformation, "leave")
+            }
           }
           callback(null, event)
         })
@@ -111,7 +117,6 @@ function archiveEvent(event,notifTrigger,callback){
       if(notifTrigger.isActive && notifTrigger.notifications.length > 0)
         utils.async.map(notifTrigger.notifications,
           utils._.partial(eventNotificationTriggerService.createNotificationAndSend, event, null, null))
-      //utils.l.d("event after remove::",event)
       helpers.firebase.createEventV2({_id : event._id, clanId : event.clanId}, null,true)
       return callback(null,event)
     }else return callback({error:"Error removing event.id"+event._id},null)
@@ -149,9 +154,11 @@ function addComment(user, data, callback) {
       } else {
         utils.l.d("comment was added successfully to event", data.text)
         utils.l.eventLog(event)
-        eventPushService.sendPushNotificationForAddComment(event,
-          utils.getNotificationPlayerListForEventExceptUser(user, event),
-          createCommentTextForPush(user, event, data.text))
+        var notificationInformation = {
+          userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
+          comment: createCommentTextForPush(user, event, data.text)
+        }
+        models.notificationQueue.addToQueue(event._id, notificationInformation, "addComment")
         helpers.firebase.updateEventV2(event, user, true)
         return callback(null, event)
       }
