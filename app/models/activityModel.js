@@ -85,7 +85,10 @@ function constructFindActivityQuery(activityType,includeTags) {
 		isActive : {$ne: false}
 	}
 	if(activityType) {
-		query.aType = activityType
+		if(activityType == "Featured")
+			query.isFeatured = true
+		else
+			query.aType = activityType
 	}
 
 	includeTags = includeTags && (includeTags==true || includeTags=="true") ?true:false

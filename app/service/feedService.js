@@ -3,13 +3,12 @@ var models = require('../models')
 var helpers = require('../helpers')
 
 function getFeed(user, consoleType, callback) {
-	var feedObject = {}
-
 	utils.async.waterfall([
 		function (callback) {
 			getEvents(user, consoleType, callback)
 		},
 		function (events, callback) {
+			var feedObject = {}
 			utils.l.i("inside second function")
 			feedObject.currentEvents = utils._.filter(events, {launchStatus: "now"})
 			feedObject.futureEvents = utils._.filter(events, {launchStatus: "upcoming"})
