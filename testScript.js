@@ -221,7 +221,8 @@ switch(command) {
       ar.isActive= a.isActive?a.isActive:false
       ar.isFeatured= a.isFeatured?a.isFeatured:false
       var adCard = {}
-      adCard.isAdCard= a.adCard.isAdCard ? a.adCard.isAdCard :false
+      //adCard.isAdCard= a.adCard.isAdCard ? a.adCard.isAdCard :false
+      adCard.isAdCard= false
       adCard.adCardBaseUrl= a.adCard.adCardBaseUrl
       adCard.adCardImagePath= a.adCard.adCardImagePath
       adCard.adCardHeader= a.adCard.adCardHeader

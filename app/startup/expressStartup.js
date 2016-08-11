@@ -82,14 +82,21 @@ module.exports = function (app, passport) {
     if (!req.isAuthenticated()) {
       return routeUtils.handleAPIUnauthorized(req, res)
     }else{
-      //models.user.setFields(req.user.id, {lastActiveTime:new Date(),notifStatus:[]},function(err,user){
-      models.user.findByUserIdAndUpdate(req.user.id, {lastActiveTime:new Date(),notifStatus:[]},function(err,user){
-        if(err){
-          utils.l.d("error in the authenticated API request", err)
-          utils.l.d("error in the authenticated API request for user", user)
-        }
-        next();
-      });
+      var userLastActiveUpdateInterval = utils.config.userLastActiveUpdateInterval
+      var timeDiff = utils.moment().utc().diff(req.user.lastActiveTime, 'minutes')
+      utils.l.d("expressStartup::timeDiff::"+timeDiff+"::lastActiveTime::"+req.user.lastActiveTime+"::userLastActiveUpdateInterval::"+userLastActiveUpdateInterval)
+      if(timeDiff > userLastActiveUpdateInterval){
+        models.user.findByUserIdAndUpdate(req.user.id, {
+          lastActiveTime: new Date(),
+          notifStatus: []
+        }, function (err, user) {
+          if (err) {
+            utils.l.d("error in the authenticated API request", err)
+            utils.l.d("error in the authenticated API request for user", user)
+          }
+          next();
+        });
+      }else next();
     }
     //if (!req.user.isNormal()) {
     //  return res.redirect('/');

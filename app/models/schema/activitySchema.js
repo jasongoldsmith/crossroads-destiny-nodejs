@@ -49,7 +49,7 @@ var activitySchema = new Schema({
 })
 
 activitySchema.index({'aType': 1})
-
+activitySchema.index({'aType': 1,'tag':1,'isFeatured':1})
 module.exports = {
 	schema: activitySchema
 }
