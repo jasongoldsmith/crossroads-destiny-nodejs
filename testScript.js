@@ -21,6 +21,7 @@ var destinyService = require('./app/service/destinyInterface')
 var userService = require('./app/service/userService')
 var authService = require('./app/service/authService')
 var notifService = require('./app/service/eventNotificationService')
+var activityService = require('./app/service/activityService')
 
 var command = process.argv[2]
 var event ='{'+
@@ -77,6 +78,8 @@ var obj = {
     "dateTime": "2016-06-09T20:37:49Z",
   }
 }
+
+
 switch(command) {
   case "helmetTest":
     destinyService.getBungieHelmet("sreeharshadasa","PS4",function(err,helmetURL){
@@ -168,90 +171,8 @@ switch(command) {
     var activities = require('/Users/dasasr/projects/traveler/admin/activities.json')
     var mods = require('/Users/dasasr/projects/traveler/admin/modifiers.json')
     //var tags = require('/Users/dasasr/projects/traveler/admin/tags.json')
-
-    var activitiesResp = []
-    utils._.map(activities, function(a){
-      var ar = {}
-      ar.aType=a.aType
-      ar.aSubType=a.aSubType
-      ar.aCheckpoint= a.aCheckpoint
-      ar.aCheckpointOrder = a.aCheckpointOrder?a.aCheckpointOrder:0
-      ar.aDifficulty = a.aDifficulty
-      ar.aModifiers = []
-      var modifierItems = a.aModifier.toString().split(',')
-      var modResp = []
-      //loop through modifiers for each modifier
-      utils._.map(modifierItems,function(modifier){
-        var m = utils._.find(mods,{Type:"aModifier",Name:modifier.trim()})
-        if(m) {
-          var mResp = {}
-          mResp.aModifierName = m.Name
-          mResp.aModifierInfo = m.Description
-          mResp.aModifierIconURL = m.Icon
-          mResp.isActive = true
-          modResp.push(mResp)
-        }
-      })
-      ar.aModifiers = modResp
-
-      var bonusLst = a.aBonus.toString().split(',')
-      var bonusLstResp = []
-      //loop through bonusLst for each bonus
-      utils._.map(bonusLst,function(bonus){
-        var m = utils._.find(mods,{Type:"aBonus",Name:bonus.trim()})
-        if(m) {
-          var bResp = {}
-          bResp.aBonusName = m.Name
-          bResp.aBonusInfo = m.Description
-          bResp.aBonusIconURL = m.Icon
-          bResp.isActive = true
-          bonusLstResp.push(bResp)
-        }
-      })
-      ar.aBonus = bonusLstResp
-
-      var location = {}
-      location.aDirectorLocation= a.aDirectorLocation
-      location.aSubLocation = a.aSubLocation
-      ar.aDescription = a.aDescription
-      ar.aStory = a.aStory
-      ar.aLight= a.aLight ? a.aLight:0
-      ar.aLevel= a.aLevel? a.aLevel:0
-      ar.aIconUrl= a.aIconURL
-      ar.isActive= a.isActive?a.isActive:false
-      ar.isFeatured= a.isFeatured?a.isFeatured:false
-      var adCard = {}
-      //adCard.isAdCard= a.adCard.isAdCard ? a.adCard.isAdCard :false
-      adCard.isAdCard= false
-      adCard.adCardBaseUrl= a.adCard.adCardBaseUrl
-      adCard.adCardImagePath= a.adCard.adCardImagePath
-      adCard.adCardHeader= a.adCard.adCardHeader
-      adCard.adCardSubHeader= a.adCard.adCardSubHeader
-      ar.adCard = adCard
-      var img = {}
-      img.aImageBaseUrl= a.aBackground.aBackgroundBaseUrl
-      img.aImageImagePath= a.aBackground.aBackgroundImagePath
-      ar.aImage= img
-      ar.minPlayers= a.minPlayers
-      ar.maxPlayers= a.maxPlayers
-      ar.aCardOrder = a.aCardOrder
-
-      //loop through tags for aType
-      ar.tag=""
-      //var tagJson = utils._.find(tags,{aType: a.aType})
-      var tagItems = a.tag.toString().split(',')
-      tagItems.push("")
-      utils._.map(tagItems, function(tagName){
-        utils.l.d("tagName::"+tagName.trim())
-        var arLocal = JSON.parse(JSON.stringify(ar));
-        arLocal.tag = tagName.trim()
-        activitiesResp.push(arLocal)
-      })
-    })
-    //utils.l.d("activitiesResp",activitiesResp)
-    utils._.map(activitiesResp,function(activityData){
-      models.activity.createActivity(activityData,function(err, data){
-      })
+    activityService.createActivities(activities,mods,function(err,data){
+      utils.l.d("Completing activity creation")
     })
   break;
   case "pushTest" :
@@ -267,6 +188,25 @@ switch(command) {
     }
 */
     helpers.pushNotification.sendMultiplePushNotificationsForUsers(notifResp,eventJSON,null)
+    break
+  case "tagTest":
+    var tags = require('/Users/dasasr/projects/traveler/admin/tags1.json')
+    utils._.map(tags,function(tag){
+      utils.l.d("tag",utils._.get(tag, "Tags/Name"))
+    })
+    break
+  case "csvToJSON":
+    activityService.createActivitiesWithConverter("/Users/dasasr/projects/traveler/admin/activities.csv",
+      "/Users/dasasr/projects/traveler/admin/modifiers.csv",
+      function(err,data){
+        utils.l.d("Done with activities")
+    })
+/*
+    converter.fromFile("/Users/dasasr/projects/traveler/admin/modifiers.csv",function(err,result){
+      mods = result
+      utils.l.d("mods",mods)
+    });
+*/
     break
   default:
     return;

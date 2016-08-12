@@ -9,5 +9,6 @@ module.exports = {
   eventService: require('./eventService'),
   feedService: require('./feedService'),
   tinyUrlService: require('./tinyUrlService'),
-  userService: require('./userService')
+  userService: require('./userService'),
+  activityService: require('./activityService')
 }

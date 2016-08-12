@@ -44,6 +44,7 @@ var activitySchema = new Schema({
 		aImageImagePath: String
 	},
 	aCardOrder:{type: Number},
+	aFeedMode:String,
 	minPlayers: {type : Number, required : true},
 	maxPlayers: {type : Number, required : true}
 })
