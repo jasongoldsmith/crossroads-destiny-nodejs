@@ -51,6 +51,7 @@ function createActivities(activities, mods,callback){
     var location = {}
     location.aDirectorLocation= a.aDirectorLocation
     location.aSubLocation = a.aSubLocation
+    ar.aLocation=location
     ar.aDescription = a.aDescription
     ar.aStory = a.aStory
     ar.aLight= a.aLight ? a.aLight:0

@@ -46,11 +46,13 @@ var activitySchema = new Schema({
 	aCardOrder:{type: Number},
 	aFeedMode:String,
 	minPlayers: {type : Number, required : true},
-	maxPlayers: {type : Number, required : true}
+	maxPlayers: {type : Number, required : true},
+	aTypeDefault:{type: Boolean, default: false}
 })
 
 activitySchema.index({'aType': 1})
 activitySchema.index({'aType': 1,'tag':1,'isFeatured':1})
+activitySchema.index({'adCard.isAdCard': 1})
 module.exports = {
 	schema: activitySchema
 }

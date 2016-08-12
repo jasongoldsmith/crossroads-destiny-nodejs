@@ -29,6 +29,8 @@ var eventSchema = new Schema({
 })
 
 eventSchema.index({'eType': 1})
+eventSchema.index({'clanId': 1,"consoleType":2})
+eventSchema.index({'launchStatus': 1,'launchDate':2})
 
 eventSchema.pre('validate', function(next) {
 	if (this.isNew) {
