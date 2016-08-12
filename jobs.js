@@ -429,10 +429,9 @@ function eventBasedNotificationsHandler() {
           utils.l.i("notificationQueueObj", notificationQueueObj)
           models.event.getById(notificationQueueObj.eventId.toString(), function (err, event) {
             if (err) {
-              return callback(err, null)
+              utils.l.s("There was an issue while fetching the event from db", err)
             } else if (!event) {
               utils.l.d("Event has been deleted", notificationQueueObj.eventId)
-              return callback(null, null)
             } else {
               var userList = notificationQueueObj.notificationInformation ? notificationQueueObj.notificationInformation.userList : null
               var comment = notificationQueueObj.notificationInformation ? notificationQueueObj.notificationInformation.comment : null
