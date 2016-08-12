@@ -39,7 +39,8 @@ function handleLeaveEvent(user, data, userTimeout, callback) {
             if(!userTimeout && utils._.isValidNonBlank(event) && !event.deleted) {
               var playerLeft = [user]
               var notificationInformation = {
-                userList: utils.convertMongooseArrayToPlainArray(playerLeft)
+                userList: utils.convertMongooseArrayToPlainArray(playerLeft),
+                playerJoinedOrLeft: user.toObject()
               }
               models.notificationQueue.addToQueue(event._id, notificationInformation, "leave")
             }

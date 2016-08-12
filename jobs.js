@@ -436,6 +436,7 @@ function eventBasedNotificationsHandler() {
             } else {
               var userList = notificationQueueObj.notificationInformation ? notificationQueueObj.notificationInformation.userList : null
               var comment = notificationQueueObj.notificationInformation ? notificationQueueObj.notificationInformation.comment : null
+              event.playerJoinedOrLeft = notificationQueueObj.notificationInformation ? notificationQueueObj.notificationInformation.playerJoinedOrLeft : null
               service.eventBasedPushNotificationService
                 [utils.constants.notificationQueueTypeEnum[notificationQueueObj.notificationType]](event, userList, comment)
             }

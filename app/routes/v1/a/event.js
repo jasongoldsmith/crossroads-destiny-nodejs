@@ -159,7 +159,8 @@ function joinEvent(user, data, callback) {
           return callback(null, null)
         }
 				var notificationInformation = {
-					userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event))
+					userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
+					playerJoinedOrLeft: user.toObject()
 				}
 				models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
 				return callback(null, event)

@@ -42,7 +42,8 @@ function getAggregateNotificationDetails(clanId, consoleType, eventCount, notifi
 
 function formatMessage(messageTemplate, event, playerLeft, comment) {
 	if(messageTemplate.indexOf("#CREATOR#") >= 0 )
-		messageTemplate =  messageTemplate.replace("#CREATOR#", utils.consoleByType(event.creator,event.consoleType).consoleId)
+		messageTemplate =  messageTemplate.replace("#CREATOR#",
+			utils.consoleByType(event.creator,event.consoleType).consoleId)
 	if(messageTemplate.indexOf("#EVENT_NAME#") >= 0 )
 		messageTemplate =  messageTemplate.replace("#EVENT_NAME#", getEventName(event.eType))
 	if(messageTemplate.indexOf("#TIME#") >= 0 )
@@ -51,9 +52,11 @@ function formatMessage(messageTemplate, event, playerLeft, comment) {
 		messageTemplate =  messageTemplate.replace("#COMMENT#", comment)
 
 	if(utils._.isValidNonBlank(playerLeft) && messageTemplate.indexOf("#PLAYER#") >= 0) {
-		messageTemplate = messageTemplate.replace("#PLAYER#", utils.consoleByType(playerLeft,event.consoleType).consoleId)
+		messageTemplate = messageTemplate.replace("#PLAYER#",
+			utils.consoleByType(playerLeft,event.consoleType).consoleId)
 	} else if(messageTemplate.indexOf("#PLAYER#") >= 0 ){
-		messageTemplate = messageTemplate.replace("#PLAYER#", utils.consoleByType(event.players[event.players.length - 1],event.consoleType).consoleId)
+		messageTemplate = messageTemplate.replace("#PLAYER#",
+			utils.consoleByType(event.playerJoinedOrLeft, event.consoleType).consoleId)
 	}
 
 	if(messageTemplate.indexOf("#PLAYERS_NEEDED#") >= 0 ) {
@@ -67,14 +70,20 @@ function formatMessage(messageTemplate, event, playerLeft, comment) {
 		if(messageTemplate.indexOf("#PLAYERS_NEEDED_TXT#") >= 0){
 			if(playersNeeded > 1) {
 				messageTemplate = messageTemplate.replace("#PLAYERS_COUNT_NEEDED#", "" + playersNeeded)
-				messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", " more players for ").replace("#PLAYERS_PREFIX_TXT#", "We are looking for ")
+				messageTemplate = messageTemplate
+					.replace("#PLAYERS_NEEDED_TXT#", " more players for ")
+					.replace("#PLAYERS_PREFIX_TXT#", "We are looking for ")
 			}else if(playersNeeded == 1) {
 				messageTemplate = messageTemplate.replace("#PLAYERS_COUNT_NEEDED#", "" + playersNeeded)
-				messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", " player for ").replace("#PLAYERS_PREFIX_TXT#", "We are looking for ")
+				messageTemplate = messageTemplate
+					.replace("#PLAYERS_NEEDED_TXT#", " player for ")
+					.replace("#PLAYERS_PREFIX_TXT#", "We are looking for ")
 			}
 			else {
 				messageTemplate = messageTemplate.replace("#PLAYERS_COUNT_NEEDED#", "")
-				messageTemplate = messageTemplate.replace("#PLAYERS_NEEDED_TXT#", "").replace("#PLAYERS_PREFIX_TXT#", "Your fireteam is ready for ")
+				messageTemplate = messageTemplate
+					.replace("#PLAYERS_NEEDED_TXT#", "")
+					.replace("#PLAYERS_PREFIX_TXT#", "Your fireteam is ready for ")
 			}
 		}
 	}
