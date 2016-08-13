@@ -14,6 +14,13 @@ function getByQuery(query, callback) {
 		.exec(callback)
 }
 
+function getByQueryAndSort(query, sort, callback) {
+	Activity
+			.find(query)
+			.sort(sort)
+			.exec(callback)
+}
+
 function createActivity(data, callback) {
 	var activityObj = new Activity(data)
 	utils.async.waterfall([
@@ -34,7 +41,7 @@ function createActivity(data, callback) {
 }
 
 function listActivities(activityType, includeTags, callback) {
-	getByQuery(constructFindActivityQuery(activityType,includeTags), callback)
+	getByQueryAndSort(constructFindActivityQuery(activityType,includeTags),{aCheckpointOrder:"ascending",tag:"ascending"}, callback)
 }
 
 function listAdActivities(callback) {

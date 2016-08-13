@@ -196,8 +196,37 @@ switch(command) {
     })
     break
   case "csvToJSON":
+    var adCards = [
+      {
+        "aType" : "Crucible",
+        "aSubType" : "Zone Control",
+        "aCheckpoint" : "",
+        "aDifficulty" : "",
+        "tag" : ""
+      },
+      {
+        "aType" : "Strike",
+        "aSubType" : "Vanguard Nightfall",
+        "aCheckpoint" : "The Shadow Thief",
+        "aDifficulty" : "",
+        "tag" : ""
+      },
+      {
+        "aType" : "Raid",
+        "aSubType" : "King's Fall",
+        "aCheckpoint" : "Golgoroth",
+        "aDifficulty" : "Hard",
+        "tag" : ""
+      },
+      {
+        "aType" : "Arena",
+        "aSubType" : "Challenge of the Elders",
+        "aCheckpoint" : "",
+        "aDifficulty" : "",
+        "tag" : ""
+      }]
     activityService.createActivitiesWithConverter("/Users/dasasr/projects/traveler/admin/activities.csv",
-      "/Users/dasasr/projects/traveler/admin/modifiers.csv",
+      "/Users/dasasr/projects/traveler/admin/modifiers.csv",adCards,
       function(err,data){
         utils.l.d("Done with activities")
     })

@@ -4,9 +4,9 @@ var models = require('../models')
 var Converter = require("csvtojson").Converter;
 var converter = new Converter({});
 
-function createActivities(activities, mods,callback){
-  utils.l.d("inside createActivities",activities)
-  var activitiesResp = []
+function prepareActivities(activities, mods, adcards, callback){
+  utils.l.d("inside prepareActivities",activities)
+  var activitiesResp=[]
   utils._.map(activities, function(a){
    // utils.l.d("activity being created",a)
     var ar = {}
@@ -75,6 +75,7 @@ function createActivities(activities, mods,callback){
     ar.maxPlayers= a.maxPlayers
     ar.aCardOrder = a.aCardOrder?a.aCardOrder:0
     ar.aFeedMode= a.aFeedMode
+    ar.aTypeDefault= a.aTypeDefault
     //loop through tags for aType
     ar.tag=""
     //var tagJson = utils._.find(tags,{aType: a.aType})
@@ -88,13 +89,20 @@ function createActivities(activities, mods,callback){
     })
   })
   //utils.l.d("activitiesResp",activitiesResp)
+  setAdCards(activitiesResp,adcards)
   utils._.map(activitiesResp,function(activityData){
     models.activity.createActivity(activityData,callback)
   })
-  return callback(null,null)
+  return callback(null,activitiesResp)
 }
 
-function createActivitiesWithConverter(activityPath,modsPath,callback){
+function createActivities(activitiesResp,callback){
+  utils._.map(activitiesResp,function(activityData){
+    models.activity.createActivity(activityData,callback)
+  })
+}
+
+function createActivitiesWithConverter(activityPath,modsPath,adcards,callback){
   utils.async.waterfall([
     function(callback){
       utils.l.d("converting activities")
@@ -108,12 +116,25 @@ function createActivitiesWithConverter(activityPath,modsPath,callback){
       });
     },function(activities,mods,callback){
       utils.l.d("creating activities with mods",mods)
-      createActivities(activities,mods,callback)
-    }
+      prepareActivities(activities,mods,adcards,callback)
+    }, /*function(activityModel, callback){
+      setAdCards(activityModel,adcards,callback)
+    }, function (activityModelWithAdCard,callback){
+      createActivities(activityModelWithAdCard,callback)
+    }*/
   ],function(err,result){
     utils.l.d("created activites")
   })
 
+}
+
+function setAdCards(activityList,adcards){
+  utils._.map(adcards,function(ad){
+    var activity = utils._.find(activityList,ad)
+    utils.l.d('found activity',activity)
+    utils._.set(activity,"adCard.isAdCard",true)
+    //activity.adCard.isAdCard=true
+  })
 }
 
 module.exports = {
