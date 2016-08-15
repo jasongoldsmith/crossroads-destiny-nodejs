@@ -213,3 +213,11 @@ function createUserGroupFlatmap(){
 
 createUserGroupFlatmap()
 //-----------END------------
+
+//-----------BEGIN----------
+//-----------Usercount by date----------
+
+db.getCollection('users').aggregate([{"$match":{"date":{"$gt":ISODate("2016-08-12 07:00:00.000Z")}}},
+        {"$group" : { "_id" :  { "$dateToString": { "format": "%Y-%m-%d 00:00:00", "date": "$date" }} , "userCount" : { $sum : 1 } }}
+])
+//-----------END------------

@@ -223,7 +223,9 @@ function launchUpComingReminders(notifTrigger){
 // Event based Notifications
 
 function handleNewEvents(event, notifTrigger, callback) {
-  utils.l.d("Running trigger handleNewEvents for event", utils.l.eventLog(event))
+  var playersNeeded = getPlayersNeeded(event)
+  utils.l.d("Running trigger handleNewEvents for event::playersNeeded"+playersNeeded, utils.l.eventLog(event))
+  utils.l.d('handleNewEvents::notifTrigger',notifTrigger)
   if(notifTrigger.isActive) {
     var newEventNotif = null
     if (event.launchStatus == utils.constants.eventLaunchStatusList.upcoming
@@ -233,12 +235,13 @@ function handleNewEvents(event, notifTrigger, callback) {
       createNotificationAndSend(event, null, null, newEventNotif)
       models.event.update(event,callback)
     } else if (event.launchStatus == utils.constants.eventLaunchStatusList.now
-      && !hasNotifStatus(event.notifStatus,"NoSignupNotification")) {
+      && !hasNotifStatus(event.notifStatus,"NoSignupNotification") && playersNeeded>0) {
+      utils.l.d('handleNewEvents::Sending NoSignupNotification notification for '+playersNeeded)
       newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NoSignupNotification"})
       event.notifStatus.push("NoSignupNotification")
       createNotificationAndSend(event, null, null, newEventNotif)
       models.event.update(event,callback)
-    }
+    }else return callback(null, null)
   } else {
     return callback(null, {message: "handleNewEvents Trigger is not active"})
   }
@@ -308,9 +311,10 @@ function launchUpcomingEvent(event, notifTrigger, callback){
     },
     function(updatedEvent, callback) {
       helpers.firebase.updateEvent(updatedEvent, updatedEvent.creator)
+      var playersNeeded = getPlayersNeeded(event)
       // for each notification in the list return notification object with formatter message, recepients
       // Return notificationResp - array of notification{name:"",recepients:[{}],message:"")}
-      if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
+      if(notifTrigger.isActive && notifTrigger.notifications.length > 0 && playersNeeded>0) {
         //Send NoSignupNotification only if there are no players signedup. i.e Only player in event is creator
         var notifications = notifTrigger.notifications
 
@@ -340,6 +344,7 @@ function createNotificationAndSend(event, user, comment, notification){
   notificationService.getNotificationDetails(event, notification, user, comment, function(err, notificationResponse) {
 
     //utils.l.d("notification response object", utils.l.notificationResponse(notificationResponse))
+    utils.l.d("notification response object", utils.l.notificationResponse(notificationResponse))
     if(err) utils.l.s("createNotificationAndSend::Error while creating notificationResponse object" + err)
     helpers.pushNotification.sendMultiplePushNotificationsForUsers(notificationResponse, event, null)
   })
@@ -383,6 +388,18 @@ function getEventPlayerIds(event){
   utils.l.d("playerIds to activate",playerIds)
   return playerIds
 }
+
+function getPlayersNeeded(event){
+  var playersNeeded = 0
+  if(event){
+    if(event.players && event.players.length>0)
+      playersNeeded = event.maxPlayers - event.players.length
+    else
+      playersNeeded = event.maxPlayers
+  }
+  return playersNeeded
+}
+
 
 module.exports ={
   handleUpcomingEvents: handleUpcomingEvents,

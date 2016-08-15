@@ -2,10 +2,9 @@ var utils = require('../utils')
 var helpers = require('../helpers')
 var models = require('../models')
 var Converter = require("csvtojson").Converter;
-var converter = new Converter({});
 
 function prepareActivities(activities, mods, adcards, callback){
-  utils.l.d("inside prepareActivities",activities)
+ // utils.l.d("inside prepareActivities",activities)
   var activitiesResp=[]
   utils._.map(activities, function(a){
    // utils.l.d("activity being created",a)
@@ -82,7 +81,7 @@ function prepareActivities(activities, mods, adcards, callback){
     var tagItems = a.tag.toString().split(',')
     tagItems.push("")
     utils._.map(tagItems, function(tagName){
-      utils.l.d("tagName::"+tagName.trim())
+    //  utils.l.d("tagName::"+tagName.trim())
       var arLocal = JSON.parse(JSON.stringify(ar));
       arLocal.tag = tagName.trim()
       activitiesResp.push(arLocal)
@@ -103,18 +102,25 @@ function createActivities(activitiesResp,callback){
 }
 
 function createActivitiesWithConverter(activityPath,modsPath,adcards,callback){
+  var activities = null
   utils.async.waterfall([
     function(callback){
       utils.l.d("converting activities")
+      var converter = new Converter({});
       converter.fromFile(activityPath,function(err,result){
         return callback(null,result)
       });
-    },function(activities,callback){
+    },function(activitiesJSON,callback){
+      activities = activitiesJSON
       utils.l.d("converting modifiers"+modsPath)
-      converter.fromFile(modsPath,function(err,result){
-        return callback(null,activities,result)
+      //converter.fromFile(modsPath,callback)
+      var converter = new Converter({});
+      converter.fromFile(modsPath,function(err,modResult){
+        utils.l.d('convertedmods',modResult)
+        return callback(null,modResult)
       });
-    },function(activities,mods,callback){
+
+    },function(mods,callback){
       utils.l.d("creating activities with mods",mods)
       prepareActivities(activities,mods,adcards,callback)
     }, /*function(activityModel, callback){
@@ -131,7 +137,7 @@ function createActivitiesWithConverter(activityPath,modsPath,adcards,callback){
 function setAdCards(activityList,adcards){
   utils._.map(adcards,function(ad){
     var activity = utils._.find(activityList,ad)
-    utils.l.d('found activity',activity)
+    //utils.l.d('found activity',activity)
     utils._.set(activity,"adCard.isAdCard",true)
     //activity.adCard.isAdCard=true
   })
