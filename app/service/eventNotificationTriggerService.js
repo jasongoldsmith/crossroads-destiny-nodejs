@@ -231,7 +231,7 @@ function handleNewEvents(event, notifTrigger, callback) {
       newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NewCreateForUpcoming"})
       event.notifStatus.push("NewCreateForUpcoming")
       createNotificationAndSend(event, null, null, newEventNotif)
-      models.event.updateEvent(event,callback)
+      models.event.update(event,callback)
     } else if (event.launchStatus == utils.constants.eventLaunchStatusList.now
       && !hasNotifStatus(event.notifStatus,"NoSignupNotification")) {
       newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NoSignupNotification"})
