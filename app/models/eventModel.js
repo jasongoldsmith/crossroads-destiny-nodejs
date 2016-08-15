@@ -357,6 +357,7 @@ function updateEvent(data, callback) {
 	],
 		function (err, updatedEvent) {
 			if (err) {
+				utils.l.s("Error in updating event object", err)
 				return callback({error: "We are experiencing some issues. Please try again later"}, null)
 			} else {
 				getById(updatedEvent._id, callback)

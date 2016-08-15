@@ -237,7 +237,7 @@ function handleNewEvents(event, notifTrigger, callback) {
       newEventNotif = utils._.find(notifTrigger.notifications, {"name": "NoSignupNotification"})
       event.notifStatus.push("NoSignupNotification")
       createNotificationAndSend(event, null, null, newEventNotif)
-      models.event.updateEvent(event,callback)
+      models.event.update(event,callback)
     }
   } else {
     return callback(null, {message: "handleNewEvents Trigger is not active"})
@@ -253,7 +253,7 @@ function handleJoinEvent(event, notifTrigger, playerList, callback) {
         utils._.partial(createNotificationAndSend, event, playerList, null))
       utils.l.d('event in join notification::',event)
       event.notifStatus.push("Join")
-      models.event.updateEvent(event, callback)
+      models.event.update(event, callback)
     } else {
       return callback(null, null)
     }
@@ -269,7 +269,7 @@ function handleLeaveEvent(event, user, notifTrigger, callback) {
       utils.async.map(notifTrigger.notifications,
         utils._.partial(createNotificationAndSend, event, user, null))
       event.notifStatus.push("Leave")
-      models.event.updateEvent(event,callback)
+      models.event.update(event,callback)
     } else {
       return callback(null, null)
     }
@@ -286,7 +286,7 @@ function handleAddComment(event, notifTrigger, playerList, comment, callback) {
         utils._.partial(createNotificationAndSend, event, playerList, comment))
       utils.l.d('event in add comemnt notification::',event)
       event.notifStatus.push("AddComment")
-      models.event.updateEvent(event, callback)
+      models.event.update(event, callback)
     } else {
       return callback(null, null)
     }
