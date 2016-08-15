@@ -29,7 +29,8 @@ function sendPushNotificationForJoin(event, playerList) {
 		}
 	], function (err, updatedEvent) {
 		if (err) {
-			utils.l.s("Error in sendPushNotificationForJoin::"+err+"::"+JSON.stringify(updatedEvent))
+			utils.l.s("Error in sendPushNotificationForJoin::", err)
+			utils.l.i("updated event", updatedEvent)
 		} else {
 			utils.l.d("sendPushNotificationForJoin successful::", updatedEvent)
 		}
@@ -46,7 +47,8 @@ function sendPushNotificationForLeave(event, user) {
 		}
 	], function (err, updatedEvent) {
 		if (err) {
-			utils.l.s("Error in sendPushNotificationForLeave::"+err+"::"+JSON.stringify(updatedEvent))
+			utils.l.s("Error in sendPushNotificationForLeave::", err)
+			utils.l.i("updated event", updatedEvent)
 		} else {
 			utils.l.d("sendPushNotificationForLeave successful::", updatedEvent)
 		}
