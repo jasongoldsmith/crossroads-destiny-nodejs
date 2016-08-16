@@ -38,10 +38,23 @@ function updatePassWord() {
       process.exit(0)
     }
   )
-
 }
 
 function deleteOldFullEvents() {
+  var stopTime = moment().add(9, 'minutes')
+  var minsToSleep = 1
+  deleteOldFullEventsHandler()
+  temporal.loop(minsToSleep * 60 * 1000, function() {
+    deleteOldFullEventsHandler()
+    if(moment() > stopTime) {
+      utils.l.i("deleteOldFullEvents was successful")
+      this.stop()
+    }
+  })
+}
+
+
+function deleteOldFullEventsHandler() {
   utils.async.waterfall([
     function (callback) {
       // We need to clear full events 10 minutes after being full https://trello.com/c/ZSu0RENR
@@ -59,9 +72,9 @@ function deleteOldFullEvents() {
   ],
   function (err, event) {
     if (err) {
-      utils.l.i("job unable to remove event due to: ", err)
+      utils.l.s("job unable to remove event due to: ", err)
     } else {
-      utils.l.i("job removed events succesfully")
+      utils.l.d("job removed events succesfully")
     }
   })
 }
