@@ -400,7 +400,7 @@ function checkBungieAccount(req, res) {
         consoles: {
           $elemMatch: {
             consoleType: req.body.consoleType,
-            consoleId: req.body.consoleId
+            consoleId: { $regex : new RegExp(req.body.consoleId, "i") }
           }
         }
       }, utils.firstInArrayCallback(callback))
