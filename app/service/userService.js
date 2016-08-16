@@ -204,6 +204,13 @@ function checkBungieAccount(console, callback) {
   destinyInterface.getBungieMemberShip(console.consoleId, console.consoleType, function(err, bungieResponse) {
     if (err) {
       return callback(err, null)
+    }else if(!bungieResponse || !bungieResponse.bungieMemberShipId || utils._.isEmpty(bungieResponse.bungieMemberShipId)){
+      var error = {
+        error: utils.constants.bungieMessages.bungieMembershipLookupError
+          .replace("#CONSOLE_TYPE#", utils._.get(utils.constants.consoleGenericsId, console.consoleType))
+          .replace("#CONSOLE_ID#", console.consoleId)
+      }
+      return callback(error, null)
     } else {
       var bungieMember = {
         consoleId: console.consoleId,
