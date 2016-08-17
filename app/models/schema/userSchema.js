@@ -41,9 +41,15 @@ var UserSchema = new Schema({
   lastCommentReportedTime: Date,
   commentsReported: {type: Number, default: 0},
   hasReachedMaxReportedComments: {type: Boolean, default: false},
-  legal:{
-    termsVersion:{type:String,default:"0.0"},
-    privacyVersion:{type:String,default:"0.0"}
+  legal: {
+    termsVersion: {type: String, default: "0.0"},
+    privacyVersion: {type: String,default: "0.0"}
+  },
+  stats: {
+    eventsCreated: Number,
+    eventsJoined: Number,
+    eventsLeft: Number,
+    eventsFull: Number
   }
 })
 
