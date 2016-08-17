@@ -1,7 +1,6 @@
 var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
-var eventPushService = require('./eventBasedPushNotificationService')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
 
 function clearEventsForPlayer(user, launchStatus, consoleType, callback){
@@ -17,6 +16,56 @@ function clearEventsForPlayer(user, launchStatus, consoleType, callback){
       callback)
     }
   ], callback)
+}
+
+
+function createEvent(user, data, callback) {
+  utils.async.waterfall(
+    [
+      function(callback) {
+        models.event.createEvent(user, data, callback)
+      },
+      function(event, callback) {
+        if(utils._.isInvalid(event)) {
+          return callback(null, null)
+        }
+        if(event.players.length == 1) {
+          models.notificationQueue.addToQueue(event._id, null, "newCreate")
+          updateUserStats(user, "eventsCreated")
+        } else {
+          var notificationInformation = {
+            userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
+            playerJoinedOrLeft: user.toObject()
+          }
+          models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
+          updateUserStats(user, "eventsJoined")
+          updateUserStatsForFullEvent(event)
+        }
+        return callback(null, event)
+      }
+    ], callback)
+}
+
+function joinEvent(user, data, callback) {
+  utils.async.waterfall(
+    [
+      function(callback) {
+        models.event.joinEvent(user, data, callback)
+      },
+      function(event, callback) {
+        if(utils._.isInvalid(event)) {
+          return callback(null, null)
+        }
+        var notificationInformation = {
+          userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
+          playerJoinedOrLeft: user.toObject()
+        }
+        models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
+        updateUserStats(user, "eventsJoined")
+        updateUserStatsForFullEvent(event)
+        return callback(null, event)
+      }
+    ], callback)
 }
 
 function leaveEvent(user, data, callback) {
@@ -43,6 +92,7 @@ function handleLeaveEvent(user, data, userTimeout, callback) {
                 playerJoinedOrLeft: user.toObject()
               }
               models.notificationQueue.addToQueue(event._id, notificationInformation, "leave")
+              updateUserStats(user, "eventsLeft")
             }
           }
           callback(null, event)
@@ -283,7 +333,40 @@ function getEventsByPlayerQuery(playerId,consoleType,launchStatus){
   return query
 }
 
+function updateUserStatsForFullEvent(event) {
+  if(event.status.toString() == "full") {
+    utils.async.mapSeries(event.players, function(player, callback) {
+      models.user.getById(player._id.toString(), function (err, user) {
+        updateUserStats(user, "eventsFull")
+        return callback(null, user)
+      })
+    },
+    function (err, updatedUsers) {
+      if(err) {
+        utils.l.s("Error in updating user full event stats", err)
+      } else {
+        utils.l.d("Users were updated successfully", updatedUsers)
+        utils.l.userLog(updatedUsers)
+      }
+    })
+  }
+}
+
+function updateUserStats(user, eventAction) {
+  user.stats[eventAction] = ++user.stats[eventAction]
+  models.user.save(user, function (err, updatedUser) {
+    if(err) {
+      utils.l.s("Error in updating user stats", err)
+    } else {
+      utils.l.d("User was updated successfully")
+      utils.l.userLog(updatedUser)
+    }
+  })
+}
+
 module.exports = {
+  createEvent: createEvent,
+  joinEvent: joinEvent,
   leaveEvent: leaveEvent,
   clearEventsForPlayer: clearEventsForPlayer,
   listEventCountByGroups: listEventCountByGroups,

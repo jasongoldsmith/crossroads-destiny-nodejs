@@ -46,10 +46,10 @@ var UserSchema = new Schema({
     privacyVersion: {type: String,default: "0.0"}
   },
   stats: {
-    eventsCreated: Number,
-    eventsJoined: Number,
-    eventsLeft: Number,
-    eventsFull: Number
+    eventsCreated: {type: Number, default: 0},
+    eventsJoined: {type: Number, default: 0},
+    eventsLeft: {type: Number, default: 0},
+    eventsFull: {type: Number, default: 0}
   }
 })
 

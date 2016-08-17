@@ -8,7 +8,7 @@ var service = require('../../../service')
 
 function create(req, res) {
 	utils.l.i("Event create request: " + JSON.stringify(req.body))
-	createEvent(req.user, req.body, function(err, event) {
+	service.eventService.createEvent(req.user, req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
@@ -28,7 +28,7 @@ function create(req, res) {
 
 function join(req, res) {
 	utils.l.i("Event join request: " + JSON.stringify(req.body))
-	joinEvent(req.user, req.body, function(err, event) {
+	service.eventService.joinEvent(req.user, req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
@@ -121,51 +121,6 @@ function listEvents(user, consoleType, callback) {
 
 function listEventById(data, callback) {
 	models.event.getById(data.id, callback)
-}
-
-function createEvent(user, data, callback) {
-	utils.async.waterfall(
-		[
-			function(callback) {
-				models.event.createEvent(user, data, callback)
-			},
-			function(event, callback) {
-        if(utils._.isInvalid(event)) {
-          return callback(null, null)
-        }
-				if(event.players.length == 1) {
-
-					models.notificationQueue.addToQueue(event._id, null, "newCreate")
-				} else {
-					var notificationInformation = {
-						userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event))
-					}
-					models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
-				}
-
-				return callback(null, event)
-			}
-		], callback)
-}
-
-function joinEvent(user, data, callback) {
-	utils.async.waterfall(
-		[
-			function(callback) {
-				models.event.joinEvent(user, data, callback)
-			},
-			function(event, callback) {
-        if(utils._.isInvalid(event)) {
-          return callback(null, null)
-        }
-				var notificationInformation = {
-					userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
-					playerJoinedOrLeft: user.toObject()
-				}
-				models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
-				return callback(null, event)
-			}
-		], callback)
 }
 
 function deleteEvent(data, callback) {
