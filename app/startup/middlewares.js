@@ -119,7 +119,7 @@ function handleIdentifyUser(req, res, next) {
   utils.async.waterfall(
     [
       function(callback) {
-        models.user.getOrCreateUIDFromRequest(req, res, false, callback);
+        models.user.getOrCreateUIDFromRequest(req, false, callback);
       }
     ],
     function(err, uid) {

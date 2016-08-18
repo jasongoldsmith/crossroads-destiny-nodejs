@@ -167,12 +167,16 @@ function signup(req, res) {
   }
 
   utils.async.waterfall([
-      helpers.req.handleVErrorWrapper(req),
-      function (callback) {
-        service.authService.signupUser(userData, callback)
-      },
-      reqLoginWrapper(req, "auth.login")
-    ],
+    helpers.req.handleVErrorWrapper(req),
+    function(callback) {
+      models.user.getOrCreateUIDFromRequest(req, false, callback)
+    },
+    function (uid, callback) {
+      userData._id = uid
+      service.authService.signupUser(userData, callback)
+    },
+    reqLoginWrapper(req, "auth.login")
+  ],
     function (err, user) {
       if (err) {
         req.routeErr = err
