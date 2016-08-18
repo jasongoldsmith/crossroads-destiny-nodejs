@@ -114,8 +114,37 @@ function forceSSL() {
   }
 }
 
+function handleIdentifyUser(req, res, next) {
+  utils.l.d('*************************************  trace zuid.4 ' + req.uid + ' ' + req.zuid);
+  utils.async.waterfall(
+    [
+      function(callback) {
+        models.user.getOrCreateUIDFromRequest(req, res, false, callback);
+      }
+    ],
+    function(err, uid) {
+      utils.l.d('*************************************  trace zuid.5 ' + req.uid + ' ' + req.zuid);
+      var data = {
+        'distinct_id': uid
+      };
+      helpers.req.appendToAdata(req, data);
+      req.zuid = uid;
+      utils.l.d('*************************************  trace zuid.6 ' + req.uid + ' ' + req.zuid);
+      next();
+    }
+  );
+}
+
+function identifyUser() {
+  console.log('*************************************  trace zuid.3 ');
+  return function (req, res, next) {
+    handleIdentifyUser(req, res, next);
+  }
+}
+
 module.exports = {
   visitTracker: visitTracker,
   forceSSL: forceSSL,
-  handleReqCleanup: handleReqCleanup
+  handleReqCleanup: handleReqCleanup,
+  identifyUser: identifyUser
 };

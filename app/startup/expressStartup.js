@@ -58,7 +58,7 @@ module.exports = function (app, passport) {
 
   // express/mongo session storage
   app.use(session({
-    resave: true,
+    resave: false,
     saveUninitialized: true,
     secret: 'met8yeIsh1Ed4kUv5sUt2veV2Ec2Oib6cUd0Kop5Cu8Ve5ghij',
     cookie: {
@@ -104,4 +104,6 @@ module.exports = function (app, passport) {
 
   });
   app.use(middlewares.visitTracker());
+
+  app.use(middlewares.identifyUser());
 };

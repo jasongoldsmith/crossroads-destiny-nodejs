@@ -243,6 +243,62 @@ function findUsersByIdAndUpdate(idList,data,callback){
   User.update({_id:{"$in":idList}},{ "$set": data},{ multi: true },callback)
 }
 
+function filterIfUserExistsForUid(uid, callback) {
+  if (utils._.isInvalid(uid)) {
+    return callback(null, null);
+  }
+  utils.async.waterfall(
+    [
+      function(callback) {
+        getById(uid, callback);
+      }
+    ],
+    function (err, user) {
+      if (err) {
+        return callback(null, null);
+      }
+      if (utils._.isValid(user)) {
+        return callback(null, null);
+      }
+      return callback(null, uid);
+    }
+  );
+}
+
+function getOrCreateUIDFromRequest(req, res, enforceNonExisting, callback) {
+  if (req.isAuthenticated()) {
+    utils.l.d("getOrCreateUIDFromRequest::is authenticated");
+    return callback(null, req.user.id); // If user exists and it authenticated return right away
+  }
+  utils.async.waterfall(
+    [
+      function(callback) {
+        var uid = req.session.zuid;
+        utils.l.d("getOrCreateUIDFromRequest::is session", uid);
+        callback(null, uid);
+      },
+      function (uid, callback) {
+        if (enforceNonExisting) {
+          filterIfUserExistsForUid(uid, callback);
+        } else {
+          return callback(null, uid);
+        }
+      }
+    ],
+    function(err, uid) {
+      if (err) {
+        return callback(err);
+      }
+      if (utils._.isValid(uid)) {
+        return callback(null, uid);
+      }
+      uid = utils.mongo.ObjectID();
+      req.session.zuid = uid;
+      return callback(null, uid);
+    }
+  );
+}
+
 module.exports = {
   model: User,
   getUserById: getUserById,
@@ -261,5 +317,6 @@ module.exports = {
   listMemberCount: listMemberCount,
   getUserMetrics: getUserMetrics,
   findByUserIdAndUpdate:findByUserIdAndUpdate,
-  findUsersByIdAndUpdate:findUsersByIdAndUpdate
+  findUsersByIdAndUpdate:findUsersByIdAndUpdate,
+  getOrCreateUIDFromRequest: getOrCreateUIDFromRequest
 }

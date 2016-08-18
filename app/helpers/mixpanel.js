@@ -10,9 +10,9 @@ if (utils._.isValidNonBlank(mixpanelKey)) {
 var reqHelper = require('./reqHelper');
 
 function trackRequest(key, data, req, user) {
-  if (utils.config.devMode || !mixpanel) {
+/*  if (utils.config.devMode || !mixpanel) {
     return;
-  }
+  }*/
   if (utils._.isInvalid(key)) {
     return;
   }
@@ -45,7 +45,7 @@ function trackRequest(key, data, req, user) {
     trackData.user_id = trackData.distinct_id;
   }
 
-  //utils.l.i('Mixpanel track', {key: key, data: trackData});
+  utils.l.d('Mixpanel track', {key: key, data: trackData});
   mixpanel.track(key, trackData, function (err, res) {
     if (err) {
       utils.l.s('Mixpanel error', err);
@@ -116,7 +116,7 @@ function setPeopleProps(user) {
 }
 
 function setUser(user) {
-  mixpanel.people.set(user.userName, {
+  mixpanel.people.set(user._id, {
     events_created: 0,
     events_joined: 0,
     events_left: 0,
@@ -131,11 +131,11 @@ function trackEvent(event) {
 }
 
 function incrementEventsCreated(user) {
-  mixpanel.people.increment(user.userName, "events_created")
+  mixpanel.people.increment(user._id, "events_created")
 }
 
 function incrementEventsJoined(user) {
-  mixpanel.people.increment(user.userName, "events_joined")
+  mixpanel.people.increment(user._id, "events_joined")
 }
 
 function incrementEventsLeft(userId) {

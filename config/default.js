@@ -29,7 +29,7 @@ var defaults = {
     return url;
   },
   confirmNavigation: false,
-  mixpanelKey: process.env.mixpanelKey || "0b333fdc50a0d9a3640051d3582d0937",
+  mixpanelKey: process.env.mixpanelKey || "0181296a3a01e24e61b79b82f936f77f",
   s3: {
     imageBucket: "feighty-images-dev",
     contentsBucket: "feighty-videos",
