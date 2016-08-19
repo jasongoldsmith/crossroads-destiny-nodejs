@@ -168,11 +168,8 @@ function signup(req, res) {
 
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
-    function(callback) {
-      models.user.getOrCreateUIDFromRequest(req, false, callback)
-    },
-    function (uid, callback) {
-      userData._id = uid
+    function (callback) {
+      userData._id = req.session.zuid
       service.authService.signupUser(userData, callback)
     },
     reqLoginWrapper(req, "auth.login")

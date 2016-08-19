@@ -439,7 +439,7 @@ function eventBasedNotificationsHandler() {
       },
       function (notificationQueue, callback) {
         utils.async.mapSeries(notificationQueue, function (notificationQueueObj, callback) {
-          utils.l.i("notificationQueueObj", notificationQueueObj)
+          utils.l.d("notificationQueueObj", notificationQueueObj)
           models.event.getById(notificationQueueObj.eventId.toString(), function (err, event) {
             if (err) {
               utils.l.s("There was an issue while fetching the event from db", err)
