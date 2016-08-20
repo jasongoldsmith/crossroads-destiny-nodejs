@@ -24,7 +24,7 @@ function getEvents(user, consoleType, callback) {
 		consoleType = utils.primaryConsole(user).consoleType
 	}
 
-	models.event.getByQuery(
+	models.event.getByQueryTrimmed(
 		{
 			clanId: user.clanId,
 			consoleType: consoleType

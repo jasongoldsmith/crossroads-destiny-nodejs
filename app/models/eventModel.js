@@ -22,9 +22,9 @@ function getByQuery(query, user, callback) {
 	Event
 		.find(query)
 		.populate("eType")
-		.populate("creator", "-passWord -groups -stats -legal")
-		.populate("players", "-passWord -groups -stats -legal")
-		.populate("comments.user", "-passWord -groups -stats -legal")
+		.populate("creator", "-passWord")
+		.populate("players", "-passWord")
+		.populate("comments.user", "-passWord")
 		.sort({launchDate:"ascending"})
 		.exec(function (err, events) {
 			if (user) {
@@ -34,6 +34,24 @@ function getByQuery(query, user, callback) {
 			}
 			callback(null, events)
 		})
+}
+
+function getByQueryTrimmed(query, user, callback) {
+	Event
+			.find(query)
+			.populate("eType")
+			.populate("creator", "-passWord -groups -stats -legal")
+			.populate("players", "-passWord -groups -stats -legal")
+			.populate("comments.user", "-passWord -groups -stats -legal")
+			.sort({launchDate:"ascending"})
+			.exec(function (err, events) {
+				if (user) {
+					events = events.filter(function(event) {
+						return event.creator.clanId == user.clanId
+					})
+				}
+				callback(null, events)
+			})
 }
 
 function getEventsByQuery(query, callback) {
@@ -377,5 +395,6 @@ module.exports = {
 	update:update,
 	listEventCount: listEventCount,
 	removeEvent: removeEvent,
-	updateEvent: updateEvent
+	updateEvent: updateEvent,
+	getByQueryTrimmed:getByQueryTrimmed
 }
