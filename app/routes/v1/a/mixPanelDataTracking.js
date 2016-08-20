@@ -35,7 +35,7 @@ function trackData(req, callback) {
 					trackEventSharing(req.user, data, callback)
 					break
 				default:
-					return callback({error: "Tracking for this object is not supported yet"}, null)
+					return callback(null, null)
 					break
 			}
 		}
@@ -47,7 +47,7 @@ function trackData(req, callback) {
 			try {
 				helpers.m.trackRequest(key, data.trackingData, req, user)
 			} catch (ex) {
-				return callback({error: ex}, null)
+				return callback(null, {success: true})
 			}
 			return callback(null, {success: true})
 		}
@@ -63,7 +63,7 @@ function trackPushNotification(data, callback) {
 }
 
 function trackAppInit(req, data, callback) {
-	data.trackingData = req.session.zuid
+	data.trackingData.userId = req.session.zuid
 	return callback(null, "appInit")
 }
 

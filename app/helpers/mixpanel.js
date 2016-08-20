@@ -77,7 +77,11 @@ function getUserProperties(user) {
     '$name': user.name,
     '$email': user.email,
     '$created': user.date,
-    'user_id': user.id
+    'user_id': user.id,
+    'events_created': user.stats.eventsCreated,
+    'events_joined': user.stats.eventsJoined,
+    'events_left': user.stats.eventsLeft,
+    'events_full': user.stats.eventsFull,
   };
   return utils._.assign(data, flagData);
 }
