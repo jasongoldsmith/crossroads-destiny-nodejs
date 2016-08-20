@@ -6,7 +6,6 @@ var moment = require('moment')
 // Activity Schema
 var eventSchema = require('./schema/eventSchema')
 var userModel = require ('./userModel')
-mongoose.set('debug','true')
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
 function roundDateToNearestQuaterHour(dateString) {

@@ -19,7 +19,6 @@ function track(req, res) {
 function trackData(req, callback) {
 	var data = req.body
 	var user = req.user
-	utils.l.d('mixPanelDataTracking::trackData',req.body)
 
 	utils.async.waterfall([
 		function(callback) {
