@@ -523,7 +523,7 @@ var bungieMessageTypes = {
 }
 
 var bungieMessages = {
-  accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder! Click the link to verify your %CONSOLETYPE%. %URL%',
+  accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder! Click the link to verify your %CONSOLETYPE%. %URL% We aren\'t actively monitoring this mailbox so if you have any issues please email us at support@crossroadsapp.co, thank you!',
   passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL%. If you did not make this request, please let us know and disregard this message.',
   addConsoleErrorMsg: "Oops! We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account. Make sure your profile is public and try again.",
   bungieMembershipLookupError: "Looks like your #CONSOLE_TYPE# #CONSOLE_ID# isn't publicly linked to your Bungie account. Check Profile > Settings > Linked Accounts to make sure it's public and try again."
