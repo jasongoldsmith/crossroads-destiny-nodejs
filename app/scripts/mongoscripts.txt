@@ -221,3 +221,11 @@ db.getCollection('users').aggregate([{"$match":{"date":{"$gt":ISODate("2016-08-1
         {"$group" : { "_id" :  { "$dateToString": { "format": "%Y-%m-%d 00:00:00", "date": "$date" }} , "userCount" : { $sum : 1 } }}
 ])
 //-----------END------------
+
+//-----------BEGIN----------
+//-----------Activity Import----------
+db.getCollection('activities').update({},{"$set":{'isActive':false}},{"upsert":true,'multi':true})
+./mongorestore -h ds013173-a0.mlab.com:13173 -d travelerprod -u travelerprod -p travelerprod -c activities /Users/dasasr/projects/traveler/admin/travelerbackend/activities.bson
+
+##./mongorestore -h ds011893.mlab.com:11893 -d travelerdev -u travelerdev -p travelerdev -c activities /Users/dasasr/projects/traveler/admin/travelerbackend/activities.bson
+//-----------END------------

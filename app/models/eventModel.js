@@ -6,7 +6,7 @@ var moment = require('moment')
 // Activity Schema
 var eventSchema = require('./schema/eventSchema')
 var userModel = require ('./userModel')
-
+mongoose.set('debug','true')
 // Model initialization
 var Event = mongoose.model('Event', eventSchema.schema)
 function roundDateToNearestQuaterHour(dateString) {
@@ -23,9 +23,9 @@ function getByQuery(query, user, callback) {
 	Event
 		.find(query)
 		.populate("eType")
-		.populate("creator", "-passWord")
-		.populate("players", "-passWord")
-		.populate("comments.user", "-passWord")
+		.populate("creator", "-passWord -groups -stats -legal")
+		.populate("players", "-passWord -groups -stats -legal")
+		.populate("comments.user", "-passWord -groups -stats -legal")
 		.sort({launchDate:"ascending"})
 		.exec(function (err, events) {
 			if (user) {

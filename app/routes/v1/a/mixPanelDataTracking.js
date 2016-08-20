@@ -19,11 +19,16 @@ function track(req, res) {
 function trackData(req, callback) {
 	var data = req.body
 	var user = req.user
+	utils.l.d('mixPanelDataTracking::trackData',req.body)
+
 	utils.async.waterfall([
 		function(callback) {
+			trackingData = data.trackingData?data.trackingData:{}
+/*
 			if(!data.trackingData) {
 				return callback({error: "trackingData cannot be null"}, null)
 			}
+*/
 			switch(data.trackingKey) {
 				case "pushNotification":
 					trackPushNotification(data, callback)
