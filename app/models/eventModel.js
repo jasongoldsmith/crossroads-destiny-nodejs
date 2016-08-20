@@ -38,7 +38,7 @@ function getByQuery(query, user, callback) {
 
 function getByQueryLean(query, user, callback) {
 	Event
-			.find(query)
+			.find(query, "-comments")
 			.sort({launchDate:"ascending"})
 			.exec(function (err, events) {
 				if (user) {

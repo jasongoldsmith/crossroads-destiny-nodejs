@@ -40,8 +40,10 @@ function getFeed(user, consoleType, callback) {
 			utils._.map(eventsList, function(event){
 				event.eType = utils._.get(activitiesMap,event.eType)
 				event.creator = utils._.get(playersMap,event.creator)
-				var playerList = utils._.map(event.players,function(playerId){
-					return utils._.get(playersMap,playerId)
+				var playerList = []
+				utils._.map(event.players,function(playerId){
+					var playerObj = utils._.get(playersMap,playerId)
+					if(utils._.isValid(playerObj)) playerList.push(playerObj)
 				})
 				utils._.assign(event.players, playerList)
 				return event
