@@ -54,6 +54,7 @@ activitySchema.index({'aType': 1})
 activitySchema.index({'aType': 1,'tag':1,'isFeatured':1})
 activitySchema.index({'adCard.isAdCard': 1})
 activitySchema.index({'isActive':1,'adCard.isAdCard': 1})
+activitySchema.index({'isActive':1,'aType': 1,'tag':1,'isFeatured':1})
 module.exports = {
 	schema: activitySchema
 }

@@ -36,13 +36,9 @@ function getByQuery(query, user, callback) {
 		})
 }
 
-function getByQueryTrimmed(query, user, callback) {
+function getByQueryLean(query, user, callback) {
 	Event
 			.find(query)
-			.populate("eType")
-			.populate("creator", "-passWord -groups -stats -legal")
-			.populate("players", "-passWord -groups -stats -legal")
-			.populate("comments.user", "-passWord -groups -stats -legal")
 			.sort({launchDate:"ascending"})
 			.exec(function (err, events) {
 				if (user) {
@@ -396,5 +392,5 @@ module.exports = {
 	listEventCount: listEventCount,
 	removeEvent: removeEvent,
 	updateEvent: updateEvent,
-	getByQueryTrimmed:getByQueryTrimmed
+	getByQueryLean:getByQueryLean
 }

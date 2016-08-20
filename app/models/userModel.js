@@ -34,9 +34,18 @@ function setFields(user_id, data, callback) {
 }
 
 function getByQuery(query, callback) {
+  utils.l.d('inside getByQuery',query)
   User
     .find(query)
     .select("-passWord")
+    .exec(callback)
+}
+
+function getByQueryLite(query, excludeFields, callback) {
+  utils.l.d('inside getByQuery',query)
+  User
+    .find(query)
+    .select(excludeFields)
     .exec(callback)
 }
 
@@ -318,5 +327,6 @@ module.exports = {
   getUserMetrics: getUserMetrics,
   findByUserIdAndUpdate:findByUserIdAndUpdate,
   findUsersByIdAndUpdate:findUsersByIdAndUpdate,
-  getOrCreateUIDFromRequest: getOrCreateUIDFromRequest
+  getOrCreateUIDFromRequest: getOrCreateUIDFromRequest,
+  getByQueryLite:getByQueryLite
 }
