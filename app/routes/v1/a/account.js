@@ -10,10 +10,10 @@ var service = require('../../../service/index')
 function listMyGroups(req, res) {
   listGroups(req.user, function(err, groups) {
     if (err) {
-      routeUtils.handleAPIError(req, res, err, err, {utm_dnt: "listMyGroups"})
+      routeUtils.handleAPIError(req, res, err, err)
     } else {
       groupsResponse = groups || [{}]
-      routeUtils.handleAPISuccess(req, res, groupsResponse, {utm_dnt: "listMyGroups"})
+      routeUtils.handleAPISuccess(req, res, groupsResponse)
     }
   })
 }
@@ -347,7 +347,7 @@ function addMuteFlagToGroupObject(user, groupsList) {
 }
 
 /** Routes */
-routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups, {utm_dnt:"listMyGroups"})
+routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups)
 routeUtils.rGet(router, '/group/search/:groupId', 'searchGroupById', searchGroupReq)
 routeUtils.rGet(router, '/group/resendBungieMessage', 'resendBungieMessage', resendBungieMessage)
 routeUtils.rPost(router, '/group/mute', 'muteGroupNotification', muteGroupNotifications)
