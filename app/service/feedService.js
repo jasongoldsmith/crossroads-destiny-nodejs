@@ -35,18 +35,25 @@ function getFeed(user, consoleType, callback) {
 			var playersMap = utils._.keyBy(players,function(player){
 				return player._id
 			})
-
+//			utils.l.d('playersMap',playersMap)
 			//run through all events, merge full objects for eType i.e. activity, creator, players using maps created
 			utils._.map(eventsList, function(event){
+//			utils.l.d('\t\t\tprocessing event',event)
 				event.eType = utils._.get(activitiesMap,event.eType)
 				event.creator = utils._.get(playersMap,event.creator)
 				var playerList = []
 				utils._.map(event.players,function(playerId){
 					var playerObj = utils._.get(playersMap,playerId)
-					if(utils._.isValid(playerObj)) playerList.push(playerObj)
+//					utils.l.d('got players object::',playerObj)
+					if(utils._.isValid(playerObj)){
+						playerList.push(playerObj)
+					}
 				})
-				utils._.assign(event.players, playerList)
-				return event
+//				utils.l.d('playerList::',playerList)
+				utils._.remove(event.players)
+				utils._.assign(event.players,playerList)
+//				utils.l.d('\t\t\tCOMPLETED processing event')
+				//return event
 			})
 
 			//create final feed object
