@@ -11,12 +11,12 @@ function getFeed(req, res) {
 		+ " with console type: " + req.param('consoleType'))
 	service.feedService.getFeed(req.user, req.param('consoleType'), function(err, feed) {
 		if (err) {
-			routeUtils.handleAPIError(req, res, err, err)
+			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"list"})
 		} else {
-			routeUtils.handleAPISuccess(req, res, feed)
+			routeUtils.handleAPISuccess(req, res, feed, {utm_dnt:"list"})
 		}
 	})
 }
 
-routeUtils.rGet(router, '/get', 'getFeed', getFeed)
+routeUtils.rGet(router, '/get', 'getFeed', getFeed, {utm_dnt:"androidAppVersion"})
 module.exports = router
