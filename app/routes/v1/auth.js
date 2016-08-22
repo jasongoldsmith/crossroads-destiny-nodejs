@@ -235,6 +235,7 @@ function verifyAccountConfirm(req,res){
       if(err) routeUtils.handleAPIError(req,res,err,err)
       else {
         helpers.firebase.updateUser(userObj)
+        helpers.m.trackRequest("AccountVerifyConfirm_SUCC", {}, req, userObj)
         res.render("account/verifyConfirm",{appName:utils.config.appName})
       }
     }

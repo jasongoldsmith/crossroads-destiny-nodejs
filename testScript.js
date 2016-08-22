@@ -22,6 +22,7 @@ var userService = require('./app/service/userService')
 var authService = require('./app/service/authService')
 var notifService = require('./app/service/eventNotificationService')
 var activityService = require('./app/service/activityService')
+var fs = require('fs')
 
 var command = process.argv[2]
 var event ='{'+
@@ -145,18 +146,22 @@ switch(command) {
     utils.l.d("index of primary console",utils.primaryConsoleIndex(userObj))
     break;
   case "reduceTest":
-    var userGroups = require("/Users/dasasr/projects/traveler/tmp/usergroups.json");
-    var userGroupFlat = utils._.flatMap(userGroups.users,function(userGroup){
-      var userId = userGroup._id
-      var results = []
+    var userGroups = require("/Users/dasasr/projects/traveler/admin/prod/usergroups.json");
+    var results = []
+    var result = "userId,groupId\n"
+    results.push(result)
+    utils._.flatMap(userGroups,function(userGroup){
+      var userId = userGroup._id.$oid
       utils._.map(userGroup.groups,function(group){
+        result = null
         result = userId+","
-        result = result + group.groupId
+        result = result + group.groupId +","+group.muteNotification+"\n"
         results.push(result)
       })
-      return results
     })
-    console.log(userGroupFlat)
+
+    //console.log(userGroupFlat)
+    fs.writeFileSync("/Users/dasasr/projects/traveler/admin/prod/usergroups.csv",results)
     break;
   case "momentTest":
     var estTime = utils.moment.tz(Date.now(), 'America/New_York').utc().format()
