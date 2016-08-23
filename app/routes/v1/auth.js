@@ -313,10 +313,17 @@ function requestResetPassword(req,res){
         utils.l.d("requestResetPassword::userName="+userName+",consoleType="+consoleType+",consoleId="+consoleId)
         if(utils._.isValidNonBlank(consoleType)) {
           useGamerTag = true
-          models.user.getUserByData({"consoles.consoleId": consoleId, "consoles.consoleType": consoleType}, callback)
+          models.user.getUserByData({
+            consoles: {
+              $elemMatch: {
+                consoleType: consoleType,
+                consoleId: { $regex : new RegExp(consoleId, "i") }
+              }
+            }
+          }, callback)
         }
         else
-          models.user.getUserByData({userName:userName},callback)
+          models.user.getUserByData({userName: userName.toLowerCase().trim()}, callback)
       },
       function(user,callback){
         if(user) {

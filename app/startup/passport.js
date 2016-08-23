@@ -20,7 +20,7 @@ module.exports = function (passport, config) {
       passwordField: 'passWord'
     },
     function( userName, password, done) {
-      models.user.getUserByData({userName:userName.toLowerCase()}, function (err, user) {
+      models.user.getUserByData({userName:userName.toLowerCase().trim()}, function (err, user) {
         if (err) return done(err);
         if (!user) {
           return done(null, false, { message: 'Unknown user' });
