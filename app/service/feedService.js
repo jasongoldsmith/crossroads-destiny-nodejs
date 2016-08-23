@@ -13,47 +13,49 @@ function getFeed(user, consoleType, callback) {
 				consoleType = utils.primaryConsole(user).consoleType
 			}
 			models.event.getByQueryLean({clanId: user.clanId,consoleType: consoleType},null, callback)
-		},function(events,callback) {
+		},
+		function(events,callback) {
 			eventsList = events
-			//get unique activityIds across all events
 			var activityIds = utils._.uniq(utils._.map(events, 'eType'))
-
-			//get unique playerIds across all events, players is an array in event. Flatten before getting uniq set.
 			playerIds = utils._.map(events, 'players')
 			playerIds = utils._.uniq(utils._.flatten(playerIds))
-
-			models.activity.getByQuery({"_id": {"$in": activityIds}}, callback)
-		},function(activities,callback) {
-			//lookup activities and create activities hashmap
-			activitiesMap = utils._.keyBy(activities, function (activity) {
+			utils.async.parallel({
+				activities: function (callback) {
+					models.activity.getByQuery({"_id": {"$in": activityIds}}, callback)
+				},
+				players: function (callback) {
+					models.user.getByQueryLite({"_id": {"$in": playerIds}}, "-passWord -groups -stats -legal", callback)
+				}
+			},
+				function (err, results) {
+					if(err) {
+						utils.l.s("There was an error in fetching users and activities", err)
+						return callback({error: "We are experiencing some issues. Please try again later"}, null)
+					}
+					else {
+						return callback(null, results)
+					}
+			})
+		},
+		function(results, callback) {
+			activitiesMap = utils._.keyBy(results.activities, function (activity) {
 				return activity._id
 			})
-
-			models.user.getByQueryLite({"_id":{"$in":playerIds}},"-passWord -groups -stats -legal",callback)
-		},function(players,callback){
-			//lookup players from user objectand create players map
-			var playersMap = utils._.keyBy(players,function(player){
+			var playersMap = utils._.keyBy(results.players,function (player) {
 				return player._id
 			})
-//			utils.l.d('playersMap',playersMap)
-			//run through all events, merge full objects for eType i.e. activity, creator, players using maps created
 			utils._.map(eventsList, function(event){
-//			utils.l.d('\t\t\tprocessing event',event)
 				event.eType = utils._.get(activitiesMap,event.eType)
 				event.creator = utils._.get(playersMap,event.creator)
 				var playerList = []
 				utils._.map(event.players,function(playerId){
 					var playerObj = utils._.get(playersMap,playerId)
-//					utils.l.d('got players object::',playerObj)
 					if(utils._.isValid(playerObj)){
 						playerList.push(playerObj)
 					}
 				})
-//				utils.l.d('playerList::',playerList)
 				utils._.remove(event.players)
 				utils._.assign(event.players,playerList)
-//				utils.l.d('\t\t\tCOMPLETED processing event')
-				//return event
 			})
 
 			//create final feed object
