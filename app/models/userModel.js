@@ -90,7 +90,8 @@ function save(user, callback) {
     if(err) {
       if(utils.format.isDuplicateMongoKeyError(err)) {
         var field = utils.format.getDuplicateMongoErrorKey(err)
-        var errmsgTemplate = "That #FIELD# is already taken"
+        var errmsgTemplate = "An account already exists for #FIELD#." +
+          "Check your Bungie messages for instructions on how to finish signing up."
         return callback({error: errmsgTemplate.replace("#FIELD#", field)}, user)
       }
       return callback(err, user)

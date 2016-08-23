@@ -9,7 +9,7 @@ function signupUser(signupData, callback) {
 		},
 		function(user, callback) {
 			if(utils._.isValidNonBlank(user)) {
-				return callback({error: "That User name is already taken"}, null)
+				return callback({error: "That username is already taken"}, null)
 			} else if(utils.config.enableBungieIntegration) {
 				destinyService.getBungieHelmet(
 					signupData.consoles[0].consoleId,
