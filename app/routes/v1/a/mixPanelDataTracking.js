@@ -22,18 +22,19 @@ function trackData(req, callback) {
 
 	utils.async.waterfall([
 		function(callback) {
-			trackingData = data.trackingData?data.trackingData:{}
-/*
 			if(!data.trackingData) {
-				return callback({error: "trackingData cannot be null"}, null)
+				data.trackingData = {}
 			}
-*/
+
 			switch(data.trackingKey) {
 				case "pushNotification":
 					trackPushNotification(data, callback)
 					break
 				case "appInit":
 					trackAppInit(req, data, callback)
+					break
+				case "signupInit":
+					trackSignupInit(req, data, callback)
 					break
 				case "eventSharing":
 					trackEventSharing(req.user, data, callback)
@@ -69,6 +70,11 @@ function trackPushNotification(data, callback) {
 function trackAppInit(req, data, callback) {
 	data.trackingData.userId = req.session.zuid
 	return callback(null, "appInit")
+}
+
+function trackSignupInit(req, data, callback) {
+	data.trackingData.userId = req.session.zuid
+	return callback(null, "signupInit")
 }
 
 function trackEventSharing(user, data, callback) {
