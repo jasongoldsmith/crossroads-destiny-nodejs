@@ -39,7 +39,10 @@ module.exports = function (app, passport) {
   app.use(express.static(__dirname + '/../'+'views'));
 
   morgan.token('zuid', function getZuid (req) {
-    return req.session.zuid
+    if(req.user)
+      return req.user.id
+    else
+      return req.session.zuid
   })
   app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" zuid=:zuid'));
   //app.use(morgan('combined'));

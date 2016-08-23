@@ -3,7 +3,7 @@ var Firebase = require("firebase")
 var path = require('path')
 
 Firebase.initializeApp({
-      serviceAccount: (process.env.NODE_ENV == 'production' ?
+      serviceAccount: (process.env.NODE_ENV == 'production' || process.env.NODE_ENV == 'staging' ?
         path.resolve('./firebase_credentials/prod/serviceAccountCredentials.json')
         : path.resolve('./firebase_credentials/dev/serviceAccountCredentials.json')),
       databaseURL: utils.config.firebaseURL
