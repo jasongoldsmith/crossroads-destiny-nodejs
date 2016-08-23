@@ -39,12 +39,38 @@ module.exports = function (app, passport) {
   app.use(express.static(__dirname + '/../'+'views'));
 
   morgan.token('zuid', function getZuid (req) {
+    var headerLog = 'zuid='
     if(req.user)
-      return req.user.id
+      headerLog = headerLog + req.user.id
     else
-      return req.session.zuid
+      headerLog = headerLog + req.session.zuid
+
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-osversion','os')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-devicetype','dt')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-devicemodel','dm')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-appversion','av')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-fbooksdk','fb')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-fbasesdk','fr')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-mpsdk','mp')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-branchsdk','br')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-fabricsdk','fa')
+    headerLog = headerLog + ' ' + getFromHeader(req,'x-manufacturer','ma')
+
+    return headerLog
   })
-  app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" zuid=:zuid'));
+
+  function getFromHeader(req, headerKey, dataKey) {
+    var value
+    if (utils._.isValid(req.headers[headerKey])) {
+      value = req.headers[headerKey]
+    } else {
+      value = ""
+    }
+
+    return dataKey +"="+ value
+  }
+
+  app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :zuid'));
   //app.use(morgan('combined'));
 
   app.use(cookieParser());
