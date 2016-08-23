@@ -39,6 +39,9 @@ function trackData(req, callback) {
 				case "eventSharing":
 					trackEventSharing(req.user, data, callback)
 					break
+				case "addCardInit":
+					trackAdCardInit(callback)
+					break
 				default:
 					return callback(null, null)
 					break
@@ -75,6 +78,10 @@ function trackAppInit(req, data, callback) {
 function trackSignupInit(req, data, callback) {
 	data.trackingData.userId = req.session.zuid
 	return callback(null, "signupInit")
+}
+
+function trackAdCardInit(callback) {
+	return callback(null, "adCardInit")
 }
 
 function trackEventSharing(user, data, callback) {
