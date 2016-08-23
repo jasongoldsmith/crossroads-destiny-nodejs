@@ -38,7 +38,11 @@ module.exports = function (app, passport) {
 
   app.use(express.static(__dirname + '/../'+'views'));
 
-  app.use(morgan('combined'));
+  morgan.token('zuid', function getZuid (req) {
+    return req.session.zuid
+  })
+  app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" zuid=:zuid'));
+  //app.use(morgan('combined'));
 
   app.use(cookieParser());
 
@@ -106,4 +110,5 @@ module.exports = function (app, passport) {
   app.use(middlewares.visitTracker());
 
   app.use(middlewares.identifyUser());
+
 };
