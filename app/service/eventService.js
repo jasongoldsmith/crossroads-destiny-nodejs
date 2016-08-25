@@ -148,7 +148,7 @@ function expireEvents(notifTrigger,sysConfig){
     ],
     function (err, updatedEvents) {
       if (err) {
-        utils.l.s("Error sending expireEvents notification::" + JSON.stringify(err) + "::" + JSON.stringify(updatedEvents))
+        utils.l.s("Error sending expireEvents notification::" + JSON.stringify(err))
       }
       utils.l.i("Completed trigger expireEvents::" +utils.moment().utc().format())
     }

@@ -141,7 +141,7 @@ function upcomingEventsReminder() {
     ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending upcomingEventsReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+        utils.l.s("Error sending upcomingEventsReminder notification::" + JSON.stringify(err))
       } else {
         utils.l.i("upcomingEventsReminder was successful")
       }
@@ -190,7 +190,7 @@ function eventFullReminder() {
     ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending eventFullReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+        utils.l.s("Error sending eventFullReminder notification::" + JSON.stringify(err) )
       } else {
         utils.l.i("eventFullReminder was successful")
       }
@@ -226,7 +226,7 @@ function eventStartReminder() {
     ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending eventStartReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+        utils.l.s("Error sending eventStartReminder notification::" + JSON.stringify(err) )
       } else {
         utils.l.i("eventStartReminder was successful")
       }
@@ -267,7 +267,7 @@ function eventExpiry() {
     ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending eventExpiry notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+        utils.l.s("Error sending eventExpiry notification::" + JSON.stringify(err))
       } else {
         utils.l.i("eventExpiry was successful")
       }
@@ -308,7 +308,7 @@ function userTimeout() {
     ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending userTimeout notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+        utils.l.s("Error sending userTimeout notification::" + JSON.stringify(err))
       } else {
         utils.l.i("userTimeout was successful")
       }
@@ -350,7 +350,7 @@ function preUserTimeout() {
     ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending preUserTimeout notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+        utils.l.s("Error sending preUserTimeout notification::" + JSON.stringify(err))
       } else {
         utils.l.i("preUserTimeout was successful")
       }
@@ -376,7 +376,7 @@ function dailyOneTimeReminder() {
   ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending dailyOneTimeReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+        utils.l.s("Error sending dailyOneTimeReminder notification::" + JSON.stringify(err))
       } else {
         utils.l.i("job completed dailyOneTimeReminder successfully")
       }
@@ -412,7 +412,7 @@ function eventUpcomingReminder() {
     ],
     function (err, events) {
       if (err) {
-        utils.l.s("Error sending eventUpcomingReminder notification::" + JSON.stringify(err) + "::" + JSON.stringify(events))
+        utils.l.s("Error sending eventUpcomingReminder notification::" + JSON.stringify(err) )
       } else {
         utils.l.i("eventUpcomingReminder was successful")
       }
@@ -459,7 +459,7 @@ function eventBasedNotificationsHandler() {
     ],
     function (err, notificationQueue) {
       if(err) {
-        utils.l.s("Error sending in eventNewCreateNotificationHandler::" + JSON.stringify(err) + "::" + JSON.stringify(notificationQueue))
+        utils.l.s("Error sending in eventNewCreateNotificationHandler::" + JSON.stringify(err) )
       }
     })
 }

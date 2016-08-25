@@ -36,7 +36,7 @@ function preUserTimeout(notifTrigger,sysConfig){
     ],
     function (err, usersNotified) {
       if (err)
-        utils.l.s("Error sending preUserTimeout notification::" + JSON.stringify(err) + "::" + utils.l.userLog(usersNotified))
+        utils.l.s("Error sending preUserTimeout notification::" + JSON.stringify(err))
       else utils.l.d("preUserTimeout::users notified",utils.l.userLog(usersNotified))
       utils.l.i("Completed trigger preUserTimeout::" +utils.moment().utc().format())
     })
@@ -102,7 +102,7 @@ function userTimeout(notifTrigger,sysConfig) {
     ],
     function (err, usersTimedOut) {
       if (err) {
-        utils.l.s("Error sending userTimeout notification::" + JSON.stringify(err) + "::" + JSON.stringify(usersTimedOut))
+        utils.l.s("Error sending userTimeout notification::" + JSON.stringify(err))
       }
       utils.l.i("Completed trigger userTimeout::" +utils.moment().utc().format())
     }
