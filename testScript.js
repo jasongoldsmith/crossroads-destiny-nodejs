@@ -242,6 +242,10 @@ switch(command) {
     });
 */
     break
+  case "testPlayers":
+    models.event.getAllCurrentEventPlayers(function(err,playerIds){
+      utils.l.d("playerIds",playerIds)
+    })
   default:
     return;
 }

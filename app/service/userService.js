@@ -7,12 +7,16 @@ var destinyInterface = require('./destinyInterface')
 function preUserTimeout(notifTrigger,sysConfig){
   utils.l.d("Starting preUserTimeout")
   utils.async.waterfall([
-      function (callback) {
+      function (callback){
+        models.event.getAllCurrentEventPlayers(callback)
+      },
+      function (playerIds,callback) {
         var preuserTimeoutInterval = getPreUserTimeoutInterval(sysConfig) || utils.config.preUserTimeoutInterval
         utils.l.d("time to notify the users timeout",preuserTimeoutInterval)
 
         var date = utils.moment().utc().add(preuserTimeoutInterval, "minutes")
         models.user.getByQuery({
+            "_id":{"$in":playerIds},
             "consoles.verifyStatus": "VERIFIED",
             lastActiveTime: {$lte: date},
             notifStatus:{$ne:'preUserTimeout'}
@@ -76,10 +80,14 @@ function notifyPreUserTimeout(user,notifTrigger,callback){
 function userTimeout(notifTrigger,sysConfig) {
   utils.l.d("Starting userTimeout")
   utils.async.waterfall([
-      function (callback) {
+      function (callback){
+        models.event.getAllCurrentEventPlayers(callback)
+      },
+      function (playerIds,callback) {
         var userTimeoutInterval = sysConfig.value || utils.config.userTimeoutInterval
         var date = utils.moment().utc().add(userTimeoutInterval, "minutes")
         models.user.getByQuery({
+            "_id":{"$in":playerIds},
             "consoles.verifyStatus": "VERIFIED",
             lastActiveTime: {$lte: date}
           },

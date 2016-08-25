@@ -52,7 +52,7 @@ function getByQueryLean(query, user, callback) {
 
 function getEventsByQuery(query, callback) {
 	Event
-			.find(query)
+			.find(query, "-comments")
 			.populate("eType")
 			.populate("creator", "-passWord")
 			.populate("players", "-passWord")
@@ -378,6 +378,12 @@ function updateEvent(data, callback) {
 	})
 }
 
+function getAllCurrentEventPlayers(callback){
+	Event
+			.distinct("players",{"launchStatus":"now"})
+			.exec(callback)
+}
+
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
@@ -392,5 +398,6 @@ module.exports = {
 	listEventCount: listEventCount,
 	removeEvent: removeEvent,
 	updateEvent: updateEvent,
-	getByQueryLean:getByQueryLean
+	getByQueryLean:getByQueryLean,
+	getAllCurrentEventPlayers:getAllCurrentEventPlayers
 }
