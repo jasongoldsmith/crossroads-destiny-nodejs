@@ -361,16 +361,12 @@ function listBungieGroupsJoined(destinyMembershipId, consoleType, currentPage, c
 //url:"http://www.bungie.net/Platform/User/SearchUsers/?q="+memberShipId,
 //url:"https://www.bungie.net/Platform/User/GetBungieNetUser/",
 function bungieGet(url, gamerId, consoleType, callback){
-  var proxyUrl =  process.env.QUOTAGUARD_URL || "http://quotaguard6541:60a2ade59642@proxy.quotaguard.com:9292"
   utils.l.d("bungieGet",url)
-  utils.l.d('proxyUrl',proxyUrl)
   request({
-    proxy:proxyUrl,
     url: url,
     method: "GET",
     headers: {
       //'X-API-KEY': 'f091c8d36c3c4a17b559c21cd489bec0', //harsha //'3beed7e811fb4f78aee0c4595eed1371'
-      'User-Agent': 'node.js',
       'X-API-KEY': utils.config.bungieAPIToken
     }
   }, function(error, response, bungieData) {
