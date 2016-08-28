@@ -22,6 +22,7 @@ var userService = require('./app/service/userService')
 var authService = require('./app/service/authService')
 var notifService = require('./app/service/eventNotificationService')
 var activityService = require('./app/service/activityService')
+var eventNotifTrigService = require('./app/service/eventNotificationTriggerService')
 var fs = require('fs')
 
 var command = process.argv[2]
@@ -246,6 +247,47 @@ switch(command) {
     models.event.getAllCurrentEventPlayers(function(err,playerIds){
       utils.l.d("playerIds",playerIds)
     })
+  case 'snsRegisterTest':
+    utils.async.waterfall([
+      function(callback){
+        models.user.getById('57b54662a3cfd5bc3f9bd9c8',callback)
+      },function(user,callback){
+        helpers.sns.registerDeviceToken(user,callback)
+      }
+    ],function(err,result){
+      utils.l.d('err',err)
+      utils.l.d('result',result)
+    })
+    //helpers.sns.sendPush()
+    break
+  case 'snsPublishTest':
+    helpers.sns.publishToSNSTopic('apn','PS4','clan_id_not_set',function(err,result){
+      utils.l.d('err',err)
+      utils.l.d('result',result)
+    })
+    break;
+  case 'launchUpComingTest':
+    utils.async.waterfall([
+        function (callback) {
+          models.notificationTrigger.getByQuery({
+              type: 'schedule',
+              triggerName: utils.constants.eventNotificationTrigger.launchUpcomingEvents,
+              isActive: true
+            },
+            utils.firstInArrayCallback(callback))
+        },
+        function(notifTrigger, callback) {
+          eventNotifTrigService.handleUpcomingEvents(notifTrigger)
+        }
+      ],
+      function (err, events) {
+        if (err) {
+          utils.l.s("Error sending upcomingEventsReminder notification::" + JSON.stringify(err))
+        } else {
+          utils.l.i("upcomingEventsReminder was successful")
+        }
+      })
+    break;
   default:
     return;
 }

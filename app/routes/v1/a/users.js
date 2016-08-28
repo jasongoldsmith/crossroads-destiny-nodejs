@@ -135,7 +135,7 @@ function addConsole(req, res) {
     })
   } else {
     if(utils._.isInvalidOrBlank(req.body.consoleId)) {
-      var err = {error: "console id is needed for adding a new console"}
+      var err = {error: "Please enter a gamertag to add a new console."}
       routeUtils.handleAPIError(req, res, err, err)
     } else {
       service.userService.addConsole(req.user, req.body, function (err, user) {

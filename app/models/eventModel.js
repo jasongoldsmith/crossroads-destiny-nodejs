@@ -36,18 +36,11 @@ function getByQuery(query, user, callback) {
 		})
 }
 
-function getByQueryLean(query, user, callback) {
+function getByQueryLean(query, callback) {
 	Event
 			.find(query, "-comments")
 			.sort({launchDate:"ascending"})
-			.exec(function (err, events) {
-				if (user) {
-					events = events.filter(function(event) {
-						return event.creator.clanId == user.clanId
-					})
-				}
-				callback(null, events)
-			})
+			.exec(callback)
 }
 
 function getEventsByQuery(query, callback) {
@@ -299,24 +292,19 @@ function deleteEvent(data, callback) {
 	)
 }
 
-function launchEvent(event, callback){
-	utils.l.d("Updating event launch status "+event.eType);
+function launchEvent(eventId, callback){
+	utils.l.d("Updating event launch status "+eventId);
 	utils.async.waterfall([
 				function(callback) {
-					getById(event._id, callback)
-				},
-				function (event, callback) {
-					if(!event){
-						return callback("Event does not exist. It is either full or an invalid event is being updated.",null)
-					}
-					utils.l.d("Found event: " + JSON.stringify(event))
-					utils._.extend(event, {launchStatus: utils.constants.eventLaunchStatusList.now})
-					update(event,callback)
+					Event.findByIdAndUpdate(eventId,{ "$set": {launchStatus: utils.constants.eventLaunchStatusList.now}},callback)
 				}
 			],function(err, updatedEvent) {
 				if (err) {
 					return callback(err, null)
 				} else {
+					if(!updatedEvent){
+						return callback("Event does not exist. It is either full or an invalid event is being updated.",null)
+					}
 					//return callback(null, updatedEvent) //
 					getById(updatedEvent._id, callback)
 				}

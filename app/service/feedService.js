@@ -12,7 +12,7 @@ function getFeed(user, consoleType, callback) {
 			if(utils._.isInvalidOrBlank(consoleType)) {
 				consoleType = utils.primaryConsole(user).consoleType
 			}
-			models.event.getByQueryLean({clanId: user.clanId,consoleType: consoleType},null, callback)
+			models.event.getByQueryLean({clanId: user.clanId,consoleType: consoleType}, callback)
 		},
 		function(events,callback) {
 			eventsList = events

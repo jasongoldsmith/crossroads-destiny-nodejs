@@ -10,10 +10,13 @@ function handleUpcomingEvents(notifTrigger) {
   utils.async.waterfall([
       function (callback) {
         var date = utils.moment().utc().add(utils.config.triggerIntervalMinutes,"minutes")
-        models.event.getByQuery({
+        models.event.getByQueryLean({
+          launchStatus: utils.constants.eventLaunchStatusList.upcoming,
+          launchDate: {$lte: date}}, callback)
+       /* models.event.getByQuery({
           launchStatus: utils.constants.eventLaunchStatusList.upcoming,
           launchDate: {$lte: date}},
-          null, callback)
+          null, callback)*/
       },
       function (events, callback) {
         var eventsLaunched = 0
@@ -305,8 +308,8 @@ function launchUpcomingEvent(event, notifTrigger, callback){
     function(callback){
       models.user.findUsersByIdAndUpdate(getEventPlayerIds(event),{lastActiveTime:new Date(),notifStatus:[]}, callback)
     },function (users,callback) {
-      utils.l.d("launchEvent:: " + event.eventType + ",launchDate: " + event.launchDate)
-      models.event.launchEvent(event, callback)
+      utils.l.d("launchEvent:: " + event._id + ",launchDate: " + event.launchDate)
+      models.event.launchEvent(event._id, callback)
       //TODO: Make a firebase API to notify
     },
     function(updatedEvent, callback) {
@@ -318,15 +321,15 @@ function launchUpcomingEvent(event, notifTrigger, callback){
         //Send NoSignupNotification only if there are no players signedup. i.e Only player in event is creator
         var notifications = notifTrigger.notifications
 
-        if(event.status.toString() == utils.constants.eventStatus.full.toString()) {
+        if(updatedEvent.status.toString() == utils.constants.eventStatus.full.toString()) {
           utils._.remove(notifications, {name: 'NoSignupNotification'})
           utils._.remove(notifications, {name: 'EventNotFullNotification'})
-        } else if(event.players.length > 1) {
+        } else if(updatedEvent.players.length > 1) {
           utils._.remove(notifications, {name: 'NoSignupNotification'})
         } else {
           utils._.remove(notifications, {name: 'EventNotFullNotification'})
         }
-        utils.async.map(notifications, utils._.partial(createNotificationAndSend, event, null, null))
+        utils.async.map(notifications, utils._.partial(createNotificationAndSend, updatedEvent, null, null))
       } else {
         return callback(null, null)
       }

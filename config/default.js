@@ -48,6 +48,11 @@ var defaults = {
     console.log('logLevel: ' + this.logLevel);
   },
   awsKey: {accessKeyId: process.env.awsAccessKeyId, secretAccessKey: process.env.awsSecretAccessKey, region: "us-east-1"},
+  awsSNSKey:{
+    accessKeyId: 'AKIAI5ODU5YNUXEMCG4Q',
+    secretAccessKey: '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',
+    region: 'us-west-2'
+  },
   onCueClipUrlHostName: "https://oncue.blob.core.windows.net",
   onCueClipCutterUrl: "http://oncuetest.prototyper.co/api/Videos",
   awsClipUrlHostName: "http://feighty-moments.s3.amazonaws.com",

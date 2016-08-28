@@ -571,6 +571,8 @@ var freelanceBungieGroup = {
 }
 
 var sysConfigKeys = {
+  awsSNSAppArn:'app_%DEVICE_TYPE%_%ENV%_%GROUP%_%CONSOLETYPE%',
+  awsSNSTopicArn:'topic_%ENV%_%GROUP%_%CONSOLETYPE%',
   eventExpiryTimeInMins:"eventExpiryTimeInMins",
   userTimeoutInMins:"userTimeoutInMins",
   preUserTimeoutInMins:"preUserTimeoutInMins",

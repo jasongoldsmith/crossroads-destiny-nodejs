@@ -12,5 +12,6 @@ module.exports = {
   awsTranscoding: require("./awsTranscoding"),
   bitly: require("./bitly"),
   pushNotification: require("./push-notification"),
-  uuid: require("./uuidHelper")
+  uuid: require("./uuidHelper"),
+  sns:require('./SNS')
 };
