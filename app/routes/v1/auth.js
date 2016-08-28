@@ -146,12 +146,12 @@ function signup(req, res) {
   }
 
   if(!req.body.consoles || utils._.isEmpty(req.body.consoles) || utils._.isInvalidOrBlank(req.body.consoles)){
-    var err = {error: "Sorry, something's not right. Could you reinstall the app and try again? If that doesn't work, email us at support@crossroadsapp.co"}
+    var err = {error: "Sorry, something's not right. Please go back to the sign up page and try entering your gamertag again."}
     return routeUtils.handleAPIError(req, res, err, err)
   }
 
   if(!req.body.bungieMemberShipId || utils._.isEmpty(req.body.bungieMemberShipId) ){
-    var err = {error: "Sorry, something's not right. Could you reinstall the app and try again? If that doesn't work, email us at support@crossroadsapp.co"}
+    var err = {error: "Sorry, something's not right. Please go back to the sign up page and try entering your gamertag again."}
     return routeUtils.handleAPIError(req, res, err, err)
   }
 
