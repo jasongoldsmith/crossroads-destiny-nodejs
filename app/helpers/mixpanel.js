@@ -124,6 +124,7 @@ function setUser(user) {
     events_created: 0,
     events_joined: 0,
     events_left: 0,
+    events_full: 0,
     date_joined: user.uDate
   })
 }
@@ -142,6 +143,10 @@ function incrementEventsJoined(user) {
   mixpanel.people.increment(user._id, "events_joined")
 }
 
+function incrementEventsFull(user) {
+  mixpanel.people.increment(user._id, "events_full")
+}
+
 function incrementEventsLeft(userId) {
   var models = require('../models')
   utils.async.waterfall([
@@ -157,7 +162,6 @@ function incrementEventsLeft(userId) {
       utils.l.d("error in mixpanel while leaving event for user", user)
     }
   })
-
 }
 
 module.exports = {
@@ -165,6 +169,8 @@ module.exports = {
   setPeopleProps: setPeopleProps,
   setUser: setUser,
   trackEvent: trackEvent,
+  incrementEventsCreated: incrementEventsCreated,
   incrementEventsJoined: incrementEventsJoined,
+  incrementEventsFull: incrementEventsFull,
   incrementEventsLeft: incrementEventsLeft
 };

@@ -338,6 +338,7 @@ function updateUserStatsForFullEvent(event) {
     utils.async.mapSeries(event.players, function(player, callback) {
       models.user.getById(player._id.toString(), function (err, user) {
         updateUserStats(user, "eventsFull")
+        helpers.m.incrementEventsFull(user)
         return callback(null, user)
       })
     },

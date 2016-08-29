@@ -12,14 +12,13 @@ function create(req, res) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
 		} else {
-			// We do not want to track events if they are created by test users
-			if (event.creator.clanId != "forcecatalyst") {
-				helpers.m.trackEvent(event)
-			}
+			helpers.m.trackEvent(event)
 			if(event.players.length == 1) {
 				helpers.firebase.createEvent(event, req.user)
+				helpers.m.incrementEventsCreated(req.user)
 			} else {
 				helpers.firebase.updateEvent(event, req.user)
+				helpers.m.incrementEventsJoined(req.user)
 			}
 			routeUtils.handleAPISuccess(req, res, event)
 		}
