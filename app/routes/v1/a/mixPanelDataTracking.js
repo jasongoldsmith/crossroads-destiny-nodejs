@@ -79,6 +79,7 @@ function trackAppInstall(req, data, callback) {
 		req.zuid = userId
 		req.session.zuid = userId
 	}
+	data.trackingData.userId = req.zuid
 	return callback(null, "appInstall")
 }
 
