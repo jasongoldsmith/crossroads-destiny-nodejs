@@ -168,8 +168,13 @@ function signup(req, res) {
 
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
-    function (callback) {
-      userData._id = req.session.zuid
+    function(callback) {
+      /* We need this call explicitly incase a new user is trying to
+         create an account from a phone which already had this app */
+      models.user.getOrCreateUIDFromRequest(req, true, callback)
+    },
+    function (uid, callback) {
+      userData._id = uid
       service.authService.signupUser(userData, callback)
     },
     reqLoginWrapper(req, "auth.login")
