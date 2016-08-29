@@ -30,6 +30,9 @@ function trackData(req, callback) {
 				case "pushNotification":
 					trackPushNotification(data, callback)
 					break
+				case "appInstall":
+					trackAppInstall(req, data, callback)
+					break
 				case "appInit":
 					trackAppInit(req, data, callback)
 					break
@@ -68,6 +71,15 @@ function trackPushNotification(data, callback) {
 	} else {
 		return callback(null, data.trackingData.notificationName)
 	}
+}
+
+function trackAppInstall(req, data, callback) {
+	var userId = data.trackingData.userId
+	if(utils._.isValidNonBlank()) {
+		req.zuid = userId
+		req.session.zuid = userId
+	}
+	return callback(null, "appInstall")
 }
 
 function trackAppInit(req, data, callback) {
