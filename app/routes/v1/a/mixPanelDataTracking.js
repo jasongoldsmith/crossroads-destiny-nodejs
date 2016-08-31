@@ -92,12 +92,16 @@ function trackAppInstall(req, data, callback) {
 
 	// expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
 	// We have to maintain this order as it is sent by fb and branch as a deep link
-	var adsValues = data.trackingData.ads.split('/')
-	adsValues[4] = adsValues[4].split('?')[0]
-	data.trackingData.source = adsValues[1]
-	data.trackingData.campaign = adsValues[2]
-	data.trackingData.ad = adsValues[3]
-	data.trackingData.creative = adsValues[4]
+	if(data.trackingData.ads.toString().toLowerCase() != "unknown") {
+		var adsValues = data.trackingData.ads.split('/')
+		adsValues[4] = adsValues[4].split('?')[0]
+		data.trackingData.source = adsValues[1]
+		data.trackingData.campaign = adsValues[2]
+		data.trackingData.ad = adsValues[3]
+		data.trackingData.creative = adsValues[4]
+	} else {
+		data.trackingData.source = "unknown"
+	}
 
 	helpers.m.setUser(req, data.trackingData)
 	return callback(null, "appInstall")
