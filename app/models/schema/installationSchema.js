@@ -9,7 +9,7 @@ var InstallationSchema = new Schema ({
   unReadNotificationCount: Number,
   date: Date,
   uDate: Date,
-  deviceSubscriptions:[{key:String,subscriptionArn:String}]
+  deviceSubscriptions:[{key:String,subscriptionArn:String,endPointArn:String}]
 })
 
 InstallationSchema.index({'user':1}, {'unique': true})

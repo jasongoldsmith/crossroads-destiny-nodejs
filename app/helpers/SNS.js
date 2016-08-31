@@ -38,13 +38,14 @@ function registerDeviceToken(user,callback){
         Attributes:{ Enabled:'true'}
       },callback)
     },function(deviceEndPoint,callback){
+      config.endPointArn=deviceEndPoint.EndpointArn
       sns.subscribe({
         Protocol:'application',
         TopicArn:config.topicARN,
         Endpoint:deviceEndPoint.EndpointArn
       },callback)
     },function(subscribeEndPoint, callback){
-      var subEndpointObj = {key:getTopicARNKey(config.consoleType,config.groupId),subscriptionArn:subscribeEndPoint.SubscriptionArn}
+      var subEndpointObj = {key:getTopicARNKey(config.consoleType,config.groupId),subscriptionArn:subscribeEndPoint.SubscriptionArn,endPointArn:config.endPointArn}
       installationObj.deviceSubscriptions.push(subEndpointObj)
       models.installation.findByIdAndUpdate(installationObj._id,{deviceSubscriptions:installationObj.deviceSubscriptions},callback)
     }
