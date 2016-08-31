@@ -163,7 +163,8 @@ function signup(req, res) {
     consoles: body.consoles,
     imageUrl: body.imageUrl,
     clanId: body.clanId,
-    bungieMemberShipId: body.bungieMemberShipId
+    bungieMemberShipId: body.bungieMemberShipId,
+    mpDistinctId: req.adata.distinct_id
   }
 
   utils.async.waterfall([
@@ -245,7 +246,7 @@ function verifyAccountConfirm(req,res){
       if(err) routeUtils.handleAPIError(req,res,err,err)
       else {
         helpers.firebase.updateUser(userObj)
-        helpers.m.trackRequest("AccountVerifyConfirm_SUCC", {"alias":userObj._id}, req, userObj)
+        helpers.m.trackRequest("AccountVerifyConfirm_SUCC", {"distinct_id":userObj.mpDistinctId}, req, userObj)
         res.render("account/verifyConfirm",{appName:utils.config.appName})
       }
     }
