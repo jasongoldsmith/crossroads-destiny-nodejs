@@ -261,7 +261,18 @@ switch(command) {
     //helpers.sns.sendPush()
     break
   case 'snsPublishTest':
-    helpers.sns.publishToSNSTopic('apn','PS4','clan_id_not_set',function(err,result){
+    var customPayload = {
+      //alert:"Custom Hello World for event from Harsha",
+      eventId:"57c5afccfd06cd0300cf8477",
+      notificationName:"eventCreateNotif",
+      activityId:"57b7a79c923973ee953d87ec",
+      eventName:"King's fall",
+      eventClanId:"clan_id_not_set",
+      eventClanName: 'Free Lance Lobby',
+      eventClanImageUrl: 'http://www.amazon.com/test.jpg',
+      eventConsole: 'PS4'
+    }
+    helpers.sns.publishToSNSTopic('PS4','clan_id_not_set',customPayload,function(err,result){
       utils.l.d('err',err)
       utils.l.d('result',result)
     })

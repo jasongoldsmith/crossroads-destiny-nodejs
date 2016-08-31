@@ -4,6 +4,7 @@ var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
 var tinyUrlService = require('./tinyUrlService')
+var proxyURL = process.env.QUOTAGUARD_URL || 'http://quotaguard6541:60a2ade59642@proxy.quotaguard.com:9292'
 
 function getBungieVariables(callback) {
   var keys = [
@@ -362,12 +363,15 @@ function listBungieGroupsJoined(destinyMembershipId, consoleType, currentPage, c
 //url:"https://www.bungie.net/Platform/User/GetBungieNetUser/",
 function bungieGet(url, gamerId, consoleType, callback){
   utils.l.d("bungieGet",url)
+
   request({
     url: url,
     method: "GET",
+    proxy: proxyURL,
     headers: {
       //'X-API-KEY': 'f091c8d36c3c4a17b559c21cd489bec0', //harsha //'3beed7e811fb4f78aee0c4595eed1371'
-      'X-API-KEY': utils.config.bungieAPIToken
+      'X-API-KEY': utils.config.bungieAPIToken,
+      'User-Agent': 'node.js'
     }
   }, function(error, response, bungieData) {
     if(error) {
@@ -415,10 +419,12 @@ function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callba
       request({
         url: url,
         method: "POST",
+        proxy: proxyURL,
         headers: {
           'x-api-key': utils.config.bungieAPIToken,
           'x-csrf': bungieVariables.bungieCsrfToken,
-          'cookie': bungieVariables.bungieCookie
+          'cookie': bungieVariables.bungieCookie,
+          'User-Agent': 'node.js'
         },
         body:msgBody,
         json:true

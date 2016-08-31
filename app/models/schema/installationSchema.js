@@ -8,7 +8,8 @@ var InstallationSchema = new Schema ({
   deviceToken: String,
   unReadNotificationCount: Number,
   date: Date,
-  uDate: Date
+  uDate: Date,
+  deviceSubscriptions:[{key:String,subscriptionArn:String}]
 })
 
 InstallationSchema.index({'user':1}, {'unique': true})

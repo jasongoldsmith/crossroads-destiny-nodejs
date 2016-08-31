@@ -88,13 +88,18 @@ function save(installation, callback) {
   );
 }
 
+function findByIdAndUpdate(id,data,callback){
+  Installation.findByIdAndUpdate(id,{ "$set": data},callback)
+}
+
 module.exports = {
   model: Installation,
   getById: getById,
   save: save,
   updateInstallation: updateInstallation,
   getInstallationByUser: getInstallationByUser,
-  getInstallationByUserList: getInstallationByUserList
+  getInstallationByUserList: getInstallationByUserList,
+  findByIdAndUpdate:findByIdAndUpdate
 };
 
 
