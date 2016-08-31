@@ -42,8 +42,17 @@ function trackData(req, callback) {
 				case "eventSharing":
 					trackEventSharing(req.user, data, callback)
 					break
-				case "addCardInit":
+				case "adCardInit":
 					trackAdCardInit(req.user, data, callback)
+					break
+				case "addActivityInit":
+					trackAddActivityInit(req.user, data, callback)
+					break
+				case "currentTabInit":
+					trackCurrentTabInit(req.user, data, callback)
+					break
+				case "upcomingTabInit":
+					trackUpcomingTabInit(req.user, data, callback)
 					break
 				default:
 					return callback(null, null)
@@ -96,6 +105,7 @@ function trackAppInstall(req, data, callback) {
 
 function trackAppInit(req, data, callback) {
 	data.trackingData.userId = req.session.zuid
+	helpers.m.incrementAppInit(req)
 	return callback(null, "appInit")
 }
 
@@ -107,6 +117,21 @@ function trackSignupInit(req, data, callback) {
 function trackAdCardInit(user, data, callback) {
 	data.trackingData.userId = user._id.toString()
 	return callback(null, "adCardInit")
+}
+
+function trackAddActivityInit(user, data, callback) {
+	data.trackingData.userId = user._id.toString()
+	return callback(null, "addActivityInit")
+}
+
+function trackCurrentTabInit(user, data, callback) {
+	data.trackingData.userId = user._id.toString()
+	return callback(null, "currentTabInit")
+}
+
+function trackUpcomingTabInit(user, data, callback) {
+	data.trackingData.userId = user._id.toString()
+	return callback(null, "upcomingTabInit")
 }
 
 function trackEventSharing(user, data, callback) {

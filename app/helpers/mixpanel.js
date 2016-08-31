@@ -71,24 +71,27 @@ function getUserProperties(user) {
 function setUser(req, data) {
   var trackingData = data || {}
   setReqAdata(req, trackingData)
-  mixpanel.people.set(trackingData.distinct_id, {
-    events_created: 0,
-    events_joined: 0,
-    events_left: 0,
-    events_full: 0
-  })
+  mixpanel.people.set(trackingData.distinct_id,
+    {
+      events_created: 0,
+      events_joined: 0,
+      events_left: 0,
+      events_full: 0,
+      app_init: 0
+    })
   setOnce(trackingData)
   mixpanel.alias(trackingData.distinct_id, req.session.zuid)
 }
 
 function setOnce(trackingData) {
-  mixpanel.people.set_once(trackingData.distinct_id, {
-    source: trackingData.source,
-    campaign: trackingData.campaign,
-    ad: trackingData.ad,
-    creative: trackingData.creative,
-    userFirstSeen: new Date().toISOString()
-  })
+  mixpanel.people.set_once(trackingData.distinct_id,
+    {
+      source: trackingData.source,
+      campaign: trackingData.campaign,
+      ad: trackingData.ad,
+      creative: trackingData.creative,
+      userFirstSeen: new Date().toISOString()
+    })
 }
 
 function updateUser(req, user) {
@@ -117,21 +120,12 @@ function incrementEventsFull(user) {
   mixpanel.people.increment(user._id, "events_full")
 }
 
+function incrementAppInit(req) {
+  mixpanel.people.increment(req.adata.distinct_id, "app_init")
+}
+
 function incrementEventsLeft(userId) {
-  var models = require('../models')
-  utils.async.waterfall([
-    function (callback) {
-      models.user.getById(userId, callback)
-    },
-    function(user, callback) {
-      mixpanel.people.increment(user.userName, "events_left")
-      callback(null, user)
-    }
-  ], function(err, user) {
-    if (err) {
-      utils.l.d("error in mixpanel while leaving event for user", user)
-    }
-  })
+  mixpanel.people.increment(userId, "events_left")
 }
 
 function setReqAdata(req, trackData) {
@@ -151,5 +145,6 @@ module.exports = {
   incrementEventsCreated: incrementEventsCreated,
   incrementEventsJoined: incrementEventsJoined,
   incrementEventsFull: incrementEventsFull,
-  incrementEventsLeft: incrementEventsLeft
+  incrementEventsLeft: incrementEventsLeft,
+  incrementAppInit: incrementAppInit
 }
