@@ -43,7 +43,7 @@ function trackData(req, callback) {
 					trackEventSharing(req.user, data, callback)
 					break
 				case "addCardInit":
-					trackAdCardInit(callback)
+					trackAdCardInit(req.user, data, callback)
 					break
 				default:
 					return callback(null, null)
@@ -75,11 +75,22 @@ function trackPushNotification(data, callback) {
 
 function trackAppInstall(req, data, callback) {
 	var userId = data.trackingData.userId
-	if(utils._.isValidNonBlank()) {
+	if(utils._.isValidNonBlank(userId)) {
 		req.zuid = userId
 		req.session.zuid = userId
 	}
-	data.trackingData.userId = req.zuid
+	data.trackingData.userId = req.session.zuid
+
+	// expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
+	// We have to maintain this order as it is sent by fb and branch as a deep link
+	var adsValues = data.trackingData.ads.split('/')
+	adsValues[4] = adsValues[4].split('?')[0]
+	data.trackingData.source = adsValues[1]
+	data.trackingData.campaign = adsValues[2]
+	data.trackingData.ad = adsValues[3]
+	data.trackingData.creative = adsValues[4]
+
+	helpers.m.setUser(req, data.trackingData)
 	return callback(null, "appInstall")
 }
 
@@ -93,7 +104,8 @@ function trackSignupInit(req, data, callback) {
 	return callback(null, "signupInit")
 }
 
-function trackAdCardInit(callback) {
+function trackAdCardInit(user, data, callback) {
+	data.trackingData.userId = user._id.toString()
 	return callback(null, "adCardInit")
 }
 

@@ -129,12 +129,6 @@ function handleAPIRedirect(req, res, url, trackingData) {
   handleAPIResponse(req, res, 200, responseTypesMap.REDIRECT, data, trackingData);
 }
 
-function handleJSONResponse(req, res, jsonData, trackingData) {
-  var trackingKey = getTrackingKeyFromRequest(req, responseTypesMap.REDIRECT);
-  helpers.m.trackRequest(trackingKey, trackingData, req, req.user);
-  res.json(jsonData);
-}
-
 function getTrackingKeyFromRequest(req, suffix) {
   var trackingKey = req.trackingKeyBase + '_' + req.method + '_' + suffix;
   return trackingKey;
@@ -188,7 +182,6 @@ function rGetPost(router, path, trackingKey, getFn, postFn,trackData) {
 }
 
 module.exports = {
-  handleJSONResponse: handleJSONResponse,
   handleAPISuccess: handleAPISuccess,
   handleAPIRedirect: handleAPIRedirect,
   handleAPIError: handleAPIError,

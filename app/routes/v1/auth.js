@@ -186,8 +186,13 @@ function signup(req, res) {
       }
       helpers.firebase.createUser(user)
       helpers.cookies.setCookie("foo", "bar", res)
-      helpers.m.setUser(user)
-      return routeUtils.handleAPISuccess(req, res, {value: service.userService.setLegalAttributes(user),message:getSignupMessage(user)})
+      helpers.m.updateUser(req, user)
+      return routeUtils.handleAPISuccess(req, res,
+        {
+          value: service.userService.setLegalAttributes(user),
+          message: getSignupMessage(user)
+        }
+      )
     }
   )
 }

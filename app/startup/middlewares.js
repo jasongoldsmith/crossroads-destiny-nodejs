@@ -90,6 +90,7 @@ function handleHeaders(req, res) {
   appendFromHeader(req, data, 'x-forwarded-for', 'userip', getUserIp(req))
   appendFromHeader(req, data, 'x-request-id', 'herokuRequestId', null)
   appendFromHeader(req, data, 'x-request-start', 'herokuTime', utils.m.moment().unix().toString())
+  appendFromHeader(req, data, 'x-mixpanelid', 'distinct_id', null)
   helpers.req.appendToAdata(req, data)
   var useragent = req.headers['user-agent']
   var uaData = getUAData(useragent)
@@ -124,10 +125,6 @@ function handleIdentifyUser(req, next) {
     ],
     function(err, uid) {
       utils.l.d('*************************************  trace zuid.5 ' + req.uid + ' ' + req.zuid)
-      var data = {
-        'distinct_id': uid
-      }
-      helpers.req.appendToAdata(req, data)
       req.zuid = uid
       utils.l.d('*************************************  trace zuid.6 ' + req.uid + ' ' + req.zuid)
       next()
