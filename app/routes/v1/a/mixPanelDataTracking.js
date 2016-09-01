@@ -36,6 +36,9 @@ function trackData(req, callback) {
 				case "appInit":
 					trackAppInit(req, data, callback)
 					break
+				case "appResume":
+					trackAppResume(req, data, callback)
+					break
 				case "signupInit":
 					trackSignupInit(req, data, callback)
 					break
@@ -99,6 +102,7 @@ function trackAppInstall(req, data, callback) {
 	data.trackingData.campaign = utils._.isValidNonBlank(adsValues[1]) ? adsValues[1] : null
 	data.trackingData.ad = utils._.isValidNonBlank(adsValues[2]) ? adsValues[2] : null
 	data.trackingData.creative = adsValues[3]
+	delete data.trackingData.ads
 	
 	helpers.m.setUser(req, data.trackingData)
 	return callback(null, "appInstall")
@@ -108,6 +112,11 @@ function trackAppInit(req, data, callback) {
 	data.trackingData.userId = req.session.zuid
 	helpers.m.incrementAppInit(req)
 	return callback(null, "appInit")
+}
+
+function trackAppResume(req, data, callback) {
+	data.trackingData.userId = req.session.zuid
+	return callback(null, "appResume")
 }
 
 function trackSignupInit(req, data, callback) {
