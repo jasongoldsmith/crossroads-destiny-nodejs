@@ -92,18 +92,14 @@ function trackAppInstall(req, data, callback) {
 
 	// expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
 	// We have to maintain this order as it is sent by fb and branch as a deep link
-	if(data.trackingData.ads.toString().toLowerCase() != "unknown") {
-		data.trackingData.ads = utils._.trim(data.trackingData.ads, '/')
-		var adsValues = data.trackingData.ads.split('/')
-		adsValues[3] = utils._.isValidNonBlank(adsValues[3]) ? adsValues[3].split('?')[0] : null
-		data.trackingData.source = utils._.isValidNonBlank(adsValues[0]) ? adsValues[0] : null
-		data.trackingData.campaign = utils._.isValidNonBlank(adsValues[1]) ? adsValues[1] : null
-		data.trackingData.ad = utils._.isValidNonBlank(adsValues[2]) ? adsValues[2] : null
-		data.trackingData.creative = adsValues[3]
-	} else {
-		data.trackingData.source = "unknown"
-	}
-
+	data.trackingData.ads = utils._.trim(data.trackingData.ads, '/')
+	var adsValues = data.trackingData.ads.split('/')
+	adsValues[3] = utils._.isValidNonBlank(adsValues[3]) ? adsValues[3].split('?')[0] : null
+	data.trackingData.source = utils._.isValidNonBlank(adsValues[0]) ? adsValues[0] : null
+	data.trackingData.campaign = utils._.isValidNonBlank(adsValues[1]) ? adsValues[1] : null
+	data.trackingData.ad = utils._.isValidNonBlank(adsValues[2]) ? adsValues[2] : null
+	data.trackingData.creative = adsValues[3]
+	
 	helpers.m.setUser(req, data.trackingData)
 	return callback(null, "appInstall")
 }
