@@ -86,6 +86,7 @@ function getUserIp(req) {
 
 function handleHeaders(req, res) {
   var data = {}
+  utils.l.d("headers being sent", req.headers)
   appendFromHeader(req, data, 'x-forwarded-for', 'ip', getUserIp(req))
   appendFromHeader(req, data, 'x-forwarded-for', 'userip', getUserIp(req))
   appendFromHeader(req, data, 'x-request-id', 'herokuRequestId', null)
