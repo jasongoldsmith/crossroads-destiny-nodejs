@@ -1,5 +1,6 @@
 module.exports = {
   hostName: 'https://travelerbackendproduction.herokuapp.com',
+  tinyUrlHost:'http://crsrd.co/',
   enableNewRelic: true,
   portNum: -1,
   s3: {

@@ -103,6 +103,7 @@ function trackAppInit(req, data, callback) {
 
 function trackAppResume(req, data, callback) {
   data.trackingData.userId = req.session.zuid
+  helpers.m.incrementAppInit(req)
   return callback(null, "appResume")
 }
 
