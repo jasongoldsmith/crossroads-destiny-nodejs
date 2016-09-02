@@ -13,6 +13,10 @@ function trackRequest(key, data, req, user) {
 /*  if (utils.config.devMode || !mixpanel) {
     return
   }*/
+  utils.l.d('mixpanelId::'+reqHelper.getHeader(req,'x-mixpanelid')+'::key::'+key)
+  if(utils._.isInvalidOrBlank(reqHelper.getHeader(req,'x-mixpanelid'))){
+    return
+  }
   if (utils._.isInvalid(key)) {
     return
   }
@@ -69,6 +73,11 @@ function getUserProperties(user) {
 }
 
 function setUser(req, data) {
+  utils.l.d('mixpanelId::'+reqHelper.getHeader(req,'x-mixpanelid'))
+  if(utils._.isInvalidOrBlank(reqHelper.getHeader(req,'x-mixpanelid'))){
+    return
+  }
+  utils.l.d('2222:mixpanelId::'+reqHelper.getHeader(req,'x-mixpanelid'))
   var trackingData = data || {}
   setReqAdata(req, trackingData)
   mixpanel.people.set(trackingData.distinct_id,

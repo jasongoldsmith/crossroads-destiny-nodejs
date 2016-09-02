@@ -570,6 +570,10 @@ var freelanceBungieGroup = {
   "clanEnabled": false
 }
 
+var existingUserInstallData = {
+  ads:"mvpUser/mvpCampaign/mvpAd/mvpCreative"
+}
+
 var sysConfigKeys = {
   awsSNSAppArn:'app_%DEVICE_TYPE%_%ENV%_%GROUP%_%CONSOLETYPE%',
   awsSNSTopicArn:'topic_%ENV%_%GROUP%_%CONSOLETYPE%',
@@ -609,5 +613,6 @@ module.exports = {
   consoleGenericsId: consoleGenericsId,
   sysConfigKeys: sysConfigKeys,
   eventStatus: eventStatus,
-  notificationQueueTypeEnum: notificationQueueTypeEnum
+  notificationQueueTypeEnum: notificationQueueTypeEnum,
+  existingUserInstallData:existingUserInstallData
 }

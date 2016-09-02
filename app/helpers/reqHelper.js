@@ -39,8 +39,17 @@ function handleFirstVErrorWrapper(req) {
   }
 }
 
+function getHeader(req,headerKey){
+  var value = null
+  if (utils._.isValidNonBlank(req.headers[headerKey])) {
+    value = req.headers[headerKey]
+  }
+  utils.l.d('got header for key['+headerKey+']',value)
+  return value
+}
 module.exports = {
   appendToAdata: appendToAdata,
   handleVErrorWrapper: handleVErrorWrapper,
-  handleFirstVErrorWrapper: handleFirstVErrorWrapper
+  handleFirstVErrorWrapper: handleFirstVErrorWrapper,
+  getHeader:getHeader
 };

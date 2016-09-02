@@ -15,12 +15,12 @@ var flash = require('connect-flash');
 var methodOverride = require('method-override');
 
 var utils = require('../utils');
-
+var helpers = require('../helpers')
 var middlewares = require('./middlewares');
 
 var routeUtils = require('../routes/routeUtils');
 var models = require('../models')
-
+var service = require('../service')
 module.exports = function (app, passport) {
   app.use(compression({
     threshold: 512
@@ -111,22 +111,34 @@ module.exports = function (app, passport) {
 
   app.use('/api/v1/a', function(req, res, next) {
     //utils.l.i("req in /api/v1/a", {path: req.path, headers: req.headers, body: req.body, files:req.files});
-
+    utils.l.d('expressStartup::')
     if (!req.isAuthenticated()) {
       return routeUtils.handleAPIUnauthorized(req, res)
     }else{
       var userLastActiveUpdateInterval = utils.config.userLastActiveUpdateInterval
       var timeDiff = utils.moment().utc().diff(req.user.lastActiveTime, 'minutes')
+      //Set mixpanel distinct ID for users from old version
+      var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
+      var updateMpDistinctId = utils._.isInvalidOrBlank(req.user.mpDistinctId) && utils._.isValidNonBlank(mpDistincId) ? true:false
+
       utils.l.d("expressStartup::timeDiff::"+timeDiff+"::lastActiveTime::"+req.user.lastActiveTime+"::userLastActiveUpdateInterval::"+userLastActiveUpdateInterval)
-      if(timeDiff > userLastActiveUpdateInterval){
-        models.user.findByUserIdAndUpdate(req.user.id, {
-          lastActiveTime: new Date(),
-          notifStatus: []
-        }, function (err, user) {
-          if (err) {
+      utils.l.d("expressStartup::updateMpDistinctId::"+updateMpDistinctId+"::req.user.mpDistinctId::"+req.user.mpDistinctId+"::"+mpDistincId)
+
+      if(timeDiff > userLastActiveUpdateInterval || utils._.isInvalidOrBlank(req.user.lastActiveTime) || updateMpDistinctId){
+        var updateData = timeDiff > userLastActiveUpdateInterval || utils._.isInvalidOrBlank(req.user.lastActiveTime) ? {lastActiveTime: new Date(),notifStatus: []}:{}
+        updateData.mpDistinctId = updateMpDistinctId ? mpDistincId:null
+        utils.l.d('updateData::',updateData)
+        models.user.findByUserIdAndUpdate(req.user.id,updateData, function (err, user) {
+          if (err)
             utils.l.d("error in the authenticated API request", err)
-            utils.l.d("error in the authenticated API request for user", user)
-          }
+          var data = {trackingData:{}}
+          data.trackingData.userId = req.user.id
+          data.trackingData.distinct_id = mpDistincId
+          // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
+          // We have to maintain this order as it is sent by fb and branch as a deep link
+          utils._.extend(data.trackingData,utils.constants.existingUserInstallData)
+
+          service.trackingService.trackAppInstall(req,data,function(err,result){})
           next();
         });
       }else next();
