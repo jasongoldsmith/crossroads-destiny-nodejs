@@ -66,7 +66,6 @@ function getUAData(useragent) {
   }
 
   return {
-    '$os': os,
     'os_generic': os_generic,
     '$browser': browser,
     'browser_generic': browser_generic,
@@ -94,6 +93,8 @@ function handleHeaders(req, res) {
   appendFromHeader(req, data, 'x-mixpanelid', 'distinct_id', null)
   appendFromHeader(req, data, '$app_build_number','$app_build_number',null)
   appendFromHeader(req, data, '$app_version_string','$app_version_string',null)
+  appendFromHeader(req, data, '$app_version_string','$app_version',null)
+  appendFromHeader(req, data, '$app_version','$app_version',null)
   appendFromHeader(req, data, '$carrier','$carrier',null)
   appendFromHeader(req, data, 'mp_lib','mp_lib',null)
   appendFromHeader(req, data, '$lib_version','$lib_version',null)
@@ -103,24 +104,11 @@ function handleHeaders(req, res) {
   appendFromHeader(req, data, '$model','$model',null)
   appendFromHeader(req, data, '$screen_height','$screen_height',null)
   appendFromHeader(req, data, '$screen_width','$screen_width',null)
-  appendFromHeader(req, data, '$ios_device_model','$ios_device_model',null)
-  appendFromHeader(req, data, '$ios_version','$ios_version',null)
-  appendFromHeader(req, data, '$ios_lib_version','$ios_lib_version',null)
-  appendFromHeader(req, data, '$wifi','$wifi',null)
   appendFromHeader(req, data, '$screen_dpi','$screen_dpi',null)
-  appendFromHeader(req, data, '$screen_height','$screen_height',null)
-  appendFromHeader(req, data, '$screen_width','$screen_width',null)
-  appendFromHeader(req, data, '$android_lib_version','$android_lib_version',null)
-  appendFromHeader(req, data, '$android_os','$android_os',null)
-  appendFromHeader(req, data, '$android_os_version','$android_os_version',null)
-  appendFromHeader(req, data, '$android_manufacturer','$android_manufacturer',null)
-  appendFromHeader(req, data, '$android_brand','$android_brand',null)
-  appendFromHeader(req, data, '$android_model','$android_model',null)
-  appendFromHeader(req, data, '$android_app_version','$android_app_version',null)
-  appendFromHeader(req, data, '$android_app_version_code','$android_app_version_code',null)
-  appendFromHeader(req, data, '$google_play_services','$google_play_services',null)
+  appendFromHeader(req, data, '$wifi','$wifi',null)
   appendFromHeader(req, data, '$has_nfc','$has_nfc',null)
-  appendFromHeader(req, data, '$carrier','$carrier',null)
+  appendFromHeader(req, data, '$brand','$brand',null)
+  appendFromHeader(req, data, '$google_play_services','$google_play_services',null)
 
   helpers.req.appendToAdata(req, data)
   var useragent = req.headers['user-agent']
