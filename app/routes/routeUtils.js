@@ -148,7 +148,9 @@ function addTrackingKeyBaseToRequest(trackingKeyBase,trackData) {
       //utils.l.d('routeUtils::addTrackingKeyBaseToRequest::Skipping trackdata[utm_dnt]')
       return next();
     }else{
-      helpers.m.trackRequest(trackingKey, {}, req, req.user);
+      utils.l.d('tracking request',utils.config.skipMPRequestTracking)
+      if(utils.config.skipMPRequestTracking == "NO")
+        helpers.m.trackRequest(trackingKey, {}, req, req.user);
       return next();
     }
   }

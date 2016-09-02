@@ -15,5 +15,5 @@ function track(req, res) {
 	})
 }
 
-routeUtils.rPost(router, '/track', 'track', track)
+routeUtils.rPost(router, '/track', 'track', track,track,{utm_dnt:"track"})
 module.exports = router
