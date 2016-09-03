@@ -367,11 +367,11 @@ function bungieGet(url, gamerId, consoleType, callback){
   request({
     url: url,
     method: "GET",
-    proxy: proxyURL,
+   // proxy: proxyURL,
     headers: {
       //'X-API-KEY': 'f091c8d36c3c4a17b559c21cd489bec0', //harsha //'3beed7e811fb4f78aee0c4595eed1371'
       'X-API-KEY': utils.config.bungieAPIToken,
-      'User-Agent': 'node.js'
+    //  'User-Agent': 'node.js'
     }
   }, function(error, response, bungieData) {
     if(error) {
@@ -419,12 +419,12 @@ function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callba
       request({
         url: url,
         method: "POST",
-        proxy: proxyURL,
+      //  proxy: proxyURL,
         headers: {
           'x-api-key': utils.config.bungieAPIToken,
           'x-csrf': bungieVariables.bungieCsrfToken,
           'cookie': bungieVariables.bungieCookie,
-          'User-Agent': 'node.js'
+       //   'User-Agent': 'node.js'
         },
         body:msgBody,
         json:true
