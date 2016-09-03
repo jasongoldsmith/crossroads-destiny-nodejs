@@ -112,20 +112,36 @@ function updateUser(req, user) {
 }
 
 function trackEvent(event) {
+  if(utils._.isInvalidOrBlank(event.creator.mpDistinctId)){
+    return
+  }
+
   mixpanel.track(event.eType.aType + ", " + event.eType.aSubType, event)
   incrementEventsCreated(event.creator)
   incrementEventsJoined(event.creator)
 }
 
 function incrementEventsCreated(user) {
+  if(utils._.isInvalidOrBlank(user.mpDistinctId)){
+    return
+  }
+
   mixpanel.people.increment(user._id, "events_created")
 }
 
 function incrementEventsJoined(user) {
+  if(utils._.isInvalidOrBlank(user.mpDistinctId)){
+    return
+  }
+
   mixpanel.people.increment(user._id, "events_joined")
 }
 
 function incrementEventsFull(user) {
+  if(utils._.isInvalidOrBlank(user.mpDistinctId)){
+    return
+  }
+
   mixpanel.people.increment(user._id, "events_full")
 }
 
@@ -133,8 +149,12 @@ function incrementAppInit(req) {
   mixpanel.people.increment(req.adata.distinct_id, "app_init")
 }
 
-function incrementEventsLeft(userId) {
-  mixpanel.people.increment(userId, "events_left")
+function incrementEventsLeft(user) {
+  if(utils._.isInvalidOrBlank(user.mpDistinctId)){
+    return
+  }
+
+  mixpanel.people.increment(user._id.toString(), "events_left")
 }
 
 function setReqAdata(req, trackData) {

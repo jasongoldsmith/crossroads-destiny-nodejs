@@ -106,7 +106,7 @@ function handleLeaveEvent(user, data, userTimeout, callback) {
         } else {
           // We do not want to track events if they are created by test users
           if (event.creator.clanId != "forcecatalyst") {
-            helpers.m.incrementEventsLeft(user._id.toString())
+            helpers.m.incrementEventsLeft(user)
           }
           helpers.firebase.updateEventV2(event, userObj,userTimeout)
         }
