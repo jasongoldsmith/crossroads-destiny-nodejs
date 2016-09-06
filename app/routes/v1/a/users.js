@@ -24,7 +24,10 @@ function listById(req, res) {
 
 function list(req, res) {
   utils.l.i("User list request")
-  listUsers(function(err, users) {
+  var username = req.param("userName")
+  var consoleId = req.param("consoleId")
+  utils.l.i("User list request", "username: " + username + " consoleId: " + consoleId)
+  listUsers(username, consoleId, function(err, users) {
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {
@@ -174,8 +177,8 @@ function getUserById(data, callback) {
   ],callback)
 }
 
-function listUsers(callback) {
-  models.user.listUsers(callback)
+function listUsers(username, consoleId, callback) {
+  models.user.listUsers(username, consoleId, callback)
 }
 
 function updateUser(data, callback) {

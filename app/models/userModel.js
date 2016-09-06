@@ -182,8 +182,8 @@ function getUserById(data, callback) {
   )
 }
 
-function listUsers(callback) {
-  getAll(callback)
+function listUsers(username, consoleId, callback) {
+  getByQuery(constructFindUserQuery(username, consoleId), callback)
 }
 
 
@@ -255,58 +255,72 @@ function findUsersByIdAndUpdate(idList,data,callback){
 
 function filterIfUserExistsForUid(uid, callback) {
   if (utils._.isInvalid(uid)) {
-    return callback(null, null);
+    return callback(null, null)
   }
   utils.async.waterfall(
     [
       function(callback) {
-        getById(uid, callback);
+        getById(uid, callback)
       }
     ],
     function (err, user) {
       if (err) {
-        return callback(null, null);
+        return callback(null, null)
       }
       if (utils._.isValid(user)) {
-        return callback(null, null);
+        return callback(null, null)
       }
-      return callback(null, uid);
+      return callback(null, uid)
     }
-  );
+  )
 }
 
 function getOrCreateUIDFromRequest(req, enforceNonExisting, callback) {
   if (req.isAuthenticated()) {
-    utils.l.d("getOrCreateUIDFromRequest::is authenticated");
-    return callback(null, req.user.id); // If user exists and it authenticated return right away
+    utils.l.d("getOrCreateUIDFromRequest::is authenticated")
+    return callback(null, req.user.id) // If user exists and it authenticated return right away
   }
   utils.async.waterfall(
     [
       function(callback) {
-        var uid = req.session.zuid;
-        utils.l.d("getOrCreateUIDFromRequest::is session", uid);
-        callback(null, uid);
+        var uid = req.session.zuid
+        utils.l.d("getOrCreateUIDFromRequest::is session", uid)
+        callback(null, uid)
       },
       function (uid, callback) {
         if (enforceNonExisting) {
-          filterIfUserExistsForUid(uid, callback);
+          filterIfUserExistsForUid(uid, callback)
         } else {
-          return callback(null, uid);
+          return callback(null, uid)
         }
       }
     ],
     function(err, uid) {
       if (err) {
-        return callback(err);
+        return callback(err)
       }
       if (utils._.isValid(uid)) {
-        return callback(null, uid);
+        return callback(null, uid)
       }
-      uid = utils.mongo.ObjectID();
-      req.session.zuid = uid;
-      return callback(null, uid);
+      uid = utils.mongo.ObjectID()
+      req.session.zuid = uid
+      return callback(null, uid)
     }
-  );
+  )
+}
+
+function constructFindUserQuery(username, consoleId) {
+  var query = {}
+
+  if(username) {
+    query.userName = username
+  }
+
+  if(consoleId) {
+    query['consoles.consoleId'] = consoleId
+  }
+
+  return query
 }
 
 module.exports = {
@@ -326,8 +340,8 @@ module.exports = {
   getUserIdsByQuery: getUserIdsByQuery,
   listMemberCount: listMemberCount,
   getUserMetrics: getUserMetrics,
-  findByUserIdAndUpdate:findByUserIdAndUpdate,
-  findUsersByIdAndUpdate:findUsersByIdAndUpdate,
+  findByUserIdAndUpdate: findByUserIdAndUpdate,
+  findUsersByIdAndUpdate: findUsersByIdAndUpdate,
   getOrCreateUIDFromRequest: getOrCreateUIDFromRequest,
-  getByQueryLite:getByQueryLite
+  getByQueryLite: getByQueryLite
 }
