@@ -17,6 +17,7 @@ function trackData(req, callback) {
             trackPushNotification(data, callback)
             break
           case "appInstall":
+            utils.l.i("track appInstall request: " + "$os: " + req.headers['$os'] + " tracking data: "+ JSON.stringify(data.trackingData))
             trackAppInstall(req, data, callback)
             break
           case "appInit":
