@@ -101,7 +101,7 @@ function trackAppInstall(req, data, callback) {
     if(err) {
       return callback(err, null)
     } else if (!temporaryUser) {
-      helpers.m.trackRequest(data.key, data.trackingData, req, req.user)
+      helpers.m.trackRequest(data.trackingKey, data.trackingData, req, req.user)
       helpers.m.setUser(req, data.trackingData)
       var temporaryUser = {
         mpDistinctId: req.adata.distinct_id,
