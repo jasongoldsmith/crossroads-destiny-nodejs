@@ -126,19 +126,23 @@ module.exports = function (app, passport) {
 
       if(timeDiff > userLastActiveUpdateInterval || utils._.isInvalidOrBlank(req.user.lastActiveTime) || updateMpDistinctId){
         var updateData = timeDiff > userLastActiveUpdateInterval || utils._.isInvalidOrBlank(req.user.lastActiveTime) ? {lastActiveTime: new Date(),notifStatus: []}:{}
-        updateData.mpDistinctId = updateMpDistinctId ? mpDistincId:null
+        if(updateMpDistinctId)
+          updateData.mpDistinctId =  mpDistincId
         utils.l.d('updateData::',updateData)
         models.user.findByUserIdAndUpdate(req.user.id,updateData, function (err, user) {
           if (err)
             utils.l.d("error in the authenticated API request", err)
-          var data = {trackingData:{}}
-          data.trackingData.userId = req.user.id
-          data.trackingData.distinct_id = mpDistincId
-          // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
-          // We have to maintain this order as it is sent by fb and branch as a deep link
-          utils._.extend(data.trackingData,utils.constants.existingUserInstallData)
+          if(updateMpDistinctId) {
+            var data = {trackingData: {}}
+            data.trackingData.userId = req.user.id
+            data.trackingData.distinct_id = mpDistincId
+            // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
+            // We have to maintain this order as it is sent by fb and branch as a deep link
+            utils._.extend(data.trackingData, utils.constants.existingUserInstallData)
 
-          service.trackingService.trackAppInstall(req,data,function(err,result){})
+            service.trackingService.trackAppInstall(req, data, function (err, result) {
+            })
+          }
           next();
         });
       }else next();

@@ -13,10 +13,12 @@ function trackRequest(key, data, req, user) {
 /*  if (utils.config.devMode || !mixpanel) {
     return
   }*/
-  utils.l.d('mixpanelId::'+reqHelper.getHeader(req,'x-mixpanelid')+'::key::'+key)
-  if(utils._.isInvalidOrBlank(reqHelper.getHeader(req,'x-mixpanelid'))){
-    return
+  var userMpId = utils._.isValid(user) ? user.mpDistinctId:null
+  utils.l.d('trackRequest::mixpanelId::'+reqHelper.getHeader(req,'x-mixpanelid')+'::key::'+key+"::mpDistinctId::"+userMpId)
+  if(utils._.isInvalidOrBlank(reqHelper.getHeader(req,'x-mixpanelid')) && utils._.isInvalidOrBlank(userMpId)){
+      return
   }
+
   if (utils._.isInvalid(key)) {
     return
   }
@@ -72,7 +74,7 @@ function getUserProperties(user) {
   return data
 }
 
-function setUser(req, data) {
+function setUser(req, data,callback) {
   utils.l.d('mixpanelId::'+reqHelper.getHeader(req,'x-mixpanelid'))
   if(utils._.isInvalidOrBlank(reqHelper.getHeader(req,'x-mixpanelid'))){
     return
@@ -80,7 +82,7 @@ function setUser(req, data) {
   utils.l.d('2222:mixpanelId::'+reqHelper.getHeader(req,'x-mixpanelid'))
   var trackingData = data || {}
   setReqAdata(req, trackingData)
-  mixpanel.people.set(trackingData.distinct_id,
+  mixpanel.people.set(req.session.zuid,
     {
       events_created: 0,
       events_joined: 0,
@@ -92,12 +94,12 @@ function setUser(req, data) {
       ad: trackingData.ad,
       creative: trackingData.creative,
     })
-  setOnce(trackingData)
-  mixpanel.alias(trackingData.distinct_id, req.session.zuid)
+  setOnce(req,trackingData)
+  mixpanel.alias(req.session.zuid,trackingData.distinct_id,callback)
 }
 
-function setOnce(trackingData) {
-  mixpanel.people.set_once(trackingData.distinct_id,
+function setOnce(req,trackingData) {
+  mixpanel.people.set_once(req.session.zuid,
     {
       userFirstSeen: new Date().toISOString()
     })
