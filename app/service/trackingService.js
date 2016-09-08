@@ -111,7 +111,7 @@ function trackAppInstall(req, data, callback) {
         },function(callback){
           helpers.m.setUser(req, data.trackingData, callback)
         }
-      ],function(err,data){
+      ],function(err, result){
         helpers.m.trackRequest("appInstall", data.trackingData, req, req.user)
         return callback(null, "appInstall")
       })
