@@ -33,7 +33,7 @@ function createActivity(data, callback) {
 				utils.l.d("no activity found, saving activity")
 				activityObj.save(callback)
 			} else {
-				uts.l.d("found activity: " + activity)
+				utils.l.d("found activity: " + activity)
 				return callback(null, activity)
 			}
 		}

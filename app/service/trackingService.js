@@ -6,11 +6,12 @@ function trackData(req, callback) {
   var data = req.body
   var user = req.user
 
+  if(!data.trackingData) {
+    data.trackingData = {}
+  }
+
   utils.async.waterfall([
       function(callback) {
-        if(!data.trackingData) {
-          data.trackingData = {}
-        }
 
         switch(data.trackingKey) {
           case "pushNotification":
@@ -52,14 +53,18 @@ function trackData(req, callback) {
     ],
     function (err, key) {
       if(err) {
+        utils.l.s("There was error in the tracking this request in mixpanel", err)
         return callback(err, null)
       } else {
         try {
-          helpers.m.trackRequest(key, data.trackingData, req, user)
+          // appInstall is a special case where we just want to track it once and we do it in it's own method
+          if(data.trackingKey != "appInstall") {
+            helpers.m.trackRequest(key, data.trackingData, req, user)
+          }
         } catch (ex) {
-          return callback(null, {success: true})
+          return callback(null, {success: true, trackingKey: data.trackingKey})
         }
-        return callback(null, {success: true})
+        return callback(null, {success: true, trackingKey: data.trackingKey})
       }
     })
 }
@@ -92,8 +97,26 @@ function trackAppInstall(req, data, callback) {
   data.trackingData.creative = adsValues[3]
   delete data.trackingData.ads
 
-  helpers.m.setUser(req, data.trackingData)
-  return callback(null, "appInstall")
+  models.temporaryUser.find(req.adata.distinct_id, function (err, temporaryUser) {
+    if(err) {
+      return callback(err, null)
+    } else if (!temporaryUser) {
+      helpers.m.trackRequest(data.key, data.trackingData, req, req.user)
+      helpers.m.setUser(req, data.trackingData)
+      var temporaryUser = {
+        mpDistinctId: req.adata.distinct_id,
+        source: data.trackingData.source
+      }
+      models.temporaryUser.create(temporaryUser, callback)
+    } else if (temporaryUser) {
+      if(temporaryUser.source == "organic" && data.trackingData.source != "organic") {
+        temporaryUser.source = data.trackingData.source
+        models.temporaryUser.update(temporaryUser, callback)
+      } else {
+        return callback(null, temporaryUser)
+      }
+    }
+  })
 }
 
 function trackAppInit(req, data, callback) {

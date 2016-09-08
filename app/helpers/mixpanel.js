@@ -86,7 +86,11 @@ function setUser(req, data) {
       events_joined: 0,
       events_left: 0,
       events_full: 0,
-      app_init: 0
+      app_init: 0,
+      source: trackingData.source,
+      campaign: trackingData.campaign,
+      ad: trackingData.ad,
+      creative: trackingData.creative,
     })
   setOnce(trackingData)
   mixpanel.alias(trackingData.distinct_id, req.session.zuid)
@@ -95,10 +99,6 @@ function setUser(req, data) {
 function setOnce(trackingData) {
   mixpanel.people.set_once(trackingData.distinct_id,
     {
-      source: trackingData.source,
-      campaign: trackingData.campaign,
-      ad: trackingData.ad,
-      creative: trackingData.creative,
       userFirstSeen: new Date().toISOString()
     })
 }

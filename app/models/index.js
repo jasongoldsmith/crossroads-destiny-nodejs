@@ -1,4 +1,5 @@
 var user = require('./userModel')
+var temporaryUser = require('./temporaryUserModel')
 var activity = require('./activityModel')
 var event = require ('./eventModel')
 var archiveEvent = require ('./archiveEventModel')
@@ -12,6 +13,7 @@ var userGroup = require('./userGroupModel')
 var notificationQueue = require ('./notificationQueueModel')
 module.exports = {
   user: user,
+  temporaryUser: temporaryUser,
   activity: activity,
   event: event,
   installation: installation,
