@@ -109,7 +109,7 @@ function trackAppInstall(req, data, callback) {
           }
           models.temporaryUser.create(temporaryUser, callback)
         },function(callback){
-          helpers.m.setUser(req, data.trackingData,callback)
+          helpers.m.setUser(req, data.trackingData, callback)
         }
       ],function(err,data){
         helpers.m.trackRequest("appInstall", data.trackingData, req, req.user)
@@ -118,6 +118,7 @@ function trackAppInstall(req, data, callback) {
     } else if (temporaryUser) {
       if(temporaryUser.source == "organic" && data.trackingData.source != "organic") {
         temporaryUser.source = data.trackingData.source
+        helpers.m.updateUserSource(req, data.trackingData)
         models.temporaryUser.update(temporaryUser, callback)
       } else {
         return callback(null, temporaryUser)

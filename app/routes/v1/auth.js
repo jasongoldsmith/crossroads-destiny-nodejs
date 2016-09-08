@@ -187,7 +187,7 @@ function signup(req, res) {
       }
       helpers.firebase.createUser(user)
       helpers.cookies.setCookie("foo", "bar", res)
-      helpers.m.updateUser(req, user)
+      helpers.m.updateUserJoinDate(req, user)
       return routeUtils.handleAPISuccess(req, res,
         {
           value: service.userService.setLegalAttributes(user),

@@ -94,23 +94,31 @@ function setUser(req, data,callback) {
       ad: trackingData.ad,
       creative: trackingData.creative,
     })
-  setOnce(req,trackingData)
+  setOnce(req)
   mixpanel.alias(req.session.zuid,trackingData.distinct_id,callback)
 }
 
-function setOnce(req,trackingData) {
+function setOnce(req) {
   mixpanel.people.set_once(req.session.zuid,
     {
       userFirstSeen: new Date().toISOString()
     })
 }
 
-function updateUser(req, user) {
-  var trackingData = {}
-  setReqAdata(req, trackingData)
-  mixpanel.people.set_once(trackingData.distinct_id, {
+function updateUserJoinDate(req, user) {
+  mixpanel.people.set_once(req.session.zuid, {
     date_joined: user.date
   })
+}
+
+function updateUserSource(req, trackingData) {
+  mixpanel.people.set(req.session.zuid,
+    {
+      source: trackingData.source,
+      campaign: trackingData.campaign,
+      ad: trackingData.ad,
+      creative: trackingData.creative,
+    })
 }
 
 function trackEvent(event) {
@@ -171,7 +179,8 @@ function setReqAdata(req, trackData) {
 module.exports = {
   trackRequest: trackRequest,
   setUser: setUser,
-  updateUser: updateUser,
+  updateUserJoinDate: updateUserJoinDate,
+  updateUserSource: updateUserSource,
   trackEvent: trackEvent,
   incrementEventsCreated: incrementEventsCreated,
   incrementEventsJoined: incrementEventsJoined,
