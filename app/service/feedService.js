@@ -2,7 +2,7 @@ var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
 
-function getFeed(user, consoleType, callback) {
+function getFeed(user, consoleType, isPublicFeed, callback) {
 	var activitiesMap = null
 	var playerIds = []
 	var eventsList = []
@@ -18,6 +18,10 @@ function getFeed(user, consoleType, callback) {
 			if(utils._.isInvalidOrBlank(consoleType) && utils._.isValidNonBlank(user)) {
 				query.consoleType = utils.primaryConsole(user).consoleType
 			}
+
+			if(isPublicFeed)
+				query.launchStatus=utils.constants.eventLaunchStatusList.now
+
 			utils.l.d("feed::query",query)
 			models.event.getByQueryLean(query, callback)
 		},
@@ -66,16 +70,19 @@ function getFeed(user, consoleType, callback) {
 			})
 
 			//create final feed object
-			transformEventsToFeed(eventsList,callback)
+			transformEventsToFeed(eventsList,isPublicFeed,callback)
 		}
 	],callback)
 }
 
-function transformEventsToFeed(events,callback){
+function transformEventsToFeed(events, isPublicFeed, callback){
 	utils.async.waterfall([
 		function(callback){
 			//Fetch adcard activities
-			models.activity.listAdActivities(callback)
+			if(isPublicFeed)
+				callback(null,null)
+			else
+				models.activity.listAdActivities(callback)
 		},function(adActivities,callback){
 			//separate current and future events from event list
 			var feedObject = {}
@@ -88,12 +95,13 @@ function transformEventsToFeed(events,callback){
 
 			//Run through adcard activities usually 5-6 objects and remove the ones alrady prsent in currentActivityIds
 			feedObject.adActivities = []
-			utils._.map(adActivities,function(activity){
-				utils.l.d('activity._id::'+activity._id+"  ###"+utils._.find(currentActivityIds,activity._id))
-				if(!utils._.find(currentActivityIds,activity._id))
-					feedObject.adActivities.push(activity)
-			})
-
+			if(!isPublicFeed) {
+				utils._.map(adActivities, function (activity) {
+					utils.l.d('activity._id::' + activity._id + "  ###" + utils._.find(currentActivityIds, activity._id))
+					if (!utils._.find(currentActivityIds, activity._id))
+						feedObject.adActivities.push(activity)
+				})
+			}
 			callback(null,feedObject)
 		}
 	],callback)

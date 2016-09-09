@@ -9,7 +9,7 @@ var service = require('../../../service')
 function getFeed(req, res) {
 	utils.l.d("Get feed request for user: " + JSON.stringify(req.user)
 		+ " with console type: " + req.param('consoleType'))
-	service.feedService.getFeed(req.user, req.param('consoleType'), function(err, feed) {
+	service.feedService.getFeed(req.user, req.param('consoleType'), false, function(err, feed) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"feed"})
 		} else {
@@ -19,7 +19,7 @@ function getFeed(req, res) {
 }
 
 function publicFeed(req, res) {
-	service.feedService.getFeed(null, null, function(err, feed) {
+	service.feedService.getFeed(null, null, true, function(err, feed) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"feed"})
 		} else {
