@@ -18,5 +18,16 @@ function getFeed(req, res) {
 	})
 }
 
+function publicFeed(req, res) {
+	service.feedService.getFeed(null, null, function(err, feed) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"feed"})
+		} else {
+			routeUtils.handleAPISuccess(req, res, feed, {utm_dnt:"feed"})
+		}
+	})
+}
+
 routeUtils.rGet(router, '/get', 'getFeed', getFeed, {utm_dnt:"feed"})
+routeUtils.rGet(router, '/public', 'publicFeed', publicFeed, {utm_dnt:"publicFeed"})
 module.exports = router

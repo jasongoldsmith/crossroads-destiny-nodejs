@@ -47,6 +47,7 @@ module.exports = function (app, passport) {
   app.use('/api/v1/notificationTrigger', require('../routes/v1/notificationTrigger'))
   app.use('/api/v1/a/event', require('../routes/v1/a/event'))
   app.use('/api/v1/a/feed', require('../routes/v1/a/feed'))
+  app.use('/api/v1/feed', require('../routes/v1/a/feed'))
   app.use('/api/v1/a/user', require('../routes/v1/a/users'))
   app.use('/api/v1/a/installation', require('../routes/v1/a/installation'))
   app.use('/api/v1/appVersion', require('../routes/v1/appVersion'))

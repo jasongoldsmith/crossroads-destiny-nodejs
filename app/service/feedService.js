@@ -8,11 +8,18 @@ function getFeed(user, consoleType, callback) {
 	var eventsList = []
 	utils.async.waterfall([
 		function(callback){
+			var query = {}
+			if(utils._.isInvalidOrBlank(user))
+				query.clanId = utils.constants.freelanceBungieGroup.groupId
+			else
+				query.clanId = user.clanId
+
 			// Fetch base event object with activity and playerIds
-			if(utils._.isInvalidOrBlank(consoleType)) {
-				consoleType = utils.primaryConsole(user).consoleType
+			if(utils._.isInvalidOrBlank(consoleType) && utils._.isValidNonBlank(user)) {
+				query.consoleType = utils.primaryConsole(user).consoleType
 			}
-			models.event.getByQueryLean({clanId: user.clanId,consoleType: consoleType}, callback)
+			utils.l.d("feed::query",query)
+			models.event.getByQueryLean(query, callback)
 		},
 		function(events,callback) {
 			eventsList = events
