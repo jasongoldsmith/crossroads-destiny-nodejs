@@ -89,6 +89,7 @@ function setUser(req, data,callback) {
       events_left: 0,
       events_full: 0,
       app_init: 0,
+      app_resume: 0,
       source: trackingData.source,
       campaign: trackingData.campaign,
       ad: trackingData.ad,
@@ -156,7 +157,11 @@ function incrementEventsFull(user) {
 }
 
 function incrementAppInit(req) {
-  mixpanel.people.increment(req.adata.distinct_id, "app_init")
+  mixpanel.people.increment(req.session.zuid, "app_init")
+}
+
+function incrementAppResume(req) {
+  mixpanel.people.increment(req.session.zuid, "app_resume")
 }
 
 function incrementEventsLeft(user) {
@@ -186,5 +191,6 @@ module.exports = {
   incrementEventsJoined: incrementEventsJoined,
   incrementEventsFull: incrementEventsFull,
   incrementEventsLeft: incrementEventsLeft,
-  incrementAppInit: incrementAppInit
+  incrementAppInit: incrementAppInit,
+  incrementAppResume: incrementAppResume
 }
