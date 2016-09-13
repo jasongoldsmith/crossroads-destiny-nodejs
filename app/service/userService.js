@@ -160,7 +160,14 @@ function upgradeConsole(user, oldConsoleType, newConsoleType, callback) {
     },
     function (events, callback) {
       consoleObject.consoleType = newConsoleType
-      updateUser(user, callback)
+      updateUser(user, function (err, updatedUser) {
+        if(err) {
+          utils.l.s("Unable to update the user", err)
+          return callback({error: "Something went wrong. Please try again"}, null)
+        } else {
+          return callback(null, updatedUser)
+        }
+      })
     }
   ], callback)
 }
@@ -182,7 +189,14 @@ function addConsole(user, console, callback) {
         console.clanTag = bungieMember.clanTag
         console.destinyMembershipId = bungieMember.destinyProfile.memberShipId
         user.consoles.push(console)
-        updateUser(user, callback)
+        updateUser(user, function (err, updatedUser) {
+          if(err) {
+            utils.l.s("Unable to update the user", err)
+            return callback({error: "Something went wrong. Please try again"}, null)
+          } else {
+            return callback(null, updatedUser)
+          }
+        })
       }
     }
   ], callback)

@@ -24,7 +24,8 @@ module.exports = function (passport, config) {
       if(!body.consoles) {
         models.user.getUserByData({userName:body.userName.toLowerCase().trim()}, function (err, user) {
           if(err) {
-            return callback(err)
+            utils.l.s("Database lookup for user failed", err)
+            return callback({error: "Something went wrong. Please try again"}, null)
           } else if(!user) {
             return callback({error: "The username and password do not match our records."}, null)
           } else if(!passwordHash.verify(password, user.passWord)) {
@@ -45,7 +46,8 @@ module.exports = function (passport, config) {
         },
           function (err, user) {
             if (err) {
-              return callback(err)
+              utils.l.s("Database lookup for user failed", err)
+              return callback({error: "Something went wrong. Please try again"}, null)
             } else if (!user) {
               return callback(null, null)
             } else if (!passwordHash.verify(password, user.passWord)) {

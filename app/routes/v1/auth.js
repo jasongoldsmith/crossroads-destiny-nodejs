@@ -43,12 +43,7 @@ function login (req, res) {
     ],
     function (err) {
       if (err) {
-        if (err instanceof helpers.errors.ValidationError) {
-          req.routeErr = err
-        } else {
-          req.routeErr = {error: "The username and password do not match our records."}
-        }
-        return routeUtils.handleAPIError(req, res, req.routeErr,req.routeErr)
+        return routeUtils.handleAPIError(req, res, err, err)
       }
       routeUtils.handleAPISuccess(req, res,
         {
@@ -67,7 +62,14 @@ function handleNewUser(req, callback) {
     },
     function (bungieMember, callback) {
       body.bungieMemberShipId = bungieMember.bungieMemberShipId
-      models.user.getUserByData({bungieMemberShipId: bungieMember.bungieMemberShipId}, callback)
+      models.user.getUserByData({bungieMemberShipId: bungieMember.bungieMemberShipId}, function(err, user) {
+        if(err) {
+          utils.l.s("Database lookup for user failed", err)
+          return callback({error: "Something went wrong. Please try again"}, null)
+        } else {
+          return callback(null, user)
+        }
+      })
     },
     function(user, callback) {
       if(!user) {
