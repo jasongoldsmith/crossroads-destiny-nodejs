@@ -211,6 +211,33 @@ function createUserGroupFlatmap(){
     )
 }
 
+//Script to get all dates of a particular event type
+function getWrathMachine() {
+    var activityIds = db.getCollection('activities').find({aSubType:'Wrath of the Machine'}, {_id:1})
+    var activityList = []
+    activityIds.forEach(
+        function(a){
+            activityList.push(a._id)
+        })
+    var events = db.getCollection('events').find({eType: {'$in':activityList}, consoleType:"PS4", launchStatus:"now"})
+    var eventsList = []
+    events.forEach(
+        function(d) {
+            var eventInfo = {
+                "launchDate" : d.launchDate,
+                "updated" : d.updated,
+                "created" : d.created,
+                "status": d.status,
+                "eType": d.eType
+            }
+            eventsList.push(eventInfo)
+        }
+    )
+    print(eventsList)
+}
+
+getWrathMachine();
+//---------------END--------------------
 createUserGroupFlatmap()
 //-----------END------------
 

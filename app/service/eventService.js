@@ -379,6 +379,75 @@ function publishFullEventListing(event,req){
   }
 }
 
+function handleDuplicateCurrentEvent(event, callback) {
+  utils.async.waterfall([
+    function(callback) {
+      utils.l.d("Looking for duplicate events", event)
+      models.event.getById(event._id, callback)
+    },
+    function(queriedEvent, callback) {
+      if(!queriedEvent) {
+        utils.l.d("This event was deleted: " + event._id)
+        return callback(null, null)
+      }
+      var query = {
+        _id: {$nin: [event._id]},
+        eId: event.eId,
+        clanId: event.clanId,
+        consoleType: event.consoleType,
+        launchStatus: utils.constants.eventLaunchStatusList.now
+      }
+      models.event.getByQueryLeanWithComments(query, callback)
+    },
+    function(currentEventList, callback) {
+      utils.l.i("currentEventList", currentEventList)
+      if(!currentEventList) {
+        return callback(null, event)
+      }
+      utils.async.mapSeries(currentEventList, function (currentEvent, callback) {
+
+          var playerList = utils.getUniquePlayerListOfTwoEvents(event, currentEvent)
+          utils.l.i("getUniquePlayerListOfTwoEvents", playerList)
+          if(playerList.length <= event.maxPlayers) {
+            event.players = playerList
+            // We need to convert the user MongooseId Object to string for this to work
+            utils._.forEach(currentEvent.comments, function (comment) {
+              comment.user = comment.user.toString()
+              event.comments.push(comment)
+            })
+            
+            models.event.update(event, function(err, updatedEvent) {
+              if(err) {
+                utils.l.s("Merging:: Error in updating event", err)
+                return callback(null, event)
+              } else {
+                utils.l.d("Merging:: Events were merged successfully: " + updatedEvent._id.toString() + ", " + currentEvent._id.toString())
+                models.event.deleteEvent({eId: currentEvent._id}, function(err, eventDeleted) {
+                  if(err) {
+                    utils.l.s("Merging:: Error in removing event", err)
+                    return callback(null, event)
+                  } else {
+                    utils.l.d("Merging:: Event was deleted successfully", eventDeleted)
+                    return callback(null, event)
+                  }
+                })
+              }
+            })
+          } else {
+            return callback(null, event)
+          }
+        },
+        function (err, eventList) {
+          if(err) {
+            return callback(err, null)
+          } else {
+            return callback(null, eventList)
+          }
+        })
+    }
+  ], callback)
+}
+
 module.exports = {
   createEvent: createEvent,
   joinEvent: joinEvent,
@@ -388,6 +457,7 @@ module.exports = {
   expireEvents: expireEvents,
   addComment: addComment,
   reportComment: reportComment,
-  clearCommentsByUser:clearCommentsByUser,
-  publishFullEventListing:publishFullEventListing
+  clearCommentsByUser: clearCommentsByUser,
+  publishFullEventListing: publishFullEventListing,
+  handleDuplicateCurrentEvent: handleDuplicateCurrentEvent
 }

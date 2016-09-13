@@ -25,6 +25,7 @@ function getByQuery(query, user, callback) {
 		.populate("creator", "-passWord")
 		.populate("players", "-passWord")
 		.populate("comments.user", "-passWord")
+		.batchSize(50)
 		.sort({launchDate:"ascending"})
 		.exec(function (err, events) {
 			if (user) {
@@ -38,18 +39,28 @@ function getByQuery(query, user, callback) {
 
 function getByQueryLean(query, callback) {
 	Event
-			.find(query, "-comments")
-			.sort({launchDate:"ascending"})
-			.exec(callback)
+		.find(query, "-comments")
+		.batchSize(50)
+		.sort({launchDate:"ascending"})
+		.exec(callback)
+}
+
+function getByQueryLeanWithComments(query, callback) {
+	Event
+		.find(query)
+		.batchSize(50)
+		.sort({launchDate:"ascending"})
+		.exec(callback)
 }
 
 function getEventsByQuery(query, callback) {
 	Event
-			.find(query, "-comments")
-			.populate("eType")
-			.populate("creator", "-passWord")
-			.populate("players", "-passWord")
-			.exec(callback)
+		.find(query, "-comments")
+		.populate("eType")
+		.populate("creator", "-passWord")
+		.populate("players", "-passWord")
+		.batchSize(50)
+		.exec(callback)
 }
 
 function getById(id, callback) {
@@ -336,7 +347,7 @@ function computeEventAttributesIfMissing(eventObj, user) {
 	}
 }
 
-function removeEvent(event,callback){
+function removeEvent(event, callback) {
 	event.remove(callback)
 }
 
@@ -391,14 +402,15 @@ module.exports = {
 	leaveEvent: leaveEvent,
 	deleteEvent: deleteEvent,
 	getByQuery: getByQuery,
-	getEventsByQuery:getEventsByQuery,
+	getEventsByQuery: getEventsByQuery,
 	getById: getById,
 	launchEvent: launchEvent,
-	update:update,
+	update: update,
 	listEventCount: listEventCount,
 	removeEvent: removeEvent,
 	updateEvent: updateEvent,
-	getByQueryLean:getByQueryLean,
-	getAllCurrentEventPlayers:getAllCurrentEventPlayers,
-	clearCommentsByUser:clearCommentsByUser
+	getByQueryLean: getByQueryLean,
+	getByQueryLeanWithComments: getByQueryLeanWithComments,
+	getAllCurrentEventPlayers: getAllCurrentEventPlayers,
+	clearCommentsByUser: clearCommentsByUser
 }

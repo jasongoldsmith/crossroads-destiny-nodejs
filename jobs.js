@@ -475,9 +475,31 @@ function eventBasedNotificationsHandler() {
     ],
     function (err, notificationQueue) {
       if(err) {
-        utils.l.s("Error sending in eventNewCreateNotificationHandler::" + JSON.stringify(err) )
+        utils.l.s("Error sending in eventNewCreateNotificationHandler::" + JSON.stringify(err))
       }
     })
+}
+
+function mergeDuplicateEvents() {
+  utils.async.waterfall([
+    function (callback) {
+      models.event.getByQueryLeanWithComments(
+        {launchStatus: utils.constants.eventLaunchStatusList.now},
+        callback)
+    },
+    function(eventList, callback) {
+      utils.async.mapSeries(eventList, function (event, callback) {
+        service.eventService.handleDuplicateCurrentEvent(event, callback)
+      }, callback)
+    }
+  ],
+  function (err, eventList) {
+    if(err) {
+      utils.l.s("There was an error in mergeDuplicateEvents::" + JSON.stringify(err))
+    } else {
+      utils.l.i("mergeDuplicateEvents completed successfully")
+    }
+  })
 }
 
 function helmetsFinder() {
@@ -695,5 +717,6 @@ module.exports = {
   preUserTimeout:preUserTimeout,
   createLoadTestUsers: createLoadTestUsers,
   eventBasedNotifications: eventBasedNotifications,
-  bulkHelmetUpdate:bulkHelmetUpdate
+  bulkHelmetUpdate: bulkHelmetUpdate,
+  mergeDuplicateEvents: mergeDuplicateEvents
 }

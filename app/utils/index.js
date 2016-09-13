@@ -134,6 +134,11 @@ function convertMongooseArrayToPlainArray(mongooseArray) {
   return plainArray
 }
 
+// Expects players to not be populated
+function getUniquePlayerListOfTwoEvents(event1, event2) {
+  return lodash.unionWith(event1.players, event2.players, lodash.isEqual)
+}
+
 module.exports = {
   format: require('./formatUtils'),
   mongo: require('./mongoUtils'),
@@ -160,5 +165,6 @@ module.exports = {
   IsUserPartOfTheEvent: IsUserPartOfTheEvent,
   getNotificationPlayerListForEventExceptUser: getNotificationPlayerListForEventExceptUser,
   convertMongooseArrayToPlainArray: convertMongooseArrayToPlainArray,
+  getUniquePlayerListOfTwoEvents: getUniquePlayerListOfTwoEvents,
   moment:require('moment')
 };

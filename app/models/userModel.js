@@ -34,7 +34,6 @@ function setFields(user_id, data, callback) {
 }
 
 function getByQuery(query, callback) {
-  utils.l.d('inside getByQuery',query)
   User
     .find(query)
     .select("-passWord")
@@ -42,7 +41,6 @@ function getByQuery(query, callback) {
 }
 
 function getByQueryLite(query, excludeFields, callback) {
-  utils.l.d('inside getByQuery',query)
   User
     .find(query)
     .select(excludeFields)
