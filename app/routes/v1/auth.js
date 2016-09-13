@@ -16,14 +16,17 @@ function login (req, res) {
     [
       helpers.req.handleVErrorWrapper(req),
       function(callback) {
-        var passportHandler = passport.authenticate('local', function(err, user, info) {
+        if(!req.body.userName) {
+          req.body.userName = req.body.consoles.consoleId
+        }
+        var passportHandler = passport.authenticate('local', function(err, user) {
           if (err) {
             return callback(err, null)
+          } else if (!user) {
+            handleNewUser(req, callback)
+          }else {
+            return callback(null, user)
           }
-          if (!user) {
-            return callback({error: "Password is incorrect"}, null)
-          }
-          callback(null, user)
         })
         passportHandler(req, res)
       },
@@ -47,7 +50,80 @@ function login (req, res) {
         }
         return routeUtils.handleAPIError(req, res, req.routeErr,req.routeErr)
       }
-      routeUtils.handleAPISuccess(req, res, {value: outerUser})
+      routeUtils.handleAPISuccess(req, res,
+        {
+          value: outerUser,
+          message: getSignupMessage(outerUser)
+        })
+    }
+  )
+}
+
+function handleNewUser(req, callback) {
+  var body = req.body
+  utils.async.waterfall([
+    function(callback) {
+      service.userService.checkBungieAccount(body.consoles, callback)
+    },
+    function (bungieMember, callback) {
+      body.bungieMemberShipId = bungieMember.bungieMemberShipId
+      models.user.getUserByData({bungieMemberShipId: bungieMember.bungieMemberShipId}, callback)
+    },
+    function(user, callback) {
+      if(!user) {
+        createNewUser(req, callback)
+      } else {
+        if (!passwordHash.verify(body.passWord, user.passWord)) {
+          return callback({error: "The username and password do not match our records."}, null)
+        } else if((body.consoles.consoleType == 'PS3' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "PS4")))
+          || (body.consoles.consoleType == 'XBOX360' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "XBOXONE")))) {
+          return ({error: "You cannot downgrade your console"}, null)
+        } else if(body.consoles.consoleType == 'PS4' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "PS3"))) {
+          service.userService.upgradeConsole(user, "PS3", body.consoles.consoleType, callback)
+        } else if(body.consoles.consoleType == 'XBOXONE' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "XBOX360"))) {
+          service.userService.upgradeConsole(user, "XBOX360", body.consoles.consoleType, callback)
+        } else {
+          service.userService.addConsole(user, body.consoles, callback)
+        }
+      }
+    }
+  ], callback)
+}
+
+function createNewUser(req, callback) {
+  var body = req.body
+
+  var userData = {
+    passWord: passwordHash.generate(body.passWord),
+    consoles: [body.consoles],
+    imageUrl: body.imageUrl,
+    clanId: body.clanId,
+    bungieMemberShipId: body.bungieMemberShipId,
+    mpDistinctId: req.adata.distinct_id
+  }
+
+  utils.async.waterfall([
+      helpers.req.handleVErrorWrapper(req),
+      function(callback) {
+        /* We need this call explicitly incase a new user is trying to
+         create an account from a phone which already had this app */
+        models.user.getOrCreateUIDFromRequest(req, true, callback)
+      },
+      function (uid, callback) {
+        userData._id = uid
+        service.authService.signupUser(userData, callback)
+      },
+      reqLoginWrapper(req, "auth.login")
+    ],
+    function (err, user) {
+      if (err) {
+        utils.l.s("There was an error in creating the user", err)
+        return callback(err, null)
+      } else {
+        helpers.firebase.createUser(user)
+        helpers.m.updateUserJoinDate(req, user)
+        return callback(null, user)
+      }
     }
   )
 }
@@ -217,7 +293,7 @@ function verifyAccount(req,res){
 }
 
 function verifyAccountConfirm(req,res){
-  var token = req.param("token");
+  var token = req.param("token")
   utils.l.d("verifyAccount::token="+token)
   req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
   var userObj = null
@@ -281,7 +357,7 @@ function deleteWrongPsnId(req,res){
       if(err) routeUtils.handleAPIError(req, res, err, err)
       else {
         helpers.firebase.updateUser(userObj)
-        res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/'});
+        res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/'})
         res.end()
       }
     }
@@ -407,7 +483,7 @@ function resetPassword(req,res){
 
 function home(req,res){
   //res.render('home/index')
-  res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/'});
+  res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/'})
   res.end()
 }
 

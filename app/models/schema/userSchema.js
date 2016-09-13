@@ -11,7 +11,7 @@ var acctVerifyEnum = {
 var UserSchema = new Schema({
   name: String,
   profileUrl : String,
-  userName: {type: String, required: true},
+  userName: {type: String},
   date: {type: Date, required: true},
   passWord: {type: String, required: true},
   uniqueID : String,

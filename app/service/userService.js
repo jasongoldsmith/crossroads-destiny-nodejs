@@ -178,7 +178,7 @@ function addConsole(user, console, callback) {
           .replace("#CONSOLE_ID#", console.consoleId)
         return callback({error: errMsg}, null)
       } else {
-        console.verifyStatus = "VERIFIED"
+        console.verifyStatus = user.consoles[0].verifyStatus
         console.clanTag = bungieMember.clanTag
         console.destinyMembershipId = bungieMember.destinyProfile.memberShipId
         user.consoles.push(console)
