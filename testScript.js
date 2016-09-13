@@ -22,6 +22,7 @@ var userService = require('./app/service/userService')
 var authService = require('./app/service/authService')
 var notifService = require('./app/service/eventNotificationService')
 var activityService = require('./app/service/activityService')
+var actService = require('./app/service/accountService')
 var eventNotifTrigService = require('./app/service/eventNotificationTriggerService')
 var fs = require('fs')
 
@@ -298,6 +299,11 @@ switch(command) {
           utils.l.i("upcomingEventsReminder was successful")
         }
       })
+    break;
+  case 'bulkHelmet':
+    actService.bulkUpdateHelmet(function(err,data){
+      utils.l.d('OUT OF STREAM')
+    })
     break;
   default:
     return;

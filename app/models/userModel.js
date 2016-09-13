@@ -326,6 +326,14 @@ function constructFindUserQuery(username, consoleId) {
   return query
 }
 
+function findUsersPaginated(query,offset,limit,callback){
+  User.find(query).skip(offset).limit(limit).exec(callback);
+}
+
+function findUserCount(query,callback){
+  User.count(query).exec(callback)
+}
+
 module.exports = {
   model: User,
   getUserById: getUserById,
@@ -346,5 +354,7 @@ module.exports = {
   findByUserIdAndUpdate: findByUserIdAndUpdate,
   findUsersByIdAndUpdate: findUsersByIdAndUpdate,
   getOrCreateUIDFromRequest: getOrCreateUIDFromRequest,
-  getByQueryLite: getByQueryLite
+  getByQueryLite: getByQueryLite,
+  findUsersPaginated:findUsersPaginated,
+  findUserCount:findUserCount
 }

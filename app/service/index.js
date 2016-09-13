@@ -11,5 +11,6 @@ module.exports = {
   tinyUrlService: require('./tinyUrlService'),
   userService: require('./userService'),
   activityService: require('./activityService'),
-  trackingService: require('./trackingService')
+  trackingService: require('./trackingService'),
+  accountService:require('./accountService')
 }

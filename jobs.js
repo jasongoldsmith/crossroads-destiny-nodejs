@@ -487,6 +487,31 @@ function helmetsFinder() {
   })
 }
 
+function bulkHelmetUpdate(){
+  var limit = 10
+  var page = 0
+  utils.l.i("Started helmetupdate:"+utils.moment().format())
+  utils.async.waterfall([
+    function(callback){
+      models.user.findUserCount({"consoles.verifyStatus":"VERIFIED"},callback)
+    },function(userCount, callback){
+      temporal.loop(5 * 1000, function() {
+        var batchStop = limit * (page+1)
+        utils.l.i("Processing helmetupdate:page["+page+"]="+batchStop+" of total users="+userCount)
+        service.accountService.bulkUpdateHelmet(page,limit)
+        if(batchStop >= userCount) {
+          utils.l.i("Updated helmets for all users")
+          this.stop()
+        } else {
+          page = page + 1
+        }
+      })
+    }
+  ],function(err,data){
+    utils.l.i("Completed helmetupdate:"+utils.moment().format())
+  })
+}
+
 function createLoadTestUsers() {
   var minstoSleep = 1
   var counter = 1
@@ -653,5 +678,6 @@ module.exports = {
   userTimeout:userTimeout,
   preUserTimeout:preUserTimeout,
   createLoadTestUsers: createLoadTestUsers,
-  eventBasedNotifications: eventBasedNotifications
+  eventBasedNotifications: eventBasedNotifications,
+  bulkHelmetUpdate:bulkHelmetUpdate
 }

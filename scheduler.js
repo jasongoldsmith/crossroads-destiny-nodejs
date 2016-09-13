@@ -96,6 +96,9 @@ switch(command) {
   case "eventBasedNotifications":
     jobs.eventBasedNotifications()
     break
+  case "bulkHelmetUpdate":
+    jobs.bulkHelmetUpdate()
+    break
   case "addSysConfig":
     models.sysConfig.createSysConfig({key:'eventExpiryTimeInMins',description:'Time to expire events. Use - value.',value:'-40'},function(err,sysconf){
       console.log('addSysConfig::err::'+err)

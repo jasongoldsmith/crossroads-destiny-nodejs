@@ -19,7 +19,7 @@ function listMyGroups(req, res) {
 }
 
 function updateHelmet(req, res) {
-  handlUpdateHelmet(req.user, function(err, updateResponse) {
+  service.accountService.handlUpdateHelmet(req.user, function(err, updateResponse) {
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {
@@ -28,32 +28,6 @@ function updateHelmet(req, res) {
   })
 }
 
-function handlUpdateHelmet(user, callback) {
-  var newHelmetURL = null
-  utils.async.waterfall([
-    function(callback){
-      var primaryConsole = utils.primaryConsole(user)
-      service.destinyInerface.getBungieHelmet(primaryConsole.consoleId,primaryConsole.consoleType,callback)
-    },function(helmet, callback){
-      var primaryConsoleIndex = utils.primaryConsoleIndex(user)
-      newHelmetURL = helmet.helmetURL
-      user.consoles[primaryConsoleIndex].clanTag = helmet.clanTag
-      user.consoles[primaryConsoleIndex].imageUrl = utils.config.bungieBaseURL + newHelmetURL
-      user.consoles[primaryConsoleIndex].destinyMembershipId = helmet.destinyProfile.memberShipId
-      models.user.updateUser({id:user._id,imageUrl:utils.config.bungieBaseURL+newHelmetURL,consoles:user.consoles},false,callback)
-    }
-  ],function(err, user){
-    if(!err && newHelmetURL)
-      return callback(null,
-        {
-          status:"Success",
-          helmetUrl: utils.config.bungieBaseURL + newHelmetURL,
-          message: "Successfully updated helmet"
-        })
-    else
-      return callback({error:"We were unable to update your helmet. Please try again later."},null)
-  })
-}
 
 function listGroups(user, callback) {
   var groupList = null

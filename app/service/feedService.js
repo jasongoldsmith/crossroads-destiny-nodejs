@@ -92,7 +92,11 @@ function transformEventsToFeed(events, isPublicFeed, callback){
 			//Create unique activityIds array from current events
 			var currentActivityIds = utils._.uniq(utils._.map(feedObject.currentEvents, 'eType._id'))
 			utils.l.d('currentActivityIds',currentActivityIds)
-
+			if(isPublicFeed){
+				models.user.findUserCount({"consoles.verifyStatus":"VERIFIED"},function(err,userCount){
+					if(!err) feedObject.totalUsers=userCount
+				})
+			}
 			//Run through adcard activities usually 5-6 objects and remove the ones alrady prsent in currentActivityIds
 			feedObject.adActivities = []
 			if(!isPublicFeed) {
