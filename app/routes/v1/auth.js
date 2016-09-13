@@ -79,11 +79,11 @@ function handleNewUser(req, callback) {
           return callback({error: "The username and password do not match our records."}, null)
         } else if((body.consoles.consoleType == 'PS3' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "PS4")))
           || (body.consoles.consoleType == 'XBOX360' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "XBOXONE")))) {
-          return ({error: "You cannot downgrade your console"}, null)
+          return callback({error: "You cannot downgrade your console"}, null)
         } else if(body.consoles.consoleType == 'PS4' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "PS3"))) {
-          service.userService.upgradeConsole(user, "PS3", body.consoles.consoleType, callback)
+          return callback(null, user)
         } else if(body.consoles.consoleType == 'XBOXONE' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "XBOX360"))) {
-          service.userService.upgradeConsole(user, "XBOX360", body.consoles.consoleType, callback)
+          return callback(null, user)
         } else {
           service.userService.addConsole(user, body.consoles, callback)
         }
