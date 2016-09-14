@@ -365,6 +365,9 @@ function updateUserStats(user, eventAction) {
   })
 }
 
+function clearCommentsByUser(user,callback){
+  models.event.clearCommentsByUser(user,callback)
+}
 module.exports = {
   createEvent: createEvent,
   joinEvent: joinEvent,
@@ -373,5 +376,6 @@ module.exports = {
   listEventCountByGroups: listEventCountByGroups,
   expireEvents: expireEvents,
   addComment: addComment,
-  reportComment: reportComment
+  reportComment: reportComment,
+  clearCommentsByUser:clearCommentsByUser
 }

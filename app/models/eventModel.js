@@ -372,6 +372,18 @@ function getAllCurrentEventPlayers(callback){
 			.exec(callback)
 }
 
+function clearCommentsByUser(user,callback){
+	Event.update({},
+		{
+			"$pull": {
+				"comments": {
+					"user": user._id
+				}
+			}
+		},
+		{"multi":true}).exec(callback)
+}
+
 module.exports = {
 	model: Event,
 	createEvent: createEvent,
@@ -387,5 +399,6 @@ module.exports = {
 	removeEvent: removeEvent,
 	updateEvent: updateEvent,
 	getByQueryLean:getByQueryLean,
-	getAllCurrentEventPlayers:getAllCurrentEventPlayers
+	getAllCurrentEventPlayers:getAllCurrentEventPlayers,
+	clearCommentsByUser:clearCommentsByUser
 }

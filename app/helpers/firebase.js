@@ -52,8 +52,8 @@ function updateEventV2(event, user,useEventClan) {
   utils.l.d('updateEventV2::user',utils.l.userLog(user))
   utils.l.d('updateEventV2::useEventClan',useEventClan)
 
-  var clansRef = useEventClan && utils._.isValidNonBlank(event.clanId) ? eventsRef.child(event.clanId) : eventsRef.child(user.clanId)
-  var clansRef = eventsRef.child(user.clanId)
+  var clansRef = useEventClan && utils._.isValidNonBlank(event) && utils._.isValidNonBlank(event.clanId) ? eventsRef.child(event.clanId) : eventsRef.child(user.clanId)
+  //var clansRef = eventsRef.child(user.clanId)
   var id = event._id.toString()
   // We want to remove _id and __v from event as it creates problems while saving in firebase
   var eventObj = getEventObj(event)

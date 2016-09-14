@@ -297,20 +297,18 @@ function verifyAccount(req,res){
 function verifyAccountConfirm(req,res){
   var token = req.param("token")
   utils.l.d("verifyAccount::token="+token)
-  req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
+  //req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
   var userObj = null
   utils.async.waterfall([
     function(callback){
-      //models.user.getUserByData({userName:name},callback)
       models.user.getUserByData({"consoles.verifyToken":token},callback)
     },function(user, callback){
-        utils.l.d("user="+user)
-      //if(user && ((user.psnId == id || user.xboxId == id) && user.psnToken == token)){
+      utils.l.d("user="+user)
       if(user){
         userObj = user
         utils._.map(user.consoles,function(console){
-          if(console.verifyToken == token) console.verifyStatus ="VERIFIED"
-
+          //if(console.verifyToken == token)
+          console.verifyStatus ="VERIFIED"
         })
         models.user.save(user,function(err,updatedUser){
           callback(null, utils.config.accountVerificationSuccess)
@@ -331,39 +329,55 @@ function verifyAccountConfirm(req,res){
   )
 }
 
-function deleteWrongPsnId(req,res){
+function verifyReject(req,res){
   var token = req.param("token")
-  utils.l.d("deleteWrongPsnId::token=" + token)
-  req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
+  utils.l.d("verifyReject::token=" + token)
+  //req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
   var userObj = null
   utils.async.waterfall([
     function(callback) {
       models.user.getUserByData({"consoles.verifyToken": token}, callback)
-    },
-    function(user, callback) {
+    },function(user, callback) {
       utils.l.d("user= " + user)
       if(user) {
-        userObj = user
-        utils._.map(userObj.consoles,function(console){
-          if(console.verifyToken == token) console.verifyStatus ="DELETED"
-
-        })
-
-        models.user.deleteUser(user, callback)
+        handleInvalidUser(user,callback)
       } else {
         callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.", null)
       }
     }
   ],
-    function (err, successResp) {
+    function (err, userDeleted) {
       if(err) routeUtils.handleAPIError(req, res, err, err)
       else {
-        helpers.firebase.updateUser(userObj)
+        helpers.firebase.updateUser(userDeleted)
         res.writeHead(302, {'Location': 'http://w3.crossroadsapp.co/'})
         res.end()
       }
     }
   )
+}
+
+function handleInvalidUser(user,callback){
+  utils.async.waterfall([
+    function(callback){
+      utils._.map(user.consoles,function(console){
+        console.verifyStatus ="DELETED"
+      })
+      callback(null,user)
+    },function(userToDelete, callback){
+      service.eventService.clearCommentsByUser(user,callback)
+    },function(eventsUpdated,callback){
+      service.eventService.clearEventsForPlayer(user,null,null,callback)
+    }
+  ],function(err,data){
+    if(err)
+      utils.l.i("unable to clear events/comments for user",err)
+    models.user.deleteUser(user, function(deleteUserErr,deletedUser){
+      if(deleteUserErr)
+        utils.l.i("Unable to delete user during verification.",deleteUserErr)
+      return callback(null,user)
+    })
+  })
 }
 
 function logout(req, res) {
@@ -532,7 +546,7 @@ routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
 routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyAccountConfirm)
-routeUtils.rGet(router, '/deletewrongpsnid/:token', 'deleteWrongPsnId', deleteWrongPsnId)
+routeUtils.rGet(router, '/verifyReject/:token', 'verifyReject', verifyReject)
 routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
 routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', requestResetPassword, requestResetPassword)
