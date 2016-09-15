@@ -490,6 +490,11 @@ function resetPassword(req,res){
       function(user,callback){
         if(user) {
           user.passWord = newPassword
+
+          utils._.map(user.consoles,function(console){
+            if(console.verifyStatus != "VERIFIED")
+              console.verifyStatus ="VERIFIED"
+          })
           models.user.save(user, callback)
         }else callback({error:"Invalid username. Please provide a valid username"})
       }

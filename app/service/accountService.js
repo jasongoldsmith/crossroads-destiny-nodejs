@@ -8,7 +8,7 @@ function handlUpdateHelmet(user, callback) {
   utils.async.waterfall([
     function(callback){
       var primaryConsole = utils.primaryConsole(user)
-      destinyInerface.getBungieHelmet(primaryConsole.consoleId,primaryConsole.consoleType,callback)
+      destinyInerface.getBungieHelmet(primaryConsole.consoleId,primaryConsole.consoleType,primaryConsole.destinyMembershipId,callback)
     },function(helmet, callback){
       var primaryConsoleIndex = utils.primaryConsoleIndex(user)
       newHelmetURL = helmet.helmetURL
@@ -17,7 +17,7 @@ function handlUpdateHelmet(user, callback) {
       user.consoles[primaryConsoleIndex].destinyMembershipId = helmet.destinyProfile.memberShipId
       models.user.updateUser({id:user._id,imageUrl:utils.config.bungieBaseURL+newHelmetURL,consoles:user.consoles},false,callback)
     }
-  ],function(err, user){
+  ],function(err, userUpdated){
     if(!err && newHelmetURL)
       return callback(null,
         {
@@ -25,8 +25,10 @@ function handlUpdateHelmet(user, callback) {
           helmetUrl: utils.config.bungieBaseURL + newHelmetURL,
           message: "Successfully updated helmet"
         })
-    else
-      return callback({error:"We were unable to update your helmet. Please try again later."},null)
+    else {
+      models.helmetTracker.createUser(user,err,callback)
+      return callback({error: "We were unable to update your helmet. Please try again later."}, null)
+    }
   })
 }
 

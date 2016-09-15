@@ -11,6 +11,7 @@ var tinyUrl = require ('./tinyUrlModel')
 var sysConfig = require('./sysConfigModel')
 var userGroup = require('./userGroupModel')
 var notificationQueue = require ('./notificationQueueModel')
+var helmetTracker = require('./helmetTrackerModel')
 module.exports = {
   user: user,
   temporaryUser: temporaryUser,
@@ -24,5 +25,6 @@ module.exports = {
   tinyUrl: tinyUrl,
   sysConfig: sysConfig,
   userGroup: userGroup,
-  notificationQueue: notificationQueue
+  notificationQueue: notificationQueue,
+  helmetTracker:helmetTracker
 }

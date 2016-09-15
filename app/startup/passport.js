@@ -1,7 +1,7 @@
 var LocalStrategy = require('passport-local').Strategy
 var models = require('../models')
 var passwordHash = require('password-hash')
-
+var utils = require('../utils')
 module.exports = function (passport, config) {
   // serialize sessions
   passport.serializeUser(function(user, callback) {
@@ -21,6 +21,7 @@ module.exports = function (passport, config) {
     },
     function(req, userName, password, callback) {
       var body = req.body
+      utils.l.d('passport::body',body)
       if(!body.consoles) {
         models.user.getUserByData({userName:body.userName.toLowerCase().trim()}, function (err, user) {
           if(err) {

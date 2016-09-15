@@ -154,6 +154,7 @@ function createUserFromData(data, callback) {
 }
 
 function getUserByData(data, callback) {
+  utils.l.d('getUserByData::data',data)
   User.find(data)
     .exec(utils.firstInArrayCallback(callback))
 }

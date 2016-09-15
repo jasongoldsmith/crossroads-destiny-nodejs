@@ -14,6 +14,7 @@ function signupUser(signupData, callback) {
 				destinyService.getBungieHelmet(
 					signupData.consoles[0].consoleId,
 					signupData.consoles[0].consoleType,
+						null,
 					function(err, helmet) {
 						if(err) {
 							return callback(err, null)

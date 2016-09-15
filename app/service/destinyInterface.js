@@ -216,12 +216,15 @@ function getClanTag(accountDetail,destinyProfile){
   return clanTag
 }
 
-function getBungieHelmet(consoleId, consoleType, callback){
+function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
   var destinyProfile = null
   var clanTag = null
   utils.async.waterfall([
     function(callback){
-      getDestinyProfileByConsole(consoleId,consoleType,callback)
+      if(utils._.isValidNonBlank(destinyMembershipId))
+        callback(null,{memberShipId:destinyMembershipId,memberShipType:getBungieMembershipType(consoleType)})
+      else
+        getDestinyProfileByConsole(consoleId,consoleType,callback)
     },function(destinyProfileResp,callback){
       destinyProfile = destinyProfileResp
       getBungieAccount(destinyProfile,consoleId,consoleType,callback)
