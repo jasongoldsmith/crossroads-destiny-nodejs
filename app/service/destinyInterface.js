@@ -180,19 +180,25 @@ function getAccountDetails(bungieAcct,acctType,callback){
   switch (acctType) {
     case "bungieNetUser":
       if(utils._.isInvalidOrBlank(bungieAcct.Response.bungieNetUser))
-        return callback({error: "Your public Bungie profile is not displaying your linked gaming account. Please set it to public and try again."},null)
+        return callback({
+          error: "Your public Bungie profile is not displaying your linked gaming account. Please set it to public and try again.",
+          errorType: "BungieError" }, null)
       else
         bungieAcctResponse.bungieNetUser = bungieAcct.Response.bungieNetUser
       break;
     case "destinyAccounts":
       if(utils._.isInvalidOrBlank(bungieAcct.Response.destinyAccounts))
-        return callback({error: "It looks like your Bungie account may be set to private or the server is busy. Please ensure your account is public and try again in a few minutes."},null)
+        return callback({
+          error: "It looks like your Bungie account may be set to private or the server is busy. Please ensure your account is public and try again in a few minutes.",
+          errorType: "BungieError"}, null)
       else
         bungieAcctResponse.destinyAccounts=bungieAcct.Response.destinyAccounts
       break
     case "all":
       if(utils._.isInvalidOrBlank(bungieAcct.Response.bungieNetUser)){
-        return callback({error: "Your public Bungie profile is not displaying your linked gaming account. Please set it to public and try again."},null)
+        return callback({
+          error: "Your public Bungie profile is not displaying your linked gaming account. Please set it to public and try again.",
+          errorType: "BungieError"}, null)
       }else {
         bungieAcctResponse.bungieNetUser = bungieAcct.Response.bungieNetUser
         bungieAcctResponse.destinyAccounts = bungieAcct.Response.destinyAccounts
@@ -236,7 +242,7 @@ function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
       var character = getRecentlyPlayedCharacter(accountDetails.destinyAccounts, destinyProfile.memberShipId, destinyProfile.memberShipType)
       utils.l.d("recent character",character)
       if(character) callback(null, character)
-      else callback({error:"Looks like you do not have any destiny account."},null)
+      else callback({error:"Looks like you do not have any destiny account.", errorType: "BungieError"},null)
     },function(character, callback){
       //var bungieItemsURL = "https://www.bungie.net/Platform/Destiny/" + memberShipType+"/Account/"+memberShipId+"/Character/"+characterId+"/Inventory/Summary?definitions=true"
       var bungieItemsURL = utils.config.bungieItemsURL
@@ -394,7 +400,8 @@ function bungieGet(url, gamerId, consoleType, callback){
             {
               error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)
                 .replace(/%CONSOLETYPE%/g, consoleType)
-                .replace(/%GAMERID%/g, gamerId)
+                .replace(/%GAMERID%/g, gamerId),
+              errorType: "BungieError"
             },
             null)
         }
@@ -403,7 +410,8 @@ function bungieGet(url, gamerId, consoleType, callback){
           {
             error: utils.constants.bungieErrorMessage('NotParsableError')
               .replace(/%CONSOLETYPE%/g, consoleType)
-              .replace(/%GAMERID%/g, gamerId)
+              .replace(/%GAMERID%/g, gamerId),
+            errorType: "BungieError"
           },
           null)
       }
@@ -461,7 +469,8 @@ function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callba
             return callback(
               {
                 error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)
-                  .replace(/%CONSOLETYPE%/g, consoleType)
+                  .replace(/%CONSOLETYPE%/g, consoleType),
+                errorType: "BungieError"
               },
               null)
           }

@@ -235,7 +235,8 @@ function checkBungieAccount(console, callback) {
       var error = {
         error: utils.constants.bungieMessages.bungieMembershipLookupError
           .replace("#CONSOLE_TYPE#", utils._.get(utils.constants.consoleGenericsId, console.consoleType))
-          .replace("#CONSOLE_ID#", console.consoleId)
+          .replace("#CONSOLE_ID#", console.consoleId),
+        errorType: "BungieError"
       }
       return callback(error, null)
     } else {

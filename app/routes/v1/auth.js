@@ -212,75 +212,11 @@ function reqLoginWrapper(req, reason) {
 }
 
 function signup(req, res) {
-  try {
-    req.assert('userName').notEmpty().isName()
-  } catch(ex) {
-    var err = {
-      error: "username must be between 1 and 50 characters"
-    }
-    return routeUtils.handleAPIError(req, res, err, err)
+
+  var errorResponse = {
+    error: "Our signup has changed. Please update this app to signup."
   }
-
-  try {
-    req.assert('passWord').notEmpty().isAlphaNumeric()
-  } catch(ex) {
-    var err = {
-      error: "password must be between 1 and 9 characters and must be alphanumeric"
-    }
-    return routeUtils.handleAPIError(req, res, err, err)
-  }
-
-  if(!req.body.consoles || utils._.isEmpty(req.body.consoles) || utils._.isInvalidOrBlank(req.body.consoles)){
-    var err = {error: "Sorry, something's not right. Please go back to the sign up page and try entering your gamertag again."}
-    return routeUtils.handleAPIError(req, res, err, err)
-  }
-
-  if(!req.body.bungieMemberShipId || utils._.isEmpty(req.body.bungieMemberShipId) ){
-    var err = {error: "Sorry, something's not right. Please go back to the sign up page and try entering your gamertag again."}
-    return routeUtils.handleAPIError(req, res, err, err)
-  }
-
-  var body = req.body
-
-  var userData = {
-    userName: body.userName.toLowerCase().trim(),
-    passWord: passwordHash.generate(body.passWord),
-    consoles: body.consoles,
-    imageUrl: body.imageUrl,
-    clanId: body.clanId,
-    bungieMemberShipId: body.bungieMemberShipId,
-    mpDistinctId: req.adata.distinct_id
-  }
-
-  utils.async.waterfall([
-    helpers.req.handleVErrorWrapper(req),
-    function(callback) {
-      /* We need this call explicitly incase a new user is trying to
-         create an account from a phone which already had this app */
-      models.user.getOrCreateUIDFromRequest(req, true, callback)
-    },
-    function (uid, callback) {
-      userData._id = uid
-      service.authService.signupUser(userData, callback)
-    },
-    reqLoginWrapper(req, "auth.login")
-  ],
-    function (err, user) {
-      if (err) {
-        req.routeErr = err
-        return routeUtils.handleAPIError(req, res, err,err)
-      }
-      helpers.firebase.createUser(user)
-      helpers.cookies.setCookie("foo", "bar", res)
-      helpers.m.updateUserJoinDate(req, user)
-      return routeUtils.handleAPISuccess(req, res,
-        {
-          value: service.userService.setLegalAttributes(user),
-          message: getSignupMessage(user)
-        }
-      )
-    }
-  )
+  routeUtils.handleAPIError(req, res, errorResponse, errorResponse)
 }
 
 function verifyAccount(req,res){
