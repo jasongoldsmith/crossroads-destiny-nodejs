@@ -11,11 +11,15 @@ var passwordHash = require('password-hash')
 
 function login (req, res) {
 
+  utils.l.d("Login request", req.body)
   var outerUser = null
     utils.async.waterfall(
     [
       helpers.req.handleVErrorWrapper(req),
       function(callback) {
+        if(req.body.consoles) {
+          req.body.consoles.consoleType = req.body.consoles.consoleType.toString().toUpperCase()
+        }
         if(!req.body.userName) {
           req.body.userName = req.body.consoles.consoleId
         }
@@ -94,7 +98,10 @@ function handleNewUser(req, callback) {
 
 function createNewUser(req, callback) {
   var body = req.body
-
+  if(body.consoles.consoleType == "XBOX360" || consoleType == "PS3") {
+    return({error: "We do not support old generation consoles anymore. " +
+    "Please try again once you have upgraded to a new generation console"}, null)
+  }
   var userData = {
     passWord: passwordHash.generate(body.passWord),
     consoles: [body.consoles],

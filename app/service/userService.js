@@ -173,15 +173,20 @@ function upgradeConsole(user, oldConsoleType, newConsoleType, callback) {
 }
 
 function addConsole(user, console, callback) {
+  var consoleType = console.consoleType.toString().toUpperCase()
+  if(consoleType == "XBOX360" || consoleType == "PS3") {
+    return callback({error: "We do not support old generation consoles anymore. " +
+    "Please try again once you have upgraded to a new generation console"}, null)
+  }
   utils.async.waterfall([
     function (callback) {
-      destinyInterface.getBungieMemberShip(console.consoleId, console.consoleType, callback)
+      destinyInterface.getBungieMemberShip(console.consoleId, consoleType, callback)
     },
     function (bungieMember, callback) {
       if(bungieMember.bungieMemberShipId.toString() != user.bungieMemberShipId.toString()) {
         var errMsgTemplate = utils.constants.bungieMessages.addConsoleErrorMsg
         var errMsg = errMsgTemplate
-          .replace("#CONSOLE_TYPE#", console.consoleType)
+          .replace("#CONSOLE_TYPE#", consoleType)
           .replace("#CONSOLE_ID#", console.consoleId)
         return callback({error: errMsg}, null)
       } else {
