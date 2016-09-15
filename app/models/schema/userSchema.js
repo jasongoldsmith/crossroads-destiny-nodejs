@@ -54,7 +54,7 @@ var UserSchema = new Schema({
   mpDistinctId:String
 })
 
-UserSchema.index({'userName':1}, {'unique': true})
+UserSchema.index({'userName':1})
 UserSchema.index({'consoles.consoleId':1})
 UserSchema.index({'consoles.verifyToken':1})
 UserSchema.index({'date': 1})

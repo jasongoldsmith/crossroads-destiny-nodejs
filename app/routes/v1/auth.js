@@ -98,7 +98,7 @@ function handleNewUser(req, callback) {
 
 function createNewUser(req, callback) {
   var body = req.body
-  if(body.consoles.consoleType == "XBOX360" || consoleType == "PS3") {
+  if(body.consoles.consoleType == "XBOX360" || body.consoles.consoleType == "PS3") {
     return({error: "We do not support old generation consoles anymore. " +
     "Please try again once you have upgraded to a new generation console"}, null)
   }

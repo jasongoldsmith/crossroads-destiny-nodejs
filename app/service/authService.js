@@ -4,13 +4,8 @@ var utils = require('../utils')
 
 function signupUser(signupData, callback) {
 	utils.async.waterfall([
-		function(callback){
-			models.user.getByQuery({userName: signupData.userName}, utils.firstInArrayCallback(callback))
-		},
-		function(user, callback) {
-			if(utils._.isValidNonBlank(user)) {
-				return callback({error: "That username is already taken"}, null)
-			} else if(utils.config.enableBungieIntegration) {
+		function(callback) {
+			if(utils.config.enableBungieIntegration) {
 				destinyService.getBungieHelmet(
 					signupData.consoles[0].consoleId,
 					signupData.consoles[0].consoleType,
@@ -27,11 +22,12 @@ function signupUser(signupData, callback) {
 							signupData.consoles[0].isPrimary = true
 							return callback(null, signupData)
 						}
-					})
-				} else {
-					return callback(null, signupData)
-				}
-			},
+					}
+				)
+			} else {
+				return callback(null, signupData)
+			}
+		},
 		function(user, callback) {
 			//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
 			// or send notification to both xbox and psn depending on the ID availability
