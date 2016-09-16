@@ -4,12 +4,17 @@ var utils = require('../utils')
 
 function signupUser(signupData, callback) {
 	utils.async.waterfall([
-		function(callback) {
-			if(utils.config.enableBungieIntegration) {
+		function(callback){
+			models.user.getByQuery({userName: signupData.userName}, utils.firstInArrayCallback(callback))
+		},
+		function(user, callback) {
+			if(utils._.isValidNonBlank(user)) {
+				return callback({error: "That username is already taken"}, null)
+			} else if(utils.config.enableBungieIntegration) {
 				destinyService.getBungieHelmet(
 					signupData.consoles[0].consoleId,
 					signupData.consoles[0].consoleType,
-						null,
+					null,
 					function(err, helmet) {
 						if(err) {
 							return callback(err, null)
@@ -55,7 +60,7 @@ function signupUser(signupData, callback) {
 			}
 		},
 		function(newUser,callback){
-			newUser.clanName=utils.constants.freelanceBungieGroup.groupName
+			newUser.clanName = utils.constants.freelanceBungieGroup.groupName
 			getCurrentLegalObject(function(err,legal){
 				newUser.legal = legal
 				utils.l.d('signup::getCurrentLegalObject',newUser)
