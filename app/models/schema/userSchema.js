@@ -15,8 +15,8 @@ var UserSchema = new Schema({
   date: {type: Date, required: true},
   passWord: {type: String, required: true},
   uniqueID : String,
-  verifyStatus:verifyStatus,
-  verifyToken:verifyToken,
+  verifyStatus:String,
+  verifyToken:String,
   consoles: [{
     consoleType: consoleTypeEnum,
     consoleId: {type: String},

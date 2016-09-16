@@ -28,6 +28,7 @@ module.exports = function (passport, config) {
             utils.l.s("Database lookup for user failed", err)
             return callback({error: "Something went wrong. Please try again"}, null)
           } else if(!user) {
+            utils.l.d("user not found")
             return callback({error: "The username and password do not match our records."}, null)
           } else if(!passwordHash.verify(password, user.passWord)) {
             return callback({error: "The username and password do not match our records."}, null)
@@ -37,11 +38,13 @@ module.exports = function (passport, config) {
           }
         })
       } else {
+        var consoleId = body.consoles.consoleId
+        utils.l.d("consoles"+consoleId)
         models.user.getUserByData({
           consoles: {
             $elemMatch: {
               consoleType: body.consoles.consoleType,
-              consoleId: {$regex : new RegExp(body.consoles.consoleId, "i")}
+              consoleId: {$regex : new RegExp(["^", consoleId, "$"].join(""), "i")}
             }
           }
         },

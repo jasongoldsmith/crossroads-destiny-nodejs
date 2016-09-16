@@ -208,10 +208,10 @@ function addConsole(user, console, callback) {
 
 }
 
-function refreshConsoles(user, bungieResponse, cosoleReq, calback){
+function refreshConsoles(user, bungieResponse, cosoleReq, callback){
   utils.async.waterfall([
     function(callback){
-      mergeConsoles(user, bungieResponse, cosoleReq, calback)
+      mergeConsoles(user, bungieResponse, cosoleReq, callback)
     },function(consoles, callback){
       //user.consoles = consoles
       utils.l.d('refreshConsoles::user',user)
@@ -221,7 +221,7 @@ function refreshConsoles(user, bungieResponse, cosoleReq, calback){
 
 }
 
-function mergeConsoles(user, bungieResponse, cosoleReq, calback){
+function mergeConsoles(user, bungieResponse, cosoleReq, callback){
   var consoles = user.consoles
 
   if(utils._.isValidNonBlank(bungieResponse) && utils._.isValidNonBlank(bungieResponse.destinyProfile)) {

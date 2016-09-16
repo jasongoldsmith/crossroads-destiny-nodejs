@@ -50,6 +50,7 @@ function getBungieVariables(callback) {
  * */
 function getBungieMemberShip(consoleId, consoleType, destinyMembershipId, callback){
   var destinyProfile = null
+  var bungieResponse = {}
   utils.async.waterfall([
     function(callback){
       if(utils._.isValidNonBlank(destinyMembershipId))
@@ -62,9 +63,11 @@ function getBungieMemberShip(consoleId, consoleType, destinyMembershipId, callba
     },function(bungieAcct,callback){
       getAccountDetails(bungieAcct,'all',callback)
     },function(accountDetails,callback){
-      var destinyAccounts = getDestinyAccounts(accountDetails)
-      var bungieMemberShipId = accountDetails.bungieNetUser.membershipId
-      return callback(null, {bungieMemberShipId: bungieMemberShipId,destinyProfile:destinyAccounts})
+      bungieResponse.bungieMemberShipId = accountDetails.bungieNetUser.membershipId
+      getDestinyAccounts(accountDetails,callback)
+    },function(destinyAccounts,callback){
+      bungieResponse.destinyProfile = destinyAccounts
+      return callback(null, bungieResponse)
     }
   ],callback)
 }
@@ -150,21 +153,30 @@ function getAccountDetails(bungieAcct,acctType,callback){
   return callback(null,bungieAcctResponse)
 }
 
-function getDestinyAccounts(accountDetail){
-  var clanTag = null
+function getDestinyAccounts(accountDetail,callback){
+/*
   var destinyAccounts = []
   if(!utils._.isInvalidOrBlank(accountDetail.destinyAccounts)) {
     utils._.map(accountDetail.destinyAccounts, function(account){
       var destinyUserInfo = {}
-      destinyUserInfo.clanTag= account.clanTag
-      destinyUserInfo.destinyMembershipId = account.memberShipId
-      destinyUserInfo.destinyMembershipType = account.membershipType
-      destinyUserInfo.destinyDisplayName=account.displayName
-      destinyUserInfo.helmetUrl = getBungieHelmetByCharacter(account)
+      destinyUserInfo.clanTag= account.userInfo.clanTag
+      destinyUserInfo.destinyMembershipId = account.userInfo.memberShipId
+      destinyUserInfo.destinyMembershipType = account.userInfo.membershipType
+      destinyUserInfo.destinyDisplayName=account.userInfo.displayName
+
+      getBungieHelmetByCharacter(account,function(err,data){
+        destinyUserInfo.helmetUrl = data
+      })
       destinyAccounts.push(destinyUserInfo)
     })
   }
-  return destinyAccounts
+  return callback(null,destinyAccounts)
+*/
+  utils.async.mapSeries(accountDetail.destinyAccounts, function(account,asyncCallback) {
+    getDestinyDetails(account,asyncCallback)
+  },function(err, destinyAccounts) {
+    return callback(err, destinyAccounts)
+  })
 }
 
 function getClanTag(accountDetail,destinyProfile){
@@ -221,7 +233,37 @@ function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
   ],callback)
 }
 
-function getBungieHelmetByCharacter(destinyAccount){
+
+function getDestinyDetails(account,callback){
+  var destinyUserInfo = {}
+  destinyUserInfo.clanTag= account.userInfo.clanTag
+  destinyUserInfo.destinyMembershipId = account.userInfo.memberShipId
+  destinyUserInfo.destinyMembershipType = account.userInfo.membershipType
+  destinyUserInfo.destinyDisplayName=account.userInfo.displayName
+
+  utils.async.waterfall([
+      function(callback){
+        var character =  getRecentlyPlayedCharacterByAccount(account)
+        var bungieItemsURL = utils.config.bungieItemsURL
+          .replace(/%MEMBERSHIPTYPE%/g, character.membershipType)
+          .replace(/%MEMBERSHIPID%/g, character.membershipId)
+          .replace(/%CHARACTERID%/g, character.characterId);
+        var consoleType = utils._.get(utils.constants.newGenConsoleType,account.userInfo.memberShipType)
+        bungieGet(bungieItemsURL, account.userInfo.displayName,utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
+      },function(itemDefinitions, callback){
+        var itemDefJSON = JSON.parse(itemDefinitions)
+        if(itemDefJSON && itemDefJSON.Response && itemDefJSON.Response.definitions && itemDefJSON.Response.definitions.items){
+          var helmetURL = getHelmentURL(itemDefJSON.Response.definitions.items)
+          utils.l.d("helmetURL::"+helmetURL)
+          destinyUserInfo.helmetUrl =helmetURL
+          callback(null,destinyUserInfo)
+        }else{
+          callback(null,destinyUserInfo)
+        }
+      }],
+    callback)
+}
+function getBungieHelmetByCharacter(destinyAccount,callback){
   utils.async.waterfall([
     function(callback) {
      var character =  getRecentlyPlayedCharacterByAccount(destinyAccount)
@@ -229,8 +271,8 @@ function getBungieHelmetByCharacter(destinyAccount){
         .replace(/%MEMBERSHIPTYPE%/g, character.membershipType)
         .replace(/%MEMBERSHIPID%/g, character.membershipId)
         .replace(/%CHARACTERID%/g, character.characterId);
-
-      bungieGet(bungieItemsURL, consoleId,utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
+      var consoleType = utils._.get(utils.constants.newGenConsoleType,destinyAccount.userInfo.memberShipType)
+      bungieGet(bungieItemsURL, destinyAccount.userInfo.displayName,utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
     },function(itemDefinitions, callback){
       var itemDefJSON = JSON.parse(itemDefinitions)
       if(itemDefJSON && itemDefJSON.Response && itemDefJSON.Response.definitions && itemDefJSON.Response.definitions.items){
@@ -241,9 +283,7 @@ function getBungieHelmetByCharacter(destinyAccount){
         callback(null,null)
       }
     }],
-    function(err,data){
-        return data
-    })
+    callback)
 }
 /*Get bungienet profile
  * 1. Make destinySearch call for displayname

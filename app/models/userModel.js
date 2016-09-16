@@ -280,7 +280,7 @@ function filterIfUserExistsForUid(uid, callback) {
 }
 
 function getOrCreateUIDFromRequest(req, enforceNonExisting, callback) {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() && !enforceNonExisting) {
     utils.l.d("getOrCreateUIDFromRequest::is authenticated")
     return callback(null, req.user.id) // If user exists and it authenticated return right away
   }

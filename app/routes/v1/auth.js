@@ -22,7 +22,9 @@ function login (req, res) {
         if(!req.body.userName) {
           req.body.userName = req.body.consoles.consoleId
         }
+        utils.l.d('calling passport...')
         var passportHandler = passport.authenticate('local', function(err, user) {
+          utils.l.d('passport.authenticate',user)
           if (err) {
             return callback(err, null)
           } else if (!user) {
@@ -84,10 +86,6 @@ function handleNewUser(req, callback) {
         } else if((body.consoles.consoleType == 'PS3' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "PS4")))
           || (body.consoles.consoleType == 'XBOX360' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "XBOXONE")))) {
           return callback({error: "You cannot downgrade your console"}, null)
-        } else if(body.consoles.consoleType == 'PS4' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "PS3"))) {
-          return callback(null, user)
-        } else if(body.consoles.consoleType == 'XBOXONE' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "XBOX360"))) {
-          return callback(null, user)
         } else {
           service.userService.refreshConsoles(user, bungieResponse, req.body.consoles, callback)
         }
@@ -135,7 +133,7 @@ function createNewUser(req, bungieResponse, callback) {
       },
       function (uid, callback) {
         userData._id = uid
-        service.authService.signupUser(userData, callback)
+        service.authService.createNewUser(userData, callback)
       },
       reqLoginWrapper(req, "auth.login")
     ],
@@ -300,7 +298,8 @@ function signup(req, res) {
 
 function verifyAccount(req,res){
   var token = req.param("token")
-  models.user.getUserByData({"consoles.verifyToken":token},function(err, user){
+  var query = { $or: [ { "consoles.verifyToken":token }, { "verifyToken":token } ] }
+  models.user.getUserByData(query,function(err, user){
     if(user){
       var primaryConsole = utils.primaryConsole(user)
       res.render("account/index",{
@@ -318,9 +317,29 @@ function verifyAccount(req,res){
 
 function verifyConfirm(req,res){
   var token = req.param("token")
+  var userObj = null
   utils.l.d("verifyAccount::token="+token)
   //req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
-  markUserVerified(token,
+  utils.async.waterfall([
+    function(callback){
+      var query = { $or: [ { "consoles.verifyToken":token }, { "verifyToken":token } ] }
+      models.user.getUserByData(query,callback)
+    },function(user, callback){
+      utils.l.d("user="+user)
+      if(user){
+        userObj = user
+        user.verifyStatus ="VERIFIED"
+        utils._.map(user.consoles,function(console){
+          //if(console.verifyToken == token)
+          console.verifyStatus ="VERIFIED"
+        })
+        models.user.save(user,function(err,updatedUser){
+          callback(null, utils.config.accountVerificationSuccess)
+        })
+      }else{
+        callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.",null)
+      }
+    }],
     function (err, successResp){
       if(err) routeUtils.handleAPIError(req,res,err,err)
       else {
@@ -328,8 +347,7 @@ function verifyConfirm(req,res){
         helpers.m.trackRequest("AccountVerifyConfirm_SUCC", {"distinct_id":userObj.mpDistinctId}, req, userObj)
         res.render("account/verifyConfirm",{appName:utils.config.appName})
       }
-    }
-  )
+    })
 }
 
 function markUserVerified(token,callback){
@@ -582,7 +600,7 @@ routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
-routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyConsoleConfirm)
+routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyConfirm)
 routeUtils.rGet(router, '/verifyReject/:token', 'verifyReject', verifyReject)
 routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)

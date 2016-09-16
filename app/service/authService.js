@@ -164,5 +164,6 @@ module.exports = {
 	signupUser: signupUser,
 	requestResetPassword: requestResetPassword,
 	listMemberCountByClan: listMemberCountByClan,
-	addLegalAttributes:addLegalAttributes
+	addLegalAttributes:addLegalAttributes,
+	createNewUser:createNewUser
 }
