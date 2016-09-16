@@ -509,6 +509,10 @@ var bungieMemberShipType = {
   XBOXONE:1
 }
 
+var newGenConsoleType = {
+  2:"PS4",
+  1:"XBOXONE"
+}
 var consoleGenericsId = {
   PSN:"PlayStation ID",
   XBOX:"Xbox Gamertag",
@@ -614,5 +618,6 @@ module.exports = {
   sysConfigKeys: sysConfigKeys,
   eventStatus: eventStatus,
   notificationQueueTypeEnum: notificationQueueTypeEnum,
-  existingUserInstallData:existingUserInstallData
+  existingUserInstallData:existingUserInstallData,
+  newGenConsoleType:newGenConsoleType
 }

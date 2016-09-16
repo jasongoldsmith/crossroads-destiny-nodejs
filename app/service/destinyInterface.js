@@ -48,89 +48,25 @@ function getBungieVariables(callback) {
  * 1. Make destinySearch call for displayname
  * 2. Using the result from search take membershipType and call GetBungieAccount API to bungie membershipcode
  * */
-function getBungieMemberShip(consoleId, consoleType, callback){
+function getBungieMemberShip(consoleId, consoleType, destinyMembershipId, callback){
   var destinyProfile = null
   utils.async.waterfall([
     function(callback){
-      getDestinyProfileByConsole(consoleId,consoleType,callback)
+      if(utils._.isValidNonBlank(destinyMembershipId))
+        callback(null,{memberShipId:destinyMembershipId,memberShipType:getBungieMembershipType(consoleType)})
+      else
+        getDestinyProfileByConsole(consoleId,consoleType,callback)
     },function(destinyProfileResp,callback){
       destinyProfile = destinyProfileResp
       getBungieAccount(destinyProfile,consoleId,consoleType,callback)
     },function(bungieAcct,callback){
       getAccountDetails(bungieAcct,'all',callback)
     },function(accountDetails,callback){
+      var destinyAccounts = getDestinyAccounts(accountDetails)
       var bungieMemberShipId = accountDetails.bungieNetUser.membershipId
-      var displayName = null
-      if(utils._.get(utils.constants.bungieMemberShipType, consoleType) == utils.constants.bungieMemberShipType.PSN)
-        displayName = accountDetails.bungieNetUser.psnDisplayName
-      else
-        displayName = accountDetails.bungieNetUser.xboxDisplayName
-      var clanTag = getClanTag(accountDetails,destinyProfile)
-      return callback(null, {bungieMemberShipId: bungieMemberShipId, displayName: displayName,clanTag:clanTag,destinyProfile:destinyProfile})
+      return callback(null, {bungieMemberShipId: bungieMemberShipId,destinyProfile:destinyAccounts})
     }
   ],callback)
-}
-
-//This is depricated.
-function getBungieMemberShipOld(gamerId, membershipType, callback) {
-  utils.async.waterfall([
-      function (callback) {
-        var destinySearchURL = utils.config.bungieDestinySearchByPSNURL
-          .replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(membershipType))
-          .replace(/%MEMBERSHIPID%/g, gamerId);
-
-        bungieGet(destinySearchURL, gamerId,
-          utils._.get(utils.constants.consoleGenericsId, membershipType),
-          callback)
-      },
-      function (destinyProfile, callback) {
-        var destinyProfileJSON = JSON.parse(destinyProfile)
-        if(destinyProfileJSON && destinyProfileJSON.Response) {
-          var memberShipType = getBungieMembershipType(membershipType)
-          var memberShipId = destinyProfileJSON.Response
-
-          utils.l.d("Got destiny profile memberShipId = " + memberShipId + " && memberShipType=" + memberShipType)
-          var bungieAcctURL = utils.config.bungieUserAccountURL+memberShipId + "/" + memberShipType + "/"
-          bungieGet(bungieAcctURL, gamerId,
-            utils._.get(utils.constants.consoleGenericsId, utils._.get(utils.constants.consoleGenericsId, membershipType)),
-            callback)
-        } else {
-          return callback(null, null)
-        }
-      },
-      function (bungieAcct, callback) {
-        var bungieAcctJson =JSON.parse(bungieAcct)
-
-        if(bungieAcctJson && bungieAcctJson.Response) {
-          if(utils._.isInvalidOrBlank(bungieAcctJson.Response.bungieNetUser)) {
-            return callback(
-              {
-                error: "Your public Bungie profile is not displaying your linked gaming account. Please set it to public and try again."
-              },
-              null)
-          }
-          var bungieAcctResp = bungieAcctJson.Response
-          var bungieMemberShipId = bungieAcctResp.bungieNetUser.membershipId
-          var displayName = null
-          if(utils._.get(utils.constants.bungieMemberShipType, membershipType) == utils.constants.bungieMemberShipType.PSN) {
-            displayName = bungieAcctResp.bungieNetUser.psnDisplayName
-          }
-          else {
-            displayName = bungieAcctResp.bungieNetUser.xboxDisplayName
-          }
-          return callback(null, {bungieMemberShipId: bungieMemberShipId, displayName: displayName})
-        } else {
-          return callback(
-            {
-              error: utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)
-                .replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, membershipType))
-                .replace(/%GAMERID%/g, gamerId)
-            },
-            null)
-        }
-      }
-    ], callback
-  )
 }
 
 function getDestinyProfileByConsole(consoleId,consoleType,callback){
@@ -199,7 +135,11 @@ function getAccountDetails(bungieAcct,acctType,callback){
         return callback({
           error: "Your public Bungie profile is not displaying your linked gaming account. Please set it to public and try again.",
           errorType: "BungieError"}, null)
-      }else {
+      }else if(utils._.isValidNonBlank(bungieAcct.Response.destinyAccountErrors) && bungieAcct.Response.destinyAccountErrors.length > 0){
+          return callback({
+            error: "It looks like this account is on a legacy platform. We’re no longer able to display the information you seek.",
+            errorType: "BungieLegacyConsoleError"}, null)
+      }else{
         bungieAcctResponse.bungieNetUser = bungieAcct.Response.bungieNetUser
         bungieAcctResponse.destinyAccounts = bungieAcct.Response.destinyAccounts
       }
@@ -208,6 +148,23 @@ function getAccountDetails(bungieAcct,acctType,callback){
       break
   }
   return callback(null,bungieAcctResponse)
+}
+
+function getDestinyAccounts(accountDetail){
+  var clanTag = null
+  var destinyAccounts = []
+  if(!utils._.isInvalidOrBlank(accountDetail.destinyAccounts)) {
+    utils._.map(accountDetail.destinyAccounts, function(account){
+      var destinyUserInfo = {}
+      destinyUserInfo.clanTag= account.clanTag
+      destinyUserInfo.destinyMembershipId = account.memberShipId
+      destinyUserInfo.destinyMembershipType = account.membershipType
+      destinyUserInfo.destinyDisplayName=account.displayName
+      destinyUserInfo.helmetUrl = getBungieHelmetByCharacter(account)
+      destinyAccounts.push(destinyUserInfo)
+    })
+  }
+  return destinyAccounts
 }
 
 function getClanTag(accountDetail,destinyProfile){
@@ -239,7 +196,7 @@ function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
     },function(accountDetails,callback){
       clanTag = getClanTag(accountDetails, destinyProfile)
       utils.l.d("clanTag",clanTag)
-      var character = getRecentlyPlayedCharacter(accountDetails.destinyAccounts, destinyProfile.memberShipId, destinyProfile.memberShipType)
+      var character = getRecentlyPlayedCharacter(accountDetails.destinyAccounts, destinyProfile.memberShipId)
       utils.l.d("recent character",character)
       if(character) callback(null, character)
       else callback({error:"Looks like you do not have any destiny account.", errorType: "BungieError"},null)
@@ -264,69 +221,30 @@ function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
   ],callback)
 }
 
-//This is depricated.
-function getBungieHelmetOld(consoleId,consoleType,callback){
-  var memberShipId = null
-  var memberShipType = null
+function getBungieHelmetByCharacter(destinyAccount){
   utils.async.waterfall([
-      function (callback) {
-        var destinySearchURL = utils.config.bungieDestinySearchByPSNURL
-          .replace(/%MEMBERSHIPTYPE%/g, getBungieMembershipType(consoleType))
-          .replace(/%MEMBERSHIPID%/g, consoleId);
+    function(callback) {
+     var character =  getRecentlyPlayedCharacterByAccount(destinyAccount)
+      var bungieItemsURL = utils.config.bungieItemsURL
+        .replace(/%MEMBERSHIPTYPE%/g, character.membershipType)
+        .replace(/%MEMBERSHIPID%/g, character.membershipId)
+        .replace(/%CHARACTERID%/g, character.characterId);
 
-        bungieGet(destinySearchURL, consoleId, utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
-      },
-      function (destinyProfile, callback) {
-        var destinyProfileJSON = JSON.parse(destinyProfile)
-        if(destinyProfileJSON && destinyProfileJSON.Response) {
-          memberShipType = getBungieMembershipType(consoleType)
-          memberShipId = destinyProfileJSON.Response
-
-          utils.l.d("Got destiny profile memberShipId = " + memberShipId + " && memberShipType=" + memberShipType)
-          var bungieAcctURL = utils.config.bungieUserAccountURL+memberShipId + "/" + memberShipType + "/"
-          bungieGet(bungieAcctURL, consoleId, utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
-        } else {
-          return callback(null, null)
-        }
-      },
-      function (bungieAcct, callback) {
-        var bungieAcctJson =JSON.parse(bungieAcct)
-        if(bungieAcctJson && bungieAcctJson.Response) {
-          if(utils._.isInvalidOrBlank(bungieAcctJson.Response.destinyAccounts)) {
-            return callback({error: "It looks like your Bungie account may be set to private or the server is busy. Please ensure your account is public and try again in a few minutes."},null)
-          }
-          //var bungieCharacters = utils._.map(bungieAcctJson.Response.destinyAccounts,"characters")
-
-          var character = getRecentlyPlayedCharacter(bungieAcctJson,memberShipId,memberShipType)
-          callback(null, character)
-        } else {
-          return callback({error: utils.constants.bungieErrorMessage(bungieAcctJson.ErrorStatus)
-            .replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, consoleType))
-            .replace(/%GAMERID%/g, gamerId)
-          },null)
-        }
-      },function(character, callback){
-        //var bungieItemsURL = "https://www.bungie.net/Platform/Destiny/" + memberShipType+"/Account/"+memberShipId+"/Character/"+characterId+"/Inventory/Summary?definitions=true"
-        var bungieItemsURL = utils.config.bungieItemsURL
-          .replace(/%MEMBERSHIPTYPE%/g, character.membershipType)
-          .replace(/%MEMBERSHIPID%/g, character.membershipId)
-          .replace(/%CHARACTERID%/g, character.characterId);
-
-        bungieGet(bungieItemsURL, consoleId,utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
-      },function(itemDefinitions, callback){
-        var itemDefJSON = JSON.parse(itemDefinitions)
-        if(itemDefJSON && itemDefJSON.Response && itemDefJSON.Response.definitions && itemDefJSON.Response.definitions.items){
-          var helmetURL = getHelmentURL(itemDefJSON.Response.definitions.items)
-          utils.l.d("helmetURL::"+helmetURL)
-          callback(null,helmetURL)
-        }else{
-          callback(null,null)
-        }
+      bungieGet(bungieItemsURL, consoleId,utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
+    },function(itemDefinitions, callback){
+      var itemDefJSON = JSON.parse(itemDefinitions)
+      if(itemDefJSON && itemDefJSON.Response && itemDefJSON.Response.definitions && itemDefJSON.Response.definitions.items){
+        var helmetURL = getHelmentURL(itemDefJSON.Response.definitions.items)
+        utils.l.d("helmetURL::"+helmetURL)
+        callback(null,helmetURL)
+      }else{
+        callback(null,null)
       }
-    ], callback
-  )
+    }],
+    function(err,data){
+        return data
+    })
 }
-
 /*Get bungienet profile
  * 1. Make destinySearch call for displayname
  * 2. Using the result from search take membershipType and call GetBungieAccount API to bungie membershipcode
@@ -335,6 +253,26 @@ function getBungieHelmetOld(consoleId,consoleType,callback){
  * TBD - Change the from ID to traveler account instead of Harsha's account :-)
  * */
 function sendBungieMessage(bungieMemberShipId, consoleType, messageType,callback){
+  utils.async.waterfall([
+      function (callback) {
+        var convUrl = utils.config.bungieConvURL
+        var token = helpers.uuid.getRandomUUID()
+        utils.l.d("bungieMemberShipId=", bungieMemberShipId)
+
+        getMessageBody(utils.config.hostUrl(), token, messageType,consoleType,function(err,msgTxt){
+          var msgBody = {
+            "membersToId": [utils.config.bungieCrsRdAppId, bungieMemberShipId],
+            "body": msgTxt
+          }
+          utils.l.d("msgBody::",msgBody)
+          bungiePost(convUrl, msgBody, token,bungieMemberShipId,consoleType, callback)
+        })
+      }
+    ], callback
+  )
+}
+
+function sendBungieMessageV2(bungieMemberShipId, consoleType, messageType,callback){
   utils.async.waterfall([
       function (callback) {
         var convUrl = utils.config.bungieConvURL
@@ -495,7 +433,7 @@ function getMessageBody(host,token,messageType,consoleType,callback){
       })
       break
     case utils.constants.bungieMessageTypes.passwordReset:
-      tinyUrlService.createTinyUrl(host+"/api/v1/auth/resetPassword/"+token,function(err, url) {
+      tinyUrlService.createTinyUrl(host+"/api/v2/auth/resetPassword/"+token,function(err, url) {
         msg = utils.constants.bungieMessages.passwordReset.replace(/%URL%/g, url)
           .replace(/%APPNAME%/g, utils.config.appName)
         utils.l.d("resetPassword msg to send::" + msg)
@@ -536,7 +474,21 @@ function getBungieMembershipType(membershipType) {
   return utils._.get(utils.constants.bungieMemberShipType, membershipType)
 }
 
-function getRecentlyPlayedCharacter(destinyAccounts,memberShipId,memberShipType){
+function getRecentlyPlayedCharacterByAccount(destinyAccount){
+  //var characters = utils._.map(bungieAcctJson.Response.destinyAccounts,"characters")
+  var characters = destinyAccount.characters
+  var sortedChars = utils._.sortBy(utils._.flatMap(characters),function(character){
+    return utils.moment(character.dateLastPlayed)
+  })
+
+  var lastCharacter = utils._.last(sortedChars)
+  if(lastCharacter) return {characterId:lastCharacter.characterId,membershipId:lastCharacter.membershipId,membershipType:lastCharacter.membershipType}
+  else return null;
+
+}
+
+
+function getRecentlyPlayedCharacter(destinyAccounts,memberShipId){
   //var characters = utils._.map(bungieAcctJson.Response.destinyAccounts,"characters")
   var characters = null
   utils._.map(destinyAccounts, function(account){
@@ -572,6 +524,7 @@ function getHelmentURL(itemDef){
 module.exports = {
   getBungieMemberShip: getBungieMemberShip,
   sendBungieMessage: sendBungieMessage,
+  sendBungieMessageV2:sendBungieMessageV2,
   listBungieGroupsJoined: listBungieGroupsJoined,
   getBungieHelmet:getBungieHelmet
 }

@@ -180,7 +180,7 @@ function addConsole(user, console, callback) {
   }
   utils.async.waterfall([
     function (callback) {
-      destinyInterface.getBungieMemberShip(console.consoleId, consoleType, callback)
+      destinyInterface.getBungieMemberShip(console.consoleId, consoleType, null, callback)
     },
     function (bungieMember, callback) {
       if(bungieMember.bungieMemberShipId.toString() != user.bungieMemberShipId.toString()) {
@@ -208,6 +208,65 @@ function addConsole(user, console, callback) {
 
 }
 
+function refreshConsoles(user, bungieResponse, cosoleReq, calback){
+  utils.async.waterfall([
+    function(callback){
+      mergeConsoles(user, bungieResponse, cosoleReq, calback)
+    },function(consoles, callback){
+      //user.consoles = consoles
+      utils.l.d('refreshConsoles::user',user)
+      models.user.save(user, callback)
+    }
+  ],callback)
+
+}
+
+function mergeConsoles(user, bungieResponse, cosoleReq, calback){
+  var consoles = user.consoles
+
+  if(utils._.isValidNonBlank(bungieResponse) && utils._.isValidNonBlank(bungieResponse.destinyProfile)) {
+    utils._.map(bungieResponse.destinyProfile, function (destinyAccount) {
+      var consoleObj = {}
+      consoleObj.consoleType = utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
+      consoleObj.destinyMembershipId = destinyAccount.destinyMembershipId
+      consoleObj.consoleId = destinyAccount.destinyDisplayName
+      consoleObj.clanTag = destinyAccount.clanTag
+      consoleObj.imageUrl = destinyAccount.helmetUrl
+      if (consoleObj.consoleType == cosoleReq.consoleType)
+        consoleObj.isPrimary = true
+      else
+        consoleObj.isPrimary = false
+
+      if (consoleObj.consoleType == 'PS4') {
+        var oldConsoleObject =utils.getUserConsoleObject(user, "PS3")
+        if (utils._.isValidNonBlank(oldConsoleObject)) {
+          //upgrade user console, destiny account from bungie is updated to new gen. Our system has old gen console
+          eventService.clearEventsForPlayer(user, null, oldConsoleObject.consoleType, function(err, data){
+            if(!err)
+              oldConsoleObject.consoleType = consoleObj.consoleType
+          })
+        } else if (utils._.isInvalidOrBlank(utils.getUserConsoleObject(user, "PS4"))) {
+          //add console, destiny account from bungie is not our system.
+          consoles.push(consoleObj)
+        }
+      } else if (consoleObj.consoleType == 'XBOXONE') {
+        var oldConsoleObject =utils.getUserConsoleObject(user, "XBOX360")
+        if (utils._.isValidNonBlank(oldConsoleObject)) {
+          //upgrade user console, destiny account from bungie is updated to new gen. Our system has old gen console
+          eventService.clearEventsForPlayer(user, null, oldConsoleObject.consoleType, function(err, data){
+            if(!err)
+              oldConsoleObject.consoleType = consoleObj.consoleType
+          })
+        } else if (utils._.isInvalidOrBlank(utils.getUserConsoleObject(user, "XBOXONE"))) {
+          //add console, destiny account from bungie is not our system.
+          consoles.push(consoleObj)
+        }
+      }
+    })
+  }
+
+  return callback(null, consoles)
+}
 function changePrimaryConsole(user, consoleType, callback) {
   var consoleObject = utils.getUserConsoleObject(user, consoleType)
   if(utils._.isInvalidOrBlank(consoleObject)) {
@@ -228,7 +287,7 @@ function updateUser(user, callback) {
 }
 
 function checkBungieAccount(console, callback) {
-  destinyInterface.getBungieMemberShip(console.consoleId, console.consoleType, function(err, bungieResponse) {
+  destinyInterface.getBungieMemberShip(console.consoleId, console.consoleType, console.destinyMembershipId, function(err, bungieResponse) {
     if (err) {
       return callback(err, null)
     }else if(!bungieResponse || !bungieResponse.bungieMemberShipId || utils._.isEmpty(bungieResponse.bungieMemberShipId)){
@@ -244,8 +303,7 @@ function checkBungieAccount(console, callback) {
         consoleId: console.consoleId,
         consoleType: console.consoleType,
         bungieMemberShipId: bungieResponse.bungieMemberShipId,
-        clanTag: bungieResponse.clanTag,
-        destinyMembershipId: bungieResponse.destinyProfile.memberShipId
+        destinyProfile: bungieResponse.destinyProfile
       }
       return callback(null, bungieMember)
     }
@@ -268,5 +326,6 @@ module.exports = {
   addConsole: addConsole,
   changePrimaryConsole: changePrimaryConsole,
   checkBungieAccount: checkBungieAccount,
-  setLegalAttributes:setLegalAttributes
+  setLegalAttributes:setLegalAttributes,
+  refreshConsoles:refreshConsoles
 }

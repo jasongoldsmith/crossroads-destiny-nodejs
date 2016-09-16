@@ -15,6 +15,8 @@ var UserSchema = new Schema({
   date: {type: Date, required: true},
   passWord: {type: String, required: true},
   uniqueID : String,
+  verifyStatus:verifyStatus,
+  verifyToken:verifyToken,
   consoles: [{
     consoleType: consoleTypeEnum,
     consoleId: {type: String},
@@ -57,6 +59,7 @@ var UserSchema = new Schema({
 UserSchema.index({'userName':1})
 UserSchema.index({'consoles.consoleId':1})
 UserSchema.index({'consoles.verifyToken':1})
+UserSchema.index({'verifyToken':1})
 UserSchema.index({'date': 1})
 UserSchema.index({"groups.groupId": 1})
 

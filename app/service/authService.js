@@ -71,6 +71,38 @@ function signupUser(signupData, callback) {
 	], callback)
 }
 
+function createNewUser(signupData,callback){
+	var primaryConsole = utils.primaryConsole(signupData)
+	signupData.imageUrl=primaryConsole.imageUrl
+	utils.async.waterfall([
+		function(callback){
+			destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,
+					utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType),
+					utils.constants.bungieMessageTypes.accountVerification,
+					function (error, messageResponse) {
+						utils.l.d('messageResponse', messageResponse)
+						utils.l.d('signupUser::sendBungieMessage::error', error)
+						if (messageResponse) {
+							utils.l.d("messageResponse::token===" + messageResponse.token)
+							signupData.verifyStatus = "INITIATED"
+							signupData.verifyToken = messageResponse.token
+							return callback(null, signupData)
+						} else {
+							return callback(error, null)
+						}
+					})
+		},function(newUser,callback){
+			newUser.clanName=utils.constants.freelanceBungieGroup.groupName
+			getCurrentLegalObject(function(err,legal){
+				newUser.legal = legal
+				utils.l.d('signup::getCurrentLegalObject',newUser)
+				utils.l.d("creating user", utils.l.userLog(newUser))
+				models.user.createUserFromData(newUser, callback)  // don't send message
+			})
+		}
+	],callback)
+}
+
 function requestResetPassword(userData, callback) {
 	utils.async.waterfall([
 		function(callback) {

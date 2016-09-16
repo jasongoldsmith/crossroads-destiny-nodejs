@@ -10,7 +10,6 @@ var passport = require('passport')
 var passwordHash = require('password-hash')
 
 function login (req, res) {
-
   utils.l.d("Login request", req.body)
   var outerUser = null
     utils.async.waterfall(
@@ -60,12 +59,13 @@ function login (req, res) {
 
 function handleNewUser(req, callback) {
   var body = req.body
+  var bungieResponse = null
   utils.async.waterfall([
     function(callback) {
       service.userService.checkBungieAccount(body.consoles, callback)
     },
     function (bungieMember, callback) {
-      body.bungieMemberShipId = bungieMember.bungieMemberShipId
+      bungieResponse = bungieMember
       models.user.getUserByData({bungieMemberShipId: bungieMember.bungieMemberShipId}, function(err, user) {
         if(err) {
           utils.l.s("Database lookup for user failed", err)
@@ -77,7 +77,7 @@ function handleNewUser(req, callback) {
     },
     function(user, callback) {
       if(!user) {
-        createNewUser(req, callback)
+        createNewUser(req, bungieResponse, callback)
       } else {
         if (!passwordHash.verify(body.passWord, user.passWord)) {
           return callback({error: "The username and password do not match our records."}, null)
@@ -89,14 +89,14 @@ function handleNewUser(req, callback) {
         } else if(body.consoles.consoleType == 'XBOXONE' && utils._.isValidNonBlank(utils.getUserConsoleObject(user, "XBOX360"))) {
           return callback(null, user)
         } else {
-          service.userService.addConsole(user, body.consoles, callback)
+          service.userService.refreshConsoles(user, bungieResponse, req.body.consoles, callback)
         }
       }
     }
   ], callback)
 }
 
-function createNewUser(req, callback) {
+function createNewUser(req, bungieResponse, callback) {
   var body = req.body
   if(body.consoles.consoleType == "XBOX360" || body.consoles.consoleType == "PS3") {
     return({error: "We do not support old generation consoles anymore. " +
@@ -104,13 +104,28 @@ function createNewUser(req, callback) {
   }
   var userData = {
     passWord: passwordHash.generate(body.passWord),
-    consoles: [body.consoles],
-    imageUrl: body.imageUrl,
     clanId: body.clanId,
-    bungieMemberShipId: body.bungieMemberShipId,
     mpDistinctId: req.adata.distinct_id
   }
 
+  if(utils._.isValidNonBlank(bungieResponse)){
+    consolesList =  []
+    utils._.map(bungieResponse.destinyProfile,function(destinyAccount){
+      var consoleObj = {}
+      consoleObj.consoleType =  utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
+      consoleObj.destinyMembershipId = destinyAccount.destinyMembershipId
+      consoleObj.consoleId=destinyAccount.destinyDisplayName
+      consoleObj.clanTag=destinyAccount.clanTag
+      consoleObj.imageUrl = destinyAccount.helmetUrl
+      if(consoleObj.consoleType == body.consoles.consoleType)
+        consoleObj.isPrimary = true
+      else
+        consoleObj.isPrimary = false
+      consolesList.push(consoleObj)
+    })
+    userData.consoles = consolesList
+    userData.bungieMemberShipId =  bungieResponse.bungieMemberShipId
+  }
   utils.async.waterfall([
       helpers.req.handleVErrorWrapper(req),
       function(callback) {
@@ -301,30 +316,11 @@ function verifyAccount(req,res){
   })
 }
 
-function verifyAccountConfirm(req,res){
+function verifyConfirm(req,res){
   var token = req.param("token")
   utils.l.d("verifyAccount::token="+token)
   //req.assert('token', "Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.").notEmpty()
-  var userObj = null
-  utils.async.waterfall([
-    function(callback){
-      models.user.getUserByData({"consoles.verifyToken":token},callback)
-    },function(user, callback){
-      utils.l.d("user="+user)
-      if(user){
-        userObj = user
-        utils._.map(user.consoles,function(console){
-          //if(console.verifyToken == token)
-          console.verifyStatus ="VERIFIED"
-        })
-        models.user.save(user,function(err,updatedUser){
-          callback(null, utils.config.accountVerificationSuccess)
-        })
-      }else{
-        callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.",null)
-      }
-    }
-  ],
+  markUserVerified(token,
     function (err, successResp){
       if(err) routeUtils.handleAPIError(req,res,err,err)
       else {
@@ -336,6 +332,31 @@ function verifyAccountConfirm(req,res){
   )
 }
 
+function markUserVerified(token,callback){
+  var userObj = null
+  utils.async.waterfall([
+    function(callback){
+      var query = { $or: [ { "consoles.verifyToken":token }, { "verifyToken":token } ] }
+      models.user.getUserByData(query,callback)
+    },function(user, callback){
+      utils.l.d("user="+user)
+      if(user){
+        userObj = user
+        user.verifyStatus ="VERIFIED"
+        utils._.map(user.consoles,function(console){
+          //if(console.verifyToken == token)
+          console.verifyStatus ="VERIFIED"
+        })
+        models.user.save(user,function(err,updatedUser){
+          callback(null, utils.config.accountVerificationSuccess)
+        })
+      }else{
+        callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.",null)
+      }
+    }
+  ],callback)
+}
+
 function verifyReject(req,res){
   var token = req.param("token")
   utils.l.d("verifyReject::token=" + token)
@@ -343,10 +364,12 @@ function verifyReject(req,res){
   var userObj = null
   utils.async.waterfall([
     function(callback) {
-      models.user.getUserByData({"consoles.verifyToken": token}, callback)
+      var query = { $or: [ { "consoles.verifyToken":token }, { "verifyToken":token } ] }
+      models.user.getUserByData(query,callback)
     },function(user, callback) {
       utils.l.d("user= " + user)
       if(user) {
+        user.verifyStatus ="DELETED"
         handleInvalidUser(user,callback)
       } else {
         callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.", null)
@@ -475,6 +498,7 @@ function resetPasswordLaunch(req,res){
 
 function resetPassword(req,res){
   var userName = req.body.userName
+  var token = req.param("token")
   try {
     req.assert('passWord').notEmpty().isAlphaNumeric()
   } catch(ex) {
@@ -482,14 +506,15 @@ function resetPassword(req,res){
   }
 
   var newPassword = passwordHash.generate(req.body.passWord)
-  console.log("resetPassword::"+userName)
+  console.log("resetPassword::userName"+userName+",token::"+token)
   utils.async.waterfall([
       function (callback) {
-        models.user.getUserByData({userName:userName},callback)
+        models.user.getUserByData({passwordResetToken:token},callback)
       },
       function(user,callback){
         if(user) {
           user.passWord = newPassword
+          user.verifyStatus ="VERIFIED"
 
           utils._.map(user.consoles,function(console){
             if(console.verifyStatus != "VERIFIED")
@@ -557,7 +582,7 @@ routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
-routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyAccountConfirm)
+routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyConsoleConfirm)
 routeUtils.rGet(router, '/verifyReject/:token', 'verifyReject', verifyReject)
 routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
 routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
