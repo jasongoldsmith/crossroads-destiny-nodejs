@@ -473,7 +473,7 @@ function getMessageBody(host,token,messageType,consoleType,callback){
       })
       break
     case utils.constants.bungieMessageTypes.passwordReset:
-      tinyUrlService.createTinyUrl(host+"/api/v2/auth/resetPassword/"+token,function(err, url) {
+      tinyUrlService.createTinyUrl(host+"/api/v1/auth/resetPassword/"+token,function(err, url) {
         msg = utils.constants.bungieMessages.passwordReset.replace(/%URL%/g, url)
           .replace(/%APPNAME%/g, utils.config.appName)
         utils.l.d("resetPassword msg to send::" + msg)
