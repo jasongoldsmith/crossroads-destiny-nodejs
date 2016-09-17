@@ -64,7 +64,6 @@ body{
 }
 
 .appTitle{
-  padding-top: 34px;
   font-family: HelveticaNeue-Bold;
   font-size: 14px;
   color: white;
@@ -99,20 +98,20 @@ body{
 }
 
 .txtSm{
-  font-family: HelveticaNeue;
-  font-size: 14px;
-  color: white;
+  font-family: ArialMT;
+  font-size: 20px;
   line-height: 14px;
   letter-spacing: 1px;
+  border-radius: 2px;
   border-left: 0px;
   border-right: 0px;
   border-top: 0px;
   border-bottom: 1px;
   border-style: dotted;
   border-color: #ffffff;
-  background-color: #000000;
-  height: 24px;
-  width: 160px;
+  vertical-align: middle;
+  height: 50px;
+  width: 280px;
 }
 
 .pad{
@@ -127,9 +126,9 @@ body{
 }
 
 .containerBox{
-  height:66px;
-  width:355px;
-  background-color:#000000;
+  height:60px;
+  width:330px;
+  background-color:#0086D0;
 }
 
 .blueTerms{
@@ -138,12 +137,26 @@ body{
   color: #0086D0;
   text-decoration: underline;
 }
-
+.blueContact{
+  font-family: ArialMT;
+  font-size: 20px;
+  color: #0086D0;
+}
 .containerTerms{
   height:47px;
   width:307px;
   font-family: HelveticaNeue;
   font-size: 13px;
+  color: white;
+  padding-top: 10px;
+  align-self: left;
+}
+
+.containerTermsContact{
+  height:40px;
+  width:320px;
+  font-family: ArialMT;
+  font-size: 18px;
   color: white;
   padding-top: 10px;
   align-self: left;
@@ -184,7 +197,7 @@ body{
   border-bottom: 0px;
   background-color: #0086D0;
   height: 50px;
-  width: 355px;
+  width: 280px;
 }
 
 .linkBluePlain{
@@ -212,8 +225,9 @@ body{
   font-size: 16px;
   color: white;
   background: #0086D0;
-  line-height: 50px;
-  width: 355px;
+  line-height: 60px;
+  border-radius: 2px;
+  width: 330px;
   display: block;
 }
 

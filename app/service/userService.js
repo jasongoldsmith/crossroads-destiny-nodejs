@@ -208,12 +208,12 @@ function addConsole(user, console, callback) {
 
 }
 
-function refreshConsoles(user, bungieResponse, cosoleReq, callback){
+function refreshConsoles(user, bungieResponse, consoleReq, callback){
   utils.async.waterfall([
     function(callback){
       if (utils._.isValidNonBlank(bungieResponse) && utils._.isValidNonBlank(bungieResponse.destinyProfile)) {
         utils.async.mapSeries(bungieResponse.destinyProfile, function (destinyAccount, asyncCallback) {
-            mergeConsoles(user, destinyAccount, cosoleReq, asyncCallback)
+            mergeConsoles(user, destinyAccount, consoleReq, asyncCallback)
           },
           function (err, consoles) {
             return callback(null, consoles)
@@ -222,11 +222,21 @@ function refreshConsoles(user, bungieResponse, cosoleReq, callback){
       }
     },function(consoles, callback){
       //user.consoles = consoles
+      setPrimaryConsole(user,consoleReq)
       utils.l.d('refreshConsoles::user',user)
       models.user.save(user, callback)
     }
   ],callback)
 
+}
+
+function setPrimaryConsole(user,consoleReq){
+  utils._.map(user.consoles,function(consoleObj){
+    if(consoleReq.consoleType == consoleObj.consoleType)
+      consoleObj.isPrimary = true
+    else
+      consoleObj.isPrimary = false
+  })
 }
 
 function mergeConsoles(user, destinyAccount, cosoleReq, callback){
