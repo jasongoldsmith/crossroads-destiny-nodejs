@@ -73,7 +73,7 @@ function signupUser(signupData, callback) {
 
 function createNewUser(signupData,callback){
 	var primaryConsole = utils.primaryConsole(signupData)
-	signupData.imageUrl=primaryConsole.imageUrl
+	signupData.imageUrl=utils.config.bungieBaseURL + "/" +primaryConsole.imageUrl
 	utils.async.waterfall([
 		function(callback){
 			destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,

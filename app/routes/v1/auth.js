@@ -114,7 +114,7 @@ function createNewUser(req, bungieResponse, callback) {
       consoleObj.destinyMembershipId = destinyAccount.destinyMembershipId
       consoleObj.consoleId=destinyAccount.destinyDisplayName
       consoleObj.clanTag=destinyAccount.clanTag
-      consoleObj.imageUrl = destinyAccount.helmetUrl
+      consoleObj.imageUrl = utils.config.bungieBaseURL + "/" +destinyAccount.helmetUrl
       if(consoleObj.consoleType == body.consoles.consoleType)
         consoleObj.isPrimary = true
       else
