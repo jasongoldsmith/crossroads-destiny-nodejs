@@ -411,6 +411,7 @@ function handleInvalidUser(user,callback){
       utils._.map(user.consoles,function(console){
         console.verifyStatus ="DELETED"
       })
+      user.verifyStatus="DELETED"
       callback(null,user)
     },function(userToDelete, callback){
       service.eventService.clearCommentsByUser(user,callback)
