@@ -237,7 +237,7 @@ function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
 function getDestinyDetails(account,callback){
   var destinyUserInfo = {}
   destinyUserInfo.clanTag= account.userInfo.clanTag
-  destinyUserInfo.destinyMembershipId = account.userInfo.memberShipId
+  destinyUserInfo.destinyMembershipId = account.userInfo.membershipId
   destinyUserInfo.destinyMembershipType = account.userInfo.membershipType
   destinyUserInfo.destinyDisplayName=account.userInfo.displayName
 
