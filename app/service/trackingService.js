@@ -22,34 +22,18 @@ function trackData(req, callback) {
             trackAppInstall(req, data, callback)
             break
           case "appInit":
-            trackAppInit(req, data, callback)
+            helpers.m.incrementAppInit(req)
+            return callback(null, "appInit")
             break
           case "appResume":
-            trackAppResume(req, data, callback)
-            break
-          case "signupInit":
-            trackSignupInit(req, data, callback)
-            break
-          case "showPassword":
-            trackShowPassword(req, data, callback)
+            helpers.m.incrementAppResume(req)
+            return callback(null, "appResume")
             break
           case "eventSharing":
             trackEventSharing(req.user, data, callback)
             break
-          case "adCardInit":
-            trackAdCardInit(req.user, data, callback)
-            break
-          case "addActivityInit":
-            trackAddActivityInit(req.user, data, callback)
-            break
-          case "currentTabInit":
-            trackCurrentTabInit(req.user, data, callback)
-            break
-          case "upcomingTabInit":
-            trackUpcomingTabInit(req.user, data, callback)
-            break
           default:
-            return callback(null, null)
+            return callback(null, data.trackingKey)
             break
         }
       }
@@ -60,6 +44,7 @@ function trackData(req, callback) {
         return callback(err, null)
       } else {
         try {
+          data.trackingData.userId = req.session.zuid
           // appInstall is a special case where we just want to track it once and we do it in it's own method
           if(data.trackingKey != "appInstall") {
             helpers.m.trackRequest(key, data.trackingData, req, user)
@@ -114,7 +99,8 @@ function trackAppInstall(req, data, callback) {
         },function(callback){
           helpers.m.setUser(req, data.trackingData, callback)
         }
-      ],function(err, result){
+      ],
+        function(err, result){
         helpers.m.trackRequest("appInstall", data.trackingData, req, req.user)
         return callback(null, "appInstall")
       })
@@ -128,48 +114,6 @@ function trackAppInstall(req, data, callback) {
       }
     }
   })
-}
-
-function trackAppInit(req, data, callback) {
-  data.trackingData.userId = req.session.zuid
-  helpers.m.incrementAppInit(req)
-  return callback(null, "appInit")
-}
-
-function trackAppResume(req, data, callback) {
-  data.trackingData.userId = req.session.zuid
-  helpers.m.incrementAppResume(req)
-  return callback(null, "appResume")
-}
-
-function trackSignupInit(req, data, callback) {
-  data.trackingData.userId = req.session.zuid
-  return callback(null, "signupInit")
-}
-
-function trackShowPassword(req, data, callback) {
-  data.trackingData.userId = req.session.zuid
-  return callback(null, "trackShowPassword")
-}
-
-function trackAdCardInit(user, data, callback) {
-  data.trackingData.userId = user._id.toString()
-  return callback(null, "adCardInit")
-}
-
-function trackAddActivityInit(user, data, callback) {
-  data.trackingData.userId = user._id.toString()
-  return callback(null, "addActivityInit")
-}
-
-function trackCurrentTabInit(user, data, callback) {
-  data.trackingData.userId = user._id.toString()
-  return callback(null, "currentTabInit")
-}
-
-function trackUpcomingTabInit(user, data, callback) {
-  data.trackingData.userId = user._id.toString()
-  return callback(null, "upcomingTabInit")
 }
 
 function trackEventSharing(user, data, callback) {
