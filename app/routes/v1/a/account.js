@@ -320,11 +320,22 @@ function addMuteFlagToGroupObject(user, groupsList) {
   }
 }
 
+function refreshHelmet(req, res) {
+  service.accountService.refreshHelmentAndConsoles(req.user, function(err, updateResponse) {
+    if (err) {
+      routeUtils.handleAPIError(req, res, err, err)
+    } else {
+      routeUtils.handleAPISuccess(req, res, updateResponse)
+    }
+  })
+}
+
 /** Routes */
 routeUtils.rGet(router, '/group/list', 'listMyGroups', listMyGroups)
 routeUtils.rGet(router, '/group/search/:groupId', 'searchGroupById', searchGroupReq)
 routeUtils.rGet(router, '/group/resendBungieMessage', 'resendBungieMessage', resendBungieMessage)
 routeUtils.rPost(router, '/group/mute', 'muteGroupNotification', muteGroupNotifications)
 routeUtils.rPost(router, '/updateHelmet', 'updateHelmet', updateHelmet)
+routeUtils.rPost(router, '/refreshHelmet', 'updateHelmet', refreshHelmet)
 module.exports = router
 

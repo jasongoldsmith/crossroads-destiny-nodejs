@@ -2,7 +2,7 @@ var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
 var destinyInerface = require('./destinyInterface')
-
+var userService =  require('./userService')
 function handlUpdateHelmet(user, callback) {
   var newHelmetURL = null
   utils.async.waterfall([
@@ -30,6 +30,18 @@ function handlUpdateHelmet(user, callback) {
       return callback({error: "We were unable to update your helmet. Please try again later."}, null)
     }
   })
+}
+
+function refreshHelmentAndConsoles(user,callback){
+  var consoleReq = utils.primaryConsole(user)
+  utils.async.waterfall([
+    function(callback) {
+      userService.checkBungieAccount(consoleReq, callback)
+    },
+    function(bungieResponse, callback) {
+      userService.refreshConsoles(user, bungieResponse, consoleReq, callback)
+    }
+  ], callback)
 }
 
 function bulkUpdateHelmet(page, limit){
@@ -62,5 +74,6 @@ function bulkUpdateHelmet(page, limit){
 
 module.exports = {
   handlUpdateHelmet: handlUpdateHelmet,
-  bulkUpdateHelmet:bulkUpdateHelmet
+  bulkUpdateHelmet:bulkUpdateHelmet,
+  refreshHelmentAndConsoles:refreshHelmentAndConsoles
 }

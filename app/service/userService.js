@@ -213,7 +213,7 @@ function refreshConsoles(user, bungieResponse, consoleReq, callback){
     function(callback){
       if (utils._.isValidNonBlank(bungieResponse) && utils._.isValidNonBlank(bungieResponse.destinyProfile)) {
         utils.async.mapSeries(bungieResponse.destinyProfile, function (destinyAccount, asyncCallback) {
-            mergeConsoles(user, destinyAccount, consoleReq, asyncCallback)
+            mergeConsoles(user, destinyAccount, asyncCallback)
           },
           function (err, consoles) {
             return callback(null, consoles)
@@ -222,7 +222,7 @@ function refreshConsoles(user, bungieResponse, consoleReq, callback){
       }
     },function(consoles, callback){
       //user.consoles = consoles
-      setPrimaryConsole(user,consoleReq)
+      setPrimaryConsoleAndHelmet(user,consoleReq)
       utils.l.d('refreshConsoles::user',user)
       models.user.save(user, callback)
     }
@@ -230,17 +230,19 @@ function refreshConsoles(user, bungieResponse, consoleReq, callback){
 
 }
 
-function setPrimaryConsole(user,consoleReq){
+function setPrimaryConsoleAndHelmet(user,consoleReq){
   utils._.map(user.consoles,function(consoleObj){
-    if(consoleReq.consoleType == consoleObj.consoleType)
+    if(consoleReq.consoleType == consoleObj.consoleType){
+      user.imageUrl = consoleObj.imageUrl
       consoleObj.isPrimary = true
-    else
+    }else
       consoleObj.isPrimary = false
   })
 }
 
-function mergeConsoles(user, destinyAccount, cosoleReq, callback){
+function mergeConsoles(user, destinyAccount, callback){
   var consoles = user.consoles
+  var primaryConsole = utils.primaryConsole(user)
   utils.l.d('mergeConsoles::',destinyAccount)
   var consoleObj = {}
   consoleObj.consoleType = utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
@@ -248,47 +250,43 @@ function mergeConsoles(user, destinyAccount, cosoleReq, callback){
   consoleObj.consoleId = destinyAccount.destinyDisplayName
   consoleObj.clanTag = destinyAccount.clanTag
   consoleObj.imageUrl = utils.config.bungieBaseURL + "/" + destinyAccount.helmetUrl
-  if (consoleObj.consoleType == cosoleReq.consoleType)
-    consoleObj.isPrimary = true
-  else
-    consoleObj.isPrimary = false
+  consoleObj.verifyStatus = primaryConsole ? primaryConsole.verifyStatus : "INITIATED"
 
-  if (consoleObj.consoleType == 'PS4') {
-    var oldConsoleObject = utils.getUserConsoleObject(user, "PS3")
-    if (utils._.isValidNonBlank(oldConsoleObject)) {
-      utils.l.d("mergeConsoles::user on legacy PS consoles")
-      //upgrade user console, destiny account from bungie is updated to new gen. Our system has old gen console
-      updateConsole(user,oldConsoleObject,consoleObj.consoleType,callback)
-    } else if (utils._.isInvalidOrBlank(utils.getUserConsoleObject(user, "PS4"))) {
-      //add console, destiny account from bungie is not our system.
-      utils.l.d("mergeConsoles::Adding new PS4 console")
-      consoles.push(consoleObj)
-      return callback(null, consoleObj)
-    }else
-      return callback(null, consoleObj)
-  } else if (consoleObj.consoleType == 'XBOXONE') {
-    var oldConsoleObject = utils.getUserConsoleObject(user, "XBOX360")
-    if (utils._.isValidNonBlank(oldConsoleObject)) {
-      //upgrade user console, destiny account from bungie is updated to new gen. Our system has old gen console
-      updateConsole(user,oldConsoleObject,consoleObj.consoleType,callback)
-    } else if (utils._.isInvalidOrBlank(utils.getUserConsoleObject(user, "XBOXONE"))) {
-      //add console, destiny account from bungie is not our system.
-      utils.l.d("mergeConsoles::Adding new XBOXONE console")
-      consoles.push(consoleObj)
-      return callback(null, consoleObj)
-    }else
-      return callback(null, consoleObj)
+  if (consoleObj.consoleType == 'PS4')
+    mergeConsoleByType(consoleObj,'PS3',user,callback)
+  else if (consoleObj.consoleType == 'XBOXONE')
+    mergeConsoleByType(consoleObj,'XBOX360',user,callback)
+}
+
+function mergeConsoleByType(newConsole,legacyConsoleType,user,callback){
+  var oldConsoleObject = utils.getUserConsoleObject(user, legacyConsoleType)
+  if (utils._.isValidNonBlank(oldConsoleObject)) {
+    utils.l.d("mergeConsoles::user on legacy consoles"+legacyConsoleType)
+    //upgrade user console, destiny account from bungie is updated to new gen. Our system has old gen console
+    updateConsole(user,oldConsoleObject,newConsole.consoleType,newConsole.consoleId,callback)
+  } else if (utils._.isInvalidOrBlank(utils.getUserConsoleObject(user, newConsole.consoleType))) {
+    //add console, destiny account from bungie is not our system.
+    utils.l.d("mergeConsoles::Adding new console"+newConsole.consoleType)
+    consoles.push(newConsole)
+    return callback(null, newConsole)
+  }else {
+    //Override consoleId with what bungie has
+    var newGenExistingConsole = utils.getUserConsoleObject(user, newConsole.consoleType)
+    newGenExistingConsole.consoleId = newConsole.consoleId
+    return callback(null, newGenExistingConsole)
   }
 }
 
-function updateConsole(user, oldConsole, newConsoleType,callback){
+function updateConsole(user, oldConsole, newConsoleType,newConsoleId,callback){
   utils.async.waterfall([
     function(callback) {
       eventService.clearEventsForPlayer(user, null, oldConsole.consoleType, callback)
     }
   ],function(err,data){
-    if(!err)
+    if(!err) {
       oldConsole.consoleType = newConsoleType
+      oldConsole.consoleId = newConsoleId
+    }
     return callback(null,oldConsole)
   })
 }
@@ -352,5 +350,6 @@ module.exports = {
   changePrimaryConsole: changePrimaryConsole,
   checkBungieAccount: checkBungieAccount,
   setLegalAttributes:setLegalAttributes,
-  refreshConsoles:refreshConsoles
+  refreshConsoles:refreshConsoles,
+  setPrimaryConsoleAndHelmet:setPrimaryConsoleAndHelmet
 }
