@@ -18,6 +18,7 @@ function login (req, res) {
       function(callback) {
         if(req.body.consoles) {
           req.body.consoles.consoleType = req.body.consoles.consoleType.toString().toUpperCase()
+          req.body.consoles.consoleId = req.body.consoles.consoleId.toString().trim()
         }
         if(!req.body.userName) {
           req.body.userName = req.body.consoles.consoleId
