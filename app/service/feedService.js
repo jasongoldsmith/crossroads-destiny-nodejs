@@ -90,13 +90,9 @@ function transformEventsToFeed(events, isPublicFeed, callback){
 			feedObject.futureEvents = utils._.filter(events, {launchStatus: "upcoming"})
 
 			//Create unique activityIds array from current events
+			utils.l.d('feedService::isPublicFeed::'+isPublicFeed)
 			var currentActivityIds = utils._.uniq(utils._.map(feedObject.currentEvents, 'eType._id'))
 			utils.l.d('currentActivityIds',currentActivityIds)
-			if(isPublicFeed){
-				models.user.findUserCount({"consoles.verifyStatus":"VERIFIED"},function(err,userCount){
-					if(!err) feedObject.totalUsers=userCount
-				})
-			}
 			//Run through adcard activities usually 5-6 objects and remove the ones alrady prsent in currentActivityIds
 			feedObject.adActivities = []
 			if(!isPublicFeed) {
@@ -106,7 +102,18 @@ function transformEventsToFeed(events, isPublicFeed, callback){
 						feedObject.adActivities.push(activity)
 				})
 			}
-			callback(null,feedObject)
+			if(isPublicFeed){
+				models.user.findUserCount({"consoles.verifyStatus":"VERIFIED"},function(err,userCount){
+					utils.l.d('feedService::totalUsers::'+userCount)
+					utils.l.d('feedService::totalUsers::err',err)
+					if(userCount>0){
+						feedObject.totalUsers=userCount.toString()
+						utils.l.d('feedService::totalUsers::feedObject.totalUsers'+feedObject.totalUsers)
+					}
+					callback(null,feedObject)
+				})
+			}else
+				callback(null,feedObject)
 		}
 	],callback)
 }

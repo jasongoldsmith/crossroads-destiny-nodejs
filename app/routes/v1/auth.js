@@ -38,7 +38,12 @@ function login (req, res) {
       function (user, callback) {
         models.user.getById(user._id, function (err, user) {
           user.isLoggedIn = true
-           service.authService.addLegalAttributes(user, function(err, data){
+          var primaryConsole = utils.primaryConsole(user)
+          if(utils._.isInvalidOrBlank(user.verifyStatus)){
+            user.verifyStatus = primaryConsole.verifyStatus
+            user.verifyToken = primaryConsole.verifyToken
+          }
+          service.authService.addLegalAttributes(user, function(err, data){
              outerUser = data
           })
           models.user.save(user, callback)
