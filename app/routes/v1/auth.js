@@ -39,7 +39,8 @@ function login (req, res) {
       function (user, callback) {
         models.user.getById(user._id, function (err, user) {
           user.isLoggedIn = true
-          service.userService.setPrimaryConsoleAndHelmet(user,req.body.consoles)
+          if(req.body.consoles)
+            service.userService.setPrimaryConsoleAndHelmet(user,req.body.consoles)
           var primaryConsole = utils.primaryConsole(user)
           if(utils._.isInvalidOrBlank(user.verifyStatus)){
             user.verifyStatus = primaryConsole.verifyStatus
