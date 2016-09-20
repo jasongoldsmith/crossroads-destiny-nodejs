@@ -77,11 +77,13 @@ function trackAppInstall(req, data, callback) {
   // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
   // We have to maintain this order as it is sent by fb and branch as a deep link
   parseAdsData(data)
-
+  utils.l.d('trackingService::trackAppInstall::req.adata',req.adata)
   models.temporaryUser.find(req.adata.distinct_id, function (err, temporaryUser) {
+    utils.l.d('trackingService::trackAppInstall::findTemporaryUser',data)
     if(err) {
       return callback(err, null)
     } else if (!temporaryUser) {
+      utils.l.d('trackingService::trackAppInstall::findTemporaryUser::No Temporary user')
       utils.async.series([
         function(callback){
           var temporaryUser = {
@@ -90,6 +92,7 @@ function trackAppInstall(req, data, callback) {
           }
           models.temporaryUser.create(temporaryUser, callback)
         },function(callback){
+          utils.l.d('trackingService::trackAppInstall::creating mixpanel user')
           helpers.m.setUser(req, data.trackingData, callback)
         }
       ],
@@ -98,8 +101,10 @@ function trackAppInstall(req, data, callback) {
         return callback(null, "appInstall")
       })
     } else if (temporaryUser) {
+      utils.l.d('trackingService::trackAppInstall::findTemporaryUser::Found Temporary user',temporaryUser)
       if(temporaryUser.source == "organic" && data.trackingData.source != "organic") {
         temporaryUser.source = data.trackingData.source
+        utils.l.d('trackingService::trackAppInstall::updating mixpanel user')
         helpers.m.updateUserSource(req, data.trackingData)
         models.temporaryUser.update(temporaryUser, callback)
       } else {
@@ -110,6 +115,7 @@ function trackAppInstall(req, data, callback) {
 }
 
 function parseAdsData(data){
+  utils.l.d('trackingService::parseAdsData::Before',data)
   data.trackingData.ads = utils._.trim(data.trackingData.ads, '/')
   var adsValues = data.trackingData.ads.split('/')
   adsValues[3] = utils._.isValidNonBlank(adsValues[3]) ? adsValues[3].split('?')[0] : null
@@ -118,6 +124,7 @@ function parseAdsData(data){
   data.trackingData.ad = utils._.isValidNonBlank(adsValues[2]) ? adsValues[2] : null
   data.trackingData.creative = adsValues[3]
   delete data.trackingData.ads
+  utils.l.d('trackingService::parseAdsData::After::',data)
 }
 
 function trackExistingUser(req, data, callback) {
