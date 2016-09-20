@@ -53,7 +53,8 @@ var UserSchema = new Schema({
     eventsLeft: {type: Number, default: 0},
     eventsFull: {type: Number, default: 0}
   },
-  mpDistinctId:String
+  mpDistinctId:String,
+  mpDistinctIdRefreshed:{type:Boolean, default:false}
 })
 
 UserSchema.index({'userName':1})

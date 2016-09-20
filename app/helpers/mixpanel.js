@@ -106,6 +106,13 @@ function setOnce(req) {
     })
 }
 
+function setUserAlias(req,data,callback){
+  var trackingData = data || {}
+  setReqAdata(req, trackingData)
+  setOnce(req)
+  mixpanel.alias(req.session.zuid,trackingData.distinct_id,callback)
+}
+
 function updateUserJoinDate(req, user) {
   mixpanel.people.set_once(req.session.zuid, {
     date_joined: user.date
@@ -184,6 +191,7 @@ function setReqAdata(req, trackData) {
 module.exports = {
   trackRequest: trackRequest,
   setUser: setUser,
+  setUserAlias:setUserAlias,
   updateUserJoinDate: updateUserJoinDate,
   updateUserSource: updateUserSource,
   trackEvent: trackEvent,

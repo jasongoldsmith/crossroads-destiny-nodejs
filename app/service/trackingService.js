@@ -76,14 +76,7 @@ function trackAppInstall(req, data, callback) {
 
   // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
   // We have to maintain this order as it is sent by fb and branch as a deep link
-  data.trackingData.ads = utils._.trim(data.trackingData.ads, '/')
-  var adsValues = data.trackingData.ads.split('/')
-  adsValues[3] = utils._.isValidNonBlank(adsValues[3]) ? adsValues[3].split('?')[0] : null
-  data.trackingData.source = utils._.isValidNonBlank(adsValues[0]) ? adsValues[0] : null
-  data.trackingData.campaign = utils._.isValidNonBlank(adsValues[1]) ? adsValues[1] : null
-  data.trackingData.ad = utils._.isValidNonBlank(adsValues[2]) ? adsValues[2] : null
-  data.trackingData.creative = adsValues[3]
-  delete data.trackingData.ads
+  parseAdsData(data)
 
   models.temporaryUser.find(req.adata.distinct_id, function (err, temporaryUser) {
     if(err) {
@@ -116,6 +109,23 @@ function trackAppInstall(req, data, callback) {
   })
 }
 
+function parseAdsData(data){
+  data.trackingData.ads = utils._.trim(data.trackingData.ads, '/')
+  var adsValues = data.trackingData.ads.split('/')
+  adsValues[3] = utils._.isValidNonBlank(adsValues[3]) ? adsValues[3].split('?')[0] : null
+  data.trackingData.source = utils._.isValidNonBlank(adsValues[0]) ? adsValues[0] : null
+  data.trackingData.campaign = utils._.isValidNonBlank(adsValues[1]) ? adsValues[1] : null
+  data.trackingData.ad = utils._.isValidNonBlank(adsValues[2]) ? adsValues[2] : null
+  data.trackingData.creative = adsValues[3]
+  delete data.trackingData.ads
+}
+
+function trackExistingUser(req, data, callback) {
+  parseAdsData(data)
+  helpers.m.setUserAlias(req,data.trackingData,callback)
+  helpers.m.updateUserSource(req, data.trackingData)
+}
+
 function trackEventSharing(user, data, callback) {
   utils.async.waterfall([
     function (callback) {
@@ -141,5 +151,6 @@ function trackEventSharing(user, data, callback) {
 
 module.exports = {
   trackData: trackData,
-  trackAppInstall:trackAppInstall
+  trackAppInstall:trackAppInstall,
+  trackExistingUser:trackExistingUser
 }

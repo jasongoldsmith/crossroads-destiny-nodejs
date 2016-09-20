@@ -119,15 +119,22 @@ module.exports = function (app, passport) {
       var timeDiff = utils.moment().utc().diff(req.user.lastActiveTime, 'minutes')
       //Set mixpanel distinct ID for users from old version
       var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
-      var updateMpDistinctId = utils._.isInvalidOrBlank(req.user.mpDistinctId) && utils._.isValidNonBlank(mpDistincId) ? true:false
+
+      var mpRefreshed = utils._.isValidNonBlank(req.user.mpDistinctIdRefreshed)? req.user.mpDistinctIdRefreshed: false
+      utils.l.d('1111:::::mpRefreshNeeded::::::::'+mpRefreshed)
+      mpRefreshed = utils._.isValidNonBlank(req.user.mpDistinctId) && mpRefreshed
+      utils.l.d('2222:::::mpRefreshNeeded::::::::'+mpRefreshed)
+      var updateMpDistinctId = (utils._.isInvalidOrBlank(req.user.mpDistinctId) || !mpRefreshed ) && utils._.isValidNonBlank(mpDistincId) ? true:false
 
       utils.l.d("expressStartup::timeDiff::"+timeDiff+"::lastActiveTime::"+req.user.lastActiveTime+"::userLastActiveUpdateInterval::"+userLastActiveUpdateInterval)
       utils.l.d("expressStartup::updateMpDistinctId::"+updateMpDistinctId+"::req.user.mpDistinctId::"+req.user.mpDistinctId+"::"+mpDistincId)
 
       if(timeDiff > userLastActiveUpdateInterval || utils._.isInvalidOrBlank(req.user.lastActiveTime) || updateMpDistinctId){
         var updateData = timeDiff > userLastActiveUpdateInterval || utils._.isInvalidOrBlank(req.user.lastActiveTime) ? {lastActiveTime: new Date(),notifStatus: []}:{}
-        if(updateMpDistinctId)
-          updateData.mpDistinctId =  mpDistincId
+        if(updateMpDistinctId) {
+          updateData.mpDistinctId = mpDistincId
+          updateData.mpDistinctIdRefreshed=true
+        }
         utils.l.d('updateData::',updateData)
         models.user.findByUserIdAndUpdate(req.user.id,updateData, function (err, user) {
           if (err)
@@ -140,7 +147,7 @@ module.exports = function (app, passport) {
             // We have to maintain this order as it is sent by fb and branch as a deep link
             utils._.extend(data.trackingData, utils.constants.existingUserInstallData)
 
-            service.trackingService.trackAppInstall(req, data, function (err, result) {
+            service.trackingService.trackExistingUser(req, data, function (err, result) {
             })
           }
           next();

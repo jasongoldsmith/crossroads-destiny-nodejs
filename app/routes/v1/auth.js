@@ -111,7 +111,8 @@ function createNewUser(req, bungieResponse, callback) {
   var userData = {
     passWord: passwordHash.generate(body.passWord),
     clanId: body.clanId,
-    mpDistinctId: req.adata.distinct_id
+    mpDistinctId: req.adata.distinct_id,
+    mpDistinctIdRefreshed:true
   }
 
   if(utils._.isValidNonBlank(bungieResponse)){
