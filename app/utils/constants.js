@@ -527,20 +527,26 @@ var bungieMessageTypes = {
 }
 
 var bungieMessages = {
-  accountVerification:'Thanks for signing up for %APPNAME%, Destiny Fireteam Finder! Click the link to verify your %CONSOLETYPE%. %URL% We aren\'t actively monitoring this mailbox so if you have any issues please email us at support@crossroadsapp.co, thank you!',
-  passwordReset:'Greetings from %APPNAME%! We received a request to reset your password. To reset your password please follow the link: %URL%. If you did not make this request, please let us know and disregard this message.',
-  addConsoleErrorMsg: "Oops! We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account. Make sure your profile is public and try again.",
-  bungieMembershipLookupError: "Looks like your #CONSOLE_TYPE# #CONSOLE_ID# isn't publicly linked to your Bungie account. Check Profile > Settings > Linked Accounts to make sure it's public and try again."
+  accountVerification:'Open the link to verify your %CONSOLETYPE% on Crossroads %URL%. ' +
+  'If you have any questions, please email us at support@crossroadsapp.co because this mailbox is unmonitored',
+  passWordReset: 'Hi, Guardian! We received a request to reset your password. Please follow the link: %URL%. ' +
+  'If you did not forget your password, please disregard this message.',
+  addConsoleErrorMsg: "Oops! We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account. " +
+  "Make sure your profile is public and try again.",
+  bungieMembershipLookupError: "Looks like your #CONSOLE_TYPE# #CONSOLE_ID# isn't publicly linked to your Bungie account. " +
+  "Check Profile > Settings > Linked Accounts to make sure it's public and try again."
 }
 
 var bungieErrorMessage= function(messageId) {
   console.log('bungieErrorMessage::messageId',messageId)
   switch (messageId) {
     case "UserCannotResolveCentralAccount":
-      return "We couldn't find a Bungie account linked to %GAMERID%. Please login to Bungie using your %CONSOLETYPE% to link your accounts before proceeding on Crossroads."
+      return "We couldn't find a Bungie account linked to %GAMERID%. " +
+        "Please login to Bungie using your %CONSOLETYPE% to link your accounts before proceeding on Crossroads."
       break
     case "NotParsableError":
-      return "We couldn't find a Bungie account linked to %GAMERID%. Please login to Bungie using your %CONSOLETYPE% to link your accounts before proceeding on Crossroads."
+      return "We couldn't find a Bungie account linked to %GAMERID%. " +
+        "Please login to Bungie using your %CONSOLETYPE% to link your accounts before proceeding on Crossroads."
       break
     case "DestinyInvalidClaimException" || "DestinyUnexpectedError" || "DestinyShardRelayClientTimeout":
       return "We are unable to contact Bungie.net. Please try again in a few minutes."
