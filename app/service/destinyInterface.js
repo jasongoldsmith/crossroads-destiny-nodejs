@@ -145,6 +145,8 @@ function getAccountDetails(bungieAcct,acctType,callback){
       }else{
         bungieAcctResponse.bungieNetUser = bungieAcct.Response.bungieNetUser
         bungieAcctResponse.destinyAccounts = bungieAcct.Response.destinyAccounts
+        bungieAcctResponse.clans=bungieAcct.Response.clans
+        bungieAcctResponse.relatedGroups=bungieAcct.Response.relatedGroups
       }
       break;
     default:
@@ -173,7 +175,7 @@ function getDestinyAccounts(accountDetail,callback){
   return callback(null,destinyAccounts)
 */
   utils.async.mapSeries(accountDetail.destinyAccounts, function(account,asyncCallback) {
-    getDestinyDetails(account,asyncCallback)
+    getDestinyDetails(account, accountDetail.clans, accountDetail.relatedGroups, asyncCallback)
   },function(err, destinyAccounts) {
     return callback(err, destinyAccounts)
   })
@@ -234,9 +236,9 @@ function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
 }
 
 
-function getDestinyDetails(account,callback){
+function getDestinyDetails(account, clans, relatedGroups,callback){
   var destinyUserInfo = {}
-  destinyUserInfo.clanTag= account.userInfo.clanTag
+  destinyUserInfo.clanTag= getClanTagFromGroups(account,clans,relatedGroups)
   destinyUserInfo.destinyMembershipId = account.userInfo.membershipId
   destinyUserInfo.destinyMembershipType = account.userInfo.membershipType
   destinyUserInfo.destinyDisplayName=account.userInfo.displayName
@@ -285,6 +287,21 @@ function getBungieHelmetByCharacter(destinyAccount,callback){
     }],
     callback)
 }
+
+function getClanTagFromGroups(account,clans,relatedGroups){
+  var clanTag = null
+  if(utils._.isValidNonBlank(clans)) {
+    utils._.map(clans, function (clanGroup) {
+      if (clanGroup.platformType == account.userInfo.membershipType) {
+        var group = utils._.get(relatedGroups,clanGroup.groupId)
+        if(utils._.isValidNonBlank(group))
+          clanTag = group.clanCallsign
+      }
+    })
+  }
+  return clanTag
+}
+
 /*Get bungienet profile
  * 1. Make destinySearch call for displayname
  * 2. Using the result from search take membershipType and call GetBungieAccount API to bungie membershipcode
