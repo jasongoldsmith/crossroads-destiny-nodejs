@@ -467,8 +467,8 @@ function getSignupMessage(user){
 function requestResetPassword(req,res){
   var useGamerTag = false
   var userName = req.body.userName
-  var consoleType = req.body.consoleType
-  var consoleId = req.body.consoleId
+  var consoleType = req.body.consoleType ? req.body.consoleType.toString().toUpperCase() : null
+  var consoleId = req.body.consoleId ? req.body.consoleId.toString().trim() : null
   utils.async.waterfall([
       function (callback) {
         utils.l.d("requestResetPassword::userName="+userName+",consoleType="+consoleType+",consoleId="+consoleId)
