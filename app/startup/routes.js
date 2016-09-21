@@ -56,6 +56,7 @@ module.exports = function (app, passport) {
   app.use('/api/v1/a/account', require('../routes/v1/a/account'))
   app.use('/api/v2/mixpanel', require('../routes/v1/a/mixPanelDataTracking'))
   app.use('/api/v1/a/mixpanel', require('../routes/v1/a/mixPanelDataTracking'))
+  app.use('/api/v1/config', require('../routes/v1/config'))
 
   /// catch 404 and forward to error handler
   app.use(function(req, res, next) {
