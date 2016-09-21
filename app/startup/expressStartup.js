@@ -109,6 +109,10 @@ module.exports = function (app, passport) {
   // connect flash for flash messages - should be declared after sessions
   app.use(flash());
 
+  app.use(middlewares.visitTracker());
+
+  app.use(middlewares.identifyUser());
+
   app.use('/api/v1/a', function(req, res, next) {
     //utils.l.i("req in /api/v1/a", {path: req.path, headers: req.headers, body: req.body, files:req.files});
     utils.l.d('expressStartup::')
@@ -159,8 +163,4 @@ module.exports = function (app, passport) {
     //}
 
   });
-  app.use(middlewares.visitTracker());
-
-  app.use(middlewares.identifyUser());
-
 };
