@@ -140,8 +140,7 @@ function getAccountDetails(bungieAcct,acctType,callback){
           errorType: "BungieError"}, null)
       }else if(utils._.isValidNonBlank(bungieAcct.Response.destinyAccountErrors) && bungieAcct.Response.destinyAccountErrors.length > 0){
           return callback({
-            error: "In line with Rise of Iron, we now only support next-gen consoles. " +
-            "When you’ve upgraded your console, please come back and join us!",
+            error: "In line with Rise of Iron, we now only support next-gen consoles. When you’ve upgraded your console, please come back and join us!",
             errorType: "BungieLegacyConsoleError"}, null)
       }else{
         bungieAcctResponse.bungieNetUser = bungieAcct.Response.bungieNetUser

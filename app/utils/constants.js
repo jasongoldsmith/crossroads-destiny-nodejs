@@ -527,14 +527,10 @@ var bungieMessageTypes = {
 }
 
 var bungieMessages = {
-  accountVerification:'Open the link to verify your %CONSOLETYPE% on Crossroads %URL%. ' +
-  'If you have any questions, please email us at support@crossroadsapp.co because this mailbox is unmonitored',
-  passWordReset: 'Hi, Guardian! We received a request to reset your password. Please follow the link: %URL%. ' +
-  'If you did not forget your password, please disregard this message.',
-  addConsoleErrorMsg: "Oops! We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account. " +
-  "Make sure your profile is public and try again.",
-  bungieMembershipLookupError: "Looks like your #CONSOLE_TYPE# #CONSOLE_ID# isn't publicly linked to your Bungie account. " +
-  "Check Profile > Settings > Linked Accounts to make sure it's public and try again."
+  accountVerification:'Open the link to verify your %CONSOLETYPE% on Crossroads %URL%. If you have any questions, please email us at support@crossroadsapp.co because this mailbox is unmonitored',
+  passwordReset: 'Hi, Guardian! We received a request to reset your password. Please follow the link: %URL%. If you did not forget your password, please disregard this message.',
+  addConsoleErrorMsg: "Oops! We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account. Make sure your profile is public and try again.",
+  bungieMembershipLookupError: "Looks like your #CONSOLE_TYPE# #CONSOLE_ID# isn't publicly linked to your Bungie account. Check Profile > Settings > Linked Accounts to make sure it's public and try again."
 }
 
 var bungieErrorMessage= function(messageId) {
