@@ -44,7 +44,7 @@ function trackData(req, callback) {
         return callback(err, null)
       } else {
         try {
-          data.trackingData.userId = req.session.zuid
+          data.trackingData.userId = req.zuid
           // appInstall is a special case where we just want to track it once and we do it in it's own method
           if(data.trackingKey != "appInstall") {
             helpers.m.trackRequest(key, data.trackingData, req, user)
@@ -72,7 +72,7 @@ function trackAppInstall(req, data, callback) {
     req.zuid = userId
     req.session.zuid = userId
   }
-  data.trackingData.userId = req.session.zuid
+  data.trackingData.userId = req.zuid
 
   // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
   // We have to maintain this order as it is sent by fb and branch as a deep link

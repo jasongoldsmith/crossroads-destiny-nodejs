@@ -282,6 +282,7 @@ function filterIfUserExistsForUid(uid, callback) {
 function getOrCreateUIDFromRequest(req, enforceNonExisting, callback) {
   if (req.isAuthenticated() && !enforceNonExisting) {
     utils.l.d("getOrCreateUIDFromRequest::is authenticated")
+    //req.session.zuid=req.user._id
     return callback(null, req.user.id) // If user exists and it authenticated return right away
   }
   utils.async.waterfall(

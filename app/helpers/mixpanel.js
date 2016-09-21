@@ -82,7 +82,7 @@ function setUser(req, data,callback) {
   utils.l.d('2222:mixpanelId::'+reqHelper.getHeader(req,'x-mixpanelid'))
   var trackingData = data || {}
   setReqAdata(req, trackingData)
-  mixpanel.people.set(req.session.zuid,
+  mixpanel.people.set(req.zuid,
     {
       events_created: 0,
       events_joined: 0,
@@ -96,31 +96,39 @@ function setUser(req, data,callback) {
       creative: trackingData.creative,
     })
   setOnce(req)
-  mixpanel.alias(req.session.zuid,trackingData.distinct_id,callback)
+  mixpanel.alias(req.zuid,trackingData.distinct_id,callback)
 }
 
 function setOnce(req) {
-  mixpanel.people.set_once(req.session.zuid,
+  mixpanel.people.set_once(req.zuid,
     {
       userFirstSeen: new Date().toISOString()
     })
 }
 
 function setUserAlias(req,data,callback){
+  utils.l.d("setUserAlias::zuid"+req.zuid+"::req.adata",req.adata)
   var trackingData = data || {}
+  mixpanel.people.set(req.zuid,
+    {
+      source: trackingData.source,
+      campaign: trackingData.campaign,
+      ad: trackingData.ad,
+      creative: trackingData.creative,
+    })
   setReqAdata(req, trackingData)
   setOnce(req)
-  mixpanel.alias(req.session.zuid,trackingData.distinct_id,callback)
+  mixpanel.alias(req.zuid,trackingData.distinct_id,callback)
 }
 
 function updateUserJoinDate(req, user) {
-  mixpanel.people.set_once(req.session.zuid, {
+  mixpanel.people.set_once(req.zuid, {
     date_joined: user.date
   })
 }
 
 function updateUserSource(req, trackingData) {
-  mixpanel.people.set(req.session.zuid,
+  mixpanel.people.set(req.zuid,
     {
       source: trackingData.source,
       campaign: trackingData.campaign,
@@ -164,11 +172,11 @@ function incrementEventsFull(user) {
 }
 
 function incrementAppInit(req) {
-  mixpanel.people.increment(req.session.zuid, "app_init")
+  mixpanel.people.increment(req.zuid, "app_init")
 }
 
 function incrementAppResume(req) {
-  mixpanel.people.increment(req.session.zuid, "app_resume")
+  mixpanel.people.increment(req.zuid, "app_resume")
 }
 
 function incrementEventsLeft(user) {
