@@ -143,8 +143,6 @@ function trackEvent(event) {
   }
 
   mixpanel.track(event.eType.aType + ", " + event.eType.aSubType, event)
-  incrementEventsCreated(event.creator)
-  incrementEventsJoined(event.creator)
 }
 
 function incrementEventsCreated(user) {
