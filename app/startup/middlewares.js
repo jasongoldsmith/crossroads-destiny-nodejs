@@ -146,6 +146,7 @@ function handleIdentifyUser(req, next) {
       utils.l.d('*************************************  trace zuid.5 ' + req.uid + ' ' + req.zuid)
       req.zuid = uid
       utils.l.d('*************************************  trace zuid.6 ' + req.uid + ' ' + req.zuid)
+      utils.l.d('req.cookie',req.cookies)
       next()
     }
   )
