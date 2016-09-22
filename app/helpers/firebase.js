@@ -91,16 +91,14 @@ function updateUser(user) {
 }
 
 function getEventObj(event) {
-  // delete does not work on a mongoose object unless we convert it to a JSON object
-  var eventObj = null
-  try{
-    eventObj = event.toObject()
-  }catch(exp){
-    eventObj = event
+  /*
+  We do not need to send the entire event objec to firebase
+  The client just needs to know something changed in the event
+  As they call the getFeed API on event change
+   */
+  return {
+    updated: utils.moment(event.updated).unix()
   }
-  delete eventObj._id
-  delete eventObj.__v
-  return eventObj
 }
 
 function getUserObj(user) {
