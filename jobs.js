@@ -66,7 +66,15 @@ function deleteOldFullEventsHandler() {
         utils.l.d("job archiving event: ", event)
         models.archiveEvent.createArchiveEvent(event, callback)
         utils.l.d("job removing event: ", event)
-        event.remove(callback)
+        event.remove(function (err, deletedEvent) {
+          if(err) {
+            utils.l.s("There was an issue in deleting this event", err)
+            return callback(err, null)
+          } else {
+            helpers.firebase.createEventV2(event, null, true)
+            return callback(null, deletedEvent)
+          }
+        })
       })
     }
   ],
@@ -92,10 +100,18 @@ function deleteOldStaleEvents() {
             utils.l.d("job archiving event: ", event)
             models.archiveEvent.createArchiveEvent(event, callback)
             utils.l.d("job removing event: ", event)
-            event.remove(callback)
+            event.remove(function (err, deletedEvent) {
+              if(err) {
+                utils.l.s("There was an issue in deleting this event", err)
+                return callback(err, null)
+              } else {
+                helpers.firebase.createEventV2(event, null, true)
+                return callback(null, deletedEvent)
+              }
+            })
           }
         })
-      },
+      }
     ],
     function (err, event) {
       if (err) {
