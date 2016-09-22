@@ -571,13 +571,14 @@ function home(req,res){
 function checkBungieAccount(req, res) {
   utils.l.d("consoleId:: " + req.body.consoleId + ", consoleType:: " + req.body.consoleType)
   utils.l.d("checkBungieAccount", req.body)
+  req.body.consoleId = utils._.isValidNonBlank(req.body.consoleId)?req.body.consoleId.trim():req.body.consoleId
   utils.async.waterfall([
     function(callback) {
       models.user.getByQuery({
         consoles: {
           $elemMatch: {
             consoleType: req.body.consoleType,
-            consoleId: { $regex : new RegExp(req.body.consoleId, "i") }
+            consoleId: {$regex : new RegExp(["^", req.body.consoleId, "$"].join(""), "i")}
           }
         }
       }, utils.firstInArrayCallback(callback))

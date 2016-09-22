@@ -132,13 +132,18 @@ function getAccountDetails(bungieAcct,acctType,callback){
           errorType: "BungieError"}, null)
       else
         bungieAcctResponse.destinyAccounts=bungieAcct.Response.destinyAccounts
+        bungieAcctResponse.clans=bungieAcct.Response.clans
+        bungieAcctResponse.relatedGroups=bungieAcct.Response.relatedGroups
       break
     case "all":
       if(utils._.isInvalidOrBlank(bungieAcct.Response.bungieNetUser)){
         return callback({
           error: "Your public Bungie profile is not displaying your linked gaming account. Please set it to public and try again.",
           errorType: "BungieError"}, null)
-      }else if(utils._.isValidNonBlank(bungieAcct.Response.destinyAccountErrors) && bungieAcct.Response.destinyAccountErrors.length > 0){
+      }else if((utils._.isValidNonBlank(bungieAcct.Response.destinyAccountErrors) && bungieAcct.Response.destinyAccountErrors.length > 0)
+        && (utils._.isInvalidOrBlank(bungieAcct.Response.destinyAccounts) || bungieAcct.Response.destinyAccounts.length <=0)
+      )
+      {
           return callback({
             error: "In line with Rise of Iron, we now only support next-gen consoles. When you’ve upgraded your console, please come back and join us!",
             errorType: "BungieLegacyConsoleError"}, null)
@@ -181,13 +186,15 @@ function getDestinyAccounts(accountDetail,callback){
   })
 }
 
-function getClanTag(accountDetail,destinyProfile){
+function getClanTag(accountDetail, clans, relatedGroups,destinyProfile){
   var clanTag = null
   if(!utils._.isInvalidOrBlank(accountDetail.destinyAccounts)) {
     utils._.map(accountDetail.destinyAccounts, function(account){
       utils.l.d('getClanTag::account.userInfo.membershipId',account.userInfo.membershipId)
-      if(account.userInfo.membershipId.toString() == destinyProfile.memberShipId.toString())
-        clanTag= account.clanTag
+      if(account.userInfo.membershipId.toString() == destinyProfile.memberShipId.toString()) {
+       utils.l.d("getClanTag::"+account.userInfo.membershipId.toString()+"::clans::"+JSON.stringify(clans,null,'  ')+"::relatedGroups"+JSON.stringify(clans,null,'  '))
+        clanTag = getClanTagFromGroups(account, clans, relatedGroups)
+      }
     })
   }
   return clanTag
@@ -208,7 +215,7 @@ function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
     },function(bungieAcct,callback){
       getAccountDetails(bungieAcct,'destinyAccounts',callback)
     },function(accountDetails,callback){
-      clanTag = getClanTag(accountDetails, destinyProfile)
+      clanTag = getClanTag(accountDetails, accountDetails.clans, accountDetails.relatedGroups,destinyProfile)
       utils.l.d("clanTag",clanTag)
       var character = getRecentlyPlayedCharacter(accountDetails.destinyAccounts, destinyProfile.memberShipId)
       utils.l.d("recent character",character)
