@@ -8,7 +8,7 @@ var reportSchema = new Schema({
 	reportDetails: { type : String, required : true },
 	resolveReason: { type : String},
 	reportType: { type: String, enum: ['issue', 'comment'], default: 'issue'},
-	reporter: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+	reporter: { type: Schema.Types.ObjectId, ref: 'User' },
 	createdDate: { type: Date, default: Date.now },
 	resolvedDate: { type: Date }
 })
