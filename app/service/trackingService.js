@@ -129,8 +129,9 @@ function parseAdsData(data){
 
 function trackExistingUser(req, data, callback) {
   parseAdsData(data)
-  helpers.m.setUserAlias(req,data.trackingData,callback)
+  helpers.m.setUserAlias(req, data.trackingData, callback)
   helpers.m.updateUserSource(req, data.trackingData)
+  helpers.m.setOrUpdateUserVerifiedStatus(req.user)
 }
 
 function trackEventSharing(user, data, callback) {
