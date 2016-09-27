@@ -106,7 +106,7 @@ function setOnce(req) {
     })
 }
 
-function setUserAlias(req,data,callback){
+function setUserAlias(req, data, callback) {
   utils.l.d("setUserAlias::zuid"+req.zuid+"::req.adata",req.adata)
   var trackingData = data || {}
   mixpanel.people.set(req.zuid,
@@ -118,12 +118,18 @@ function setUserAlias(req,data,callback){
     })
   setReqAdata(req, trackingData)
   setOnce(req)
-  mixpanel.alias(req.zuid,trackingData.distinct_id,callback)
+  mixpanel.alias(req.zuid, trackingData.distinct_id, callback)
 }
 
-function updateUserJoinDate(req, user) {
-  mixpanel.people.set_once(req.zuid, {
+function updateUserJoinDate(user) {
+  mixpanel.people.set_once(user._id, {
     date_joined: user.date
+  })
+}
+
+function setOrUpdateUserVerifiedStatus(user) {
+  mixpanel.people.set(user._id, {
+    verifyStatus: user.verifyStatus
   })
 }
 
@@ -138,34 +144,18 @@ function updateUserSource(req, trackingData) {
 }
 
 function trackEvent(event) {
-  if(utils._.isInvalidOrBlank(event.creator.mpDistinctId)){
-    return
-  }
-
   mixpanel.track(event.eType.aType + ", " + event.eType.aSubType, event)
 }
 
 function incrementEventsCreated(user) {
-  if(utils._.isInvalidOrBlank(user.mpDistinctId)){
-    return
-  }
-
   mixpanel.people.increment(user._id, "events_created")
 }
 
 function incrementEventsJoined(user) {
-  if(utils._.isInvalidOrBlank(user.mpDistinctId)){
-    return
-  }
-
   mixpanel.people.increment(user._id, "events_joined")
 }
 
 function incrementEventsFull(user) {
-  if(utils._.isInvalidOrBlank(user.mpDistinctId)){
-    return
-  }
-
   mixpanel.people.increment(user._id, "events_full")
 }
 
@@ -178,10 +168,6 @@ function incrementAppResume(req) {
 }
 
 function incrementEventsLeft(user) {
-  if(utils._.isInvalidOrBlank(user.mpDistinctId)){
-    return
-  }
-
   mixpanel.people.increment(user._id.toString(), "events_left")
 }
 
@@ -199,6 +185,7 @@ module.exports = {
   setUser: setUser,
   setUserAlias:setUserAlias,
   updateUserJoinDate: updateUserJoinDate,
+  setOrUpdateUserVerifiedStatus: setOrUpdateUserVerifiedStatus,
   updateUserSource: updateUserSource,
   trackEvent: trackEvent,
   incrementEventsCreated: incrementEventsCreated,

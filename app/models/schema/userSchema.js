@@ -10,32 +10,32 @@ var acctVerifyEnum = {
 
 var UserSchema = new Schema({
   name: String,
-  profileUrl : String,
+  profileUrl: String,
   userName: {type: String},
   date: {type: Date, required: true},
   passWord: {type: String, required: true},
-  uniqueID : String,
-  verifyStatus:String,
-  verifyToken:String,
+  uniqueID: String,
+  verifyStatus: acctVerifyEnum,
+  verifyToken: String,
   consoles: [{
     consoleType: consoleTypeEnum,
-    consoleId: {type: String},
+    consoleId: String,
     verifyStatus: acctVerifyEnum,
-    verifyToken: {type: String},
+    verifyToken: String,
     clanTag: String,
     destinyMembershipId: String,
     imageUrl: String,
     isPrimary: {type: Boolean, default: false}
   }],
   clanId: {type: String, default: "clan_id_not_set"},
-  clanName: {type: String},
-  clanImageUrl: {type:String},
+  clanName: String,
+  clanImageUrl: String,
   imageUrl: String,
   uDate: Date,
   signupDate: Date,
   flags: Mixed,
-  bungieMemberShipId:{type: String},
-  passwordResetToken:{type: String},
+  bungieMemberShipId: String,
+  passwordResetToken: String,
   groups:[{type: Mixed}],
   lastActiveTime: Date,
   isLoggedIn: {type: Boolean, default: true},
@@ -45,7 +45,7 @@ var UserSchema = new Schema({
   hasReachedMaxReportedComments: {type: Boolean, default: false},
   legal: {
     termsVersion: {type: String, default: "0.0"},
-    privacyVersion: {type: String,default: "0.0"}
+    privacyVersion: {type: String, default: "0.0"}
   },
   stats: {
     eventsCreated: {type: Number, default: 0},
@@ -53,14 +53,14 @@ var UserSchema = new Schema({
     eventsLeft: {type: Number, default: 0},
     eventsFull: {type: Number, default: 0}
   },
-  mpDistinctId:String,
-  mpDistinctIdRefreshed:{type:Boolean, default:false}
+  mpDistinctId: String,
+  mpDistinctIdRefreshed: {type: Boolean, default: false}
 })
 
-UserSchema.index({'userName':1})
-UserSchema.index({'consoles.consoleId':1})
-UserSchema.index({'consoles.verifyToken':1})
-UserSchema.index({'verifyToken':1})
+UserSchema.index({'userName': 1})
+UserSchema.index({'consoles.consoleId': 1})
+UserSchema.index({'consoles.verifyToken': 1})
+UserSchema.index({'verifyToken': 1})
 UserSchema.index({'date': 1})
 UserSchema.index({"groups.groupId": 1})
 

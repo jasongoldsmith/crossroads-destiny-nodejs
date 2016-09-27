@@ -152,7 +152,8 @@ function createNewUser(req, bungieResponse, callback) {
         return callback(err, null)
       } else {
         helpers.firebase.createUser(user)
-        helpers.m.updateUserJoinDate(req, user)
+        helpers.m.updateUserJoinDate(user)
+        helpers.m.setOrUpdateUserVerifiedStatus(user)
         return callback(null, user)
       }
     }
@@ -294,7 +295,7 @@ function signup(req, res) {
       }
       helpers.firebase.createUser(user)
       helpers.cookies.setCookie("foo", "bar", res)
-      helpers.m.updateUserJoinDate(req, user)
+      helpers.m.updateUserJoinDate(user)
       return routeUtils.handleAPISuccess(req, res,
         {
           value: service.userService.setLegalAttributes(user),
@@ -342,11 +343,17 @@ function verifyConfirm(req,res){
           //if(console.verifyToken == token)
           console.verifyStatus ="VERIFIED"
         })
-        models.user.save(user,function(err,updatedUser){
-          callback(null, utils.config.accountVerificationSuccess)
+        models.user.save(user,function(err, updatedUser) {
+          if(err) {
+            utils.l.s("There was an error in saving the user", err)
+            return callback(err, null)
+          } else {
+            helpers.m.setOrUpdateUserVerifiedStatus(updatedUser)
+            return callback(null, utils.config.accountVerificationSuccess)
+          }
         })
-      }else{
-        callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.",null)
+      } else {
+        return callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.", null)
       }
     }],
     function (err, successResp){
