@@ -44,7 +44,7 @@ module.exports = function (passport, config) {
           consoles: {
             $elemMatch: {
               consoleType: body.consoles.consoleType,
-              consoleId: {$regex : new RegExp(["^", consoleId, "$"].join(""), "i")}
+              consoleId: {$regex : new RegExp(["^", consoleId, "$"].join("")), $options:"ix"}
             }
           }
         },
