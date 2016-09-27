@@ -59,7 +59,7 @@ function trackData(req, callback) {
 
 function trackPushNotification(data, callback) {
   if(utils._.isInvalidOrBlank(data.trackingData.notificationName)) {
-    return callback({error: "notification name cannot be null for notification tracking"}, null)
+    return callback(null, 'genericNotification')
   } else {
     return callback(null, data.trackingData.notificationName)
   }

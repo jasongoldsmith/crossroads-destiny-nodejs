@@ -339,6 +339,7 @@ function updateUserStatsForFullEvent(event) {
       models.user.getById(player._id.toString(), function (err, user) {
         updateUserStats(user, "eventsFull")
         helpers.m.incrementEventsFull(user)
+        helpers.m.trackRequest("eventFull", {"distinct_id":user.mpDistinctId,eventId:event._id}, null, user)
         return callback(null, user)
       })
     },
@@ -368,6 +369,16 @@ function updateUserStats(user, eventAction) {
 function clearCommentsByUser(user,callback){
   models.event.clearCommentsByUser(user,callback)
 }
+
+function publishFullEventListing(event,req){
+
+  if(utils._.isValidNonBlank(req.user) &&
+    utils._.findIndex(event.players,{"_id":req.user._id}) >=0
+    && event.status.toString() == "full"){
+    helpers.m.trackRequest("viewFullEvent", {"distinct_id":req.user.mpDistinctId,eventId:event._id}, req, req.user)
+  }
+}
+
 module.exports = {
   createEvent: createEvent,
   joinEvent: joinEvent,
@@ -377,5 +388,6 @@ module.exports = {
   expireEvents: expireEvents,
   addComment: addComment,
   reportComment: reportComment,
-  clearCommentsByUser:clearCommentsByUser
+  clearCommentsByUser:clearCommentsByUser,
+  publishFullEventListing:publishFullEventListing
 }

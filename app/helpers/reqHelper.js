@@ -41,7 +41,7 @@ function handleFirstVErrorWrapper(req) {
 
 function getHeader(req,headerKey){
   var value = null
-  if (utils._.isValidNonBlank(req.headers[headerKey])) {
+  if (utils._.isValidNonBlank(req) && utils._.isValidNonBlank(req.headers[headerKey])) {
     value = req.headers[headerKey]
   }
   utils.l.d('got header for key['+headerKey+']',value)

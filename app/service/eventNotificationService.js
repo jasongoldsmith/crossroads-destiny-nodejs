@@ -148,14 +148,17 @@ function getRecipients(recipientType, event, clanId, consoleType, callback) {
 function getClanMembers(event, clanId, consoleType, callback) {
 	var clanId = event ? event.clanId : clanId
 	var consoleType = event ? event.consoleType : consoleType
-
-	models.user.getUserIdsByQuery(
-		{
-			'groups': {'$elemMatch': { 'groupId': clanId, 'muteNotification': false}},
-			'consoles.consoleType': consoleType
-		},
-		callback
-	)
+	if(clanId == utils.constants.freelanceBungieGroup.groupId){
+		return callback(null,[])
+	}else {
+		models.user.getUserIdsByQuery(
+				{
+					'groups': {'$elemMatch': {'groupId': clanId, 'muteNotification': false}},
+					'consoles.consoleType': consoleType
+				},
+				callback
+		)
+	}
 }
 
 function removeEventPlayersFromClan(clanPlayers, eventPlayers) {

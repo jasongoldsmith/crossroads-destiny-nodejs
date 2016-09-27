@@ -20,7 +20,7 @@ function create(req, res) {
 				helpers.firebase.updateEvent(event, req.user)
 				helpers.m.incrementEventsJoined(req.user)
 			}
-			routeUtils.handleAPISuccess(req, res, event)
+			routeUtils.handleAPISuccess(req, res, event,{eventId:event._id})
 		}
 	})
 }
@@ -39,7 +39,7 @@ function join(req, res) {
 				helpers.m.incrementEventsJoined(player)
 			}
 			helpers.firebase.updateEvent(event, req.user)
-			routeUtils.handleAPISuccess(req, res, event)
+			routeUtils.handleAPISuccess(req, res, event,{eventId:event._id})
 		}
 	})
 }
@@ -74,8 +74,11 @@ function listById(req, res) {
 		} else {
 			if(!event){
 				err = { error: "Sorry, looks like that event is no longer available."}
-				routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listById"})
-			}else routeUtils.handleAPISuccess(req, res, event, {utm_dnt:"listById"})
+				routeUtils.handleAPIError(req, res, err, err)
+			}else {
+				service.eventService.publishFullEventListing(event,req)
+				routeUtils.handleAPISuccess(req, res, event, {eventId: event._id})
+			}
 		}
 	})
 }
@@ -89,7 +92,7 @@ function leave(req, res) {
 		} else {
 			//Send just event id if the event is deleted for backward compatibility
 			event  = utils._.isValidNonBlank(event) && event.deleted ? {_id : req.body.eId}:event
-			routeUtils.handleAPISuccess(req, res, event)
+			routeUtils.handleAPISuccess(req, res, event,{eventId:event._id})
 		}
 	})
 }
