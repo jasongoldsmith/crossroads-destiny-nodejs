@@ -10,7 +10,8 @@ var reportSchema = new Schema({
 	reportType: { type: String, enum: ['issue', 'comment'], default: 'issue'},
 	reporter: { type: Schema.Types.ObjectId, ref: 'User' },
 	createdDate: { type: Date, default: Date.now },
-	resolvedDate: { type: Date }
+	resolvedDate: { type: Date },
+	reportAdditionalInfo:[{type: Schema.Types.Mixed}]
 })
 
 reportSchema.index({'reportStatus': 1})
