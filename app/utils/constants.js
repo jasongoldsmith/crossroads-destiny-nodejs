@@ -514,10 +514,10 @@ var newGenConsoleType = {
   1:"XBOXONE"
 }
 var consoleGenericsId = {
-  PSN:"PlayStation ID",
+  PSN:"PlayStation Gamertag",
   XBOX:"Xbox Gamertag",
-  PS3:"PlayStation ID",
-  PS4:"PlayStation ID",
+  PS3:"PlayStation Gamertag",
+  PS4:"PlayStation Gamertag",
   XBOX360:"Xbox Gamertag",
   XBOXONE:"Xbox Gamertag"
 }
