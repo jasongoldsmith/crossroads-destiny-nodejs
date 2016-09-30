@@ -223,9 +223,7 @@ function reportComment(user, data, callback) {
     },
     function(event, callback){
       if(utils._.isInvalidOrBlank(event)) {
-        return callback({ error:"Event was not found" }, null)
-      } else if(!utils.IsUserPartOfTheEvent(user, event)) {
-        return callback({error: "You are not allowed to comment because you are not part of this event" }, null)
+        return callback({error: "Event was not found"}, null)
       } else {
         handleUserCommentReports(user, event, callback)
       }
