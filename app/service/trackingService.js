@@ -149,8 +149,10 @@ function needMPIdfresh(req,user){
 
 function trackUserLogin(req, user,updateMpDistinctId,existingMPUserId, callback) {
   if(updateMpDistinctId) {
-    helpers.m.removeUser(existingMPUserId,callback)
-    utils.l.d('removing existingMPUserId',existingMPUserId)
+    if(user._id.toString() != existingMPUserId.toString()) {
+      helpers.m.removeUser(existingMPUserId, callback)
+      utils.l.d('removing existingMPUserId', existingMPUserId)
+    }
     var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
     utils.l.d('3333....creating tracking data for new user::mpDistincId::'+mpDistincId+"::zuid",req.zuid)
     var data = {trackingData: {}}
