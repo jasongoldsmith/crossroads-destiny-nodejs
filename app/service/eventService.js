@@ -339,7 +339,7 @@ function updateUserStatsForFullEvent(event) {
       models.user.getById(player._id.toString(), function (err, user) {
         updateUserStats(user, "eventsFull")
         helpers.m.incrementEventsFull(user)
-        helpers.m.trackRequest("eventFull", {"distinct_id":user.mpDistinctId,eventId:event._id}, null, user)
+        helpers.m.trackRequest("eventFull", {"distinct_id":user._id,eventId:event._id}, null, user)
         return callback(null, user)
       })
     },
@@ -375,7 +375,7 @@ function publishFullEventListing(event,req){
   if(utils._.isValidNonBlank(req.user) &&
     utils._.findIndex(event.players,{"_id":req.user._id}) >=0
     && event.status.toString() == "full"){
-    helpers.m.trackRequest("viewFullEvent", {"distinct_id":req.user.mpDistinctId,eventId:event._id}, req, req.user)
+    helpers.m.trackRequest("viewFullEvent", {"distinct_id":req.user.id,eventId:event._id}, req, req.user)
   }
 }
 

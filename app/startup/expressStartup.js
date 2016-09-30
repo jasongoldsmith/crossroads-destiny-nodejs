@@ -146,7 +146,7 @@ module.exports = function (app, passport) {
           if(updateMpDistinctId) {
             var data = {trackingData: {}}
             data.trackingData.userId = req.user.id
-            data.trackingData.distinct_id = mpDistincId
+            data.trackingData.distinct_id = req.user.id
             // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
             // We have to maintain this order as it is sent by fb and branch as a deep link
             utils._.extend(data.trackingData, utils.constants.existingUserInstallData)

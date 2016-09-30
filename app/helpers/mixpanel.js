@@ -96,7 +96,8 @@ function setUser(req, data,callback) {
       creative: trackingData.creative,
     })
   setOnce(req)
-  mixpanel.alias(req.zuid,trackingData.distinct_id,callback)
+  return callback(null,null)
+ // mixpanel.alias(req.zuid,trackingData.distinct_id,callback)
 }
 
 function setOnce(req) {
@@ -106,8 +107,15 @@ function setOnce(req) {
     })
 }
 
-function setUserAlias(req, data, callback) {
-  utils.l.d("setUserAlias::zuid"+req.zuid+"::req.adata",req.adata)
+function removeUser(mpUserId){
+  utils.l.d('11111....removing existingMPUserId',mpUserId)
+  mixpanel.people.delete_user(mpUserId)
+  utils.l.d('22222....removing existingMPUserId',mpUserId)
+}
+
+function setUserAliasAndSource(req, data, callback) {
+  var mpDistinctId = reqHelper.getHeader(req,'x-mixpanelid')
+  utils.l.d("setUserAlias::zuid"+req.zuid+"::mpDistinctId::"+ mpDistinctId+"::req.adata",req.adata)
   var trackingData = data || {}
   mixpanel.people.set(req.zuid,
     {
@@ -118,9 +126,18 @@ function setUserAlias(req, data, callback) {
     })
   setReqAdata(req, trackingData)
   setOnce(req)
-  mixpanel.alias(req.zuid, trackingData.distinct_id, callback)
+  mixpanel.alias(req.zuid, mpDistinctId, function(err,data){
+    utils.l.d("==============created mixpanel alias:err",err)
+    utils.l.d("==============created mixpanel alias:data",data)
+    return callback(err,data)
+  })
 }
 
+function setUserAlias(req, callback) {
+  var mpDistinctId = reqHelper.getHeader(req,'x-mixpanelid')
+  utils.l.d("setUserAlias::zuid"+req.zuid+"::mpDistinctId::"+ mpDistinctId+"::req.adata",req.adata)
+  mixpanel.alias(req.zuid, mpDistinctId, callback)
+}
 function updateUserJoinDate(user) {
   mixpanel.people.set_once(user._id, {
     date_joined: user.date
@@ -183,6 +200,7 @@ function setReqAdata(req, trackData) {
 module.exports = {
   trackRequest: trackRequest,
   setUser: setUser,
+  setUserAliasAndSource:setUserAliasAndSource,
   setUserAlias:setUserAlias,
   updateUserJoinDate: updateUserJoinDate,
   setOrUpdateUserVerifiedStatus: setOrUpdateUserVerifiedStatus,
@@ -193,5 +211,6 @@ module.exports = {
   incrementEventsFull: incrementEventsFull,
   incrementEventsLeft: incrementEventsLeft,
   incrementAppInit: incrementAppInit,
-  incrementAppResume: incrementAppResume
+  incrementAppResume: incrementAppResume,
+  removeUser:removeUser
 }

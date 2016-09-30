@@ -46,10 +46,42 @@ function login (req, res) {
             user.verifyStatus = primaryConsole.verifyStatus
             user.verifyToken = primaryConsole.verifyToken
           }
+
           service.authService.addLegalAttributes(user, function(err, data){
              outerUser = data
           })
-          models.user.save(user, callback)
+
+          var updateMpDistinctId = service.trackingService.needMPIdfresh(req,user)
+          var existingUserZuid = req.zuid
+          if(updateMpDistinctId){// An existing user logging for first time after installing the app. Create mp user
+            req.zuid = user._id
+            req.adata.distinct_id=user._id
+            service.trackingService.trackUserLogin(req,user,updateMpDistinctId,existingUserZuid,function(err,data){
+              utils.l.d('*********************auth:111::err',err)
+              utils.l.d('*********************auth:111::data',data)
+              if(!err){
+                utils.l.d('setting mp refresh data')
+                var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
+                user.mpDistinctId = mpDistincId
+                user.mpDistinctIdRefreshed=true
+              }
+              utils.l.d("***************Saving user:::::",user)
+              models.user.save(user, callback)
+            })
+          }else {// An existing user logging in either as a result of log out or app calling login when launched.
+            utils.l.d("***************else::Saving user:::::", user)
+            req.zuid = user._id
+            req.adata.distinct_id=user._id
+            if(existingUserZuid.toString() != user._id.toString()){
+              //app calling due to log out then zuid and user._id are different.
+              // With logout cookie is cleared and next api call will issue new zuid
+              // Fire appInit and remove mp user created due to new session id.
+              helpers.m.removeUser(existingUserZuid)
+              helpers.m.incrementAppInit(req)
+              helpers.m.trackRequest("appInit", {}, req, user)
+            }
+            models.user.save(user, callback)
+          }
         })
       }
       ,reqLoginWrapper(req, "auth.login")
@@ -108,10 +140,11 @@ function createNewUser(req, bungieResponse, callback) {
     return({error: "We do not support old generation consoles anymore. " +
     "Please try again once you have upgraded to a new generation console"}, null)
   }
+  var mpDistinctId = helpers.req.getHeader(req,'x-mixpanelid')
   var userData = {
     passWord: passwordHash.generate(body.passWord),
     clanId: body.clanId,
-    mpDistinctId: req.adata.distinct_id,
+    mpDistinctId: mpDistinctId,
     mpDistinctIdRefreshed:true
   }
 
@@ -152,8 +185,7 @@ function createNewUser(req, bungieResponse, callback) {
         return callback(err, null)
       } else {
         helpers.firebase.createUser(user)
-        helpers.m.updateUserJoinDate(user)
-        helpers.m.setOrUpdateUserVerifiedStatus(user)
+        service.trackingService.trackUserSignup(req,user,callback)
         return callback(null, user)
       }
     }
@@ -295,7 +327,7 @@ function verifyConfirm(req,res){
       if(err) routeUtils.handleAPIError(req,res,err,err)
       else {
         helpers.firebase.updateUser(userObj)
-        helpers.m.trackRequest("AccountVerifyConfirm_SUCC", {"distinct_id":userObj.mpDistinctId}, req, userObj)
+        helpers.m.trackRequest("AccountVerifyConfirm_SUCC", {"distinct_id":userObj._id}, req, userObj)
         res.render("account/verifyConfirm",{appName:utils.config.appName})
       }
     })

@@ -90,7 +90,7 @@ function handleHeaders(req, res) {
   appendFromHeader(req, data, 'x-forwarded-for', 'userip', getUserIp(req))
   appendFromHeader(req, data, 'x-request-id', 'herokuRequestId', null)
   appendFromHeader(req, data, 'x-request-start', 'herokuTime', utils.m.moment().unix().toString())
-  appendFromHeader(req, data, 'x-mixpanelid', 'distinct_id', null)
+  //appendFromHeader(req, data, 'x-mixpanelid', 'distinct_id', null)
   appendFromHeader(req, data, '$app_build_number','$app_build_number',null)
   appendFromHeader(req, data, '$app_version_string','$app_version_string',null)
   appendFromHeader(req, data, '$app_version_string','$app_version',null)
@@ -109,6 +109,8 @@ function handleHeaders(req, res) {
   appendFromHeader(req, data, '$has_nfc','$has_nfc',null)
   appendFromHeader(req, data, '$brand','$brand',null)
   appendFromHeader(req, data, '$google_play_services','$google_play_services',null)
+
+  data.distinct_id = req.zuid
 
   helpers.req.appendToAdata(req, data)
   var useragent = req.headers['user-agent']

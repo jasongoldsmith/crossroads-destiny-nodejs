@@ -78,7 +78,8 @@ function trackAppInstall(req, data, callback) {
   // We have to maintain this order as it is sent by fb and branch as a deep link
   parseAdsData(data)
   utils.l.d('trackingService::trackAppInstall::req.adata',req.adata)
-  models.temporaryUser.find(req.adata.distinct_id, function (err, temporaryUser) {
+  var mpDistinctId = helpers.req.getHeader(req,'x-mixpanelid')
+  models.temporaryUser.find(mpDistinctId, function (err, temporaryUser) {
     utils.l.d('trackingService::trackAppInstall::findTemporaryUser',data)
     if(err) {
       return callback(err, null)
@@ -87,7 +88,7 @@ function trackAppInstall(req, data, callback) {
       utils.async.series([
         function(callback){
           var temporaryUser = {
-            mpDistinctId: req.adata.distinct_id,
+            mpDistinctId: mpDistinctId,
             source: data.trackingData.source
           }
           models.temporaryUser.create(temporaryUser, callback)
@@ -129,9 +130,52 @@ function parseAdsData(data){
 
 function trackExistingUser(req, data, callback) {
   parseAdsData(data)
-  helpers.m.setUserAlias(req, data.trackingData, callback)
+  helpers.m.setUserAliasAndSource(req, data.trackingData, callback)
   helpers.m.updateUserSource(req, data.trackingData)
   helpers.m.setOrUpdateUserVerifiedStatus(req.user)
+}
+
+function needMPIdfresh(req,user){
+  var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
+  var mpRefreshed = utils._.isValidNonBlank(user.mpDistinctIdRefreshed)? user.mpDistinctIdRefreshed: false
+  utils.l.d('needMPIdfresh::1111:::::mpRefreshNeeded::::::::'+mpRefreshed)
+  mpRefreshed = utils._.isValidNonBlank(user.mpDistinctId) && mpRefreshed
+  utils.l.d('needMPIdfresh::2222:::::mpRefreshNeeded::::::::'+mpRefreshed)
+
+  var updateMpDistinctId = (utils._.isInvalidOrBlank(user.mpDistinctId) || !mpRefreshed ) && utils._.isValidNonBlank(mpDistincId) ? true:false
+  utils.l.d('needMPIdfresh::333:::::updateMpDistinctId::::::::'+mpRefreshed)
+  return updateMpDistinctId
+}
+
+function trackUserLogin(req, user,updateMpDistinctId,existingMPUserId, callback) {
+  if(updateMpDistinctId) {
+    helpers.m.removeUser(existingMPUserId,callback)
+    utils.l.d('removing existingMPUserId',existingMPUserId)
+    var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
+    utils.l.d('3333....creating tracking data for new user::mpDistincId::'+mpDistincId+"::zuid",req.zuid)
+    var data = {trackingData: {}}
+    data.trackingData.userId = user._id
+    data.trackingData.distinct_id = user._id
+    // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
+    // We have to maintain this order as it is sent by fb and branch as a deep link
+    utils._.extend(data.trackingData, utils.constants.existingUserInstallData)
+
+    parseAdsData(data)
+    helpers.m.setUserAliasAndSource(req, data.trackingData, callback)
+    helpers.m.incrementAppInit(req)
+    helpers.m.updateUserSource(req, data.trackingData)
+    helpers.m.setOrUpdateUserVerifiedStatus(user)
+  }else{
+    return callback(null,null)
+  }
+}
+
+function trackUserSignup(req, user, callback) {
+    // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
+    // We have to maintain this order as it is sent by fb and branch as a deep link
+  helpers.m.setUserAlias(req, callback)
+  helpers.m.updateUserJoinDate(user)
+  helpers.m.setOrUpdateUserVerifiedStatus(user)
 }
 
 function trackEventSharing(user, data, callback) {
@@ -160,5 +204,8 @@ function trackEventSharing(user, data, callback) {
 module.exports = {
   trackData: trackData,
   trackAppInstall:trackAppInstall,
-  trackExistingUser:trackExistingUser
+  trackExistingUser:trackExistingUser,
+  needMPIdfresh:needMPIdfresh,
+  trackUserLogin:trackUserLogin,
+  trackUserSignup:trackUserSignup
 }

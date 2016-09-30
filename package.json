@@ -38,7 +38,7 @@
     "livereload-js": "2.2.2",
     "lodash": "4.11.2",
     "method-override": "2.3.3",
-    "mixpanel": "0.4.0",
+    "mixpanel": "0.5.0",
     "moment": "2.10.3",
     "moment-timezone": "0.4.0",
     "mongoose": "4.0.7",
