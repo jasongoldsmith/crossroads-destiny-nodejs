@@ -552,7 +552,7 @@ function checkBungieAccount(req, res) {
         consoles: {
           $elemMatch: {
             consoleType: req.body.consoleType,
-            consoleId: {$regex : new RegExp(["^", consoleId, "$"].join("")), $options:"ix"}
+            consoleId: {$regex : new RegExp(["^", req.body.consoleId, "$"].join("")), $options:"ix"}
           }
         }
       }, utils.firstInArrayCallback(callback))
