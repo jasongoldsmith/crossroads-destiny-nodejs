@@ -111,7 +111,6 @@ function handleAPIResponse(req, res, responseCode, responseType, data, trackingD
       handleAPISuccessMessageToUser(req, data);
       handleAPIErrorMessageToUser(req, data);
       track(req, responseType, trackingData, user);
-      data = utils.updateS3Domain(data);
       data.httpStatusCode = responseCode;
       res.status(responseCode).json(data);
     });
