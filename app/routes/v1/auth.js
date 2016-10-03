@@ -284,7 +284,8 @@ function verifyAccount(req,res){
         consoleId: primaryConsole.consoleId,
         consoleType: utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType),
         appName:utils.config.appName,
-        userName:user.userName
+        userName:user.userName,
+        verifyStatus: utils._.isValidNonBlank(user.verifyStatus) ? user.verifyStatus: user.consoles[0].verifyStatus
       })
     }else{
       res.render("account/error")
