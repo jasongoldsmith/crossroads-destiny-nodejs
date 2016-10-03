@@ -2,6 +2,7 @@ var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
+var reportService = require('./reportService')
 
 function clearEventsForPlayer(user, launchStatus, consoleType, callback){
 
@@ -222,11 +223,34 @@ function reportComment(user, data, callback) {
     function(callback) {
       models.event.getById(data.eId, callback)
     },
-    function(event, callback){
+    function(event, callback) {
+      var formDetails = data.formDetails
+      if(formDetails) {
+        var reportDetails = {
+          reporter: user._id,
+          reporterEmail: formDetails.reporterEmail,
+          reportDetails: formDetails.reportDetails,
+          reportAdditionalInfo: formDetails.reportAdditionalInfo
+        }
+        reportService.createReport(reportDetails, function (err, report) {
+          if(err) {
+            utils.l.s("There was a problem is creating a report", err)
+            return callback(null, event, false)
+          } else {
+            utils.l.s("Report was created successfully for this comment", formDetails)
+            return callback(null, event, true)
+          }
+        })
+      } else {
+        utils.l.d("No formDetails field found")
+        return callback(null, event, false)
+      }
+    },
+    function(event, isFormFilled, callback){
       if(utils._.isInvalidOrBlank(event)) {
         return callback({error: "Event was not found"}, null)
       } else {
-        handleUserCommentReports(user, event, callback)
+        handleUserCommentReports(user, event, isFormFilled, callback)
       }
     },
     function(event, callback) {
@@ -262,7 +286,7 @@ function reportComment(user, data, callback) {
     })
 }
 
-function handleUserCommentReports(user, event, callback) {
+function handleUserCommentReports(user, event, isFormFilled, callback) {
   utils.async.waterfall([
     function(callback) {
       var keys = [
@@ -281,9 +305,11 @@ function handleUserCommentReports(user, event, callback) {
         return value.key.toString() == utils.constants.sysConfigKeys.commentsReportMaxValue.toString()
       })
 
-      if(user.commentsReported < parseInt(maxAllowedComments.value)) {
+      if(isFormFilled) {
+        user.commentsReported = 1
+        user.hasReachedMaxReportedComments = false
+      } else if(user.commentsReported < parseInt(maxAllowedComments.value)) {
         user.commentsReported++
-        user.lastCommentReportedTime = Date.now()
         user.hasReachedMaxReportedComments = false
       } else {
         var lastCommentReportedTime = utils.moment(user.lastCommentReportedTime).utc()
@@ -296,15 +322,14 @@ function handleUserCommentReports(user, event, callback) {
 
         if(timeDiff > parseInt(coolingOffPeriod.value)) {
           user.commentsReported = 1
-          user.lastCommentReportedTime = Date.now()
           user.hasReachedMaxReportedComments = false
         } else {
           user.commentsReported++
-          user.lastCommentReportedTime = Date.now()
           user.hasReachedMaxReportedComments = true
         }
       }
 
+      user.lastCommentReportedTime = Date.now()
       models.user.save(user, function(err, user) {
         if(err) {
           utils.l.d("There was a problem in saving the user", user)

@@ -26,7 +26,7 @@ function create(req, res) {
 }
 
 function join(req, res) {
-	utils.l.i("Event join request: " + JSON.stringify(req.body))
+	utils.l.d("Event join request: " + JSON.stringify(req.body))
 	service.eventService.joinEvent(req.user, req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -45,7 +45,7 @@ function join(req, res) {
 }
 
 function list(req, res) {
-	utils.l.i("Event list request")
+	utils.l.d("Event list request")
 	listEvents(req.user, req.param('consoleType'), function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"list"})
@@ -56,7 +56,7 @@ function list(req, res) {
 }
 
 function listAll(req, res) {
-	utils.l.i("Event listAll request")
+	utils.l.d("Event listAll request")
 	models.event.getByQuery({}, null, function(err, events) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listAll"})
@@ -67,7 +67,7 @@ function listAll(req, res) {
 }
 
 function listById(req, res) {
-	utils.l.i("Get event by id request" + JSON.stringify(req.body))
+	utils.l.d("Get event by id request" + JSON.stringify(req.body))
 	listEventById(req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listById"})
@@ -84,7 +84,7 @@ function listById(req, res) {
 }
 
 function leave(req, res) {
-	utils.l.i("Event leave request: " + JSON.stringify(req.body))
+	utils.l.d("Event leave request: " + JSON.stringify(req.body))
 
 	service.eventService.leaveEvent(req.user, req.body, function(err, event) {
 		if (err) {
@@ -98,7 +98,7 @@ function leave(req, res) {
 }
 
 function remove(req, res) {
-	utils.l.i("Event delete request")
+	utils.l.d("Event delete request")
 	deleteEvent(req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -140,6 +140,7 @@ function clearEventsForPlayer(req, res) {
 }
 
 function addComment(req, res) {
+	utils.l.d("Add comment request: " + JSON.stringify(req.body))
 	service.eventService.addComment(req.user, req.body, function (err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)
@@ -150,6 +151,10 @@ function addComment(req, res) {
 }
 
 function reportComment(req, res) {
+	utils.l.d("Report comment request: " + JSON.stringify(req.body))
+	if(req.body.formDetails) {
+		req.assert('formDetails.reportDetails', "Report details cannot be empty").notEmpty()
+	}
 	service.eventService.reportComment(req.user, req.body, function (err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err)

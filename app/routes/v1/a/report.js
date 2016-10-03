@@ -5,15 +5,15 @@ var service = require('../../../service/index')
 var utils = require('../../../utils/index')
 
 function createReport(req, res) {
-    utils.l.i("Event create request: " + JSON.stringify(req.body))
+    utils.l.i("Report create request: " + JSON.stringify(req.body))
     req.assert('reportDetails', "Report details cannot be empty").notEmpty()
     req.assert('reporter', "Reporter - User of the person reporting cannot be empty").notEmpty()
 
-    service.reportService.createReport(req.body, function(err, event) {
+    service.reportService.createReport(req.body, function(err, report) {
         if (err) {
             routeUtils.handleAPIError(req, res, err, err)
         } else {
-            routeUtils.handleAPISuccess(req, res, event)
+            routeUtils.handleAPISuccess(req, res, report)
         }
     })
 }
@@ -29,11 +29,11 @@ function resolveReport(req,res){
 }
 
 function listReport(req,res){
-    service.reportService.listReport(req.param("status"), function(err, event) {
+    service.reportService.listReport(req.param("status"), function(err, reportList) {
         if (err) {
             routeUtils.handleAPIError(req, res, err, err)
         } else {
-            routeUtils.handleAPISuccess(req, res, event)
+            routeUtils.handleAPISuccess(req, res, reportList)
         }
     })
 }
