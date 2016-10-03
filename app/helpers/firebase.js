@@ -15,6 +15,7 @@ var firebaseRef = Firebase.database().ref()
 
 var eventsRef = firebaseRef.child("events")
 var usersRef = firebaseRef.child("users")
+var commentsRef = firebaseRef.child("comments")
 
 function createEvent(event, user){
   createEventV2(event,user,false)
@@ -67,6 +68,17 @@ function updateEventV2(event, user,useEventClan) {
   })
 }
 
+function updateComment(event){
+  var eventCommentRef = commentsRef.child(event._id.toString())
+  eventCommentRef.set({updated: utils.moment(event.updated).unix()}, function (error) {
+    if (error) {
+      utils.l.d("Comment update failed in firebase", utils.l.eventLog(event))
+    } else {
+      utils.l.d("Comment was updated successfully in firebase", utils.l.eventLog(event))
+    }
+  })
+}
+
 function createUser(user) {
   var id = user._id.toString()
   var userObj = getUserObj(user)
@@ -114,5 +126,6 @@ module.exports = {
   createEventV2: createEventV2,
   updateEventV2: updateEventV2,
   createUser: createUser,
-  updateUser: updateUser
+  updateUser: updateUser,
+  updateComment:updateComment
 }

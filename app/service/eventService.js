@@ -211,6 +211,7 @@ function addComment(user, data, callback) {
         }
         models.notificationQueue.addToQueue(event._id, notificationInformation, "addComment")
         helpers.firebase.updateEventV2(event, user, true)
+        helpers.firebase.updateComment(event)
         return callback(null, event)
       }
     })
@@ -255,6 +256,7 @@ function reportComment(user, data, callback) {
         utils.l.d("comment was successfully reported", data.text)
         utils.l.eventLog(event)
         helpers.firebase.updateEventV2(event, user, true)
+        helpers.firebase.updateComment(event)
         return callback(null, event)
       }
     })
