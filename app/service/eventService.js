@@ -230,7 +230,10 @@ function reportComment(user, data, callback) {
           reporter: user._id,
           reporterEmail: formDetails.reporterEmail,
           reportDetails: formDetails.reportDetails,
-          reportAdditionalInfo: formDetails.reportAdditionalInfo
+          reportAdditionalInfo: {
+            eId: data.eId,
+            commentId: data.commentId
+          }
         }
         reportService.createReport(reportDetails, function (err, report) {
           if(err) {
