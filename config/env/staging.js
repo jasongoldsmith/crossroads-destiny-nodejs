@@ -12,5 +12,6 @@ module.exports = {
   enableBungieIntegration: true,
   logLevel: 'debug',
   devMode: true,
-  enableNewRelic:true
+  enableNewRelic:true,
+  disableEnvetUpdateForComments: process.env.DISABLE_EVENT_UPDATE_COMMENTS || false
 }

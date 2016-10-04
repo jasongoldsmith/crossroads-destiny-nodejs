@@ -6,5 +6,5 @@ module.exports = {
   showErrorStacktrace: true,
   sendEmail: true,
   logLevel: 'debug',
-  enableBungieIntegration: true,
+  enableBungieIntegration: true
 }

@@ -12,5 +12,6 @@ module.exports = {
   awsProfileImageUrl: "http://feighty-images.s3.amazonaws.com/",
   enableBungieIntegration: true,
   logLevel: 'info',
-  enableNewRelic:process.env.enableNewRelic || true
+  enableNewRelic:process.env.enableNewRelic || true,
+  disableEnvetUpdateForComments: process.env.DISABLE_EVENT_UPDATE_COMMENTS || false
 };

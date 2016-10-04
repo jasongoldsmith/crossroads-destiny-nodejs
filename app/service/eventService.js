@@ -211,7 +211,8 @@ function addComment(user, data, callback) {
           comment: createCommentTextForPush(user, event, data.text)
         }
         models.notificationQueue.addToQueue(event._id, notificationInformation, "addComment")
-        helpers.firebase.updateEventV2(event, user, true)
+        if(!utils.config.disableEnvetUpdateForComments)
+          helpers.firebase.updateEventV2(event, user, true)
         helpers.firebase.updateComment(event)
         return callback(null, event)
       }
@@ -282,7 +283,8 @@ function reportComment(user, data, callback) {
       } else {
         utils.l.d("comment was successfully reported", data.text)
         utils.l.eventLog(event)
-        helpers.firebase.updateEventV2(event, user, true)
+        if(!utils.config.disableEnvetUpdateForComments)
+          helpers.firebase.updateEventV2(event, user, true)
         helpers.firebase.updateComment(event)
         return callback(null, event)
       }

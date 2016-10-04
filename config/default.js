@@ -99,7 +99,8 @@ var defaults = {
   eventExpiryInterval:-40,
   userTimeoutInterval:-20,
   preUserTimeoutInterval:-5,
-  userLastActiveUpdateInterval:2
+  userLastActiveUpdateInterval:2,
+  disableEnvetUpdateForComments: process.env.DISABLE_EVENT_UPDATE_COMMENTS || true
 };
 
 /**
