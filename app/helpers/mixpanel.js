@@ -150,6 +150,12 @@ function setOrUpdateUserVerifiedStatus(user) {
   })
 }
 
+function setOrUpdateUserVerifiedStatusFromConsole(user) {
+  mixpanel.people.set(user._id, {
+    verifyStatus: user.consoles[0].verifyStatus
+  })
+}
+
 function updateUserSource(req, trackingData) {
   mixpanel.people.set(req.zuid,
     {
@@ -204,6 +210,7 @@ module.exports = {
   setUserAlias:setUserAlias,
   updateUserJoinDate: updateUserJoinDate,
   setOrUpdateUserVerifiedStatus: setOrUpdateUserVerifiedStatus,
+  setOrUpdateUserVerifiedStatusFromConsole: setOrUpdateUserVerifiedStatusFromConsole,
   updateUserSource: updateUserSource,
   trackEvent: trackEvent,
   incrementEventsCreated: incrementEventsCreated,

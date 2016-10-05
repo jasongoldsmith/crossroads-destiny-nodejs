@@ -3,6 +3,7 @@ var models = require('../models')
 var helpers = require('../helpers')
 var destinyInerface = require('./destinyInterface')
 var userService =  require('./userService')
+
 function handlUpdateHelmet(user, callback) {
   var newHelmetURL = null
   utils.async.waterfall([
@@ -44,17 +45,19 @@ function refreshHelmentAndConsoles(user,callback){
   ], callback)
 }
 
-function bulkUpdateHelmet(page, limit){
+function bulkUpdateHelmet(page, limit) {
   utils.async.waterfall([
-    function(callback){
-      models.user.findUsersPaginated({"consoles.verifyStatus":"VERIFIED"},page,limit,callback)
-    },function(userList,callback){
-      utils._.map(userList,function(user){
-        handlUpdateHelmet(user,callback)
+    function(callback) {
+      models.user.findUsersPaginated({"consoles.verifyStatus" : "VERIFIED"} ,page ,limit, callback)
+    },
+    function(userList, callback) {
+      utils._.map(userList, function(user) {
+        handlUpdateHelmet(user, callback)
       })
     }
-  ],function(err,data){
-    utils.l.d('Completed processing page::'+page)
+  ],
+    function(err ,data) {
+      utils.l.d('Completed processing page::' + page)
   })
 
 /*
@@ -72,8 +75,24 @@ function bulkUpdateHelmet(page, limit){
 */
 }
 
+function bulkUpdateVerifiedStatusMixPanel(page, limit) {
+  utils.async.waterfall([
+    function(callback) {
+      models.user.findUsersPaginated({}, page, limit, callback)
+    },function(userList, callback) {
+      utils._.map(userList, function(user) {
+        helpers.m.setOrUpdateUserVerifiedStatusFromConsole(user)
+        return callback(null, user)
+      })
+    }
+  ],function(err, data) {
+    utils.l.d('Completed processing page for bulkUpdateVerifiedStatus::' + page)
+  })
+}
+
 module.exports = {
   handlUpdateHelmet: handlUpdateHelmet,
   bulkUpdateHelmet:bulkUpdateHelmet,
-  refreshHelmentAndConsoles:refreshHelmentAndConsoles
+  refreshHelmentAndConsoles: refreshHelmentAndConsoles,
+  bulkUpdateVerifiedStatusMixPanel: bulkUpdateVerifiedStatusMixPanel
 }

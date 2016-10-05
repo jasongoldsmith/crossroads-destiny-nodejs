@@ -326,8 +326,8 @@ function constructFindUserQuery(username, consoleId) {
   return query
 }
 
-function findUsersPaginated(query,offset,limit,callback){
-  User.find(query).skip(offset).limit(limit).exec(callback);
+function findUsersPaginated(query, pageNumber, limit, callback) {
+  User.find(query).skip(pageNumber > 0 ? ((pageNumber) * limit) : 0).limit(limit).exec(callback)
 }
 
 function findUserCount(query,callback){
