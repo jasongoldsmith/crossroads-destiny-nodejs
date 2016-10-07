@@ -324,11 +324,13 @@ function handleUserCommentReports(user, event, isFormFilled, callback) {
         var coolingOffPeriod = utils._.find(commentsReportFrequency, function (value) {
           return value.key.toString() == utils.constants.sysConfigKeys.commentsReportCoolingOffPeriod.toString()
         })
-
+        utils.l.d('1111*********lastCommentReportedTime::'+lastCommentReportedTime+"::currentTIme::"+currentTIme+"::timeDiff::"+timeDiff+"::coolingOffPeriod::"+coolingOffPeriod)
         if(timeDiff > parseInt(coolingOffPeriod.value)) {
+          utils.l.d('2222*********lastCommentReportedTime::'+lastCommentReportedTime+"::currentTIme::"+currentTIme+"::timeDiff::"+timeDiff+"::coolingOffPeriod::"+coolingOffPeriod)
           user.commentsReported = 1
           user.hasReachedMaxReportedComments = false
         } else {
+          utils.l.d('3333*********lastCommentReportedTime::'+lastCommentReportedTime+"::currentTIme::"+currentTIme+"::timeDiff::"+timeDiff+"::coolingOffPeriod::"+coolingOffPeriod)
           user.commentsReported++
           user.hasReachedMaxReportedComments = true
         }
