@@ -453,7 +453,7 @@ function requestResetPassword(req,res){
             consoles: {
               $elemMatch: {
                 consoleType: consoleType,
-                consoleId:{$regex : new RegExp(["^", consoleId, "$"].join("")), $options:"ix"}
+                consoleId:{$regex : new RegExp(["^", consoleId, "$"].join("")), $options:"i"}
               }
             }
           }, callback)
@@ -553,7 +553,7 @@ function checkBungieAccount(req, res) {
         consoles: {
           $elemMatch: {
             consoleType: req.body.consoleType,
-            consoleId: {$regex : new RegExp(["^", req.body.consoleId, "$"].join("")), $options:"ix"}
+            consoleId: {$regex : new RegExp(["^", req.body.consoleId, "$"].join("")), $options:"i"}
           }
         }
       }, utils.firstInArrayCallback(callback))
