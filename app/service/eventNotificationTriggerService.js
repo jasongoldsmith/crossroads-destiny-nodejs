@@ -290,7 +290,7 @@ function handleAddComment(event, notifTrigger, playerList, comment, callback) {
     if(event.players.length > 1) {
       utils.async.map(notifTrigger.notifications,
         utils._.partial(createNotificationAndSend, event, playerList, comment))
-      utils.l.d('event in add comemnt notification::',event)
+      utils.l.d('event in add comment notification::',event)
       event.notifStatus.push("AddComment")
       models.event.update(event, callback)
     } else {
@@ -298,6 +298,20 @@ function handleAddComment(event, notifTrigger, playerList, comment, callback) {
     }
   } else {
     return callback(null, {message: "handleAddComment Trigger is not active"})
+  }
+}
+
+function handleCreatorChange(event, notifTrigger, playerList, callback) {
+  utils.l.d("Running trigger for creator change", utils.l.eventLog(event))
+  if(notifTrigger.isActive) {
+    if(event.status == "full") {
+      utils.async.map(notifTrigger.notifications,
+        utils._.partial(createNotificationAndSend, event, playerList, null))
+      utils.l.d('event in creator change notification::', event)
+      return callback(null, event)
+    } else {
+      return callback(null, {message : "handleCreatorChange Trigger is not active"})
+    }
   }
 }
 
@@ -414,6 +428,7 @@ module.exports ={
   handleJoinEvent: handleJoinEvent,
   handleLeaveEvent: handleLeaveEvent,
   handleAddComment: handleAddComment,
+  handleCreatorChange: handleCreatorChange,
   createNotificationAndSend: createNotificationAndSend,
   sendMultipleEventNotifications: sendMultipleEventNotifications
 }

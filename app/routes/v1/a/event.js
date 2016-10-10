@@ -208,6 +208,7 @@ function listEventById(data, callback) {
 							eventObj.creator = eventObj.players[0]
 							event.creator = eventObj.players[0]
 							event.players = eventObj.players
+							models.notificationQueue.addToQueue(event._id, null, "creatorChange")
 							models.event.update(event, function(err, updatedEvent) {
 								if(err) {
 									utils.l.s("There was an error in updating the event", err)

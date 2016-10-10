@@ -72,9 +72,27 @@ function sendPushNotificationForAddComment(event, playerList, comment) {
 	})
 }
 
+function sendPushNotificationForCreatorChange(event, playerList) {
+	utils.async.waterfall([
+		function (callback) {
+			models.notificationTrigger.getByQuery({triggerName: "CreatorChange"}, utils.firstInArrayCallback(callback))
+		},
+		function (notificationTrigger, callback) {
+			notificationTriggerService.handleCreatorChange(event, notificationTrigger, playerList, callback)
+		}
+	], function (err, updatedEvent) {
+		if (err) {
+			utils.l.s("Error in sendPushNotificationForCreatorChange::"+err+"::"+JSON.stringify(updatedEvent))
+		} else {
+			utils.l.d("sendPushNotificationForCreatorChange successful::", updatedEvent)
+		}
+	})
+}
+
 module.exports ={
 	sendPushNotificationForNewCreate: sendPushNotificationForNewCreate,
 	sendPushNotificationForJoin: sendPushNotificationForJoin,
 	sendPushNotificationForLeave: sendPushNotificationForLeave,
-	sendPushNotificationForAddComment: sendPushNotificationForAddComment
+	sendPushNotificationForAddComment: sendPushNotificationForAddComment,
+	sendPushNotificationForCreatorChange: sendPushNotificationForCreatorChange
 }
