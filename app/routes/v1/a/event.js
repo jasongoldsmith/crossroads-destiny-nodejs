@@ -118,7 +118,19 @@ function listEvents(user, consoleType, callback) {
 	if(utils._.isInvalidOrBlank(consoleType)) {
 		consoleType = utils.primaryConsole(user).consoleType
 	}
-	models.event.getByQuery({clanId: user.clanId, consoleType: consoleType}, null, callback)
+	models.event.getByQuery({clanId: user.clanId, consoleType: consoleType,
+		$or: [
+			{status: {$ne: "full"}},
+			{players: user._id}
+		]
+	}, null, function(err, eventList) {
+		if(err) {
+			utils.l.s("There was an error in listEvent", err)
+			return callback({error: "Something went wrong. Please try again in a few minutes"}, null)
+		} else {
+			return callback(null, eventList)
+		}
+	})
 }
 
 function listEventById(data, callback) {
