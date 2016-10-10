@@ -134,7 +134,94 @@ function listEvents(user, consoleType, callback) {
 }
 
 function listEventById(data, callback) {
-	models.event.getById(data.id, callback)
+	utils.async.waterfall([
+		function(callback) {
+			var defaultUserActiveTimeOutInMins = 10
+			models.sysConfig.getSysConfig(utils.constants.sysConfigKeys.userActiveTimeOutInMins, function (err, userActiveTimeOutInMins) {
+				if(err || !userActiveTimeOutInMins) {
+					utils.l.s("There was a problem in getting userActiveTimeInMins from sysconfig table", err)
+					return callback(null, defaultUserActiveTimeOutInMins)
+				} else {
+					return callback(null, userActiveTimeOutInMins.value)
+				}
+			})
+		},
+		function(userActiveTimeOutInMins, callback) {
+			models.event.getById(data.id, function (err, event) {
+				if(err) {
+					utils.l.s("There was an error in listEventById", err)
+					return callback({error: "Something went wrong. Please try again."}, null)
+				} else {
+					// We need to convert a mongo object to a plain object to add new fields (isActive)
+					var eventObj = event.toObject()
+
+					// We need to only add new fields and decide the creator for "full" events
+					if(eventObj.status == "full") {
+						var activeCutOffTime = utils.moment().subtract(userActiveTimeOutInMins, 'minutes')
+
+						// Decide isActive for creator
+						if(eventObj.creator.lastActiveTime < activeCutOffTime) {
+							eventObj.creator.isActive = false
+						} else {
+							eventObj.creator.isActive = true
+						}
+
+						/*
+						 * Decide isActive for event players
+						 * We need a inactive player count to know if all players are inactive
+						 */
+						var areAllInactive = false
+						var inactivePlayersCount = 0
+						utils._.forEach(eventObj.players, function(player) {
+							if(player.lastActiveTime < activeCutOffTime) {
+								player.isActive = false
+								inactivePlayersCount++
+							} else {
+								player.isActive = true
+							}
+						})
+
+						if(inactivePlayersCount == eventObj.players.length) {
+							areAllInactive = true
+						}
+
+						/*
+						 * Remove creator from the list if it's active or if everyone is inactive
+						 * We don't want to sort the creator in that case
+						 */
+						var creator = null
+						if(eventObj.creator.isActive || areAllInactive) {
+							creator = utils._.remove(eventObj.players, function(player) {
+								if (player._id.toString() == eventObj.creator._id.toString()) {
+									utils.l.d("player found")
+									return player
+								}
+							})
+						}
+
+						eventObj.players = utils._.orderBy(eventObj.players, ['lastActiveTime'], ['desc'])
+
+						// If creator is not null add it back to the list else we have a new creator
+						if(creator) {
+							eventObj.players.unshift(creator[0])
+						} else {
+							eventObj.creator = eventObj.players[0]
+							event.creator = eventObj.players[0]
+							event.players = eventObj.players
+							models.event.update(event, function(err, updatedEvent) {
+								if(err) {
+									utils.l.s("There was an error in updating the event", err)
+								} else {
+									utils.l.eventLog("Event was updated successfully", updatedEvent)
+								}
+							})
+						}
+					}
+					return callback(null, eventObj)
+				}
+			})
+		}
+	], callback)
 }
 
 function deleteEvent(data, callback) {
