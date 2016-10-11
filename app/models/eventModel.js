@@ -73,7 +73,7 @@ function update(event, callback) {
 		if (err) {
 			return callback(err, null)
 		} else {
-			Event.findOne({_id: data._id}, callback)
+			getByQuery({_id: data._id}, null, utils.firstInArrayCallback(callback))
 		}
 	})
 }

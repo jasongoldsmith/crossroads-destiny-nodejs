@@ -42,7 +42,7 @@ function createEvent(user, data, callback) {
           updateUserStats(user, "eventsJoined")
           updateUserStatsForFullEvent(event)
         }
-        return callback(null, event)
+        handleCreatorChangeForFullCurrentEvent(event, callback)
       }
     ], callback)
 }
@@ -64,7 +64,7 @@ function joinEvent(user, data, callback) {
         models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
         updateUserStats(user, "eventsJoined")
         updateUserStatsForFullEvent(event)
-        return callback(null, event)
+        handleCreatorChangeForFullCurrentEvent(event, callback)
       }
     ], callback)
 }
@@ -478,6 +478,81 @@ function handleDuplicateCurrentEvent(event, callback) {
         })
     }
   ], callback)
+}
+
+function handleCreatorChangeForFullCurrentEvent(event, callback) {
+  if(event.status == "full" && event.launchStatus == "now") {
+    utils.async.waterfall([
+
+      function (callback) {
+        var defaultUserActiveTimeOutInMins = 10
+        models.sysConfig.getSysConfig(utils.constants.sysConfigKeys.userActiveTimeOutInMins, function (err, userActiveTimeOutInMins) {
+          if(err || !userActiveTimeOutInMins) {
+            utils.l.s("There was a problem in getting userActiveTimeInMins from sysconfig table", err)
+            return callback(null, defaultUserActiveTimeOutInMins)
+          } else {
+            utils.l.d("Got userActiveTimeOutInMins from db", userActiveTimeOutInMins.value)
+            return callback(null, userActiveTimeOutInMins.value)
+          }
+        })
+      },
+
+      function (userActiveTimeOutInMins, callback) {
+        // We need to convert a mongo object to a plain object to add new fields (isActive)
+        var eventObj = event.toObject()
+
+        // We need to only add new fields and decide the creator for "full" events
+          var activeCutOffTime = utils.moment().subtract(userActiveTimeOutInMins, 'minutes')
+
+        // Decide isActive for creator
+        if(eventObj.creator.lastActiveTime < activeCutOffTime) {
+          eventObj.creator.isActive = false
+        } else {
+          eventObj.creator.isActive = true
+        }
+
+        // Decide isActive for event players
+        utils._.forEach(eventObj.players, function(player) {
+          if(player.lastActiveTime < activeCutOffTime) {
+            player.isActive = false
+          } else {
+            player.isActive = true
+          }
+        })
+
+        var areAllInactive = utils._.every(eventObj.players, ['isActive', false])
+
+        // If creator is inactive and someone in the event is active then change creator
+        if(!eventObj.creator.isActive && !areAllInactive) {
+          var activePlayers = utils._.remove(eventObj.players, 'isActive')
+          event.creator = activePlayers[0]._id
+          // We need to realign the players list based on the new creator
+          event.players = []
+          utils._.forEach(activePlayers, function(player) {
+            event.players.push(player._id)
+          })
+          utils._.forEach(eventObj.players, function(player) {
+            event.players.push(player._id)
+          })
+
+          models.event.update(event, function (err, updatedEvent) {
+            if(err || !updatedEvent) {
+              utils.l.s("There was a problem in updating the event", err)
+              return callback(null, event)
+            } else {
+              models.notificationQueue.addToQueue(event._id, null, "creatorChange")
+              return callback(null, updatedEvent)
+            }
+          })
+        } else {
+          return callback(null, event)
+        }
+      }
+    ], callback)
+  } else {
+    utils.l.d("This event does not need a leader yet")
+    return callback(null, event)
+  }
 }
 
 module.exports = {
