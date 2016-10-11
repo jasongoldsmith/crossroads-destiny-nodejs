@@ -4,7 +4,7 @@ var Mixed = Schema.Types.Mixed
 var consoleTypeEnum = {type: String, enum: ['PS4','XBOX360','XBOXONE','PS3']}
 var acctVerifyEnum = {
   type: String,
-  enum: ['VERIFIED','INITIATED','FAILED_INITIATION','NOT_INITIATED'],
+  enum: ['VERIFIED','INITIATED','FAILED_INITIATION','NOT_INITIATED', 'INVITED', 'INVALID_GAMERTAG'],
   default: "NOT_INITIATED"
 }
 
