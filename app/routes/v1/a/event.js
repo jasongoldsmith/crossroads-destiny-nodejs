@@ -62,7 +62,7 @@ function listAll(req, res) {
 
 function listById(req, res) {
 	utils.l.d("Get event by id request" + JSON.stringify(req.body))
-	listEventById(req.body, function(err, event) {
+	service.eventService.listEventById(req.body, function(err, event) {
 		if (err) {
 			routeUtils.handleAPIError(req, res, err, err, {utm_dnt:"listById"})
 		} else {
@@ -125,48 +125,6 @@ function listEvents(user, consoleType, callback) {
 			return callback(null, eventList)
 		}
 	})
-}
-
-function listEventById(data, callback) {
-	utils.async.waterfall([
-		function(callback) {
-			var defaultUserActiveTimeOutInMins = 10
-			models.sysConfig.getSysConfig(utils.constants.sysConfigKeys.userActiveTimeOutInMins, function (err, userActiveTimeOutInMins) {
-				if(err || !userActiveTimeOutInMins) {
-					utils.l.s("There was a problem in getting userActiveTimeInMins from sysconfig table", err)
-					return callback(null, defaultUserActiveTimeOutInMins)
-				} else {
-					return callback(null, userActiveTimeOutInMins.value)
-				}
-			})
-		},
-		function(userActiveTimeOutInMins, callback) {
-			models.event.getById(data.id, function (err, event) {
-				if(err) {
-					utils.l.s("There was an error in listEventById", err)
-					return callback({error: "Something went wrong. Please try again."}, null)
-				} else {
-					// We need to convert a mongo object to a plain object to add new fields (isActive)
-					var eventObj = event.toObject()
-
-					// We need to only add new fields and decide the creator for "full" events
-					if(eventObj.status == "full" && eventObj.launchStatus == "now") {
-						var activeCutOffTime = utils.moment().subtract(userActiveTimeOutInMins, 'minutes')
-
-						// Decide isActive for event players
-						utils._.forEach(eventObj.players, function(player) {
-							if(player.lastActiveTime < activeCutOffTime) {
-								player.isActive = false
-							} else {
-								player.isActive = true
-							}
-						})
-					}
-					return callback(null, eventObj)
-				}
-			})
-		}
-	], callback)
 }
 
 function deleteEvent(data, callback) {
