@@ -424,7 +424,7 @@ function handleDuplicateCurrentEvent(event, callback) {
       }
       var query = {
         _id: {$nin: [event._id]},
-        eId: event.eId,
+        eType: event.eType._id,
         clanId: event.clanId,
         consoleType: event.consoleType,
         launchStatus: utils.constants.eventLaunchStatusList.now
