@@ -597,6 +597,31 @@ function handleCreatorChangeForFullCurrentEvent(event, callback) {
   }
 }
 
+function invite(user, data, callback) {
+  utils.async.waterfall([
+    function (callback) {
+      models.event.getById(data.eId, callback)
+    },
+    function(event, callback) {
+      if(!event) {
+        utils.l.d("No event was found for sending invite")
+        return callback({error: "This event has been deleted. Please refresh"}, null)
+      }
+      models.user.getByQuery({'consoles.consoleId': {$in: data.invitees}}, function(err, users) {
+        if(utils._.isInvalidOrBlank(users)) {
+          return callback({
+            error: "We couldn’t find their Bungie profile so you’ll need to contact them directly." +
+            "We can still reserve a spot for them on your Fireteam",
+            errorType: "InvalidGamertagError"
+          }, null)
+        } else {
+          return callback(null, {success: true})
+        }
+      })
+    }
+  ], callback)
+}
+
 module.exports = {
   createEvent: createEvent,
   joinEvent: joinEvent,
@@ -609,5 +634,6 @@ module.exports = {
   clearCommentsByUser: clearCommentsByUser,
   publishFullEventListing: publishFullEventListing,
   handleDuplicateCurrentEvent: handleDuplicateCurrentEvent,
-  listEventById: listEventById
+  listEventById: listEventById,
+  invite: invite
 }

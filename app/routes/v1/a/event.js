@@ -166,6 +166,25 @@ function reportComment(req, res) {
 	})
 }
 
+function invite(req, res) {
+	utils.l.d("Invite request: " + JSON.stringify(req.body))
+	if(!req.body.eId  || !req.body.invitees) {
+		var err = {
+			error: "Something went wrong in sending the invite. Please try again later"
+		}
+		utils.l.s("Bad request for invite request", req.body)
+		routeUtils.handleAPIError(req, res, err, err)
+	} else {
+		service.eventService.invite(req.user, req.body, function (err, event) {
+			if (err) {
+				routeUtils.handleAPIError(req, res, err, err)
+			} else {
+				routeUtils.handleAPISuccess(req, res, event)
+			}
+		})
+	}
+}
+
 routeUtils.rPost(router, '/create', 'createEvent', create)
 routeUtils.rPost(router, '/join', 'joinEvent', join)
 routeUtils.rGet(router, '/list', 'listEvents', list, {utm_dnt:"androidAppVersion"})
@@ -176,4 +195,5 @@ routeUtils.rPost(router, '/delete', 'removeEvent', remove)
 routeUtils.rPost(router, '/clear', 'clearEventsForPlayer', clearEventsForPlayer)
 routeUtils.rPost(router, '/addComment', 'addEventComment', addComment)
 routeUtils.rPost(router, '/reportComment', 'reportEventComment', reportComment)
+routeUtils.rPost(router, '/invite', 'invite', invite)
 module.exports = router
