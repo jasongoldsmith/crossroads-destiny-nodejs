@@ -3,6 +3,7 @@ var utils = require('../utils')
 var eventService = require('./eventService')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
 var destinyInterface = require('./destinyInterface')
+var passwordHash = require('password-hash')
 
 function preUserTimeout(notifTrigger,sysConfig){
   utils.l.d("Starting preUserTimeout")
@@ -342,6 +343,35 @@ function setLegalAttributes(user){
   return userWithLegalResp
 }
 
+function getNewUserData(password,clanId,mpDistinctId,refreshedMixPanel,bungieResponse,consoleType){
+  var userData = {
+    passWord: password?passwordHash.generate(password):password,
+    clanId: clanId,
+    mpDistinctId: mpDistinctId,
+    mpDistinctIdRefreshed:refreshedMixPanel
+  }
+
+  if(utils._.isValidNonBlank(bungieResponse)){
+    var consolesList =  []
+    utils._.map(bungieResponse.destinyProfile,function(destinyAccount){
+      var consoleObj = {}
+      consoleObj.consoleType =  utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
+      consoleObj.destinyMembershipId = destinyAccount.destinyMembershipId
+      consoleObj.consoleId=destinyAccount.destinyDisplayName
+      consoleObj.clanTag=destinyAccount.clanTag
+      consoleObj.imageUrl = utils.config.bungieBaseURL + "/" +destinyAccount.helmetUrl
+      if(consoleObj.consoleType == consoleType)
+        consoleObj.isPrimary = true
+      else
+        consoleObj.isPrimary = false
+      consolesList.push(consoleObj)
+    })
+    userData.consoles = consolesList
+    userData.bungieMemberShipId =  bungieResponse.bungieMemberShipId
+  }
+  return userData
+}
+
 module.exports = {
   userTimeout: userTimeout,
   preUserTimeout: preUserTimeout,
@@ -351,5 +381,6 @@ module.exports = {
   checkBungieAccount: checkBungieAccount,
   setLegalAttributes:setLegalAttributes,
   refreshConsoles:refreshConsoles,
-  setPrimaryConsoleAndHelmet:setPrimaryConsoleAndHelmet
+  setPrimaryConsoleAndHelmet:setPrimaryConsoleAndHelmet,
+  getNewUserData:getNewUserData
 }

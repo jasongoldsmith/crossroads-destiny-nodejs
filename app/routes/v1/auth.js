@@ -141,7 +141,8 @@ function createNewUser(req, bungieResponse, callback) {
     "Please try again once you have upgraded to a new generation console"}, null)
   }
   var mpDistinctId = helpers.req.getHeader(req,'x-mixpanelid')
-  var userData = {
+
+/*  var userData = {
     passWord: passwordHash.generate(body.passWord),
     clanId: body.clanId,
     mpDistinctId: mpDistinctId,
@@ -149,7 +150,7 @@ function createNewUser(req, bungieResponse, callback) {
   }
 
   if(utils._.isValidNonBlank(bungieResponse)){
-    consolesList =  []
+    var consolesList =  []
     utils._.map(bungieResponse.destinyProfile,function(destinyAccount){
       var consoleObj = {}
       consoleObj.consoleType =  utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
@@ -165,7 +166,10 @@ function createNewUser(req, bungieResponse, callback) {
     })
     userData.consoles = consolesList
     userData.bungieMemberShipId =  bungieResponse.bungieMemberShipId
-  }
+  }*/
+
+  var userData = service.userService.getNewUserData(body.passWord,body.clanId,mpDistinctId,true,bungieResponse,body.consoles.consoleType)
+
   utils.async.waterfall([
       helpers.req.handleVErrorWrapper(req),
       function(callback) {
@@ -175,7 +179,7 @@ function createNewUser(req, bungieResponse, callback) {
       },
       function (uid, callback) {
         userData._id = uid
-        service.authService.createNewUser(userData, callback)
+        service.authService.createNewUser(userData,true,"INITIATED", callback)
       },
       reqLoginWrapper(req, "auth.login")
     ],

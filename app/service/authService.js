@@ -1,6 +1,7 @@
 var models = require('../models')
 var destinyService = require('./destinyInterface')
 var utils = require('../utils')
+var userService = require('./userService')
 
 function signupUser(signupData, callback) {
 	utils.async.waterfall([
@@ -71,26 +72,30 @@ function signupUser(signupData, callback) {
 	], callback)
 }
 
-function createNewUser(signupData,callback){
+function createNewUser(signupData,validateBungie,verifyStatus,callback){
 	var primaryConsole = utils.primaryConsole(signupData)
 	signupData.imageUrl = primaryConsole.imageUrl
 	utils.async.waterfall([
 		function(callback){
-			destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,
-					utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType),
-					utils.constants.bungieMessageTypes.accountVerification,
-					function (error, messageResponse) {
-						utils.l.d('messageResponse', messageResponse)
-						utils.l.d('signupUser::sendBungieMessage::error', error)
-						if (messageResponse) {
-							utils.l.d("messageResponse::token===" + messageResponse.token)
-							signupData.verifyStatus = "INITIATED"
-							signupData.verifyToken = messageResponse.token
-							return callback(null, signupData)
-						} else {
-							return callback(error, null)
-						}
-					})
+			if(validateBungie) {
+				destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,
+						utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType),
+						utils.constants.bungieMessageTypes.accountVerification,
+						function (error, messageResponse) {
+							utils.l.d('messageResponse', messageResponse)
+							utils.l.d('signupUser::sendBungieMessage::error', error)
+							if (messageResponse) {
+								utils.l.d("messageResponse::token===" + messageResponse.token)
+								signupData.verifyStatus = verifyStatus
+								signupData.verifyToken = messageResponse.token
+								return callback(null, signupData)
+							} else {
+								return callback(error, null)
+							}
+						})
+			}else {
+				return callback(null, signupData)
+			}
 		},function(newUser,callback){
 			newUser.clanName=utils.constants.freelanceBungieGroup.groupName
 			getCurrentLegalObject(function(err,legal){
@@ -160,10 +165,83 @@ function getCurrentLegalObject(callback){
 		})
 }
 
+function createUsersWithConsoles(consoleIdList, consoleType, callback){
+	utils.async.waterfall([
+		function(callback){
+			utils.async.mapSeries(consoleIdList,function(consoleId,asyncCallback){
+				utils.l.d("^^^^^^^^^^^^^^^^^^^^^")
+				validateConsole({
+					consoleId: consoleId,
+					consoleType: consoleType,
+				},asyncCallback)
+				utils.l.d("^^^^^^^^^^^^^^^^^^^^^")
+			},function(errors, bungieMemberList){
+				return callback(errors,bungieMemberList)
+			})
+		},function(bungieMembersList,callback){
+			utils.l.d("******************************************************************:bungieMembersList::",bungieMembersList)
+			utils.async.mapSeries(bungieMembersList, function(bungieMember,asyncCallback){
+				utils.l.d("**********************",bungieMember)
+				createInvitedUsers(bungieMember,consoleType,asyncCallback)
+				utils.l.d("**********************")
+			},function(errors, userList){
+				return callback(errors,userList)
+			})
+		}
+	],callback)
+}
+
+function validateConsole(console, callback){
+
+	userService.checkBungieAccount(console,function(err,bungieResponse){
+		var bungieMember = {
+			consoleId: console.consoleId,
+			consoleType: console.consoleType,
+		}
+
+		if(utils._.isInvalidOrBlank(bungieResponse) || utils._.isValidNonBlank(err)) {
+			bungieMember.verifyStatus="INVALID_GAMERTAG"
+		}else{
+			bungieMember.bungieMemberShipId= bungieResponse.bungieMemberShipId
+			bungieMember.destinyProfile= bungieResponse.destinyProfile
+			bungieMember.verifyStatus="INVITED"
+		}
+
+		return callback(null,bungieMember)
+	})
+}
+
+function createInvitedUsers(bungieMembership,consoleType,callback){
+	utils.l.d("**********************createInvitedUsers::",bungieMembership)
+	var userData = null
+	var validateBungie = false
+	if(bungieMembership.verifyStatus == "INVALID_GAMERTAG"){
+		userData = userService.getNewUserData("crossroads",null,null,false,null,consoleType)
+		validateBungie = false
+		var consolesList =  []
+		var consoleObj = {}
+		consoleObj.consoleType =  bungieMembership.consoleType
+		consoleObj.consoleId=bungieMembership.consoleId
+		consoleObj.isPrimary = true
+		consolesList.push(consoleObj)
+		userData.consoles = consolesList
+		userData.verifyStatus = bungieMembership.verifyStatus
+	}else{
+		validateBungie = true
+		userData = userService.getNewUserData("crossroads",null,null,false,bungieMembership,consoleType)
+		userData.verifyStatus = bungieMembership.verifyStatus
+	}
+
+	var uid = utils.mongo.ObjectID()
+	userData._id = uid
+	createNewUser(userData,validateBungie,bungieMembership.verifyStatus, callback)
+}
+
 module.exports = {
 	signupUser: signupUser,
 	requestResetPassword: requestResetPassword,
 	listMemberCountByClan: listMemberCountByClan,
 	addLegalAttributes:addLegalAttributes,
-	createNewUser:createNewUser
+	createNewUser:createNewUser,
+	createUsersWithConsoles:createUsersWithConsoles
 }

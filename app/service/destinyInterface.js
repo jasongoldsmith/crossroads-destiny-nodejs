@@ -460,20 +460,14 @@ function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callba
           else{
             if(bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
               utils.l.s("bungie message POST error",
-                {
-                  errorStatus: bungieJSON.ErrorStatus,
+                {errorStatus: bungieJSON.ErrorStatus,
                   url: url, msgBody: msgBody,
                   token: token,
                   bungieMemberShipId: bungieMemberShipId,
                   consoleType: consoleType
-                }
-              )
+                })
             return callback(
-              {
-                error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus)
-                  .replace(/%CONSOLETYPE%/g, consoleType),
-                errorType: "BungieError"
-              },
+              {error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g, consoleType),errorType: "BungieError"},
               null)
           }
         }
