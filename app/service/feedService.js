@@ -19,8 +19,14 @@ function getFeed(user, consoleType, isPublicFeed, callback) {
 				query.consoleType = utils.primaryConsole(user).consoleType
 			}
 
-			if(isPublicFeed)
-				query.launchStatus=utils.constants.eventLaunchStatusList.now
+			if(isPublicFeed) {
+				query.launchStatus = utils.constants.eventLaunchStatusList.now
+			}
+
+			query.$or = [
+				{status: {$ne: "full"}},
+				{players: user._id}
+			]
 
 			utils.l.d("feed::query",query)
 			models.event.getByQueryLean(query, callback)
