@@ -90,7 +90,11 @@ function createNewUser(signupData,validateBungie,verifyStatus,messageType,messag
 								signupData.verifyToken = messageResponse.token
 								return callback(null, signupData)
 							} else {
-								return callback(error, null)
+								if(messageType == utils.constants.bungieMessageTypes.eventInvitation){
+									signupData.verifyStatus = "INVITATION_MSG_FAILED"
+									return callback(null, signupData)
+								}else
+									return callback(error, null) //This is the case where user is signing up in the normal flow
 							}
 						})
 			}else {

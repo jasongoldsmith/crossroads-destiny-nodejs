@@ -240,6 +240,18 @@ function handleAcceptLegal(user, callback){
   ],callback)
 }
 
+/*
+function inviteUsers(req,res){
+  service.authService.createUsersWithConsoles(req.body.consoleIds,req.body.consoleType, req.body.messageDetails, function(err, userList) {
+    if (err) {
+      routeUtils.handleAPIError(req, res, err, err)
+    } else {
+      routeUtils.handleAPISuccess(req, res,  {value: userList})
+    }
+  })
+}
+*/
+
 
 routeUtils.rGet(router, '/self', 'GetSelfUser', getSelfUser)
 routeUtils.rGet(router, '/list', 'list', list)
@@ -251,4 +263,5 @@ routeUtils.rPost(router, '/updatePassword', 'updatePassword', updatePassword)
 routeUtils.rPost(router, '/addConsole', 'addUserConsole', addConsole)
 routeUtils.rPost(router, '/changePrimaryConsole', 'changePrimaryConsole', changePrimaryConsole)
 routeUtils.rGet(router, '/getMetrics', 'getUserMetrics', getUserMetrics)
+//routeUtils.rPost(router, '/inviteUsers', 'inviteUsers', inviteUsers)
 module.exports = router
