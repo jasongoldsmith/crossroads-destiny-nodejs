@@ -323,7 +323,7 @@ function sendBungieMessage(bungieMemberShipId, consoleType, messageType,callback
         var token = helpers.uuid.getRandomUUID()
         utils.l.d("bungieMemberShipId=", bungieMemberShipId)
 
-        getMessageBody(utils.config.hostUrl(), token, messageType,consoleType,function(err,msgTxt){
+        getMessageBody(utils.config.hostUrl(), token, messageType,consoleType,null,function(err,msgTxt){
           var msgBody = {
             "membersToId": [utils.config.bungieCrsRdAppId, bungieMemberShipId],
             "body": msgTxt
@@ -336,14 +336,14 @@ function sendBungieMessage(bungieMemberShipId, consoleType, messageType,callback
   )
 }
 
-function sendBungieMessageV2(bungieMemberShipId, consoleType, messageType,callback){
+function sendBungieMessageV2(bungieMemberShipId, consoleType, messageType,messageDetails,callback){
   utils.async.waterfall([
       function (callback) {
         var convUrl = utils.config.bungieConvURL
         var token = helpers.uuid.getRandomUUID()
         utils.l.d("bungieMemberShipId=", bungieMemberShipId)
 
-        getMessageBody(utils.config.hostUrl(), token, messageType,consoleType,function(err,msgTxt){
+        getMessageBody(utils.config.hostUrl(), token, messageType,consoleType,messageDetails,function(err,msgTxt){
           var msgBody = {
             "membersToId": [utils.config.bungieCrsRdAppId, bungieMemberShipId],
             "body": msgTxt
@@ -476,7 +476,7 @@ function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callba
   ], callback)
 }
 
-function getMessageBody(host,token,messageType,consoleType,callback){
+function getMessageBody(host,token,messageType,consoleType, messageDetails, callback){
   var msg = null
   switch (messageType) {
     case utils.constants.bungieMessageTypes.accountVerification:
@@ -497,6 +497,20 @@ function getMessageBody(host,token,messageType,consoleType,callback){
         utils.l.d("resetPassword msg to send::" + msg)
         return callback(null, msg)
       })
+      break
+    case utils.constants.bungieMessageTypes.eventInvitation:
+      var event = messageDetails?messageDetails.event:null
+      var invitedByGamerTag = messageDetails.invitedByGamerTag
+      var invitationLink = messageDetails.invitationLink
+      if(utils._.isValidNonBlank(event)){
+        if(event.launchStatus == utils.constants.eventLaunchStatusList.now)
+          msg = utils.constants.bungieMessages.eventInvitationCurrent.replace(/%CONSOLE_ID%/g,invitedByGamerTag).replace(/%ACTIVITY_NAME%/g,event.eType.aSubType).replace(/%EVENT_DEEPLINK%/g,invitationLink)
+        else
+          msg = utils.constants.bungieMessages.eventInvitationUpcoming.replace(/%CONSOLE_ID%/g,invitedByGamerTag).replace(/%ACTIVITY_NAME%/g,event.eType.aSubType).replace(/%EVENT_DEEPLINK%/g,invitationLink).replace(/%EVENT_TIME%/g,event.launchDate)
+      }else{
+        msg = utils.constants.bungieMessages.eventInvitationDefault
+      }
+      return callback(null, msg)
       break
     default:
       break

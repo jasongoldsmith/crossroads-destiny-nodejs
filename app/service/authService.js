@@ -72,7 +72,7 @@ function signupUser(signupData, callback) {
 	], callback)
 }
 
-function createNewUser(signupData,validateBungie,verifyStatus,callback){
+function createNewUser(signupData,validateBungie,verifyStatus,messageType,messageDetails,callback){
 	var primaryConsole = utils.primaryConsole(signupData)
 	signupData.imageUrl = primaryConsole.imageUrl
 	utils.async.waterfall([
@@ -80,7 +80,7 @@ function createNewUser(signupData,validateBungie,verifyStatus,callback){
 			if(validateBungie) {
 				destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,
 						utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType),
-						utils.constants.bungieMessageTypes.accountVerification,
+						messageType,messageDetails,
 						function (error, messageResponse) {
 							utils.l.d('messageResponse', messageResponse)
 							utils.l.d('signupUser::sendBungieMessage::error', error)
@@ -165,7 +165,7 @@ function getCurrentLegalObject(callback){
 		})
 }
 
-function createUsersWithConsoles(consoleIdList, consoleType, callback){
+function createUsersWithConsoles(consoleIdList, consoleType, messageDetails, callback){
 	utils.async.waterfall([
 		function(callback){
 			utils.async.mapSeries(consoleIdList,function(consoleId,asyncCallback){
@@ -182,7 +182,7 @@ function createUsersWithConsoles(consoleIdList, consoleType, callback){
 			utils.l.d("******************************************************************:bungieMembersList::",bungieMembersList)
 			utils.async.mapSeries(bungieMembersList, function(bungieMember,asyncCallback){
 				utils.l.d("**********************",bungieMember)
-				createInvitedUsers(bungieMember,consoleType,asyncCallback)
+				createInvitedUsers(bungieMember,consoleType,messageDetails,asyncCallback)
 				utils.l.d("**********************")
 			},function(errors, userList){
 				return callback(errors,userList)
@@ -211,7 +211,7 @@ function validateConsole(console, callback){
 	})
 }
 
-function createInvitedUsers(bungieMembership,consoleType,callback){
+function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback){
 	utils.l.d("**********************createInvitedUsers::",bungieMembership)
 	var userData = null
 	var validateBungie = false
@@ -234,7 +234,14 @@ function createInvitedUsers(bungieMembership,consoleType,callback){
 
 	var uid = utils.mongo.ObjectID()
 	userData._id = uid
-	createNewUser(userData,validateBungie,bungieMembership.verifyStatus, callback)
+/*
+	var messageDetails = {
+		event: event,
+ 		invitedByGamerTag: invitedByGamerTag,
+		invitationLink: invitationLink
+	}
+*/
+	createNewUser(userData,validateBungie,bungieMembership.verifyStatus,utils.constants.bungieMessageTypes.eventInvitation,messageDetails, callback)
 }
 
 module.exports = {
