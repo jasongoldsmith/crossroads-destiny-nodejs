@@ -12,6 +12,8 @@ var sysConfig = require('./sysConfigModel')
 var userGroup = require('./userGroupModel')
 var notificationQueue = require ('./notificationQueueModel')
 var helmetTracker = require('./helmetTrackerModel')
+var eventInvitationModel = require('./eventInvitationModel')
+
 module.exports = {
   user: user,
   temporaryUser: temporaryUser,
@@ -26,5 +28,6 @@ module.exports = {
   sysConfig: sysConfig,
   userGroup: userGroup,
   notificationQueue: notificationQueue,
-  helmetTracker:helmetTracker
+  helmetTracker: helmetTracker,
+  eventInvitation: eventInvitationModel
 }

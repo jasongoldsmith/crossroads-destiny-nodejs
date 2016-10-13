@@ -28,12 +28,12 @@ function getByQuery(query, user, callback) {
 		.batchSize(50)
 		.sort({launchDate:"ascending"})
 		.exec(function (err, events) {
-			if (user) {
-				events = events.filter(function(event) {
-					return event.creator.clanId == user.clanId
-				})
+			if (err) {
+				utils.l.s("Something went wrong in getting events from database", err)
+				return callback({error: "Something went wrong. Please try again later."}, null)
+			} else {
+				return callback(err, events)
 			}
-			callback(null, events)
 		})
 }
 
@@ -42,7 +42,14 @@ function getByQueryLean(query, callback) {
 		.find(query, "-comments")
 		.batchSize(50)
 		.sort({launchDate:"ascending"})
-		.exec(callback)
+		.exec(function (err, events) {
+			if (err) {
+				utils.l.s("Something went wrong in getting events from database", err)
+				return callback({error: "Something went wrong. Please try again later."}, null)
+			} else {
+				return callback(err, events)
+			}
+		})
 }
 
 function getByQueryLeanWithComments(query, callback) {
@@ -50,7 +57,14 @@ function getByQueryLeanWithComments(query, callback) {
 		.find(query)
 		.batchSize(50)
 		.sort({launchDate:"ascending"})
-		.exec(callback)
+		.exec(function (err, events) {
+			if (err) {
+				utils.l.s("Something went wrong in getting events from database", err)
+				return callback({error: "Something went wrong. Please try again later."}, null)
+			} else {
+				return callback(err, events)
+			}
+		})
 }
 
 function getEventsByQuery(query, callback) {
@@ -60,7 +74,14 @@ function getEventsByQuery(query, callback) {
 		.populate("creator", "-passWord")
 		.populate("players", "-passWord")
 		.batchSize(50)
-		.exec(callback)
+		.exec(function (err, events) {
+			if (err) {
+				utils.l.s("Something went wrong in getting events from database", err)
+				return callback({error: "Something went wrong. Please try again later."}, null)
+			} else {
+				return callback(err, events)
+			}
+		})
 }
 
 function getById(id, callback) {

@@ -3,6 +3,8 @@ var models = require('../models')
 var helpers = require('../helpers')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
 var reportService = require('./reportService')
+var destinyInterface = require('./destinyInterface')
+var authService = require('./authService')
 
 function clearEventsForPlayer(user, launchStatus, consoleType, callback){
 
@@ -599,6 +601,16 @@ function handleCreatorChangeForFullCurrentEvent(event, callback) {
   }
 }
 
+function addUsersToEvent(event, userIds, callback) {
+  utils._.map(userIds, function(userId) {
+    event.players.push(userId)
+  })
+  if(event.players.length > event.maxPlayers) {
+    return callback({error: "Sorry looks like you can't add these many players to this event"}, null)
+  }
+  models.event.update(event, callback)
+}
+
 function invite(user, data, callback) {
   utils.async.waterfall([
     function (callback) {
@@ -609,19 +621,68 @@ function invite(user, data, callback) {
         utils.l.d("No event was found for sending invite")
         return callback({error: "This event has been deleted. Please refresh"}, null)
       }
-      models.user.getByQuery({'consoles.consoleId': {$in: data.invitees}}, function(err, users) {
-        if(utils._.isInvalidOrBlank(users)) {
-          return callback({
-            error: "We couldn’t find their Bungie profile so you’ll need to contact them directly." +
-            "We can still reserve a spot for them on your Fireteam",
-            errorType: "InvalidGamertagError"
-          }, null)
-        } else {
-          return callback(null, {success: true})
-        }
-      })
+      handleUserInvites(event, user, data.invitees, data.invitationLink, callback)
     }
   ], callback)
+}
+
+function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, callback) {
+  // Due to circular dependency between eventService, authService and userService maybe the authService gets loaded partially
+  // and authService methods are not loaded without this call
+  authService = require('./authService')
+  var messageDetails = {
+    event: event,
+    invitedByGamerTag: utils.primaryConsole(inviter).consoleId,
+    invitationLink: invitationLink
+  }
+  var invitedUserIds = []
+
+  utils.async.waterfall([
+    function(callback) {
+      models.user.getByQuery({'consoles.consoleId': {$in: inviteesGamertags}}, callback)
+    },
+    function(usersInDatabase, callback) {
+      var usersInDatabaseGamerTags = []
+      utils._.map(usersInDatabase, function(user) {
+        usersInDatabaseGamerTags.push(utils.primaryConsole(user).consoleId.toString())
+        invitedUserIds.push(user._id.toString())
+        sendBungieMessage(user, messageDetails)
+      })
+      return callback(null, usersInDatabaseGamerTags)
+    },
+    function(usersInDatabaseGamerTags, callback) {
+      var inviteesGamertagsNotInDatabase = utils._.difference(inviteesGamertags, usersInDatabaseGamerTags)
+      authService.createInvitees(inviteesGamertagsNotInDatabase, utils.primaryConsole(inviter).consoleType,
+        messageDetails, callback)
+    }
+  ],
+    function (err, newUsers) {
+      if(err) {
+        utils.l.d("Invite was unsucessful", err)
+        return callback({error: "Something went wrong with sending invites. Please try again later."}, callback)
+      } else {
+        utils._.map(newUsers, function(newUser) {
+          invitedUserIds.push(newUser._id.toString())
+        })
+        return callback(null, event, invitedUserIds)
+      }
+    })
+}
+
+function sendBungieMessage(user, messageDetails) {
+  var userPrimaryConsole = utils.primaryConsole(user)
+  destinyInterface.sendBungieMessageV2(
+    user.bungieMemberShipId,
+    utils._.get(utils.constants.consoleGenericsId, userPrimaryConsole.consoleType),
+    utils.constants.bungieMessageTypes.eventInvitation,
+    messageDetails,
+    function(err, response) {
+      if(err) {
+        utils.l.i("There was an error in sending a message to this crossroads user", user)
+      } else {
+        utils.l.d("Message was sent successfully to this crossroads user", response)
+      }
+    })
 }
 
 module.exports = {
@@ -637,5 +698,6 @@ module.exports = {
   publishFullEventListing: publishFullEventListing,
   handleDuplicateCurrentEvent: handleDuplicateCurrentEvent,
   listEventById: listEventById,
+  addUsersToEvent: addUsersToEvent,
   invite: invite
 }

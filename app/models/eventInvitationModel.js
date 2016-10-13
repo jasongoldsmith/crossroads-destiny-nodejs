@@ -12,7 +12,7 @@ function getByQueryPopulated(query, callback) {
   EventInvitation
     .find(query)
     .populate("event")
-    .populate("invitor", "-passWord")
+    .populate("inviter", "-passWord")
     .populate("invitee", "-passWord")
     .batchSize(50)
     .exec(function (err, eventInvitationList) {
@@ -34,31 +34,36 @@ function getByQueryLean(query, callback) {
         utils.l.s("There was a problem in getting EventInvitation populated from db", err)
         return callback({error: "There was some problem in sending the invite. Please try again later."}, null)
       } else {
-        return (err, eventInvitationList)
+        return callback(err, eventInvitationList)
       }
     })
 }
 
 function create(data, callback) {
-  var eventInvitationObj = new EventInvitation(data)
+  var eventInvitationData = {
+    event: data.eventId,
+    inviter: data.inviterId,
+    invitee: data.inviteeId
+  }
+  var eventInvitationObj = new EventInvitation(eventInvitationData)
   utils.async.waterfall([
     function (callback) {
       var query1 = {
         event: data.eventId,
-        invitor: data.invitorId,
+        inviter: data.inviterId,
         invitee: data.inviteeId
       }
       var query2 = {
         event: data.eventId,
-        invitor: data.inviteeId,
-        invitee: data.invitorId
+        inviter: data.inviteeId,
+        invitee: data.inviterId
       }
       getByQueryLean({$or: [query1, query2]}, callback)
     },
     function(eventInvitation, callback) {
-      if(eventInvitation) {
+      if(utils._.isValidNonBlank(eventInvitation)) {
         utils.l.d("Invitation already exists for this event, skipping creation", eventInvitation)
-        return callback({error: "The invitation already exists for this event"}, null)
+        return callback({error: "One of the players has already been invited to this event"}, null)
       } else {
         save(eventInvitationObj, callback)
       }

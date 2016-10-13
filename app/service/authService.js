@@ -169,7 +169,7 @@ function getCurrentLegalObject(callback){
 		})
 }
 
-function createUsersWithConsoles(consoleIdList, consoleType, messageDetails, callback){
+function createInvitees(consoleIdList, consoleType, messageDetails, callback){
 	utils.async.waterfall([
 		function(callback){
 			utils.async.mapSeries(consoleIdList,function(consoleId,asyncCallback){
@@ -252,7 +252,7 @@ module.exports = {
 	signupUser: signupUser,
 	requestResetPassword: requestResetPassword,
 	listMemberCountByClan: listMemberCountByClan,
-	addLegalAttributes:addLegalAttributes,
-	createNewUser:createNewUser,
-	createUsersWithConsoles:createUsersWithConsoles
+	addLegalAttributes: addLegalAttributes,
+	createNewUser: createNewUser,
+	createInvitees: createInvitees
 }

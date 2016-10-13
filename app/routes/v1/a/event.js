@@ -175,13 +175,45 @@ function invite(req, res) {
 		utils.l.s("Bad request for invite request", req.body)
 		routeUtils.handleAPIError(req, res, err, err)
 	} else {
-		service.eventService.invite(req.user, req.body, function (err, event) {
-			if (err) {
-				routeUtils.handleAPIError(req, res, err, err)
-			} else {
-				routeUtils.handleAPISuccess(req, res, event)
+		utils.async.waterfall([
+			function (callback) {
+				service.eventService.invite(req.user, req.body, callback)
+			},
+			function (event, userIds, callback) {
+				service.eventService.addUsersToEvent(event, userIds, function(err, updatedEvent) {
+					if(err) {
+						return callback(err, null)
+					} else {
+						return callback(null, event, userIds)
+					}
+				})
+			},
+			function(event, userIds, callback) {
+				utils.async.mapSeries(userIds, function (userId, callback) {
+					var data = {
+						eventId: event._id.toString(),
+						inviterId: req.user._id.toString(),
+						inviteeId: userId
+					}
+					service.eventInvitationService.createInvitation(data, callback)
+				},
+					function (err, eventInvitations) {
+						if(err || utils._.isInvalidOrBlank(eventInvitations)) {
+							utils.l.s("create invitation mapSeries was unsuccessful", err)
+							return callback(err, null)
+						} else {
+							return callback(null, event)
+						}
+					})
 			}
-		})
+		],
+			function (err, event) {
+				if (err) {
+					routeUtils.handleAPIError(req, res, err, err)
+				} else {
+					routeUtils.handleAPISuccess(req, res, event)
+				}
+			})
 	}
 }
 
