@@ -498,7 +498,9 @@ function listEventById(data, callback) {
         if(err) {
           utils.l.s("There was an error in listEventById", err)
           return callback({error: "Something went wrong. Please try again."}, null)
-        } else {
+        } else if(utils._.isInvalidOrBlank(event)){
+          return callback({ error: "Sorry, looks like that event is no longer available."},null)
+        }else {
           // We need to convert a mongo object to a plain object to add new fields (isActive)
           var eventObj = event.toObject()
 
