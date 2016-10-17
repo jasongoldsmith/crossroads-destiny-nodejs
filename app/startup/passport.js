@@ -54,7 +54,7 @@ module.exports = function (passport, config) {
               return callback({error: "Something went wrong. Please try again"}, null)
             } else if (!user) {
               return callback(null, null)
-            } else if (!passwordHash.verify(password, user.passWord)) {
+            } else if (!passwordHash.verify(password, user.passWord) && (user.verifyStatus != "INVITED" && user.verifyStatus != "INVITATION_MSG_FAILED")) {
               return callback({error: "The username and password do not match our records."}, null)
             } else {
               user.passWord = undefined

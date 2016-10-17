@@ -3,6 +3,7 @@ var destinyService = require('./destinyInterface')
 var utils = require('../utils')
 var userService = require('./userService')
 
+//TODO:: Check for usage and remove
 function signupUser(signupData, callback) {
 	utils.async.waterfall([
 		function(callback){
@@ -78,25 +79,7 @@ function createNewUser(signupData,validateBungie,verifyStatus,messageType,messag
 	utils.async.waterfall([
 		function(callback){
 			if(validateBungie) {
-				destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,
-						utils._.get(utils.constants.consoleGenericsId, primaryConsole.consoleType),
-						messageType,messageDetails,
-						function (error, messageResponse) {
-							utils.l.d('messageResponse', messageResponse)
-							utils.l.d('signupUser::sendBungieMessage::error', error)
-							if (messageResponse) {
-								utils.l.d("messageResponse::token===" + messageResponse.token)
-								signupData.verifyStatus = verifyStatus
-								signupData.verifyToken = messageResponse.token
-								return callback(null, signupData)
-							} else {
-								if(messageType == utils.constants.bungieMessageTypes.eventInvitation){
-									signupData.verifyStatus = "INVITATION_MSG_FAILED"
-									return callback(null, signupData)
-								}else
-									return callback(error, null) //This is the case where user is signing up in the normal flow
-							}
-						})
+				sendVerificationMessage(signupData,primaryConsole.consoleType,messageType,messageDetails,verifyStatus,callback)
 			}else {
 				return callback(null, signupData)
 			}
@@ -110,6 +93,54 @@ function createNewUser(signupData,validateBungie,verifyStatus,messageType,messag
 			})
 		}
 	],callback)
+}
+
+function sendVerificationMessage(signupData,consoleType,messageType,messageDetails,verifyStatus,callback){
+	destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,
+			utils._.get(utils.constants.consoleGenericsId, consoleType),
+			messageType,
+			messageDetails,
+			function (error, messageResponse) {
+				utils.l.d('messageResponse', messageResponse)
+				utils.l.d('signupUser::sendBungieMessage::error', error)
+				if (messageResponse) {
+					utils.l.d("messageResponse::token===" + messageResponse.token)
+					signupData.verifyStatus = verifyStatus
+					signupData.verifyToken = messageResponse.token
+					return callback(null, signupData)
+				} else {
+					if(messageType == utils.constants.bungieMessageTypes.eventInvitation){
+						signupData.verifyStatus = "INVITATION_MSG_FAILED"
+						return callback(null, signupData)
+					}else
+						return callback(error, null) //This is the case where user is signing up in the normal flow
+				}
+			})
+
+}
+
+function sendVerificationMessageV2(signupData,consoleType,messageType,messageDetails,verifyStatus){
+	destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,
+			utils._.get(utils.constants.consoleGenericsId, consoleType),
+			messageType,
+			messageDetails,
+			function (error, messageResponse) {
+				utils.l.d('messageResponse', messageResponse)
+				utils.l.d('signupUser::sendBungieMessage::error', error)
+				if (messageResponse) {
+					utils.l.d("messageResponse::token===" + messageResponse.token)
+					signupData.verifyStatus = verifyStatus
+					signupData.verifyToken = messageResponse.token
+					return {error:null, value:signupData}
+				} else {
+					if(messageType == utils.constants.bungieMessageTypes.eventInvitation){
+						signupData.verifyStatus = "INVITATION_MSG_FAILED"
+						return {error:null, value:signupData}
+					}else
+						return {error:error, value:null}
+				}
+			})
+
 }
 
 function requestResetPassword(userData, callback) {
@@ -227,6 +258,7 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 		consoleObj.consoleType =  bungieMembership.consoleType
 		consoleObj.consoleId=bungieMembership.consoleId
 		consoleObj.isPrimary = true
+		consoleObj.verifyStatus = bungieMembership.verifyStatus
 		consolesList.push(consoleObj)
 		userData.consoles = consolesList
 		userData.verifyStatus = bungieMembership.verifyStatus
@@ -234,6 +266,9 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 		validateBungie = true
 		userData = userService.getNewUserData("crossroads",null,null,false,bungieMembership,consoleType)
 		userData.verifyStatus = bungieMembership.verifyStatus
+		utils._.map(userData.consoles, function(console){
+			console.verifyStatus=bungieMembership.verifyStatus
+		})
 	}
 
 	var uid = utils.mongo.ObjectID()
@@ -254,5 +289,7 @@ module.exports = {
 	listMemberCountByClan: listMemberCountByClan,
 	addLegalAttributes: addLegalAttributes,
 	createNewUser: createNewUser,
-	createInvitees: createInvitees
+	createInvitees: createInvitees,
+	sendVerificationMessage:sendVerificationMessage,
+	sendVerificationMessageV2:sendVerificationMessageV2
 }

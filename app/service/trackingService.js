@@ -143,7 +143,7 @@ function needMPIdfresh(req,user){
   utils.l.d('needMPIdfresh::2222:::::mpRefreshNeeded::::::::'+mpRefreshed)
 
   var updateMpDistinctId = (utils._.isInvalidOrBlank(user.mpDistinctId) || !mpRefreshed ) && utils._.isValidNonBlank(mpDistincId) ? true:false
-  utils.l.d('needMPIdfresh::333:::::updateMpDistinctId::::::::'+mpRefreshed)
+  utils.l.d('needMPIdfresh::333:::::updateMpDistinctId::::::::'+updateMpDistinctId)
   return updateMpDistinctId
 }
 

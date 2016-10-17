@@ -37,16 +37,55 @@ function login (req, res) {
         passportHandler(req, res)
       },
       function (user, callback) {
-        models.user.getById(user._id, function (err, user) {
-          user.isLoggedIn = true
+        handlePostLogin(req,user,callback)
+ /*       models.user.getById(user._id, function (err, user) {
+        user.isLoggedIn = true
+          //If the user is invited or invited but unable to send verification message, need to convert them as real users when logged in.
+          if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED") ){
+            if(utils._.isValidNonBlank(req.body.invitations)) { //if the invited user clicks invitiation deep link from branch mark them verified.
+              user.verifyStatus = "VERIFIED"
+              utils._.map(user.consoles, function(console){
+                console.verifyStatus="VERIFIED"
+              })
+            }
+            else{
+              //if the user downloads app and signin treat them as regular user. Send bungie account verification link.
+              //If message send fails keep the status as invited, so next login attempt will resent bungie message.
+              //var bungieMsgResponse =
+                service.authService.sendVerificationMessage(user,
+                req.body.consoles?req.body.consoles.consoleType:utils.primaryConsole(user).consoleType,
+                utils.constants.bungieMessageTypes.accountVerification,
+                null,
+                "INITIATED",
+              function(err,data){
+
+                  utils.l.d("sent bungie message for invited user::",data)
+                  if(!err){
+                    utils._.map(data.consoles, function(console){
+                      console.verifyStatus="INITIATED"
+                    })
+
+                    utils.l.d("Updated consoles for invited user::",data)
+                    utils.l.d("Updated consoles for invited user::222::",user)
+
+                  }
+                }
+              )
+            }
+            user.passWord = passwordHash.generate(req.body.passWord)
+          }
+
+          //User has multiple consoles and logged in with a consoleId other than primary console that was set during previous login.
           if(req.body.consoles)
             service.userService.setPrimaryConsoleAndHelmet(user,req.body.consoles)
+
           var primaryConsole = utils.primaryConsole(user)
           if(utils._.isInvalidOrBlank(user.verifyStatus)){
             user.verifyStatus = primaryConsole.verifyStatus
             user.verifyToken = primaryConsole.verifyToken
           }
 
+          //Set legal boolean attributes as transient data as we dont need to save this in DB.
           service.authService.addLegalAttributes(user, function(err, data){
              outerUser = data
           })
@@ -82,6 +121,11 @@ function login (req, res) {
             }
             models.user.save(user, callback)
           }
+        })*/
+      },function(user,callback){
+        service.authService.addLegalAttributes(user, function(err, data){
+          outerUser = data
+          callback(null,user)
         })
       }
       ,reqLoginWrapper(req, "auth.login")
@@ -97,6 +141,95 @@ function login (req, res) {
         })
     }
   )
+}
+
+function handlePostLogin(req,user,callback){
+  utils.async.waterfall([
+    function(callback){
+      user.isLoggedIn = true
+      user.passWord = passwordHash.generate(req.body.passWord)
+      if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED") ){
+        if(isInvitedUser(req.body.invitation,user)) { //if the invited user clicks invitiation deep link from branch mark them verified.
+          user.verifyStatus = "VERIFIED"
+          utils._.map(user.consoles, function (console) {
+            console.verifyStatus = "VERIFIED"
+          })
+          return callback(null, user)
+        }else{
+          //if the user downloads app and signin treat them as regular user. Send bungie account verification link.
+          //If message send fails keep the status as invited, so next login attempt will resent bungie message.
+          //var bungieMsgResponse =
+          service.authService.sendVerificationMessage(user,
+            req.body.consoles?req.body.consoles.consoleType:utils.primaryConsole(user).consoleType,
+            utils.constants.bungieMessageTypes.accountVerification,null,"INITIATED",function(err,user){
+              utils.l.d("sent bungie message for invited user::",user)
+              if(!err){
+                utils._.map(user.consoles, function(console){
+                  console.verifyStatus="INITIATED"
+                })
+                utils.l.d("Updated consoles for invited user::222::",user)
+              }
+              return callback(null,user)
+            })
+        }
+
+      }else callback(null,user)
+    },function(user,callback){
+      if(req.body.consoles)
+        service.userService.setPrimaryConsoleAndHelmet(user,req.body.consoles)
+
+      var primaryConsole = utils.primaryConsole(user)
+      if(utils._.isInvalidOrBlank(user.verifyStatus)){
+        user.verifyStatus = primaryConsole.verifyStatus
+        user.verifyToken = primaryConsole.verifyToken
+      }
+      callback(null,user)
+    },function(user,callback){
+      var updateMpDistinctId = service.trackingService.needMPIdfresh(req,user)
+      var existingUserZuid = req.zuid
+      if(updateMpDistinctId){// An existing user logging for first time after installing the app. Create mp user
+        req.zuid = user._id
+        req.adata.distinct_id=user._id
+        service.trackingService.trackUserLogin(req,user,updateMpDistinctId,existingUserZuid,function(err,data){
+          utils.l.d('*********************auth:111::err',err)
+          utils.l.d('*********************auth:111::data',data)
+          if(!err){
+            utils.l.d('setting mp refresh data')
+            var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
+            user.mpDistinctId = mpDistincId
+            user.mpDistinctIdRefreshed=true
+          }
+          utils.l.d("***************Saving user:::::",user)
+          models.user.save(user, callback)
+        })
+      }else {// An existing user logging in either as a result of log out or app calling login when launched.
+        utils.l.d("***************else::Saving user:::::", user)
+        req.zuid = user._id
+        req.adata.distinct_id=user._id
+        if(existingUserZuid.toString() != user._id.toString()){
+          //app calling due to log out then zuid and user._id are different.
+          // With logout cookie is cleared and next api call will issue new zuid
+          // Fire appInit and remove mp user created due to new session id.
+          helpers.m.removeUser(existingUserZuid)
+          helpers.m.incrementAppInit(req)
+          helpers.m.trackRequest("appInit", {}, req, user)
+        }
+        models.user.save(user, callback)
+      }
+    }
+  ],
+  callback)
+}
+
+function isInvitedUser(invitation,user){
+  var invitedUser = false
+  if(utils._.isValidNonBlank(invitation) && utils._.isValidNonBlank(invitation.invitees)){
+    utils._.map(user.consoles,function(console){
+      if(utils._.indexOf(invitation.invitees,console.consoleId) >= 0)
+        invitedUser = true
+    })
+  }
+  return invitedUser
 }
 
 function handleNewUser(req, callback) {
