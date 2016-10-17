@@ -134,7 +134,6 @@ function login (req, res) {
       if (err) {
         return routeUtils.handleAPIError(req, res, err, err)
       }
-      outerUser.passWord=undefined
       routeUtils.handleAPISuccess(req, res,
         {
           value: outerUser,
@@ -147,6 +146,8 @@ function login (req, res) {
 function handlePostLogin(req,user,callback){
   utils.async.waterfall([
     function(callback){
+      models.user.getById(user._id,callback)
+    },function(user,callback){
       user.isLoggedIn = true
       if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED") ){
         user.passWord = passwordHash.generate(req.body.passWord)
@@ -173,7 +174,6 @@ function handlePostLogin(req,user,callback){
               return callback(null,user)
             })
         }
-
       }else if(user.verifyStatus == "INVALID_GAMERTAG"){
         var error = {
           error: utils.constants.bungieMessages.bungieMembershipLookupError
