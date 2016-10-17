@@ -134,6 +134,7 @@ function login (req, res) {
       if (err) {
         return routeUtils.handleAPIError(req, res, err, err)
       }
+      outerUser.passWord=undefined
       routeUtils.handleAPISuccess(req, res,
         {
           value: outerUser,
@@ -147,7 +148,6 @@ function handlePostLogin(req,user,callback){
   utils.async.waterfall([
     function(callback){
       user.isLoggedIn = true
-
       if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED") ){
         user.passWord = passwordHash.generate(req.body.passWord)
         if(isInvitedUser(req.body.invitation,user)) { //if the invited user clicks invitiation deep link from branch mark them verified.
