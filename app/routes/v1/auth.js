@@ -147,8 +147,9 @@ function handlePostLogin(req,user,callback){
   utils.async.waterfall([
     function(callback){
       user.isLoggedIn = true
-      user.passWord = passwordHash.generate(req.body.passWord)
+
       if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED") ){
+        user.passWord = passwordHash.generate(req.body.passWord)
         if(isInvitedUser(req.body.invitation,user)) { //if the invited user clicks invitiation deep link from branch mark them verified.
           user.verifyStatus = "VERIFIED"
           utils._.map(user.consoles, function (console) {
@@ -173,7 +174,16 @@ function handlePostLogin(req,user,callback){
             })
         }
 
-      }else callback(null,user)
+      }else if(user.verifyStatus == "INVALID_GAMERTAG"){
+        var error = {
+          error: utils.constants.bungieMessages.bungieMembershipLookupError
+            .replace("#CONSOLE_TYPE#", utils._.get(utils.constants.consoleGenericsId, req.body.consoles.consoleType))
+            .replace("#CONSOLE_ID#", req.body.consoles.consoleId),
+          errorType: "BungieError"
+        }
+        return callback({error:error},null)
+      }
+      else callback(null,user)
     },function(user,callback){
       if(req.body.consoles)
         service.userService.setPrimaryConsoleAndHelmet(user,req.body.consoles)
