@@ -74,6 +74,17 @@ function update(req, res) {
 	})
 }
 
+function remove(req, res) {
+	utils.l.d("Delete activity request" + JSON.stringify(req.body))
+	removeActivity(req.body, function(err, deletedActivity) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			routeUtils.handleAPISuccess(req, res, deletedActivity)
+		}
+	})
+}
+
 function createActivity(data, callback) {
 	models.activity.createActivity(data, callback)
 }
@@ -98,10 +109,15 @@ function updateActivity(data, callback) {
 	models.activity.updateActivity(data, callback)
 }
 
-routeUtils.rPost(router, '/create', 'create', create)
-routeUtils.rGet(router, '/list', 'list', list)
+function removeActivity(data, callback) {
+	models.activity.deleteActivity({_id: data.id}, callback)
+}
+
+routeUtils.rPost(router, '/create', 'createActivity', create)
+routeUtils.rGet(router, '/list', 'listActivity', list)
 routeUtils.rGet(router, '/listAd', 'listAdActivities', listAd)
-routeUtils.rGet(router, '/listAll', 'listAll', listAll)
-routeUtils.rPost(router, '/listById', 'listById', listById)
-routeUtils.rPost(router, '/update', 'update', update)
+routeUtils.rGet(router, '/listAll', 'listAllActivities', listAll)
+routeUtils.rPost(router, '/listById', 'ActivitylistById', listById)
+routeUtils.rPost(router, '/update', 'updateActivity', update)
+routeUtils.rPost(router, '/delete', 'deleteActivity', remove)
 module.exports = router

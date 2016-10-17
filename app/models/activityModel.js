@@ -87,6 +87,18 @@ function updateActivity(data, callback) {
 	], callback)
 }
 
+function deleteActivity(query, callback) {
+	Activity.findOneAndRemove(query, function (err, deletedActivity) {
+		if(err) {
+			return callback({error: "Something went wrong while deleting this activity"}, null)
+		} else if(utils._.isInvalidOrBlank(deletedActivity)) {
+			return callback({error: "Activity with this id does not exist"}, null)
+		} else {
+			return callback(null , deletedActivity)
+		}
+	})
+}
+
 function constructFindActivityQuery(activityType,includeTags) {
 	var query = {
 		isActive : {$ne: false}
@@ -113,5 +125,6 @@ module.exports = {
 	listAdActivities: listAdActivities,
 	listAllActivities: listAllActivities,
 	listActivityById: listActivityById,
-	updateActivity: updateActivity
+	updateActivity: updateActivity,
+	deleteActivity: deleteActivity
 }
