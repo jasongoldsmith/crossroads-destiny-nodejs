@@ -10,13 +10,14 @@ function sendPushNotificationForNewCreate(event) {
 		function (notificationTrigger, callback) {
 			notificationTriggerService.handleNewEvents(event, notificationTrigger, callback)
 		}
-	], function (err, updatedEvent) {
-		if (err) {
+	],
+		function (err, updatedEvent) {
+			if (err) {
 			utils.l.s("Error in sendPushNotificationForNewCreate::"+err+"::"+JSON.stringify(updatedEvent))
-		} else {
+			} else {
 			utils.l.d("sendPushNotificationForNewCreate successful::", updatedEvent)
-		}
-	})
+			}
+		})
 }
 
 function sendPushNotificationForJoin(event, playerList) {
@@ -27,14 +28,15 @@ function sendPushNotificationForJoin(event, playerList) {
 		function (notificationTrigger, callback) {
 			notificationTriggerService.handleJoinEvent(event, notificationTrigger, playerList, callback)
 		}
-	], function (err, updatedEvent) {
-		if (err) {
-			utils.l.s("Error in sendPushNotificationForJoin::", err)
-			utils.l.i("updated event", updatedEvent)
-		} else {
-			utils.l.d("sendPushNotificationForJoin successful::", updatedEvent)
-		}
-	})
+	],
+		function (err, updatedEvent) {
+			if (err) {
+				utils.l.s("Error in sendPushNotificationForJoin::", err)
+				utils.l.i("updated event", updatedEvent)
+			} else {
+				utils.l.d("sendPushNotificationForJoin successful::", updatedEvent)
+			}
+		})
 }
 
 function sendPushNotificationForLeave(event, user) {
@@ -45,14 +47,15 @@ function sendPushNotificationForLeave(event, user) {
 		function (notificationTrigger, callback) {
 			notificationTriggerService.handleLeaveEvent(event, user[0], notificationTrigger, callback)
 		}
-	], function (err, updatedEvent) {
-		if (err) {
-			utils.l.s("Error in sendPushNotificationForLeave::", err)
-			utils.l.i("updated event", updatedEvent)
-		} else {
-			utils.l.d("sendPushNotificationForLeave successful::", updatedEvent)
-		}
-	})
+	],
+		function (err, updatedEvent) {
+			if (err) {
+				utils.l.s("Error in sendPushNotificationForLeave::", err)
+				utils.l.i("updated event", updatedEvent)
+			} else {
+				utils.l.d("sendPushNotificationForLeave successful::", updatedEvent)
+			}
+		})
 }
 
 function sendPushNotificationForAddComment(event, playerList, comment) {
@@ -63,13 +66,14 @@ function sendPushNotificationForAddComment(event, playerList, comment) {
 		function (notificationTrigger, callback) {
 			notificationTriggerService.handleAddComment(event, notificationTrigger, playerList, comment, callback)
 		}
-	], function (err, updatedEvent) {
-		if (err) {
-			utils.l.s("Error in sendPushNotificationForAddComment::"+err+"::"+JSON.stringify(updatedEvent))
-		} else {
-			utils.l.d("sendPushNotificationForAddComment successful::", updatedEvent)
-		}
-	})
+	],
+		function (err, updatedEvent) {
+			if (err) {
+				utils.l.s("Error in sendPushNotificationForAddComment::"+err+"::"+JSON.stringify(updatedEvent))
+			} else {
+				utils.l.d("sendPushNotificationForAddComment successful::", updatedEvent)
+			}
+		})
 }
 
 function sendPushNotificationForCreatorChange(event, playerList) {
@@ -80,13 +84,32 @@ function sendPushNotificationForCreatorChange(event, playerList) {
 		function (notificationTrigger, callback) {
 			notificationTriggerService.handleCreatorChange(event, notificationTrigger, playerList, callback)
 		}
-	], function (err, updatedEvent) {
-		if (err) {
-			utils.l.s("Error in sendPushNotificationForCreatorChange::"+err+"::"+JSON.stringify(updatedEvent))
-		} else {
-			utils.l.d("sendPushNotificationForCreatorChange successful::", updatedEvent)
+	],
+		function (err, updatedEvent) {
+			if (err) {
+				utils.l.s("Error in sendPushNotificationForCreatorChange::"+err+"::"+JSON.stringify(updatedEvent))
+			} else {
+				utils.l.d("sendPushNotificationForCreatorChange successful::", updatedEvent)
+			}
+		})
+}
+
+function sendPushNotificationForEventInvites(event, playerList) {
+	utils.async.waterfall([
+		function (callback) {
+			models.notificationTrigger.getByQuery({triggerName: "EventInvites"}, utils.firstInArrayCallback(callback))
+		},
+		function (notificationTrigger, callback) {
+			notificationTriggerService.handleEventInvites(event, notificationTrigger, playerList, callback)
 		}
-	})
+	],
+		function (err, updatedEvent) {
+			if (err) {
+				utils.l.s("Error in sendPushNotificationForEventInvites::"+err+"::"+JSON.stringify(updatedEvent))
+			} else {
+				utils.l.d("sendPushNotificationForEventInvites successful::", updatedEvent)
+			}
+		})
 }
 
 module.exports ={
@@ -94,5 +117,6 @@ module.exports ={
 	sendPushNotificationForJoin: sendPushNotificationForJoin,
 	sendPushNotificationForLeave: sendPushNotificationForLeave,
 	sendPushNotificationForAddComment: sendPushNotificationForAddComment,
-	sendPushNotificationForCreatorChange: sendPushNotificationForCreatorChange
+	sendPushNotificationForCreatorChange: sendPushNotificationForCreatorChange,
+	sendPushNotificationForEventInvites: sendPushNotificationForEventInvites
 }

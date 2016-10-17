@@ -315,6 +315,19 @@ function handleCreatorChange(event, notifTrigger, playerList, callback) {
   }
 }
 
+function handleEventInvites(event, notifTrigger, playerList, callback) {
+  utils.l.d("Running trigger for event invite push notification", utils.l.eventLog(event))
+  if(notifTrigger.isActive) {
+    var eventInviteNotif = (event.launchStatus == utils.constants.eventLaunchStatusList.upcoming)
+      ? utils._.find(notifTrigger.notifications, {"name": "EventInviteForUpcoming"})
+      : utils._.find(notifTrigger.notifications, {"name": "EventInviteForCurrent"})
+    createNotificationAndSend(event, playerList, null, eventInviteNotif)
+    return callback(null, event)
+  } else {
+    return callback(null, {message : "handleEventInvites Trigger is not active"})
+  }
+}
+
 // Helper Functions
 
 function launchUpcomingEvent(event, notifTrigger, callback){
@@ -429,6 +442,7 @@ module.exports ={
   handleLeaveEvent: handleLeaveEvent,
   handleAddComment: handleAddComment,
   handleCreatorChange: handleCreatorChange,
+  handleEventInvites: handleEventInvites,
   createNotificationAndSend: createNotificationAndSend,
   sendMultipleEventNotifications: sendMultipleEventNotifications
 }

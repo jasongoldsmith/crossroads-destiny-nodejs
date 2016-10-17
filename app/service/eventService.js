@@ -642,11 +642,23 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
       models.user.getByQuery({'consoles.consoleId': {$in: inviteesGamertags}}, callback)
     },
     function(usersInDatabase, callback) {
+      // send bungie message and send push notification
+      if(utils._.isValidNonBlank(event) && !event.deleted) {
+        var invitedPlayers = usersInDatabase
+        var notificationInformation = {
+          //userList are players the notification should be sent to
+          userList: utils.convertMongooseArrayToPlainArray(invitedPlayers),
+          // playerJoinedorLeft is the player who will replace #PlAYER# in the message template
+          playerJoinedOrLeft: inviter.toObject()
+        }
+        models.notificationQueue.addToQueue(event._id, notificationInformation, "eventInvite")
+        sendBungieMessage(usersInDatabase, messageDetails)
+      }
+
       var usersInDatabaseGamerTags = []
       utils._.map(usersInDatabase, function(user) {
         usersInDatabaseGamerTags.push(utils.primaryConsole(user).consoleId.toString())
         invitedUserIds.push(user._id.toString())
-        sendBungieMessage(user, messageDetails)
       })
       return callback(null, usersInDatabaseGamerTags)
     },
@@ -669,20 +681,22 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
     })
 }
 
-function sendBungieMessage(user, messageDetails) {
-  var userPrimaryConsole = utils.primaryConsole(user)
-  destinyInterface.sendBungieMessageV2(
-    user.bungieMemberShipId,
-    utils._.get(utils.constants.consoleGenericsId, userPrimaryConsole.consoleType),
-    utils.constants.bungieMessageTypes.eventInvitation,
-    messageDetails,
-    function(err, response) {
-      if(err) {
-        utils.l.i("There was an error in sending a message to this crossroads user", user)
-      } else {
-        utils.l.d("Message was sent successfully to this crossroads user", response)
-      }
-    })
+function sendBungieMessage(userList, messageDetails) {
+  utils._.map(userList, function (user) {
+    var userPrimaryConsole = utils.primaryConsole(user)
+    destinyInterface.sendBungieMessageV2(
+      user.bungieMemberShipId,
+      utils._.get(utils.constants.consoleGenericsId, userPrimaryConsole.consoleType),
+      utils.constants.bungieMessageTypes.eventInvitation,
+      messageDetails,
+      function(err, response) {
+        if(err) {
+          utils.l.i("There was an error in sending a message to this crossroads user", user)
+        } else {
+          utils.l.d("Message was sent successfully to this crossroads user", response)
+        }
+      })
+  })
 }
 
 module.exports = {

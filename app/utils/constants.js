@@ -603,7 +603,8 @@ var notificationQueueTypeEnum = {
   leave: "sendPushNotificationForLeave",
   newCreate: "sendPushNotificationForNewCreate",
   addComment: "sendPushNotificationForAddComment",
-  creatorChange: "sendPushNotificationForCreatorChange"
+  creatorChange: "sendPushNotificationForCreatorChange",
+  eventInvite: "sendPushNotificationForEventInvites"
 }
 
 module.exports = {
