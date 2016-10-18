@@ -27,6 +27,7 @@ function getFeed(user, consoleType, isPublicFeed, callback) {
 			if(user) {
 				query.$or = [
 					{status: {$ne: "full"}},
+					{launchStatus: utils.constants.eventLaunchStatusList.upcoming},
 					{players: user._id}
 				]
 			}
