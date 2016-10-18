@@ -242,7 +242,7 @@ function handleAcceptLegal(user, callback){
 
 /*
 function inviteUsers(req,res){
-  service.authService.createUsersWithConsoles(req.body.consoleIds,req.body.consoleType, req.body.messageDetails, function(err, userList) {
+  service.authService.createInvitees(req.body.consoleIds,req.body.consoleType, req.body.messageDetails, function(err, userList) {
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {

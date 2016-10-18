@@ -252,9 +252,12 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 	var validateBungie = false
 	if(bungieMembership.verifyStatus == "INVALID_GAMERTAG"){
 		userData = userService.getNewUserData("crossroads",null,null,false,null,consoleType)
+		userData.imageUrl=utils.config.defaultHelmetUrl
+
 		validateBungie = false
 		var consolesList =  []
 		var consoleObj = {}
+		consoleObj.imageUrl = utils.config.defaultHelmetUrl
 		consoleObj.consoleType =  bungieMembership.consoleType
 		consoleObj.consoleId=bungieMembership.consoleId
 		consoleObj.isPrimary = true
