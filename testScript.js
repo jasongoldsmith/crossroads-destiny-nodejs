@@ -243,7 +243,13 @@ switch(command) {
       utils.l.d("mods",mods)
     });
 */
-    break
+    break;
+  case "bulkVerify":
+    actService.bulkMPUserStatusUpdaet('/Users/dasasr/projects/traveler/temp/mpusers_prod.csv',function(err,data){
+      utils.l.d('bulkMPUserStatusUpdaet::err',err)
+      utils.l.d('bulkMPUserStatusUpdaet::data',data)
+    })
+    break;
   case "testPlayers":
     models.event.getAllCurrentEventPlayers(function(err,playerIds){
       utils.l.d("playerIds",playerIds)

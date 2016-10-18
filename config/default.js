@@ -100,7 +100,8 @@ var defaults = {
   userTimeoutInterval:-20,
   preUserTimeoutInterval:-5,
   userLastActiveUpdateInterval:2,
-  disableEnvetUpdateForComments: process.env.DISABLE_EVENT_UPDATE_COMMENTS || true
+  disableEnvetUpdateForComments: process.env.DISABLE_EVENT_UPDATE_COMMENTS || true,
+  defaultHelmetUrl:'https://www.bungie.net/common/destiny_content/icons/3e0b919ea55d420156cdf384b66a7f8a.jpg'
 };
 
 /**
