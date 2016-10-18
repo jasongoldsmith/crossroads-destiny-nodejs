@@ -256,3 +256,19 @@ db.getCollection('activities').update({},{"$set":{'isActive':false}},{"upsert":t
 
 ##./mongorestore -h ds011893.mlab.com:11893 -d travelerdev -u travelerdev -p travelerdev -c activities /Users/dasasr/projects/traveler/admin/travelerbackend/activities.bson
 //-----------END------------
+
+//-------------BEGIN------------
+function removeUser(consoleId){
+    var usersList =db.getCollection('users').find({"consoles.consoleId":consoleId})
+    usersList.forEach(
+        function (user) {
+            db.getCollection('installations').find({"user":user._id})
+            db.getCollection('events').remove({"players":user._id})
+            db.getCollection('usergroups').remove({"user":user._id})
+            db.getCollection('users').remove({"consoles.consoleId":consoleId})
+        }
+    )
+}
+
+removeUser('')
+//-------------END--------------

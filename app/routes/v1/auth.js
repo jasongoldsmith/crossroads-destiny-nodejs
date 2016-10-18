@@ -149,7 +149,7 @@ function handlePostLogin(req,user,callback){
       models.user.getById(user._id,callback)
     },function(user,callback){
       user.isLoggedIn = true
-      if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED") ){
+      if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED" ||  user.verifyStatus == "INITIATED")){
         user.passWord = passwordHash.generate(req.body.passWord)
         if(isInvitedUser(req.body.invitation,user)) { //if the invited user clicks invitiation deep link from branch mark them verified.
           user.verifyStatus = "VERIFIED"
@@ -157,7 +157,7 @@ function handlePostLogin(req,user,callback){
             console.verifyStatus = "VERIFIED"
           })
           return callback(null, user)
-        }else{
+        }else if( user.verifyStatus != "INITIATED"){
           //if the user downloads app and signin treat them as regular user. Send bungie account verification link.
           //If message send fails keep the status as invited, so next login attempt will resent bungie message.
           //var bungieMsgResponse =
@@ -173,6 +173,8 @@ function handlePostLogin(req,user,callback){
               }
               return callback(null,user)
             })
+        }else{
+          return callback(null,user)
         }
       }else if(user.verifyStatus == "INVALID_GAMERTAG"){
         var error = {
@@ -234,9 +236,12 @@ function handlePostLogin(req,user,callback){
 function isInvitedUser(invitation,user){
   var invitedUser = false
   if(utils._.isValidNonBlank(invitation) && utils._.isValidNonBlank(invitation.invitees)){
+    utils.l.d('auth::isInvitedUser::1111::'+invitation.invitees)
     utils._.map(user.consoles,function(console){
-      if(utils._.indexOf(invitation.invitees,console.consoleId) >= 0)
+      if(utils._.indexOf(invitation.invitees,console.consoleId) >= 0) {
+        utils.l.d('auth::isInvitedUser::found gamertag::'+console.consoleId)
         invitedUser = true
+      }
     })
   }
   return invitedUser
