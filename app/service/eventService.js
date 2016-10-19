@@ -507,6 +507,9 @@ function handleCreatorChangeForFullCurrentEvent(event, callback) {
         addIsActiveFlagToEventPlayers(event, callback)
       },
       function (eventObj, callback) {
+        addIsInvitedByToPlayers(eventObj, callback)
+      },
+      function (eventObj, callback) {
         makeFirstActivePlayerTheCreator(event, eventObj, callback)
       }
     ], callback)
@@ -545,11 +548,11 @@ function addIsActiveFlagToEventPlayers(event, callback) {
 }
 
 function makeFirstActivePlayerTheCreator(event, eventObj, callback) {
-  var areAllInactive = utils._.every(eventObj.players, ['isActive', false])
+  // active players are also defined as not invited players
+  var activePlayers = utils._.remove(eventObj.players, {isActive: true, invitedBy: null})
 
   // If creator is inactive and someone in the event is active then change creator
-  if(!eventObj.creator.isActive && !areAllInactive) {
-    var activePlayers = utils._.remove(eventObj.players, 'isActive')
+  if(!eventObj.creator.isActive && utils._.isValidNonBlank(activePlayers)) {
     event.creator = activePlayers[0]._id
     // We need to realign the players list based on the new creator
     event.players = []
