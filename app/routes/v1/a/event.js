@@ -211,6 +211,7 @@ function invite(req, res) {
 				if (err) {
 					routeUtils.handleAPIError(req, res, err, err)
 				} else {
+					helpers.firebase.updateEventV2(event, req.user,true)
 					routeUtils.handleAPISuccess(req, res, event)
 				}
 			})

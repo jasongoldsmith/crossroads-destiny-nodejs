@@ -272,3 +272,24 @@ function removeUser(consoleId){
 
 removeUser('')
 //-------------END--------------
+
+//------------BEGIN-------------
+//----Flatten users with group and console
+db.getCollection('users').aggregate([
+    {
+        "$unwind": "$groups"
+    },
+    {
+        "$unwind": "$consoles"
+    },
+    {
+        "$project": {
+            "_id": "$_id",
+            "groupId": "$groups.groupId",
+            "consoleId": "$consoles.consoleId",
+            "consoleType":"$consoles.consoleType",
+            "verifyStatus":"$consoles.verifyStatus"
+        }
+    }
+])
+//------------END-------------
