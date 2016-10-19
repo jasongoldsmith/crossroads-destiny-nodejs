@@ -532,9 +532,9 @@ var bungieMessages = {
   passwordReset: 'Hi, Guardian! We received a request to reset your password. Please follow the link: %URL%. If you did not forget your password, please disregard this message.',
   addConsoleErrorMsg: "Oops! We could not find the #CONSOLE_TYPE# #CONSOLE_ID# publicly linked to your bungie account. Make sure your profile is public and try again.",
   bungieMembershipLookupError: "Looks like your #CONSOLE_TYPE# #CONSOLE_ID# isn't publicly linked to your Bungie account. Check Profile > Settings > Linked Accounts to make sure it's public and try again.",
-  eventInvitationCurrent:"%CONSOLE_ID% reserved you a Fireteam spot for %ACTIVITY_NAME%. Respond on Crossroads %EVENT_DEEPLINK%. If you don’t want to receive invitation messages anymore, click here.",
-  eventInvitationUpcoming:"%CONSOLE_ID% reserved you a Fireteam spot for %ACTIVITY_NAME% at %EVENT_TIME%. Respond on Crossroads %EVENT_DEEPLINK%. If you don’t want to receive invitation messages anymore, click here.",
-  eventInvitationDefault:""
+  eventInvitationCurrent:"%CONSOLE_ID% reserved you a Fireteam spot for %ACTIVITY_NAME%. Respond on Crossroads %EVENT_DEEPLINK%.",
+  eventInvitationUpcoming:"%CONSOLE_ID% reserved you a Fireteam spot for %ACTIVITY_NAME% at %EVENT_TIME%. Respond on Crossroads %EVENT_DEEPLINK%.",
+  eventInvitationDefault:"%CONSOLE_ID% reserved you a Fireteam spot for %ACTIVITY_NAME%. Respond on Crossroads %EVENT_DEEPLINK%."
 }
 
 var bungieErrorMessage= function(messageId) {

@@ -5,6 +5,7 @@ var models = require('../models')
 var helpers = require('../helpers')
 var tinyUrlService = require('./tinyUrlService')
 var proxyURL = process.env.QUOTAGUARD_URL || 'http://quotaguard6541:60a2ade59642@proxy.quotaguard.com:9292'
+var momentTimeZone = require('moment-timezone')
 
 function getBungieVariables(callback) {
   var keys = [
@@ -506,7 +507,7 @@ function getMessageBody(host,token,messageType,consoleType, messageDetails, call
         if(event.launchStatus == utils.constants.eventLaunchStatusList.now)
           msg = utils.constants.bungieMessages.eventInvitationCurrent.replace(/%CONSOLE_ID%/g,invitedByGamerTag).replace(/%ACTIVITY_NAME%/g,event.eType.aSubType).replace(/%EVENT_DEEPLINK%/g,invitationLink)
         else
-          msg = utils.constants.bungieMessages.eventInvitationUpcoming.replace(/%CONSOLE_ID%/g,invitedByGamerTag).replace(/%ACTIVITY_NAME%/g,event.eType.aSubType).replace(/%EVENT_DEEPLINK%/g,invitationLink).replace(/%EVENT_TIME%/g,event.launchDate)
+          msg = utils.constants.bungieMessages.eventInvitationUpcoming.replace(/%CONSOLE_ID%/g,invitedByGamerTag).replace(/%ACTIVITY_NAME%/g,event.eType.aSubType).replace(/%EVENT_DEEPLINK%/g,invitationLink).replace(/%EVENT_TIME%/g,momentTimeZone.tz(event.launchDate,"America/Los_Angeles").format("YYYY-mm-DD H:M:S z"))
       }else{
         msg = utils.constants.bungieMessages.eventInvitationDefault
       }
