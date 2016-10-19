@@ -267,6 +267,15 @@ switch(command) {
     })
     //helpers.sns.sendPush()
     break
+  case "search":
+    var usersSearchList = ["sreeharshadasa","unteins"]
+    var searchUser = 'Unteins1'
+    utils.l.d('finding::'+searchUser,utils._.find(usersSearchList,function(userId){
+      utils.l.d('userId::',userId)
+      if(userId.trim().toLowerCase() == "Unteins1".trim().toLocaleLowerCase())
+        return true
+    }))
+    break
   case 'snsPublishTest':
     var customPayload = {
       //alert:"Custom Hello World for event from Harsha",

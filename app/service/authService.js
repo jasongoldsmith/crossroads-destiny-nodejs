@@ -2,7 +2,7 @@ var models = require('../models')
 var destinyService = require('./destinyInterface')
 var utils = require('../utils')
 var userService = require('./userService')
-
+var helpers = require('../helpers')
 //TODO:: Check for usage and remove
 function signupUser(signupData, callback) {
 	utils.async.waterfall([
@@ -283,7 +283,11 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 		invitationLink: invitationLink
 	}
 */
-	createNewUser(userData,validateBungie,bungieMembership.verifyStatus,utils.constants.bungieMessageTypes.eventInvitation,messageDetails, callback)
+	createNewUser(userData,validateBungie,bungieMembership.verifyStatus,utils.constants.bungieMessageTypes.eventInvitation,messageDetails, function(err,newUser){
+		if(!err)
+			helpers.firebase.createUser(newUser)
+		return callback(err,newUser)
+	})
 }
 
 module.exports = {

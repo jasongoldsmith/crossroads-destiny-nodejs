@@ -82,6 +82,14 @@ function mergeLists() {
   return lodash.reduce(arguments, concat, []);
 }
 
+function hasElement(targetArray,searchTxt){
+  var searchResult = lodash.find(targetArray,function(element){
+      if(element.trim().toLowerCase() == searchTxt.trim().toLocaleLowerCase())
+        return true
+    })
+  return isValidNonBlank(searchResult)
+}
+
 lodash.mixin({
   iterPull: iterPull,
   isInvalid: isInvalid,
@@ -93,7 +101,8 @@ lodash.mixin({
   chunk: chunk,
   deepObjectExtend: deepObjectExtend,
   mergeLists: mergeLists,
-  deepGet: deepGet
+  deepGet: deepGet,
+  hasElement:hasElement
 });
 
 module.exports = lodash;

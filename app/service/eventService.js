@@ -644,18 +644,41 @@ function addUsersToEvent(event, userIds, callback) {
 }
 
 function invite(user, data, callback) {
+  var eventObj
   utils.async.waterfall([
     function (callback) {
       models.event.getById(data.eId, callback)
-    },
-    function(event, callback) {
+    },function(event, callback) {
       if(!event) {
         utils.l.d("No event was found for sending invite")
         return callback({error: "This event has been deleted. Please refresh"}, null)
       }
-      handleUserInvites(event, user, data.invitees, data.invitationLink, callback)
+      eventObj = event
+      validateInvitees(user,data,event,callback)
+    },function(validatedInvitees,callback){
+      handleUserInvites(eventObj, user, validatedInvitees.invitees, validatedInvitees.invitationLink, callback)
     }
   ], callback)
+}
+
+function validateInvitees(user,data,event,callback){
+  var updatedInvitees = [];
+  utils._.map(data.invitees,function(invitedUserGamerTag){
+    utils.l.d('utils._.includes(updatedInvitees,invitedUserGamerTag)::',utils._.includes(updatedInvitees,invitedUserGamerTag))
+    utils.l.d("utils._.find(utils._.flatten(utils._.map(event.players,'consoles')),{consoleId:invitedUserGamerTag}))",utils._.find(utils._.flatten(utils._.map(event.players,'consoles')),{consoleId:invitedUserGamerTag}))
+    if(!utils._.hasElement(updatedInvitees,invitedUserGamerTag) &&
+      !utils._.hasElement(utils._.map(utils._.flatten(utils._.map(event.players,'consoles')),'consoleId'),invitedUserGamerTag)) {
+      updatedInvitees.push(invitedUserGamerTag)
+    }
+  })
+  if(utils._.isValidNonBlank(updatedInvitees)) {
+    data.invitees = updatedInvitees
+    utils.l.d('updatedInvitees::',updatedInvitees)
+    return callback(null, data)
+  }else{
+    return callback({error:"All invitied players are already part of this event",errorType:"NO_NEW_INVITEES"}, null)
+  }
+
 }
 
 function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, callback) {

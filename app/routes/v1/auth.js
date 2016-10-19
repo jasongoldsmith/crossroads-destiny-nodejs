@@ -144,6 +144,7 @@ function login (req, res) {
 }
 
 function handlePostLogin(req,user,callback){
+  var needFirebaseUpdate = false;
   utils.async.waterfall([
     function(callback){
       models.user.getById(user._id,callback)
@@ -156,11 +157,13 @@ function handlePostLogin(req,user,callback){
           utils._.map(user.consoles, function (console) {
             console.verifyStatus = "VERIFIED"
           })
+          needFirebaseUpdate=true
           return callback(null, user)
-        }else if( user.verifyStatus != "INITIATED"){
+        }else if( user.verifyStatus == "INVITED"){
           //if the user downloads app and signin treat them as regular user. Send bungie account verification link.
           //If message send fails keep the status as invited, so next login attempt will resent bungie message.
           //var bungieMsgResponse =
+          needFirebaseUpdate=true
           service.authService.sendVerificationMessage(user,
             req.body.consoles?req.body.consoles.consoleType:utils.primaryConsole(user).consoleType,
             utils.constants.bungieMessageTypes.accountVerification,null,"INITIATED",function(err,user){
@@ -228,6 +231,9 @@ function handlePostLogin(req,user,callback){
         }
         models.user.save(user, callback)
       }
+
+      if(needFirebaseUpdate)
+        helpers.firebase.updateUser(user)
     }
   ],
   callback)
