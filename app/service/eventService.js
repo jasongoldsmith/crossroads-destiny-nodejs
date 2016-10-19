@@ -590,7 +590,7 @@ function groupByInvited(eventObj, callback) {
 
       utils._.forEach(invitedPlayerList, function(invitedPlayer) {
         var index = utils._.findIndex(eventObj.players, {_id: invitedPlayer.invitedBy})
-        eventObj.players.splice(index, 0, invitedPlayer)
+        eventObj.players.splice(index + 1, 0, invitedPlayer)
       })
       return callback(null, eventObj)
     }
