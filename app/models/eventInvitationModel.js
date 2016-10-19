@@ -88,6 +88,7 @@ function removeEventInvitation(eventInvitation, callback) {
 
 module.exports = {
   model: EventInvitation,
+  getByQueryLean: getByQueryLean,
   create: create,
   delete: removeEventInvitation
 }
