@@ -251,7 +251,7 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 	var userData = null
 	var validateBungie = false
 	if(bungieMembership.verifyStatus == "INVALID_GAMERTAG"){
-		userData = userService.getNewUserData("crossroads",null,null,false,null,consoleType)
+		userData = userService.getNewUserData("crossroads",utils.constants.freelanceBungieGroup.groupId,null,false,null,consoleType)
 		userData.imageUrl=utils.config.defaultHelmetUrl
 
 		validateBungie = false
@@ -267,7 +267,7 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 		userData.verifyStatus = bungieMembership.verifyStatus
 	}else{
 		validateBungie = true
-		userData = userService.getNewUserData("crossroads",null,null,false,bungieMembership,consoleType)
+		userData = userService.getNewUserData("crossroads",utils.constants.freelanceBungieGroup.groupId,null,false,bungieMembership,consoleType)
 		userData.verifyStatus = bungieMembership.verifyStatus
 		utils._.map(userData.consoles, function(console){
 			console.verifyStatus=bungieMembership.verifyStatus
