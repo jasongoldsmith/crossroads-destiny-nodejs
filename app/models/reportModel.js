@@ -25,7 +25,8 @@ function createReport(report, callback) {
 	var reportObj = new Report(report)
 	reportObj.save(function (err, data) {
 		if (err) {
-			return callback(err, null)
+			utils.l.s("There was a problem in creating this report", err)
+			return callback({error: "Something went wrong in creating this report. Please try again later"}, null)
 		} else {
 			return callback(null, data)
 		}

@@ -11,64 +11,54 @@ function clearEventsForPlayer(user, launchStatus, consoleType, callback){
   utils.async.waterfall([
     function(callback){
       models.event.getByQuery(getEventsByPlayerQuery(user._id.toString(), consoleType, launchStatus), null, callback)
-    },function(eventList, callback) {
+    },
+    function(eventList, callback) {
       //mapSeries used to avoid the consurrency situation in the same session.
-      utils.async.mapSeries(eventList, function(event, callback){
-          handleLeaveEvent(user, {eId: event._id.toString()}, true, callback)
-      },
-      callback)
+      utils.async.mapSeries(eventList, function(event, callback) {
+        handleLeaveEvent(user, {eId: event._id.toString()}, true, callback)
+      }, callback)
     }
   ], callback)
 }
 
 
 function createEvent(user, data, callback) {
-  utils.async.waterfall(
-    [
-      function(callback) {
-        models.event.createEvent(user, data, callback)
-      },
-      function(event, callback) {
-        if(utils._.isInvalid(event)) {
-          return callback(null, null)
-        }
-        if(event.players.length == 1) {
-          models.notificationQueue.addToQueue(event._id, null, "newCreate")
-          updateUserStats(user, "eventsCreated")
-        } else {
-          var notificationInformation = {
-            userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
-            playerJoinedOrLeft: user.toObject()
-          }
-          models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
-          updateUserStats(user, "eventsJoined")
-          updateUserStatsForFullEvent(event)
-        }
-        handleCreatorChangeForFullCurrentEvent(event, callback)
+  utils.async.waterfall([
+    function(callback) {
+      models.event.createEvent(user, data, callback)
+    },
+    function(event, callback) {
+      if(utils._.isInvalid(event)) {
+        return callback(null, null)
       }
-    ], callback)
+      if(event.players.length == 1) {
+        models.notificationQueue.addToQueue(event._id, null, "newCreate")
+        updateUserStats(user, "eventsCreated")
+      } else {
+        addPushNotificationToQueue(event, utils.getNotificationPlayerListForEventExceptUser(user, event), user, null, "join")
+        updateUserStats(user, "eventsJoined")
+        updateUserStatsForFullEvent(event)
+      }
+      handleCreatorChangeForFullCurrentEvent(event, callback)
+    }
+  ], callback)
 }
 
 function joinEvent(user, data, callback) {
-  utils.async.waterfall(
-    [
-      function(callback) {
-        models.event.joinEvent(user, data, callback)
-      },
-      function(event, callback) {
-        if(utils._.isInvalid(event)) {
-          return callback(null, null)
-        }
-        var notificationInformation = {
-          userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
-          playerJoinedOrLeft: user.toObject()
-        }
-        models.notificationQueue.addToQueue(event._id, notificationInformation, "join")
-        updateUserStats(user, "eventsJoined")
-        updateUserStatsForFullEvent(event)
-        handleCreatorChangeForFullCurrentEvent(event, callback)
+  utils.async.waterfall([
+    function(callback) {
+      models.event.joinEvent(user, data, callback)
+    },
+    function(event, callback) {
+      if(utils._.isInvalid(event)) {
+        return callback(null, null)
       }
-    ], callback)
+      addPushNotificationToQueue(event, utils.getNotificationPlayerListForEventExceptUser(user, event), user, null, "join")
+      updateUserStats(user, "eventsJoined")
+      updateUserStatsForFullEvent(event)
+      handleCreatorChangeForFullCurrentEvent(event, callback)
+    }
+  ], callback)
 }
 
 function leaveEvent(user, data, callback) {
@@ -76,104 +66,88 @@ function leaveEvent(user, data, callback) {
 }
 
 function handleLeaveEvent(user, data, userTimeout, callback) {
-  utils.l.d('handleLeaveEvent::',data)
-  var userObj = null
-  utils.async.waterfall(
-    [
-      function(callback) {
-        models.event.leaveEvent(user, data, callback)
-      },
-      function(event, callback) {
-        models.user.getById(user._id.toString(), function(err, user) {
-
-          if(utils._.isValidNonBlank(user)) {
-            userObj = user
-            if(!userTimeout && utils._.isValidNonBlank(event) && !event.deleted) {
-              var playerLeft = [user]
-              var notificationInformation = {
-                userList: utils.convertMongooseArrayToPlainArray(playerLeft),
-                playerJoinedOrLeft: user.toObject()
-              }
-              models.notificationQueue.addToQueue(event._id, notificationInformation, "leave")
-              updateUserStats(user, "eventsLeft")
-            }
-          }
-          callback(null, event)
-        })
-      },function(event,callback){
-        // Adding event id in delete request since it helps the client identify which event was deleted
-        utils.l.d('event.deleted'+event.deleted)
-        if(utils._.isValidNonBlank(event) && event.deleted) {
-          // When the event has been deleted we want to make all fields null in firebase
-          helpers.firebase.createEventV2({_id : data.eId,clanId:event.clanId}, userObj,userTimeout)
-        } else {
-          // We do not want to track events if they are created by test users
-          if (event.creator.clanId != "forcecatalyst") {
-            helpers.m.incrementEventsLeft(user)
-          }
-          helpers.firebase.updateEventV2(event, userObj,userTimeout)
-        }
-        callback(null,event)
+  utils.l.d('handleLeaveEvent::', data)
+  utils.async.waterfall([
+    function(callback) {
+      models.event.leaveEvent(user, data, callback)
+    },
+    function(event, callback) {
+      if(!userTimeout && utils._.isValidNonBlank(event) && !event.deleted) {
+        addPushNotificationToQueue(event, [user], user, null, "leave")
       }
-    ], callback)
+      updateUserStats(user, "eventsLeft")
+      updateEventsFirebase(user, userTimeout, event)
+      helpers.m.incrementEventsLeft(user)
+      return callback(null, event)
+    },
+  ], callback)
+}
+
+function updateEventsFirebase(user, userTimeout, event) {
+  if(utils._.isValidNonBlank(event) && event.deleted) {
+    // When the event has been deleted we want to make all fields null in firebase
+    helpers.firebase.createEventV2({_id : data.eId, clanId: event.clanId}, user, userTimeout)
+  } else {
+    helpers.firebase.updateEventV2(event, user, userTimeout)
+  }
 }
 
 function listEventCountByGroups(groupIds, consoleType, callback){
-  models.event.listEventCount("clanId",{clanId:{$in:groupIds},consoleType:consoleType},callback)
+  models.event.listEventCount("clanId", {clanId: {$in: groupIds}, consoleType: consoleType}, callback)
 }
 
 function expireEvents(notifTrigger,sysConfig){
   utils.l.d("Starting expireEvents")
   utils.async.waterfall([
-      function (callback) {
-        var eventExpiryInterval = sysConfig.value || utils.config.eventExpiryInterval
-        utils.l.d('looking for events inactive for '+eventExpiryInterval+" mins")
-        var date = utils.moment().utc().add(eventExpiryInterval, "minutes")
-        var date1 = utils.moment().utc()
-        models.event.getEventsByQuery({
-            launchStatus: utils.constants.eventLaunchStatusList.now,
-            updated: {$lte: date}
-          },
-          callback)
-      },
-      function(events, callback) {
-        var totalEventsToExpire = events ? events.length: 0
-        if(totalEventsToExpire > 0) {
-          utils.async.map(events, function(event,asyncCallback) {
-            archiveEvent(event,notifTrigger,asyncCallback)
-          },function(err, updatedEvents) {
-            return callback(err, updatedEvents)
-          })
-        }else {
-          return callback(null, null)
-        }
+    function (callback) {
+      var eventExpiryInterval = sysConfig.value || utils.config.eventExpiryInterval
+      utils.l.d('looking for events inactive for ' + eventExpiryInterval + " mins")
+      var date = utils.moment().utc().add(eventExpiryInterval, "minutes")
+      models.event.getEventsByQuery({
+        launchStatus: utils.constants.eventLaunchStatusList.now,
+        updated: {$lte: date}
+      }, callback)
+    },
+    function(events, callback) {
+      var totalEventsToExpire = events ? events.length: 0
+      if(totalEventsToExpire > 0) {
+        utils.async.map(events, function(event, asyncCallback) {
+          archiveEvent(event, notifTrigger, asyncCallback)
+        }, callback)
+      } else {
+        return callback(null, null)
       }
-    ],
+    }
+  ],
     function (err, updatedEvents) {
       if (err) {
         utils.l.s("Error sending expireEvents notification::" + JSON.stringify(err))
       }
-      utils.l.i("Completed trigger expireEvents::" +utils.moment().utc().format())
+      utils.l.i("Completed trigger expireEvents::" + utils.moment().utc().format())
     }
   )
 }
 
 function archiveEvent(event,notifTrigger,callback){
   utils.async.waterfall([
-    function(callback){
-      models.archiveEvent.createArchiveEvent(event, function(err,data){})
-      models.event.removeEvent(event,callback)
+    function(callback) {
+      models.archiveEvent.createArchiveEvent(event, function(err, data) {})
+      models.event.removeEvent(event, callback)
     }
-  ],function(err,eventRemoveStatus){
-    utils.l.d('eventRemoved',utils.l.eventLog(eventRemoveStatus))
-    if(!err){
-      event.deleted=true
-      if(notifTrigger.isActive && notifTrigger.notifications.length > 0)
-        utils.async.map(notifTrigger.notifications,
-          utils._.partial(eventNotificationTriggerService.createNotificationAndSend, event, null, null))
-      helpers.firebase.createEventV2({_id : event._id, clanId : event.clanId}, null,true)
-      return callback(null,event)
-    }else return callback({error:"Error removing event.id"+event._id},null)
+  ],
+    function(err, eventRemoveStatus) {
+      utils.l.d('eventRemoved',utils.l.eventLog(eventRemoveStatus))
+      if(!err) {
+        event.deleted = true
+        if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
+          utils.async.map(notifTrigger.notifications,
+            utils._.partial(eventNotificationTriggerService.createNotificationAndSend, event, null, null))
+        }
+        helpers.firebase.createEventV2({_id: event._id, clanId: event.clanId}, null, true)
+        return callback(null, event)
+      } else {
+        return callback({error: "Error removing event.id" + event._id}, null)
+      }
   })
 }
 
@@ -208,13 +182,12 @@ function addComment(user, data, callback) {
       } else {
         utils.l.d("comment was added successfully to event", data.text)
         utils.l.eventLog(event)
-        var notificationInformation = {
-          userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
-          comment: createCommentTextForPush(user, event, data.text)
-        }
-        models.notificationQueue.addToQueue(event._id, notificationInformation, "addComment")
-        if(!utils.config.disableEnvetUpdateForComments)
+        addPushNotificationToQueue(event, utils.getNotificationPlayerListForEventExceptUser(user, event), null,
+          createCommentTextForPush(user, event, data.text), "addComment")
+
+        if(!utils.config.disableEnvetUpdateForComments) {
           helpers.firebase.updateEventV2(event, user, true)
+        }
         helpers.firebase.updateComment(event)
         return callback(null, event)
       }
@@ -227,23 +200,17 @@ function reportComment(user, data, callback) {
       models.event.getById(data.eId, callback)
     },
     function(event, callback) {
-      var formDetails = data.formDetails
-      if(formDetails) {
-        var reportDetails = {
-          reporter: user._id,
-          reporterEmail: formDetails.reporterEmail,
-          reportDetails: formDetails.reportDetails,
-          reportAdditionalInfo: {
-            eId: data.eId,
-            commentId: data.commentId
-          }
-        }
-        reportService.createReport(reportDetails, function (err, report) {
+      if(!event) {
+        return callback({error: "This event has been deleted. Please refresh"}, null)
+      }
+
+      if(data.formDetails) {
+        createReport(user, data, data.formDetails, function (err, report) {
           if(err) {
             utils.l.s("There was a problem is creating a report", err)
             return callback(null, event, false)
           } else {
-            utils.l.s("Report was created successfully for this comment", formDetails)
+            utils.l.d("Report was created successfully for this comment", data.formDetails)
             return callback(null, event, true)
           }
         })
@@ -253,11 +220,7 @@ function reportComment(user, data, callback) {
       }
     },
     function(event, isFormFilled, callback){
-      if(utils._.isInvalidOrBlank(event)) {
-        return callback({error: "Event was not found"}, null)
-      } else {
-        handleUserCommentReports(user, event, isFormFilled, callback)
-      }
+      handleUserCommentReports(user, event, isFormFilled, callback)
     },
     function(event, callback) {
       var commentObj = utils._.find(event.comments, function(comment) {
@@ -265,17 +228,10 @@ function reportComment(user, data, callback) {
       })
 
       if(utils._.isInvalidOrBlank(commentObj)) {
-        return callback({error: "Comment was not found"}, null)
+        return callback({error: "This comment has been deleted. Please refresh"}, null)
       } else {
         commentObj.isReported = true
-        models.event.updateEvent(event, function(err, updatedEvent) {
-          if(err) {
-            utils.l.s("There was a problem in reporting the comment to the database", err)
-            return callback({error: "There was some problem in reporting the comment"}, null)
-          } else {
-            return callback(null, updatedEvent)
-          }
-        })
+        models.event.updateEvent(event, callback)
       }
     }
   ],
@@ -352,6 +308,19 @@ function handleUserCommentReports(user, event, isFormFilled, callback) {
       })
     }
   ], callback)
+}
+
+function createReport(user, data, formDetails, callback) {
+  var reportDetails = {
+    reporter: user._id,
+    reporterEmail: formDetails.reporterEmail,
+    reportDetails: formDetails.reportDetails,
+    reportAdditionalInfo: {
+      eId: data.eId,
+      commentId: data.commentId
+    }
+  }
+  reportService.createReport(reportDetails, callback)
 }
 
 function createCommentTextForPush(user, event, comment) {
@@ -648,37 +617,39 @@ function invite(user, data, callback) {
   utils.async.waterfall([
     function (callback) {
       models.event.getById(data.eId, callback)
-    },function(event, callback) {
+    },
+    function(event, callback) {
       if(!event) {
         utils.l.d("No event was found for sending invite")
         return callback({error: "This event has been deleted. Please refresh"}, null)
       }
       eventObj = event
-      validateInvitees(user,data,event,callback)
-    },function(validatedInvitees,callback){
+      validateInvitees(data, event, callback)
+    },
+    function(validatedInvitees, callback) {
       handleUserInvites(eventObj, user, validatedInvitees.invitees, validatedInvitees.invitationLink, callback)
     }
   ], callback)
 }
 
-function validateInvitees(user,data,event,callback){
-  var updatedInvitees = [];
+function validateInvitees(data, event, callback) {
+  var updatedInvitees = []
   utils._.map(data.invitees,function(invitedUserGamerTag){
-    utils.l.d('utils._.includes(updatedInvitees,invitedUserGamerTag)::',utils._.includes(updatedInvitees,invitedUserGamerTag))
-    utils.l.d("utils._.find(utils._.flatten(utils._.map(event.players,'consoles')),{consoleId:invitedUserGamerTag}))",utils._.find(utils._.flatten(utils._.map(event.players,'consoles')),{consoleId:invitedUserGamerTag}))
+    utils.l.d('utils._.includes(updatedInvitees,invitedUserGamerTag)::', utils._.includes(updatedInvitees, invitedUserGamerTag))
+    utils.l.d("utils._.find(utils._.flatten(utils._.map(event.players,'consoles')),{consoleId:invitedUserGamerTag}))",
+      utils._.find(utils._.flatten(utils._.map(event.players, 'consoles')), {consoleId: invitedUserGamerTag}))
     if(!utils._.hasElement(updatedInvitees,invitedUserGamerTag) &&
-      !utils._.hasElement(utils._.map(utils._.flatten(utils._.map(event.players,'consoles')),'consoleId'),invitedUserGamerTag)) {
+      !utils._.hasElement(utils._.map(utils._.flatten(utils._.map(event.players, 'consoles')), 'consoleId'), invitedUserGamerTag)) {
       updatedInvitees.push(invitedUserGamerTag)
     }
   })
   if(utils._.isValidNonBlank(updatedInvitees)) {
     data.invitees = updatedInvitees
-    utils.l.d('updatedInvitees::',updatedInvitees)
+    utils.l.d('updatedInvitees::', updatedInvitees)
     return callback(null, data)
-  }else{
-    return callback({error:"All invitied players are already part of this event",errorType:"NO_NEW_INVITEES"}, null)
+  } else {
+    return callback({error: "All invitied players are already part of this event", errorType:"NO_NEW_INVITEES"}, null)
   }
-
 }
 
 function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, callback) {
@@ -697,25 +668,7 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
       models.user.getByQuery({'consoles.consoleId': {$in: inviteesGamertags}}, callback)
     },
     function(usersInDatabase, callback) {
-      // send bungie message and send push notification
-      if(utils._.isValidNonBlank(event) && !event.deleted) {
-        var invitedPlayers = usersInDatabase
-        var notificationInformation = {
-          //userList are players the notification should be sent to
-          userList: utils.convertMongooseArrayToPlainArray(invitedPlayers),
-          // playerJoinedorLeft is the player who will replace #PlAYER# in the message template
-          playerJoinedOrLeft: inviter.toObject()
-        }
-        models.notificationQueue.addToQueue(event._id, notificationInformation, "eventInvite")
-        sendBungieMessage(usersInDatabase, messageDetails)
-      }
-
-      var usersInDatabaseGamerTags = []
-      utils._.map(usersInDatabase, function(user) {
-        usersInDatabaseGamerTags.push(utils.primaryConsole(user).consoleId.toString())
-        invitedUserIds.push(user._id.toString())
-      })
-      return callback(null, usersInDatabaseGamerTags)
+      return handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, callback)
     },
     function(usersInDatabaseGamerTags, callback) {
       var inviteesGamertagsNotInDatabase = utils._.difference(inviteesGamertags, usersInDatabaseGamerTags)
@@ -752,6 +705,32 @@ function sendBungieMessage(userList, messageDetails) {
         }
       })
   })
+}
+
+function handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, callback) {
+// send bungie message and send push notification
+  if(utils._.isValidNonBlank(event) && ! event.deleted) {
+    addPushNotificationToQueue(event, usersInDatabase, inviter, null, "eventInvite")
+    sendBungieMessage(usersInDatabase, messageDetails)
+  }
+
+  var usersInDatabaseGamerTags = []
+  utils._.map(usersInDatabase, function(user) {
+    usersInDatabaseGamerTags.push(utils.primaryConsole(user).consoleId.toString())
+    invitedUserIds.push(user._id.toString())
+  })
+  return callback(null, usersInDatabaseGamerTags)
+}
+
+function addPushNotificationToQueue(event, userList, playerJoinedOrLeft, comment, notificationType) {
+  var notificationInformation = {
+    //userList are players the notification should be sent to
+    userList : utils._.isValidNonBlank(userList) ? utils.convertMongooseArrayToPlainArray(userList) : null,
+    // playerJoinedorLeft is the player who will replace #PlAYER# in the message template
+    playerJoinedOrLeft : playerJoinedOrLeft ? playerJoinedOrLeft.toObject() : null,
+    comment: comment
+  }
+  models.notificationQueue.addToQueue(event._id, notificationInformation, notificationType)
 }
 
 module.exports = {

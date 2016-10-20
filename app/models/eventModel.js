@@ -380,7 +380,7 @@ function updateEvent(data, callback) {
 		function(event, callback) {
 			if (!event) {
 				utils.l.d("no event found")
-				return callback({ error: "event with this id does not exist" }, null)
+				return callback({ error: "This event has been deleted. Please refresh." }, null)
 			} else {
 				utils.l.d("found event: " + JSON.stringify(event))
 				utils._.extend(event, data)
