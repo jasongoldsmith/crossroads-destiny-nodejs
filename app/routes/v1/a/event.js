@@ -189,22 +189,10 @@ function invite(req, res) {
 				})
 			},
 			function(event, userIds, callback) {
-				utils.async.mapSeries(userIds, function (userId, callback) {
-					var data = {
-						eventId: event._id.toString(),
-						inviterId: req.user._id.toString(),
-						inviteeId: userId
-					}
-					service.eventInvitationService.createInvitation(data, callback)
-				},
-					function (err, eventInvitations) {
-						if(err || utils._.isInvalidOrBlank(eventInvitations)) {
-							utils.l.s("create invitation mapSeries was unsuccessful", err)
-							return callback(err, null)
-						} else {
-							return callback(null, event)
-						}
-					})
+				createEventInvitations(userIds, event, req.user, callback)
+			},
+			function(event, callback) {
+				service.eventService.handleCreatorChangeForFullCurrentEvent(event, callback)
 			}
 		],
 			function (err, event) {
@@ -212,11 +200,30 @@ function invite(req, res) {
 					routeUtils.handleAPIError(req, res, err, err)
 				} else {
 					if(utils._.isValidNonBlank())
-						helpers.firebase.updateEventV2(event, req.user,true)
+						helpers.firebase.updateEventV2(event, req.user, true)
 					routeUtils.handleAPISuccess(req, res, event)
 				}
 			})
 	}
+}
+
+function createEventInvitations(inviteeIds, event, inviter, callback) {
+	utils.async.mapSeries(inviteeIds, function(userId, callback) {
+			var data = {
+				eventId: event._id.toString(),
+				inviterId: inviter._id.toString(),
+				inviteeId: userId
+			}
+			service.eventInvitationService.createInvitation(data, callback)
+		},
+		function(err, eventInvitations) {
+			if(err || utils._.isInvalidOrBlank(eventInvitations)) {
+				utils.l.s("create invitation mapSeries was unsuccessful", err)
+				return callback(err, null)
+			} else {
+				return callback(null, event)
+			}
+		})
 }
 
 routeUtils.rPost(router, '/create', 'createEvent', create)

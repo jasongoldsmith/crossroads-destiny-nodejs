@@ -247,36 +247,26 @@ function leaveEvent(user, data, callback) {
 		function(event, callback) {
 			if(event.players.length == 1) {
 				utils.l.d("Just one player in the event; deleting the event")
-				//Handle concurrency. If the event was found and removed before reaching this point
-				event.remove(function(err,eventRemoved){
-					utils.l.d('trying to remove event::'+JSON.stringify(data),err)
-					if(err) return callback(null,null)
-					else callback(null,eventRemoved)
+				// Handle concurrency. If the event was found and removed before reaching this point
+				event.remove(function(err, eventRemoved) {
+					utils.l.d('trying to remove event::' + JSON.stringify(data), err)
+					if(err) {
+						return callback(null, null)
+					} else {
+						callback(null, eventRemoved)
+					}
 				})
 			} else {
 				var player = utils._.remove(event.players, function(player) {
-					if (player.toString() == user._id.toString()) {
-						utils.l.d("player found")
-						return player
-					}
+					return player.toString() == user._id.toString()
 				})
-				utils.l.d("removing player")
 				event.players.remove(player)
 
 				if(event.creator.toString() == user._id.toString()) {
 					utils.l.d("player is also the creator; changing the creator to the first user in the list")
 					event.creator = event.players[0]
 				}
-
-				// Reseting the notification flags for reminders
-				if(event.maxPlayers - event.players.length == 3) {
-					event.notifStatus.remove("RaidEventLf2mNotification")
-				} else if(event.maxPlayers - event.players.length == 2) {
-					event.notifStatus.remove("EventLf1mNotification")
-				} else if(event.maxPlayers - event.players.length == 1) {
-					event.notifStatus.remove("launchEventStart")
-				}
-
+				resetNotificationFlags(event)
 				update(event, callback)
 			}
 		}
@@ -286,19 +276,34 @@ function leaveEvent(user, data, callback) {
 				utils.l.d('error removing event::'+JSON.stringify(data),err)
 				return callback(err, null)
 			} else {
-				getById(event._id, function(err,eventUpdated){
-					if(!utils._.isValidNonBlank(eventUpdated)){
-						var eventObj = event.toObject()
-						eventObj.deleted=true
-						utils.l.d('updated event with delete flag',utils.l.eventLog(eventObj))
-						return callback(err,eventObj)
-					}else{
-						return callback(err,eventUpdated)
-					}
-				})
+				handleDeletedEvent(event, callback)
 			}
 		}
 	)
+}
+
+function resetNotificationFlags(event) {
+// Reseting the notification flags for reminders
+	if(event.maxPlayers - event.players.length == 3) {
+		event.notifStatus.remove("RaidEventLf2mNotification")
+	} else if(event.maxPlayers - event.players.length == 2) {
+		event.notifStatus.remove("EventLf1mNotification")
+	} else if(event.maxPlayers - event.players.length == 1) {
+		event.notifStatus.remove("launchEventStart")
+	}
+}
+
+function handleDeletedEvent(event, callback) {
+	getById(event._id, function(err, eventUpdated) {
+		if(!utils._.isValidNonBlank(eventUpdated)) {
+			var eventObj = event.toObject()
+			eventObj.deleted = true
+			utils.l.d('updated event with delete flag', utils.l.eventLog(eventObj))
+			return callback(err, eventObj)
+		} else {
+			return callback(err, eventUpdated)
+		}
+	})
 }
 
 function deleteEvent(data, callback) {

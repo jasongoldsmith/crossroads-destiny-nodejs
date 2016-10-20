@@ -1,12 +1,14 @@
-var utils = require('../utils')
 var models = require('../models')
-var helpers = require('../helpers')
-
 
 function createInvitation(data, callback) {
   models.eventInvitation.create(data, callback)
 }
 
+function deleteInvitation(eventInvitation, callback) {
+  models.eventInvitation.delete(eventInvitation, callback)
+}
+
 module.exports = {
-  createInvitation: createInvitation
+  createInvitation: createInvitation,
+  deleteInvitation: deleteInvitation
 }

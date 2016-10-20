@@ -5,6 +5,7 @@ var eventNotificationTriggerService = require('./eventNotificationTriggerService
 var reportService = require('./reportService')
 var destinyInterface = require('./destinyInterface')
 var authService = require('./authService')
+var eventInvitationService = require('./eventInvitationService')
 
 function clearEventsForPlayer(user, launchStatus, consoleType, callback){
 
@@ -74,12 +75,41 @@ function handleLeaveEvent(user, data, userTimeout, callback) {
     function(event, callback) {
       if(!userTimeout && utils._.isValidNonBlank(event) && !event.deleted) {
         addPushNotificationToQueue(event, [user], user, null, "leave")
+        removeInvitedPlayersFromEvent(user, event, callback)
+      } else {
+        return callback(null, event)
+      }
+    }
+  ],
+    function (err, event) {
+      if(err) {
+        return callback(err, event)
       }
       updateUserStats(user, "eventsLeft")
       updateEventsFirebase(user, userTimeout, event)
       helpers.m.incrementEventsLeft(user)
-      return callback(null, event)
+      return callback(err, event)
+  })
+}
+
+function removeInvitedPlayersFromEvent(user, event, callback) {
+  utils.async.waterfall([
+    function (callback) {
+      models.eventInvitation.getByQueryPopulated({event: event._id, inviter: user._id}, callback)
     },
+    function (eventInvitationList, callback) {
+      if(utils._.isInvalidOrBlank(eventInvitationList)) {
+        return callback(null, event)
+      }
+      utils.async.mapSeries(eventInvitationList, function(eventInvitation, callback) {
+        eventInvitationService.deleteInvitation(eventInvitation, function (err, deletedEventInvitation) {
+          if(err) {
+            utils.l.s("Event invitation could not be deleted")
+          }
+        })
+        models.event.leaveEvent(eventInvitation.invitee, {eId: event._id.toString()}, callback)
+      }, utils.firstInArrayCallback(callback))
+    }
   ], callback)
 }
 
@@ -628,7 +658,7 @@ function invite(user, data, callback) {
     },
     function(validatedInvitees, callback) {
       handleUserInvites(eventObj, user, validatedInvitees.invitees, validatedInvitees.invitationLink, callback)
-    }
+    },
   ], callback)
 }
 
@@ -747,5 +777,6 @@ module.exports = {
   handleDuplicateCurrentEvent: handleDuplicateCurrentEvent,
   listEventById: listEventById,
   addUsersToEvent: addUsersToEvent,
-  invite: invite
+  invite: invite,
+  handleCreatorChangeForFullCurrentEvent: handleCreatorChangeForFullCurrentEvent
 }

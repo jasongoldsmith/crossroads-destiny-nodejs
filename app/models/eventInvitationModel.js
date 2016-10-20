@@ -20,7 +20,7 @@ function getByQueryPopulated(query, callback) {
         utils.l.s("There was a problem in getting EventInvitation populated from db", err)
         return callback({error: "There was some problem in sending the invite. Please try again later."}, null)
       } else {
-        return (err, eventInvitationList)
+        return callback(err, eventInvitationList)
       }
     })
 }
@@ -83,12 +83,20 @@ function save(eventInvitationObj, callback) {
 }
 
 function removeEventInvitation(eventInvitation, callback) {
-  eventInvitation.remove(callback)
+  eventInvitation.remove(function (err, deletedEventInvitation) {
+    if(err) {
+      utils.l.s("There was a problem in deleting event invitation", eventInvitation)
+      return callback({error: "We could not delete this user's invitation. Please try again later"}, callback)
+    } else {
+      return callback(err, deletedEventInvitation)
+    }
+  })
 }
 
 module.exports = {
   model: EventInvitation,
   getByQueryLean: getByQueryLean,
+  getByQueryPopulated: getByQueryPopulated,
   create: create,
   delete: removeEventInvitation
 }
