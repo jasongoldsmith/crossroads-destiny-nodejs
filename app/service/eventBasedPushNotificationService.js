@@ -58,6 +58,25 @@ function sendPushNotificationForLeave(event, user) {
 		})
 }
 
+function sendInviteAcceptNotification(event,playerList) {
+	utils.async.waterfall([
+		function (callback) {
+			models.notificationTrigger.getByQuery({triggerName: "eventInviteAccept"}, utils.firstInArrayCallback(callback))
+		},
+		function (notificationTrigger, callback) {
+			notificationTriggerService.handleEventInviteAccept(event, notificationTrigger, playerList, callback)
+		}
+	],
+	function (err, updatedEvent) {
+		if (err) {
+			utils.l.s("Error in sendInviteAcceptNotification::", err)
+			utils.l.i("updated event", updatedEvent)
+		} else {
+			utils.l.d("sendInviteAcceptNotification successful::", updatedEvent)
+		}
+	})
+}
+
 function sendPushNotificationForAddComment(event, playerList, comment) {
 	utils.async.waterfall([
 		function (callback) {
@@ -118,5 +137,6 @@ module.exports ={
 	sendPushNotificationForLeave: sendPushNotificationForLeave,
 	sendPushNotificationForAddComment: sendPushNotificationForAddComment,
 	sendPushNotificationForCreatorChange: sendPushNotificationForCreatorChange,
-	sendPushNotificationForEventInvites: sendPushNotificationForEventInvites
+	sendPushNotificationForEventInvites: sendPushNotificationForEventInvites,
+	sendInviteAcceptNotification:sendInviteAcceptNotification
 }

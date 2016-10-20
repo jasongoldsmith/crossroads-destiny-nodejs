@@ -268,6 +268,24 @@ function handleJoinEvent(event, notifTrigger, playerList, callback) {
   }
 }
 
+function handleEventInviteAccept(event, notifTrigger, playerList, callback) {
+  utils.l.d("Running trigger for event join", utils.l.eventLog(event))
+  if(notifTrigger.isActive) {
+    if(event.launchStatus == utils.constants.eventLaunchStatusList.now &&
+      event.players.length > 1 && event.players.length < event.maxPlayers) {
+      utils.async.map(notifTrigger.notifications,
+        utils._.partial(createNotificationAndSend, event, playerList, null))
+      utils.l.d('event in join notification::',event)
+      event.notifStatus.push("Join")
+      models.event.update(event, callback)
+    } else {
+      return callback(null, null)
+    }
+  } else {
+    return callback(null, {message: "handleJoinEvent Trigger is not active"})
+  }
+}
+
 function handleLeaveEvent(event, user, notifTrigger, callback) {
   utils.l.d("Running trigger for event leave", utils.l.eventLog(event))
   if(notifTrigger.isActive) {
@@ -444,5 +462,6 @@ module.exports ={
   handleCreatorChange: handleCreatorChange,
   handleEventInvites: handleEventInvites,
   createNotificationAndSend: createNotificationAndSend,
-  sendMultipleEventNotifications: sendMultipleEventNotifications
+  sendMultipleEventNotifications: sendMultipleEventNotifications,
+  handleEventInviteAccept:handleEventInviteAccept
 }

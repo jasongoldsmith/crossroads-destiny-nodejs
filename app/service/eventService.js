@@ -816,6 +816,28 @@ function getInviteesRegex(inviteesGamertags) {
   return inviteesRegex
 }
 
+function acceptInvite(user, eventInvitation, callback) {
+  utils.async.waterfall([
+    function (callback) {
+      models.eventInvitation.getByQueryLean({event: eventInvitation.eId, invitee: user.id}, utils.firstInArrayCallback(callback))
+    }, function (eventInvitation, callback) {
+      if (utils._.isValidNonBlank(eventInvitation))
+        models.eventInvitation.delete(eventInvitation, callback)
+      else
+        return callback({error: "Sorry that invitation is no longer valid"}, null)
+    }, function(deletedInvitation,callback){
+      models.event.getById(eventInvitation.eId,callback)
+    },function (event, callback) {
+      var notificationInformation = {
+        userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
+        playerJoinedOrLeft: user.toObject()
+      }
+      models.notificationQueue.addToQueue(eventInvitation.eId, notificationInformation, "eventInviteAccept")
+      return callback(null, event)
+    }
+  ], callback)
+}
+
 module.exports = {
   createEvent: createEvent,
   joinEvent: joinEvent,
@@ -831,5 +853,6 @@ module.exports = {
   listEventById: listEventById,
   addUsersToEvent: addUsersToEvent,
   invite: invite,
-  handleCreatorChangeForFullCurrentEvent: handleCreatorChangeForFullCurrentEvent
+  handleCreatorChangeForFullCurrentEvent: handleCreatorChangeForFullCurrentEvent,
+  acceptInvite:acceptInvite
 }
