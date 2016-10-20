@@ -199,8 +199,8 @@ function invite(req, res) {
 				if (err && err.errorType != "NO_NEW_INVITEES") {
 					routeUtils.handleAPIError(req, res, err, err)
 				} else {
-					if(utils._.isValidNonBlank())
-						helpers.firebase.updateEventV2(event, req.user, true)
+					if(utils._.isValidNonBlank(event))
+						helpers.firebase.updateEventV2(event, req.user,true)
 					routeUtils.handleAPISuccess(req, res, event)
 				}
 			})
