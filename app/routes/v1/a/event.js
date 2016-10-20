@@ -179,17 +179,17 @@ function invite(req, res) {
 			function (callback) {
 				service.eventService.invite(req.user, req.body, callback)
 			},
-			function (event, userIds, callback) {
+			function (event, userIds, userIdsInDatabase, callback) {
 				service.eventService.addUsersToEvent(event, userIds, function(err, updatedEvent) {
 					if(err) {
 						return callback(err, null)
 					} else {
-						return callback(null, event, userIds)
+						return callback(null, event, userIds, userIdsInDatabase)
 					}
 				})
 			},
-			function(event, userIds, callback) {
-				createEventInvitations(userIds, event, req.user, callback)
+			function(event, userIds, userIdsInDatabase, callback) {
+				createEventInvitations(userIds, userIdsInDatabase, event, req.user, callback)
 			},
 			function(event, callback) {
 				service.eventService.handleCreatorChangeForFullCurrentEvent(event, callback)
@@ -207,7 +207,11 @@ function invite(req, res) {
 	}
 }
 
-function createEventInvitations(inviteeIds, event, inviter, callback) {
+function createEventInvitations(inviteeIds, userIdsInDatabase, event, inviter, callback) {
+	if(process.env.acceptingInvitations == "false") {
+		inviteeIds = utils._.difference(inviteeIds, userIdsInDatabase)
+	}
+
 	utils.async.mapSeries(inviteeIds, function(userId, callback) {
 			var data = {
 				eventId: event._id.toString(),

@@ -692,13 +692,14 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
     invitationLink: invitationLink
   }
   var invitedUserIds = []
+  var userIdsInDatabase = []
 
   utils.async.waterfall([
     function(callback) {
       models.user.getByQuery({'consoles.consoleId': {$in: inviteesGamertags}}, callback)
     },
     function(usersInDatabase, callback) {
-      return handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, callback)
+      return handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, userIdsInDatabase, callback)
     },
     function(usersInDatabaseGamerTags, callback) {
       var inviteesGamertagsNotInDatabase = utils._.difference(inviteesGamertags, usersInDatabaseGamerTags)
@@ -714,7 +715,7 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
         utils._.map(newUsers, function(newUser) {
           invitedUserIds.push(newUser._id.toString())
         })
-        return callback(null, event, invitedUserIds)
+        return callback(null, event, invitedUserIds, userIdsInDatabase)
       }
     })
 }
@@ -737,7 +738,7 @@ function sendBungieMessage(userList, messageDetails) {
   })
 }
 
-function handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, callback) {
+function handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, userIdsInDatabase, callback) {
 // send bungie message and send push notification
   if(utils._.isValidNonBlank(event) && ! event.deleted) {
     addPushNotificationToQueue(event, usersInDatabase, inviter, null, "eventInvite")
@@ -748,6 +749,7 @@ function handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messag
   utils._.map(usersInDatabase, function(user) {
     usersInDatabaseGamerTags.push(utils.primaryConsole(user).consoleId.toString())
     invitedUserIds.push(user._id.toString())
+    userIdsInDatabase.push(user._id.toString())
   })
   return callback(null, usersInDatabaseGamerTags)
 }
