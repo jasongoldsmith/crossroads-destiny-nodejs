@@ -8,7 +8,12 @@ function deleteInvitation(eventInvitation, callback) {
   models.eventInvitation.delete(eventInvitation, callback)
 }
 
+function findOneAndRemove(query, callback) {
+  models.eventInvitation.findOneAndRemove(query, callback)
+}
+
 module.exports = {
   createInvitation: createInvitation,
-  deleteInvitation: deleteInvitation
+  deleteInvitation: deleteInvitation,
+  findOneAndRemove: findOneAndRemove
 }

@@ -93,10 +93,23 @@ function removeEventInvitation(eventInvitation, callback) {
   })
 }
 
+function findOneAndRemove(query, callback) {
+  EventInvitation.findOneAndRemove(query, function (err, deletedeventInvitation) {
+    if(err) {
+      return callback({error: "Something went wrong while deleting this event invitation"}, null)
+    } else if(utils._.isInvalidOrBlank(deletedeventInvitation)) {
+      return callback({error: "This event invitation does not exist"}, null)
+    } else {
+      return callback(null , deletedeventInvitation)
+    }
+  })
+}
+
 module.exports = {
   model: EventInvitation,
   getByQueryLean: getByQueryLean,
   getByQueryPopulated: getByQueryPopulated,
   create: create,
-  delete: removeEventInvitation
+  delete: removeEventInvitation,
+  findOneAndRemove: findOneAndRemove
 }

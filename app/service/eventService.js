@@ -101,6 +101,13 @@ function removeInvitedPlayersFromEvent(user, event, callback) {
       if(utils._.isInvalidOrBlank(eventInvitationList)) {
         return callback(null, event)
       }
+      // Need to remove the entry if the person leaving is an invitee
+      service.eventInvitationService.findOneAndRemove({invitee: user._id}, function (err, deletedEventInvitation) {
+        if(err) {
+          utils.l.s("Event invitation could not be deleted")
+        }
+      })
+
       utils.async.mapSeries(eventInvitationList, function(eventInvitation, callback) {
         eventInvitationService.deleteInvitation(eventInvitation, function (err, deletedEventInvitation) {
           if(err) {
