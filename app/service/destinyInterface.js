@@ -501,7 +501,7 @@ function getMessageBody(host,token,messageType,consoleType, messageDetails, call
         if(event.launchStatus == utils.constants.eventLaunchStatusList.now)
           msg = utils.constants.bungieMessages.eventInvitationCurrent.replace(/%CONSOLE_ID%/g,invitedByGamerTag).replace(/%ACTIVITY_NAME%/g,event.eType.aSubType).replace(/%EVENT_DEEPLINK%/g,invitationLink)
         else
-          msg = utils.constants.bungieMessages.eventInvitationUpcoming.replace(/%CONSOLE_ID%/g,invitedByGamerTag).replace(/%ACTIVITY_NAME%/g,event.eType.aSubType).replace(/%EVENT_DEEPLINK%/g,invitationLink).replace(/%EVENT_TIME%/g,momentTimeZone.tz(event.launchDate,"America/Los_Angeles").format("dddd, MMM Do YYYY h:m A z"))
+          msg = utils.constants.bungieMessages.eventInvitationUpcoming.replace(/%CONSOLE_ID%/g,invitedByGamerTag).replace(/%ACTIVITY_NAME%/g,event.eType.aSubType).replace(/%EVENT_DEEPLINK%/g,invitationLink).replace(/%EVENT_TIME%/g,momentTimeZone.tz(event.launchDate,"America/Los_Angeles").format("h:m A z on dddd, MMM Do"))
       }else{
         msg = utils.constants.bungieMessages.eventInvitationDefault
       }
