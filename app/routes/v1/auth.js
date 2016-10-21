@@ -169,15 +169,16 @@ function handlePostLogin(req,user,callback){
           needFirebaseUpdate=true
           service.authService.sendVerificationMessage(user,
             req.body.consoles?req.body.consoles.consoleType:utils.primaryConsole(user).consoleType,
-            utils.constants.bungieMessageTypes.accountVerification,null,"INITIATED",function(err,user){
-              utils.l.d("sent bungie message for invited user::",user)
+            utils.constants.bungieMessageTypes.accountVerification,null,"INITIATED",function(err,userToVerify){
+              utils.l.d("sent bungie message for invited user::",userToVerify)
               if(!err){
-                utils._.map(user.consoles, function(console){
+                utils._.map(userToVerify.consoles, function(console){
                   console.verifyStatus="INITIATED"
                 })
-                utils.l.d("Updated consoles for invited user::222::",user)
-              }
-              return callback(null,user)
+                return callback(null,userToVerify)
+                utils.l.d("Updated consoles for invited user::222::",userToVerify)
+              }else
+                return callback(null,user)
             })
         }else{
           return callback(null,user)
@@ -247,7 +248,7 @@ function isInvitedUser(invitation,user){
   if(utils._.isValidNonBlank(invitation) && utils._.isValidNonBlank(invitation.invitees)){
     utils.l.d('auth::isInvitedUser::1111::'+invitation.invitees)
     utils._.map(user.consoles,function(console){
-      if(utils._.indexOf(invitation.invitees,console.consoleId) >= 0) {
+      if(utils._.hasElement(invitation.invitees,console.consoleId.toString()) ) {
         utils.l.d('auth::isInvitedUser::found gamertag::'+console.consoleId)
         invitedUser = true
       }
