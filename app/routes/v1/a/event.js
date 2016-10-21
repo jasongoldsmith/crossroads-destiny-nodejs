@@ -175,10 +175,8 @@ function invite(req, res) {
 		utils.l.s("Bad request for invite request", req.body)
 		routeUtils.handleAPIError(req, res, err, err)
 	} else {
-		var data = {
-			eId: req.body.eId,
-			invitees: utils._.map(req.body.invitees, utils._.trim)
-		}
+		var data = req.body
+		data.invitees = utils._.map(data.invitees, utils._.trim)
 
 		utils.async.waterfall([
 			function (callback) {
