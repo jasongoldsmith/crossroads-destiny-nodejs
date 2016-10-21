@@ -102,7 +102,7 @@ function removeInvitedPlayersFromEvent(user, event, callback) {
         return callback(null, event)
       }
       // Need to remove the entry if the person leaving is an invitee
-      service.eventInvitationService.findOneAndRemove({invitee: user._id}, function (err, deletedEventInvitation) {
+      eventInvitationService.findOneAndRemove({invitee: user._id}, function (err, deletedEventInvitation) {
         if(err) {
           utils.l.s("Event invitation could not be deleted")
         }
@@ -703,13 +703,13 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
 
   utils.async.waterfall([
     function(callback) {
-      models.user.getByQuery({'consoles.consoleId': {$in: inviteesGamertags}}, callback)
+      models.user.getByQuery({'consoles.consoleId': {$in : getInviteesRegex(inviteesGamertags)}}, callback)
     },
     function(usersInDatabase, callback) {
       return handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, userIdsInDatabase, callback)
     },
     function(usersInDatabaseGamerTags, callback) {
-      var inviteesGamertagsNotInDatabase = utils._.difference(inviteesGamertags, usersInDatabaseGamerTags)
+      var inviteesGamertagsNotInDatabase = utils._.differenceBy(inviteesGamertags, usersInDatabaseGamerTags, utils._.toLower)
       authService.createInvitees(inviteesGamertagsNotInDatabase, utils.primaryConsole(inviter).consoleType,
         messageDetails, callback)
     }
@@ -770,6 +770,15 @@ function addPushNotificationToQueue(event, userList, playerJoinedOrLeft, comment
     comment: comment
   }
   models.notificationQueue.addToQueue(event._id, notificationInformation, notificationType)
+}
+
+function getInviteesRegex(inviteesGamertags) {
+  var inviteesRegex = []
+  utils._.map(inviteesGamertags, function(gamerTag) {
+    // We need the eval statement to trim quotes from the string
+    inviteesRegex.push(eval("/^" + gamerTag + "$/i"))
+  })
+  return inviteesRegex
 }
 
 module.exports = {
