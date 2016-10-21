@@ -435,25 +435,34 @@ function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callba
           utils.l.d("response::bungieData ", bungieData)
           var bungieJSON = bungieData
           utils.l.d("Got bungie for "+url)
-          if(bungieJSON.ErrorStatus == 'Success')
-            return callback(null,
-              {
-                bungieProfile: bungieData,
-                token: token,
-                bungieMemberShipId: bungieMemberShipId
-              }
-            )
-          else{
-            if(bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
-              utils.l.s("bungie message POST error",
-                {errorStatus: bungieJSON.ErrorStatus,
-                  url: url, msgBody: msgBody,
+          if(utils.isJson(bungieData)) {
+            if (bungieJSON.ErrorStatus == 'Success')
+              return callback(null,
+                {
+                  bungieProfile: bungieData,
                   token: token,
-                  bungieMemberShipId: bungieMemberShipId,
-                  consoleType: consoleType
-                })
+                  bungieMemberShipId: bungieMemberShipId
+                }
+              )
+            else {
+              if (bungieJSON.ErrorStatus != "UserCannotResolveCentralAccount")
+                utils.l.s("bungie message POST error",
+                  {
+                    errorStatus: bungieJSON.ErrorStatus,
+                    url: url, msgBody: msgBody,
+                    token: token,
+                    bungieMemberShipId: bungieMemberShipId,
+                    consoleType: consoleType
+                  })
+              return callback(
+                {error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g, consoleType),
+                  errorType: "BungieError"},
+                null)
+            }
+          }else{
             return callback(
-              {error: utils.constants.bungieErrorMessage(bungieJSON.ErrorStatus).replace(/%CONSOLETYPE%/g, consoleType),errorType: "BungieError"},
+              {error: utils.constants.bungieErrorMessage('NotParsableError'),
+                errorType: "BungieError"},
               null)
           }
         }

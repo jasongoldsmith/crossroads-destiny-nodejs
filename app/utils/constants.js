@@ -544,7 +544,7 @@ var bungieErrorMessage= function(messageId) {
       return "We couldn’t find a Bungie.net profile linked to the %CONSOLETYPE% you entered."
       break
     case "NotParsableError":
-      return "We couldn’t find a Bungie.net profile linked to the %CONSOLETYPE% you entered."
+      return "We are unable to contact Bungie.net. Please try again in a few minutes."
       break
     case "DestinyInvalidClaimException" || "DestinyUnexpectedError" || "DestinyShardRelayClientTimeout":
       return "We are unable to contact Bungie.net. Please try again in a few minutes."
