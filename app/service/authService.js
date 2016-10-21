@@ -205,7 +205,7 @@ function createInvitees(consoleIdList, consoleType, messageDetails, callback){
 		function(callback){
 			utils.async.mapSeries(consoleIdList,function(consoleId,asyncCallback){
 				utils.l.d("^^^^^^^^^^^^^^^^^^^^^")
-				validateConsole({
+				validateInviteeConsole({
 					consoleId: consoleId,
 					consoleType: consoleType,
 				},asyncCallback)
@@ -226,9 +226,9 @@ function createInvitees(consoleIdList, consoleType, messageDetails, callback){
 	],callback)
 }
 
-function validateConsole(console, callback){
+function validateInviteeConsole(console, callback){
 
-	userService.checkBungieAccount(console,function(err,bungieResponse){
+	userService.checkBungieAccount(console,false,function(err,bungieResponse){
 		var bungieMember = {
 			consoleId: console.consoleId,
 			consoleType: console.consoleType,

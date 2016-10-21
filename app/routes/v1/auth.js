@@ -258,7 +258,7 @@ function handleNewUser(req, callback) {
   var bungieResponse = null
   utils.async.waterfall([
     function(callback) {
-      service.userService.checkBungieAccount(body.consoles, callback)
+      service.userService.checkBungieAccount(body.consoles, true,callback)
     },
     function (bungieMember, callback) {
       bungieResponse = bungieMember
@@ -726,7 +726,7 @@ function checkBungieAccount(req, res) {
         }
         return callback(error, null)
       }
-      service.userService.checkBungieAccount(req.body, callback)
+      service.userService.checkBungieAccount(req.body, true, callback)
     }
   ],
     function(err, bungieMember) {

@@ -181,7 +181,7 @@ function addConsole(user, console, callback) {
   }
   utils.async.waterfall([
     function (callback) {
-      destinyInterface.getBungieMemberShip(console.consoleId, consoleType, null, callback)
+      destinyInterface.getBungieMemberShip(console.consoleId, consoleType, null, true,callback)
     },
     function (bungieMember, callback) {
       if(bungieMember.bungieMemberShipId.toString() != user.bungieMemberShipId.toString()) {
@@ -310,8 +310,8 @@ function updateUser(user, callback) {
   models.user.save(user, callback)
 }
 
-function checkBungieAccount(console, callback) {
-  destinyInterface.getBungieMemberShip(console.consoleId, console.consoleType, console.destinyMembershipId, function(err, bungieResponse) {
+function checkBungieAccount(console,needHelmet, callback) {
+  destinyInterface.getBungieMemberShip(console.consoleId, console.consoleType, console.destinyMembershipId, needHelmet,function(err, bungieResponse) {
     if (err) {
       return callback(err, null)
     }else if(!bungieResponse || !bungieResponse.bungieMemberShipId || utils._.isEmpty(bungieResponse.bungieMemberShipId)){
@@ -359,7 +359,7 @@ function getNewUserData(password,clanId,mpDistinctId,refreshedMixPanel,bungieRes
       consoleObj.destinyMembershipId = destinyAccount.destinyMembershipId
       consoleObj.consoleId=destinyAccount.destinyDisplayName
       consoleObj.clanTag=destinyAccount.clanTag
-      consoleObj.imageUrl = utils.config.bungieBaseURL + "/" +destinyAccount.helmetUrl
+      consoleObj.imageUrl = utils._.isValidNonBlank(destinyAccount.helmetUrl)?utils.config.bungieBaseURL + "/" +destinyAccount.helmetUrl:utils.config.defaultHelmetUrl
       if(consoleObj.consoleType == consoleType)
         consoleObj.isPrimary = true
       else

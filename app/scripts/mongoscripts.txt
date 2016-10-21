@@ -293,3 +293,28 @@ db.getCollection('users').aggregate([
     }
 ])
 //------------END-------------
+
+//------------BEGIN-------------
+//--------------EVENT INVITE NOTIFICATION----------
+{
+    "_id" : ObjectId("58093e3aea3c9f83c47b8a5e"),
+    "name" : "eventInviteAccept",
+    "messageTemplate" : "#PLAYER# has accepted invitation for #EVENT_NAME#",
+    "recipientType" : "knownUsers",
+    "isActive" : true,
+    "__v" : 0
+}
+
+//--------------EVENT INVITE NOTIFICATIONTRIGGER----------
+{
+    "_id" : ObjectId("58093de2ea3c9f83c47b8a5d"),
+    "triggerName" : "eventInviteAccept",
+    "schedule" : "*/2 * * * *",
+    "type" : "schedule",
+    "isActive" : true,
+    "notifications" : [
+        ObjectId("58093e3aea3c9f83c47b8a5e")
+    ],
+    "__v" : 0
+}
+//------------END-------------

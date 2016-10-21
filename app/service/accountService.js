@@ -38,7 +38,7 @@ function refreshHelmentAndConsoles(user,callback){
   var consoleReq = utils.primaryConsole(user)
   utils.async.waterfall([
     function(callback) {
-      userService.checkBungieAccount(consoleReq, callback)
+      userService.checkBungieAccount(consoleReq, true, callback)
     },
     function(bungieResponse, callback) {
       userService.refreshConsoles(user, bungieResponse, consoleReq, callback)

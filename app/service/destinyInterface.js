@@ -49,7 +49,7 @@ function getBungieVariables(callback) {
  * 1. Make destinySearch call for displayname
  * 2. Using the result from search take membershipType and call GetBungieAccount API to bungie membershipcode
  * */
-function getBungieMemberShip(consoleId, consoleType, destinyMembershipId, callback){
+function getBungieMemberShip(consoleId, consoleType, destinyMembershipId, needHelmet, callback){
   var destinyProfile = null
   var bungieResponse = {}
   utils.async.waterfall([
@@ -65,7 +65,7 @@ function getBungieMemberShip(consoleId, consoleType, destinyMembershipId, callba
       getAccountDetails(bungieAcct,'all',callback)
     },function(accountDetails,callback){
       bungieResponse.bungieMemberShipId = accountDetails.bungieNetUser.membershipId
-      getDestinyAccounts(accountDetails,callback)
+      getDestinyAccounts(accountDetails,needHelmet,callback)
     },function(destinyAccounts,callback){
       bungieResponse.destinyProfile = destinyAccounts
       return callback(null, bungieResponse)
@@ -161,27 +161,9 @@ function getAccountDetails(bungieAcct,acctType,callback){
   return callback(null,bungieAcctResponse)
 }
 
-function getDestinyAccounts(accountDetail,callback){
-/*
-  var destinyAccounts = []
-  if(!utils._.isInvalidOrBlank(accountDetail.destinyAccounts)) {
-    utils._.map(accountDetail.destinyAccounts, function(account){
-      var destinyUserInfo = {}
-      destinyUserInfo.clanTag= account.userInfo.clanTag
-      destinyUserInfo.destinyMembershipId = account.userInfo.memberShipId
-      destinyUserInfo.destinyMembershipType = account.userInfo.membershipType
-      destinyUserInfo.destinyDisplayName=account.userInfo.displayName
-
-      getBungieHelmetByCharacter(account,function(err,data){
-        destinyUserInfo.helmetUrl = data
-      })
-      destinyAccounts.push(destinyUserInfo)
-    })
-  }
-  return callback(null,destinyAccounts)
-*/
+function getDestinyAccounts(accountDetail,needHelmet,callback){
   utils.async.mapSeries(accountDetail.destinyAccounts, function(account,asyncCallback) {
-    getDestinyDetails(account, accountDetail.clans, accountDetail.relatedGroups, asyncCallback)
+    getDestinyDetails(account, accountDetail.clans, accountDetail.relatedGroups, needHelmet,asyncCallback)
   },function(err, destinyAccounts) {
     return callback(err, destinyAccounts)
   })
@@ -244,7 +226,7 @@ function getBungieHelmet(consoleId, consoleType, destinyMembershipId, callback){
 }
 
 
-function getDestinyDetails(account, clans, relatedGroups,callback){
+function getDestinyDetails(account, clans, relatedGroups,needHelmet,callback){
   var destinyUserInfo = {}
   destinyUserInfo.clanTag= getClanTagFromGroups(account,clans,relatedGroups)
   destinyUserInfo.destinyMembershipId = account.userInfo.membershipId
@@ -253,15 +235,18 @@ function getDestinyDetails(account, clans, relatedGroups,callback){
 
   utils.async.waterfall([
       function(callback){
-        var character =  getRecentlyPlayedCharacterByAccount(account)
-        var bungieItemsURL = utils.config.bungieItemsURL
-          .replace(/%MEMBERSHIPTYPE%/g, character.membershipType)
-          .replace(/%MEMBERSHIPID%/g, character.membershipId)
-          .replace(/%CHARACTERID%/g, character.characterId);
-        var consoleType = utils._.get(utils.constants.newGenConsoleType,account.userInfo.memberShipType)
-        bungieGet(bungieItemsURL, account.userInfo.displayName,utils._.get(utils.constants.consoleGenericsId, consoleType),callback)
+        if(needHelmet) {
+          var character = getRecentlyPlayedCharacterByAccount(account)
+          var bungieItemsURL = utils.config.bungieItemsURL
+            .replace(/%MEMBERSHIPTYPE%/g, character.membershipType)
+            .replace(/%MEMBERSHIPID%/g, character.membershipId)
+            .replace(/%CHARACTERID%/g, character.characterId);
+          var consoleType = utils._.get(utils.constants.newGenConsoleType, account.userInfo.memberShipType)
+          bungieGet(bungieItemsURL, account.userInfo.displayName, utils._.get(utils.constants.consoleGenericsId, consoleType), callback)
+        }else
+          callback(null,null)
       },function(itemDefinitions, callback){
-        var itemDefJSON = JSON.parse(itemDefinitions)
+        var itemDefJSON = utils._.isValidNonBlank(itemDefinitions)?JSON.parse(itemDefinitions):null
         if(itemDefJSON && itemDefJSON.Response && itemDefJSON.Response.definitions && itemDefJSON.Response.definitions.items){
           var helmetURL = getHelmentURL(itemDefJSON.Response.definitions.items)
           utils.l.d("helmetURL::"+helmetURL)
