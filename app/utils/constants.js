@@ -582,6 +582,10 @@ var existingUserInstallData = {
   ads:"mvpUser/mvpCampaign/mvpAd/mvpCreative"
 }
 
+var invitedUserInstallData = {
+  ads:"invitedUser/inviteCampaign/invitepAd/inviteCreative"
+}
+
 var sysConfigKeys = {
   awsSNSAppArn:'app_%DEVICE_TYPE%_%ENV%_%GROUP%_%CONSOLETYPE%',
   awsSNSTopicArn:'topic_%ENV%_%GROUP%_%CONSOLETYPE%',
@@ -626,5 +630,6 @@ module.exports = {
   eventStatus: eventStatus,
   notificationQueueTypeEnum: notificationQueueTypeEnum,
   existingUserInstallData:existingUserInstallData,
-  newGenConsoleType:newGenConsoleType
+  newGenConsoleType:newGenConsoleType,
+  invitedUserInstallData:invitedUserInstallData
 }

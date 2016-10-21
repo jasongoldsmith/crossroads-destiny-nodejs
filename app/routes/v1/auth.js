@@ -145,6 +145,7 @@ function login (req, res) {
 
 function handlePostLogin(req,user,callback){
   var needFirebaseUpdate = false;
+  var isInvitedUserInstall = false;
   utils.async.waterfall([
     function(callback){
       models.user.getById(user._id,callback)
@@ -153,6 +154,8 @@ function handlePostLogin(req,user,callback){
       if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED" ||  user.verifyStatus == "INITIATED")){
         user.passWord = passwordHash.generate(req.body.passWord)
         if(isInvitedUser(req.body.invitation,user)) { //if the invited user clicks invitiation deep link from branch mark them verified.
+          if(user.verifyStatus != "INITIATED")
+            isInvitedUserInstall=true
           user.verifyStatus = "VERIFIED"
           utils._.map(user.consoles, function (console) {
             console.verifyStatus = "VERIFIED"
@@ -205,7 +208,7 @@ function handlePostLogin(req,user,callback){
       if(updateMpDistinctId){// An existing user logging for first time after installing the app. Create mp user
         req.zuid = user._id
         req.adata.distinct_id=user._id
-        service.trackingService.trackUserLogin(req,user,updateMpDistinctId,existingUserZuid,function(err,data){
+        service.trackingService.trackUserLogin(req,user,updateMpDistinctId,existingUserZuid,isInvitedUserInstall,function(err,data){
           utils.l.d('*********************auth:111::err',err)
           utils.l.d('*********************auth:111::data',data)
           if(!err){

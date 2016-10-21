@@ -147,7 +147,7 @@ function needMPIdfresh(req,user){
   return updateMpDistinctId
 }
 
-function trackUserLogin(req, user,updateMpDistinctId,existingMPUserId, callback) {
+function trackUserLogin(req, user,updateMpDistinctId,existingMPUserId,isInvitedUserInstall, callback) {
   if(updateMpDistinctId) {
     if(user._id.toString() != existingMPUserId.toString()) {
       helpers.m.removeUser(existingMPUserId, callback)
@@ -160,7 +160,10 @@ function trackUserLogin(req, user,updateMpDistinctId,existingMPUserId, callback)
     data.trackingData.distinct_id = user._id
     // expecting trackingData.ads to be in the format "/<source>/<campaign>/<ad>/<creative>?sasda"
     // We have to maintain this order as it is sent by fb and branch as a deep link
-    utils._.extend(data.trackingData, utils.constants.existingUserInstallData)
+    if(isInvitedUserInstall)
+      utils._.extend(data.trackingData, utils.constants.invitedUserInstallData)
+    else
+      utils._.extend(data.trackingData, utils.constants.existingUserInstallData)
 
     parseAdsData(data)
     helpers.m.setUserAliasAndSource(req, data.trackingData, callback)
