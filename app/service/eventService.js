@@ -86,7 +86,7 @@ function handleLeaveEvent(user, data, userTimeout, callback) {
         return callback(err, event)
       }
       updateUserStats(user, "eventsLeft")
-      updateEventsFirebase(user, userTimeout, event)
+      updateEventsFirebase(user, userTimeout, event,data)
       helpers.m.incrementEventsLeft(user)
       return callback(err, event)
   })
@@ -120,7 +120,7 @@ function removeInvitedPlayersFromEvent(user, event, callback) {
   ], callback)
 }
 
-function updateEventsFirebase(user, userTimeout, event) {
+function updateEventsFirebase(user, userTimeout, event,data) {
   if(utils._.isValidNonBlank(event) && event.deleted) {
     // When the event has been deleted we want to make all fields null in firebase
     helpers.firebase.createEventV2({_id : data.eId, clanId: event.clanId}, user, userTimeout)
