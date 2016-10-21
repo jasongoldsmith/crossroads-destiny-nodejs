@@ -507,7 +507,7 @@ function listEventById(data, callback) {
 }
 
 function handleCreatorChangeForFullCurrentEvent(event, callback) {
-  if(event.status == "full" && event.launchStatus == "now") {
+  if(utils._.isValidNonBlank(event) && event.status == "full" && event.launchStatus == "now") {
     utils.async.waterfall([
       function (callback) {
         addIsActiveFlagToEventPlayers(event, callback)
