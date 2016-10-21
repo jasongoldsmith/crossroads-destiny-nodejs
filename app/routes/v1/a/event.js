@@ -228,7 +228,7 @@ function createEventInvitations(inviteeIds, userIdsInDatabase, event, inviter, c
 		function(err, eventInvitations) {
 			if(err || utils._.isInvalidOrBlank(eventInvitations)) {
 				utils.l.s("create invitation mapSeries was unsuccessful", err)
-				return callback(err, null)
+				return callback(err, event)
 			} else {
 				return callback(null, event)
 			}
