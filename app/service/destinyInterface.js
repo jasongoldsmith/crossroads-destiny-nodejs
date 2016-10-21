@@ -435,7 +435,7 @@ function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callba
           utils.l.d("response::bungieData ", bungieData)
           var bungieJSON = bungieData
           utils.l.d("Got bungie for "+url)
-          if(utils.isJson(bungieData)) {
+          //if(utils.isJson(bungieData)) {
             if (bungieJSON.ErrorStatus == 'Success')
               return callback(null,
                 {
@@ -459,12 +459,12 @@ function bungiePost(url, msgBody, token, bungieMemberShipId, consoleType, callba
                   errorType: "BungieError"},
                 null)
             }
-          }else{
+          /*}else{
             return callback(
               {error: utils.constants.bungieErrorMessage('NotParsableError'),
                 errorType: "BungieError"},
               null)
-          }
+          }*/
         }
       })
     }
