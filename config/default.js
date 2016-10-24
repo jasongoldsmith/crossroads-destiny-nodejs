@@ -78,7 +78,7 @@ var defaults = {
   placeholder_versionString: "VERSIONSTRING",
   upgradeTitle: process.env.upgradeTitle,
   googleAPIKey: process.env.googleAPIKey,
-  enableBungieIntegration: true,
+  enableBungieIntegration: process.env.enableBungieIntegration|| true,
   bungieCrsRdAppId:"13495568",
   bungieAPIToken:"b5518df2a3a04cafb16c1d34a5f4295e",
   bungieCSRFToken:"7968073564440830385",

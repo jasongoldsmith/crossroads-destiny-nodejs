@@ -337,7 +337,7 @@ function createNewUser(req, bungieResponse, callback) {
       },
       function (uid, callback) {
         userData._id = uid
-        service.authService.createNewUser(userData,true,"INITIATED",utils.constants.bungieMessageTypes.accountVerification,null, callback)
+        service.authService.createNewUser(userData,utils.config.enableBungieIntegration,"INITIATED",utils.constants.bungieMessageTypes.accountVerification,null, callback)
       },
       reqLoginWrapper(req, "auth.login")
     ],

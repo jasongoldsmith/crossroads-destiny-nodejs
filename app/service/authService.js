@@ -275,7 +275,7 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 		userData.consoles = consolesList
 		userData.verifyStatus = bungieMembership.verifyStatus
 	}else{
-		validateBungie = true
+		validateBungie = utils.config.enableBungieIntegration
 		userData = userService.getNewUserData("crossroads",utils.constants.freelanceBungieGroup.groupId,null,false,bungieMembership,consoleType)
 		userData.verifyStatus = bungieMembership.verifyStatus
 		utils._.map(userData.consoles, function(console){

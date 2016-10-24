@@ -728,21 +728,24 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
 }
 
 function sendBungieMessage(userList, messageDetails) {
-  utils._.map(userList, function (user) {
-    var userPrimaryConsole = utils.primaryConsole(user)
-    destinyInterface.sendBungieMessageV2(
-      user.bungieMemberShipId,
-      utils._.get(utils.constants.consoleGenericsId, userPrimaryConsole.consoleType),
-      utils.constants.bungieMessageTypes.eventInvitation,
-      messageDetails,
-      function(err, response) {
-        if(err) {
-          utils.l.i("There was an error in sending a message to this crossroads user", user)
-        } else {
-          utils.l.d("Message was sent successfully to this crossroads user", response)
-        }
-      })
-  })
+  if(utils.config.enableBungieIntegration) {
+    utils._.map(userList, function (user) {
+      var userPrimaryConsole = utils.primaryConsole(user)
+      destinyInterface.sendBungieMessageV2(
+        user.bungieMemberShipId,
+        utils._.get(utils.constants.consoleGenericsId, userPrimaryConsole.consoleType),
+        utils.constants.bungieMessageTypes.eventInvitation,
+        messageDetails,
+        function (err, response) {
+          if (err) {
+            utils.l.i("There was an error in sending a message to this crossroads user", user)
+          } else {
+            utils.l.d("Message was sent successfully to this crossroads user", response)
+          }
+        })
+    })
+  }else
+    utils.l.d('Bungie messaging disabled. No messages sent.')
 }
 
 function handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, userIdsInDatabase, callback) {
