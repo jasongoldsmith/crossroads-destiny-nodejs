@@ -112,8 +112,12 @@ function sendVerificationMessage(signupData,consoleType,messageType,messageDetai
 					if(messageType == utils.constants.bungieMessageTypes.eventInvitation){
 						signupData.verifyStatus = "INVITATION_MSG_FAILED"
 						return callback(null, signupData)
-					}else
+					}else if(messageType == utils.constants.bungieMessageTypes.accountVerification){
+						signupData.verifyStatus = "FAILED_INITIATION"
+						return callback(null, signupData)
+					}else{
 						return callback(error, null) //This is the case where user is signing up in the normal flow
+					}
 				}
 			})
 
@@ -136,8 +140,13 @@ function sendVerificationMessageV2(signupData,consoleType,messageType,messageDet
 					if(messageType == utils.constants.bungieMessageTypes.eventInvitation){
 						signupData.verifyStatus = "INVITATION_MSG_FAILED"
 						return {error:null, value:signupData}
-					}else
+					}else if(messageType == utils.constants.bungieMessageTypes.accountVerification){
+						signupData.verifyStatus = "FAILED_INITIATION"
+						return {error:null, value:signupData}
+						//return {error:error, value:null}
+					}else{
 						return {error:error, value:null}
+					}
 				}
 			})
 
