@@ -299,6 +299,21 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 	})
 }
 
+function handleBungieResponse(data, callback) {
+	switch(data.request) {
+		case "login":
+			handleUserLogin(data.bungieResponse, callback)
+			break
+		default:
+			utils.l.i("We do not support this bungie request yet", data.request)
+			return callback({error: "Something went wrong. Please try again later."}, null)
+	}
+}
+
+function handleUserLogin(bungieResponse, callback) {
+	return callback(null, bungieResponse)
+}
+
 module.exports = {
 	signupUser: signupUser,
 	requestResetPassword: requestResetPassword,
@@ -307,5 +322,6 @@ module.exports = {
 	createNewUser: createNewUser,
 	createInvitees: createInvitees,
 	sendVerificationMessage:sendVerificationMessage,
-	sendVerificationMessageV2:sendVerificationMessageV2
+	sendVerificationMessageV2:sendVerificationMessageV2,
+	handleBungieResponse: handleBungieResponse
 }

@@ -30,117 +30,35 @@ function login (req, res) {
             return callback(err, null)
           } else if (!user) {
             handleNewUser(req, callback)
-          }else {
+          } else {
             return callback(null, user)
           }
         })
         passportHandler(req, res)
       },
       function (user, callback) {
-        handlePostLogin(req,user,callback)
- /*       models.user.getById(user._id, function (err, user) {
-        user.isLoggedIn = true
-          //If the user is invited or invited but unable to send verification message, need to convert them as real users when logged in.
-          if((user.verifyStatus == "INVITED" || user.verifyStatus == "INVITATION_MSG_FAILED") ){
-            if(utils._.isValidNonBlank(req.body.invitations)) { //if the invited user clicks invitiation deep link from branch mark them verified.
-              user.verifyStatus = "VERIFIED"
-              utils._.map(user.consoles, function(console){
-                console.verifyStatus="VERIFIED"
-              })
-            }
-            else{
-              //if the user downloads app and signin treat them as regular user. Send bungie account verification link.
-              //If message send fails keep the status as invited, so next login attempt will resent bungie message.
-              //var bungieMsgResponse =
-                service.authService.sendVerificationMessage(user,
-                req.body.consoles?req.body.consoles.consoleType:utils.primaryConsole(user).consoleType,
-                utils.constants.bungieMessageTypes.accountVerification,
-                null,
-                "INITIATED",
-              function(err,data){
-
-                  utils.l.d("sent bungie message for invited user::",data)
-                  if(!err){
-                    utils._.map(data.consoles, function(console){
-                      console.verifyStatus="INITIATED"
-                    })
-
-                    utils.l.d("Updated consoles for invited user::",data)
-                    utils.l.d("Updated consoles for invited user::222::",user)
-
-                  }
-                }
-              )
-            }
-            user.passWord = passwordHash.generate(req.body.passWord)
-          }
-
-          //User has multiple consoles and logged in with a consoleId other than primary console that was set during previous login.
-          if(req.body.consoles)
-            service.userService.setPrimaryConsoleAndHelmet(user,req.body.consoles)
-
-          var primaryConsole = utils.primaryConsole(user)
-          if(utils._.isInvalidOrBlank(user.verifyStatus)){
-            user.verifyStatus = primaryConsole.verifyStatus
-            user.verifyToken = primaryConsole.verifyToken
-          }
-
-          //Set legal boolean attributes as transient data as we dont need to save this in DB.
-          service.authService.addLegalAttributes(user, function(err, data){
-             outerUser = data
-          })
-
-          var updateMpDistinctId = service.trackingService.needMPIdfresh(req,user)
-          var existingUserZuid = req.zuid
-          if(updateMpDistinctId){// An existing user logging for first time after installing the app. Create mp user
-            req.zuid = user._id
-            req.adata.distinct_id=user._id
-            service.trackingService.trackUserLogin(req,user,updateMpDistinctId,existingUserZuid,function(err,data){
-              utils.l.d('*********************auth:111::err',err)
-              utils.l.d('*********************auth:111::data',data)
-              if(!err){
-                utils.l.d('setting mp refresh data')
-                var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
-                user.mpDistinctId = mpDistincId
-                user.mpDistinctIdRefreshed=true
-              }
-              utils.l.d("***************Saving user:::::",user)
-              models.user.save(user, callback)
-            })
-          }else {// An existing user logging in either as a result of log out or app calling login when launched.
-            utils.l.d("***************else::Saving user:::::", user)
-            req.zuid = user._id
-            req.adata.distinct_id=user._id
-            if(existingUserZuid.toString() != user._id.toString()){
-              //app calling due to log out then zuid and user._id are different.
-              // With logout cookie is cleared and next api call will issue new zuid
-              // Fire appInit and remove mp user created due to new session id.
-              helpers.m.removeUser(existingUserZuid)
-              helpers.m.incrementAppInit(req)
-              helpers.m.trackRequest("appInit", {}, req, user)
-            }
-            models.user.save(user, callback)
-          }
-        })*/
-      },function(user,callback){
-        service.authService.addLegalAttributes(user, function(err, data){
+        handlePostLogin(req, user, callback)
+      },
+      function(user,callback) {
+        service.authService.addLegalAttributes(user, function(err, data) {
           outerUser = data
-          callback(null,user)
+          return callback(null, user)
         })
-      }
-      ,reqLoginWrapper(req, "auth.login")
+      },
+      reqLoginWrapper(req, "auth.login")
     ],
-    function (err) {
-      if (err) {
-        return routeUtils.handleAPIError(req, res, err, err)
+      function (err) {
+        if (err) {
+          return routeUtils.handleAPIError(req, res, err, err)
+        } else {
+          routeUtils.handleAPISuccess(req, res,
+            {
+              value: outerUser,
+              message: getSignupMessage(outerUser)
+            })
+        }
       }
-      routeUtils.handleAPISuccess(req, res,
-        {
-          value: outerUser,
-          message: getSignupMessage(outerUser)
-        })
-    }
-  )
+    )
 }
 
 function handlePostLogin(req,user,callback){
@@ -743,6 +661,24 @@ function checkBungieAccount(req, res) {
   )
 }
 
+function handleBungieResponse(req, res) {
+  utils.l.d("handleBungieResponse request", req.body)
+  var data = req.body
+  if(!data.request || !data.bungieResponse) {
+    utils.l.s("Bad handleBungieResponse request")
+    var err = {error: "Something went wrong. Please try again later."}
+    routeUtils.handleAPIError(req, res, err, err)
+  } else {
+    service.authService.handleBungieResponse(req.body, function (err, response) {
+      if(err) {
+        routeUtils.handleAPIError(req, res, err, err)
+      } else {
+        routeUtils.handleAPISuccess(req, res, response)
+      }
+    })
+  }
+}
+
 /** Routes */
 routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
@@ -756,5 +692,6 @@ routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', reque
 routeUtils.rPost(router, '/resetPassword/:token', 'resetPassword', resetPassword, resetPassword)
 routeUtils.rGet(router,'/','homePage',home,home)
 routeUtils.rPost(router, '/checkBungieAccount', 'checkBungieAccount', checkBungieAccount)
+routeUtils.rPost(router, '/handleBungieResponse', 'handleBungieResponse', handleBungieResponse)
 module.exports = router
 
