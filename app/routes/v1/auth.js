@@ -61,30 +61,31 @@ function login (req, res) {
     )
 }
 
-function handleBungieResponse(req, res) {
+function validateUserLogin(req, res) {
   utils.l.d("handleBungieResponse request", req.body)
   var data = req.body
-  var err = {error: "Something went wrong. Please try again later."}
+  var outerUser = null
 
-  if(!data.requestType || !data.bungieResponse) {
+  if(!data.bungieResponse || !data.bungieResponse.Response || !data.bungieResponse.Response.user || !data.consoleType) {
     utils.l.s("Bad handleBungieResponse request")
+    var err = {error: "Something went wrong. Please try again later."}
     routeUtils.handleAPIError(req, res, err, err)
     return
   }
 
-  switch(data.requestType) {
-    case "login":
-      handleBungieLogin(req, res)
-      break
-    default:
-      utils.l.i("We do not support this bungie request yet", data.request)
-      routeUtils.handleAPIError(req, res, err, err)
-  }
-}
+  var gamerTag = utils._.isValidNonBlank(data.bungieResponse.Response.psnId) ?
+    data.bungieResponse.Response.psnId : data.bungieResponse.Response.gamerTag
 
-function handleBungieLogin(req, res) {
-  var data = req.body
-  var outerUser = null
+  if(!data.bungieResponse.ErrorStatus || data.bungieResponse.ErrorStatus != "Success") {
+    var err = {
+      error: utils.constants.bungieErrorMessage(data.bungieResponse.ErrorStatus)
+        .replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, data.consoleType))
+        .replace(/%GAMERID%/g, gamerTag),
+      errorType: "BungieLoginError"
+    }
+    routeUtils.handleAPIError(req, res, err, err)
+    return
+  }
 
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
@@ -245,6 +246,8 @@ function isInvitedUser(invitation,user){
 function handleNewUserV2(req, callback) {
   var bungieResponse = req.body.bungieResponse
   var consoles = []
+  // Due to the old login flow we parsed another bungie API to lookup a user
+  // We need the trimmedBungieResponse to be in this format to be parsed correctly
   if(utils._.isValidNonBlank(bungieResponse.Response.psnId)) {
     consoles.push({
       destinyDisplayName: bungieResponse.Response.psnId,
@@ -747,6 +750,6 @@ routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', reque
 routeUtils.rPost(router, '/resetPassword/:token', 'resetPassword', resetPassword, resetPassword)
 routeUtils.rGet(router,'/','homePage',home,home)
 routeUtils.rPost(router, '/checkBungieAccount', 'checkBungieAccount', checkBungieAccount)
-routeUtils.rPost(router, '/handleBungieResponse', 'handleBungieResponse', handleBungieResponse)
+routeUtils.rPost(router, '/validateUserLogin', 'validateUserLogin', validateUserLogin)
 module.exports = router
 
