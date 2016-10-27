@@ -49,13 +49,15 @@ function getBungieVariables(callback) {
  * 1. Make destinySearch call for displayname
  * 2. Using the result from search take membershipType and call GetBungieAccount API to bungie membershipcode
  * */
-function getBungieMemberShip(consoleId, consoleType, destinyMembershipId, needHelmet, callback){
+function getBungieMemberShip(consoleId, consoleType, destinyMembership, needHelmet, callback){
   var destinyProfile = null
   var bungieResponse = {}
   utils.async.waterfall([
     function(callback){
-      if(utils._.isValidNonBlank(destinyMembershipId))
-        callback(null,{memberShipId:destinyMembershipId,memberShipType:getBungieMembershipType(consoleType)})
+      if(utils._.isValidNonBlank(destinyMembership) && utils._.isValidNonBlank(destinyMembership.memberShipType))
+        callback(null,{memberShipId:destinyMembership.memberShipId,memberShipType:getBungieMembershipType(destinyMembership.memberShipType)})
+      else if(utils._.isValidNonBlank(destinyMembership))
+        callback(null,{memberShipId:destinyMembership,memberShipType:getBungieMembershipType(consoleType)})
       else
         getDestinyProfileByConsole(consoleId,consoleType,callback)
     },function(destinyProfileResp,callback){
@@ -375,7 +377,7 @@ function bungieGet(url, gamerId, consoleType, callback){
       utils.l.s("Error getting bungie for url "+url+" and error is::----"+error)
       return callback(error,null)
     } else {
-      utils.l.d('bungie GET for url::'+url)
+      utils.l.d('bungie GET for url::'+url,bungieData)
       if(utils.isJson(bungieData)) {
         var bungieJSON = JSON.parse(bungieData)
         utils.l.d("bungie error status: "+bungieJSON.ErrorStatus)
@@ -593,5 +595,6 @@ module.exports = {
   sendBungieMessage: sendBungieMessage,
   sendBungieMessageV2:sendBungieMessageV2,
   listBungieGroupsJoined: listBungieGroupsJoined,
-  getBungieHelmet:getBungieHelmet
+  getBungieHelmet:getBungieHelmet,
+  getBungieAccount:getBungieAccount
 }

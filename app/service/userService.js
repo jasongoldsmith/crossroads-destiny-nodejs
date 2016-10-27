@@ -4,6 +4,7 @@ var eventService = require('./eventService')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
 var destinyInterface = require('./destinyInterface')
 var passwordHash = require('password-hash')
+var helpers = require('../helpers')
 
 function preUserTimeout(notifTrigger,sysConfig){
   utils.l.d("Starting preUserTimeout")
@@ -373,6 +374,58 @@ function getNewUserData(password, clanId, mpDistinctId, refreshedMixPanel,
   return userData
 }
 
+//Used to update destiny/bungie profile info for a given user object
+function updateUserConsoles(userToupdate){
+  utils.l.d("updateUserConsoles::Entry user",userToupdate)
+  var primaryConsole = utils.primaryConsole(userToupdate)
+  var userObj = null
+  utils.async.waterfall([
+    function(callback){
+      models.user.getById(userToupdate._id,callback)
+    },
+    function(user,callback){
+      if(utils._.isValidNonBlank(user))
+        userObj = user
+      else
+        return callback({error:"No userfound for id"+userToupdate._id},null)
+      var destinyProfile = {
+        memberShipId:user.bungieMemberShipId,
+        memberShipType:"bungieNetUser"
+      }
+      if(utils._.isValidNonBlank(primaryConsole))
+        destinyInterface.getBungieMemberShip(primaryConsole.consoleId,primaryConsole.consoleType,destinyProfile,true,callback)
+      else
+        return callback({error:"No console found for the user"},null)
+    },function(bungieResponse,callback){
+      utils.l.d('updateUserConsoles:bungieResponse',bungieResponse)
+      if (utils._.isValidNonBlank(bungieResponse) && utils._.isValidNonBlank(bungieResponse.destinyProfile)) {
+        utils._.map(bungieResponse.destinyProfile, function(destinyAccount) {
+          utils.l.d('updateUserConsoles::destinyAccount',destinyAccount)
+          var userConsoleType = utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
+          var userConsole = utils.getUserConsoleObject(userObj,userConsoleType)
+          if(utils._.isValidNonBlank(userConsole)) {
+            userConsole.destinyMembershipId = destinyAccount.destinyMembershipId
+            userConsole.consoleId = destinyAccount.destinyDisplayName
+            userConsole.clanTag = destinyAccount.clanTag
+            userConsole.imageUrl = utils.config.bungieBaseURL + "/" + destinyAccount.helmetUrl
+            userConsole.verifyStatus = userObj.verifyStatus ? userObj.verifyStatus : "INITIATED"
+          }
+        })
+
+        utils.l.d("updateUserConsoles::after updating user",userObj)
+        models.user.save(userObj,callback)
+      }else{
+        callback(null,userObj)
+      }
+    }
+  ],function(err,data){
+    if(err || userObj==null)
+      utils.l.i("Error updating bungie profile for user. Please try again later",err)
+    else
+      helpers.firebase.updateUser(userObj)
+  })
+}
+
 module.exports = {
   userTimeout: userTimeout,
   preUserTimeout: preUserTimeout,
@@ -383,5 +436,6 @@ module.exports = {
   setLegalAttributes:setLegalAttributes,
   refreshConsoles:refreshConsoles,
   setPrimaryConsoleAndHelmet:setPrimaryConsoleAndHelmet,
-  getNewUserData:getNewUserData
+  getNewUserData:getNewUserData,
+  updateUserConsoles:updateUserConsoles
 }

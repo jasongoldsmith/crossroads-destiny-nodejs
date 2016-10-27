@@ -506,7 +506,8 @@ var bungieMemberShipType = {
   PS3:2,
   PS4:2,
   XBOX360:1,
-  XBOXONE:1
+  XBOXONE:1,
+  bungieNetUser:254
 }
 
 var newGenConsoleType = {
