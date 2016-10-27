@@ -86,7 +86,7 @@ function validateUserLogin(req, res) {
     routeUtils.handleAPIError(req, res, err, err)
     return
   }
-
+  var createNewUser = false
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
     function(callback) {
@@ -99,6 +99,7 @@ function validateUserLogin(req, res) {
         if (err) {
           return callback(err, null)
         } else if (!user) {
+          createNewUser=true
           handleNewUserV2(req, callback)
         } else {
           return callback(null, user)
@@ -118,7 +119,8 @@ function validateUserLogin(req, res) {
       if (err) {
         return routeUtils.handleAPIError(req, res, err, err)
       } else {
-        service.userService.updateUserConsoles(outerUser)
+        if(createNewUser)
+          service.userService.updateUserConsoles(outerUser)
         routeUtils.handleAPISuccess(req, res,
           {
             value: outerUser,

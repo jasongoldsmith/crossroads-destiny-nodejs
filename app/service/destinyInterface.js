@@ -377,7 +377,7 @@ function bungieGet(url, gamerId, consoleType, callback){
       utils.l.s("Error getting bungie for url "+url+" and error is::----"+error)
       return callback(error,null)
     } else {
-      utils.l.d('bungie GET for url::'+url,bungieData)
+      utils.l.d('bungie GET for url::'+url)
       if(utils.isJson(bungieData)) {
         var bungieJSON = JSON.parse(bungieData)
         utils.l.d("bungie error status: "+bungieJSON.ErrorStatus)
