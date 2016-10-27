@@ -61,6 +61,72 @@ function login (req, res) {
     )
 }
 
+function handleBungieResponse(req, res) {
+  utils.l.d("handleBungieResponse request", req.body)
+  var data = req.body
+  var err = {error: "Something went wrong. Please try again later."}
+
+  if(!data.requestType || !data.bungieResponse) {
+    utils.l.s("Bad handleBungieResponse request")
+    routeUtils.handleAPIError(req, res, err, err)
+    return
+  }
+
+  switch(data.requestType) {
+    case "login":
+      handleBungieLogin(req, res)
+      break
+    default:
+      utils.l.i("We do not support this bungie request yet", data.request)
+      routeUtils.handleAPIError(req, res, err, err)
+  }
+}
+
+function handleBungieLogin(req, res) {
+  var data = req.body
+  var outerUser = null
+
+  utils.async.waterfall([
+    helpers.req.handleVErrorWrapper(req),
+    function(callback) {
+      data.bungieMemberShipId = data.bungieResponse.Response.user.memberShipId
+      data.userName = data.bungieMemberShipId
+      data.passWord = "password"
+      utils.l.d('calling passport...')
+      var passportHandler = passport.authenticate('local', function(err, user) {
+        utils.l.d('passport.authenticate', user)
+        if (err) {
+          return callback(err, null)
+        } else if (!user) {
+          handleNewUserV2(req, callback)
+        } else {
+          return callback(null, user)
+        }
+      })
+      passportHandler(req, res)
+    },
+    function(user, callback) {
+      service.authService.addLegalAttributes(user, function(err, data) {
+        outerUser = data
+        return callback(null, user)
+      })
+    },
+    reqLoginWrapper(req, "auth.login")
+  ],
+    function (err) {
+      if (err) {
+        return routeUtils.handleAPIError(req, res, err, err)
+      } else {
+        routeUtils.handleAPISuccess(req, res,
+          {
+            value: outerUser,
+            message: getSignupMessage(outerUser)
+          })
+      }
+    }
+  )
+}
+
 function handlePostLogin(req,user,callback){
   var needFirebaseUpdate = false;
   var isInvitedUserInstall = false;
@@ -175,6 +241,35 @@ function isInvitedUser(invitation,user){
   return invitedUser
 }
 
+
+function handleNewUserV2(req, callback) {
+  var bungieResponse = req.body.bungieResponse
+  var consoles = []
+  if(utils._.isValidNonBlank(bungieResponse.Response.psnId)) {
+    consoles.push({
+      destinyDisplayName: bungieResponse.Response.psnId,
+      destinyMembershipType: 2
+    })
+  }
+
+  if(utils._.isValidNonBlank(bungieResponse.Response.gamerTag)) {
+    consoles.push({
+      destinyDisplayName: bungieResponse.Response.gamerTag,
+      destinyMembershipType: 1
+    })
+  }
+
+  var trimmedBungieResponse = {
+    destinyProfile: consoles,
+    bungieMemberShipId: req.body.bungieMemberShipId
+  }
+
+  req.body.consoles = {
+    consoleType: req.body.consoleType
+  }
+  createNewUser(req, trimmedBungieResponse, false, "VERIFIED", callback)
+}
+
 function handleNewUser(req, callback) {
   var body = req.body
   var bungieResponse = null
@@ -195,7 +290,7 @@ function handleNewUser(req, callback) {
     },
     function(user, callback) {
       if(!user) {
-        createNewUser(req, bungieResponse, callback)
+        createNewUser(req, bungieResponse, null, "INITIATED", callback)
       } else {
         if (!passwordHash.verify(body.passWord, user.passWord)) {
           return callback({error: "The username and password do not match our records."}, null)
@@ -210,41 +305,16 @@ function handleNewUser(req, callback) {
   ], callback)
 }
 
-function createNewUser(req, bungieResponse, callback) {
+function createNewUser(req, bungieResponse, enableBungieIntegration, userVerificationStatus, callback) {
   var body = req.body
   if(body.consoles.consoleType == "XBOX360" || body.consoles.consoleType == "PS3") {
     return({error: "We do not support old generation consoles anymore. " +
     "Please try again once you have upgraded to a new generation console"}, null)
   }
-  var mpDistinctId = helpers.req.getHeader(req,'x-mixpanelid')
+  var mpDistinctId = helpers.req.getHeader(req, 'x-mixpanelid')
 
-/*  var userData = {
-    passWord: passwordHash.generate(body.passWord),
-    clanId: body.clanId,
-    mpDistinctId: mpDistinctId,
-    mpDistinctIdRefreshed:true
-  }
-
-  if(utils._.isValidNonBlank(bungieResponse)){
-    var consolesList =  []
-    utils._.map(bungieResponse.destinyProfile,function(destinyAccount){
-      var consoleObj = {}
-      consoleObj.consoleType =  utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
-      consoleObj.destinyMembershipId = destinyAccount.destinyMembershipId
-      consoleObj.consoleId=destinyAccount.destinyDisplayName
-      consoleObj.clanTag=destinyAccount.clanTag
-      consoleObj.imageUrl = utils.config.bungieBaseURL + "/" +destinyAccount.helmetUrl
-      if(consoleObj.consoleType == body.consoles.consoleType)
-        consoleObj.isPrimary = true
-      else
-        consoleObj.isPrimary = false
-      consolesList.push(consoleObj)
-    })
-    userData.consoles = consolesList
-    userData.bungieMemberShipId =  bungieResponse.bungieMemberShipId
-  }*/
-
-  var userData = service.userService.getNewUserData(body.passWord,body.clanId,mpDistinctId,true,bungieResponse,body.consoles.consoleType)
+  var userData = service.userService.getNewUserData(body.passWord, body.clanId, mpDistinctId, true,
+    bungieResponse, body.consoles.consoleType)
 
   utils.async.waterfall([
       helpers.req.handleVErrorWrapper(req),
@@ -255,7 +325,9 @@ function createNewUser(req, bungieResponse, callback) {
       },
       function (uid, callback) {
         userData._id = uid
-        service.authService.createNewUser(userData,utils.config.enableBungieIntegration,"INITIATED",utils.constants.bungieMessageTypes.accountVerification,null, callback)
+        var enableBungieIntegration = utils._.isValidNonBlank(enableBungieIntegration) ? enableBungieIntegration : utils.config.enableBungieIntegration
+        service.authService.createNewUser(userData, enableBungieIntegration, userVerificationStatus,
+          utils.constants.bungieMessageTypes.accountVerification, null, callback)
       },
       reqLoginWrapper(req, "auth.login")
     ],
@@ -265,7 +337,7 @@ function createNewUser(req, bungieResponse, callback) {
         return callback(err, null)
       } else {
         helpers.firebase.createUser(user)
-        service.trackingService.trackUserSignup(req,user,callback)
+        service.trackingService.trackUserSignup(req, user, callback)
         return callback(null, user)
       }
     }
@@ -659,24 +731,6 @@ function checkBungieAccount(req, res) {
       }
     }
   )
-}
-
-function handleBungieResponse(req, res) {
-  utils.l.d("handleBungieResponse request", req.body)
-  var data = req.body
-  if(!data.request || !data.bungieResponse) {
-    utils.l.s("Bad handleBungieResponse request")
-    var err = {error: "Something went wrong. Please try again later."}
-    routeUtils.handleAPIError(req, res, err, err)
-  } else {
-    service.authService.handleBungieResponse(req.body, function (err, response) {
-      if(err) {
-        routeUtils.handleAPIError(req, res, err, err)
-      } else {
-        routeUtils.handleAPISuccess(req, res, response)
-      }
-    })
-  }
 }
 
 /** Routes */

@@ -22,7 +22,7 @@ module.exports = function (passport, config) {
     function(req, userName, password, callback) {
       var body = req.body
       utils.l.d('passport::body',body)
-      if(!body.consoles) {
+      if(!body.consoles && !body.bungieMemberShipId) {
         models.user.getUserByData({userName:body.userName.toLowerCase().trim()}, function (err, user) {
           if(err) {
             utils.l.s("Database lookup for user failed", err)
@@ -37,14 +37,14 @@ module.exports = function (passport, config) {
             return callback(null, user)
           }
         })
-      } else {
+      } else if(body.consoles) {
         var consoleId = body.consoles.consoleId
-        utils.l.d("consoles"+consoleId)
+        utils.l.d("consoles: " + consoleId)
         models.user.getUserByData({
           consoles: {
             $elemMatch: {
               consoleType: body.consoles.consoleType,
-              consoleId: {$regex : new RegExp(["^", consoleId, "$"].join("")), $options:"i"}
+              consoleId: {$regex: new RegExp(["^", consoleId, "$"].join("")), $options: "i"}
             }
           }
         },
@@ -62,6 +62,19 @@ module.exports = function (passport, config) {
             }
           }
         )
+      } else {
+        utils.l.d("bungieMemberShipId: " + body.bungieMemberShipId)
+        models.user.getUserByData({bungieMemberShipId: body.bungieMemberShipId}, function (err, user) {
+          if (err) {
+            utils.l.s("Database lookup for user failed", err)
+            return callback({error: "Something went wrong. Please try again"}, null)
+          } else if (!user) {
+            return callback(null, null)
+          } else {
+            user.passWord = undefined
+            return callback(null, user)
+          }
+        })
       }
     }
   )
