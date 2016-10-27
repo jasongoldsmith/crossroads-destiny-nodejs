@@ -305,7 +305,8 @@ function handleNewUser(req, callback) {
   ], callback)
 }
 
-function createNewUser(req, bungieResponse, enableBungieIntegration, userVerificationStatus, callback) {
+function createNewUser(req, bungieResponse, localEnableBungieIntegration,
+                       userVerificationStatus, callback) {
   var body = req.body
   if(body.consoles.consoleType == "XBOX360" || body.consoles.consoleType == "PS3") {
     return({error: "We do not support old generation consoles anymore. " +
@@ -314,7 +315,7 @@ function createNewUser(req, bungieResponse, enableBungieIntegration, userVerific
   var mpDistinctId = helpers.req.getHeader(req, 'x-mixpanelid')
 
   var userData = service.userService.getNewUserData(body.passWord, body.clanId, mpDistinctId, true,
-    bungieResponse, body.consoles.consoleType)
+    bungieResponse, body.consoles.consoleType, userVerificationStatus)
 
   utils.async.waterfall([
       helpers.req.handleVErrorWrapper(req),
@@ -325,7 +326,7 @@ function createNewUser(req, bungieResponse, enableBungieIntegration, userVerific
       },
       function (uid, callback) {
         userData._id = uid
-        var enableBungieIntegration = utils._.isValidNonBlank(enableBungieIntegration) ? enableBungieIntegration : utils.config.enableBungieIntegration
+        var enableBungieIntegration = utils._.isValidNonBlank(localEnableBungieIntegration) ? localEnableBungieIntegration : utils.config.enableBungieIntegration
         service.authService.createNewUser(userData, enableBungieIntegration, userVerificationStatus,
           utils.constants.bungieMessageTypes.accountVerification, null, callback)
       },

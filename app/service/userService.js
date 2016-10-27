@@ -343,27 +343,28 @@ function setLegalAttributes(user){
   return userWithLegalResp
 }
 
-function getNewUserData(password,clanId,mpDistinctId,refreshedMixPanel,bungieResponse,consoleType){
+function getNewUserData(password, clanId, mpDistinctId, refreshedMixPanel,
+                        bungieResponse, consoleType, userVerificationStatus) {
+
   var userData = {
     passWord: password?passwordHash.generate(password):password,
     clanId: clanId,
     mpDistinctId: mpDistinctId,
-    mpDistinctIdRefreshed:refreshedMixPanel
+    mpDistinctIdRefreshed:refreshedMixPanel,
+    verifyStatus: userVerificationStatus
   }
 
-  if(utils._.isValidNonBlank(bungieResponse)){
+  if(utils._.isValidNonBlank(bungieResponse)) {
     var consolesList =  []
-    utils._.map(bungieResponse.destinyProfile,function(destinyAccount){
+    utils._.map(bungieResponse.destinyProfile, function(destinyAccount) {
       var consoleObj = {}
       consoleObj.consoleType =  utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
       consoleObj.destinyMembershipId = destinyAccount.destinyMembershipId
-      consoleObj.consoleId=destinyAccount.destinyDisplayName
-      consoleObj.clanTag=destinyAccount.clanTag
-      consoleObj.imageUrl = utils._.isValidNonBlank(destinyAccount.helmetUrl)?utils.config.bungieBaseURL + "/" +destinyAccount.helmetUrl:utils.config.defaultHelmetUrl
-      if(consoleObj.consoleType == consoleType)
-        consoleObj.isPrimary = true
-      else
-        consoleObj.isPrimary = false
+      consoleObj.consoleId = destinyAccount.destinyDisplayName
+      consoleObj.clanTag = destinyAccount.clanTag
+      consoleObj.imageUrl = utils._.isValidNonBlank(destinyAccount.helmetUrl) ?
+      utils.config.bungieBaseURL + "/" +destinyAccount.helmetUrl : utils.config.defaultHelmetUrl
+      consoleObj.isPrimary = consoleObj.consoleType == consoleType
       consolesList.push(consoleObj)
     })
     userData.consoles = consolesList
