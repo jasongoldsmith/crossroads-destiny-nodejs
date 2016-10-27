@@ -90,7 +90,7 @@ function validateUserLogin(req, res) {
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
     function(callback) {
-      data.bungieMemberShipId = data.bungieResponse.Response.user.memberShipId
+      data.bungieMemberShipId = data.bungieResponse.Response.user.membershipId
       data.userName = data.bungieMemberShipId
       data.passWord = "password"
       utils.l.d('calling passport...')
