@@ -77,12 +77,9 @@ function validateUserLogin(req, res) {
     data.bungieResponse.Response.psnId : data.bungieResponse.Response.gamerTag
 
   if(!data.bungieResponse.ErrorStatus || data.bungieResponse.ErrorStatus != "Success") {
-    var err = {
-      error: utils.constants.bungieErrorMessage(data.bungieResponse.ErrorStatus)
-        .replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, data.consoleType))
-        .replace(/%GAMERID%/g, gamerTag),
-      errorType: "BungieLoginError"
-    }
+    var err = utils.constants.bungieErrorMessage(data.bungieResponse.ErrorStatus)
+    err.error.replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, data.consoleType))
+      .replace(/%GAMERID%/g, gamerTag)
     routeUtils.handleAPIError(req, res, err, err)
     return
   }

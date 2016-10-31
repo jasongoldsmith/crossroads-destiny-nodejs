@@ -539,22 +539,31 @@ var bungieMessages = {
 }
 
 var bungieErrorMessage= function(messageId) {
-  console.log('bungieErrorMessage::messageId',messageId)
+  utils.l.d('bungieErrorMessage::messageId', messageId)
   switch (messageId) {
     case "UserCannotResolveCentralAccount":
-      return "We couldn’t find a Bungie.net profile linked to the %CONSOLETYPE% you entered."
+      return  {
+        error: "We couldn’t find a Bungie.net profile linked to the %CONSOLETYPE% you entered.",
+        errorType: "BungieLoginError"
+      }
       break
-    case "NotParsableError":
-      return "We are unable to contact Bungie.net. Please try again in a few minutes."
+    case "NotParsableError" || "DestinyInvalidClaimException" || "DestinyUnexpectedError" || "DestinyShardRelayClientTimeout":
+      return {
+        error: "We are unable to contact Bungie.net. Please try again in a few minutes.",
+        errorType: "BungieConnectError"
+      }
       break
-    case "DestinyInvalidClaimException" || "DestinyUnexpectedError" || "DestinyShardRelayClientTimeout":
-      return "We are unable to contact Bungie.net. Please try again in a few minutes."
-      break;
     case "WebAuthRequired":
-      return "We are unable to contact Bungie.net. Please try again in a few minutes."
-      break;
+      return {
+        error: "We are unable to contact Bungie.net. Please try again in a few minutes.",
+        errorType: "BungieLoginError"
+      }
+      break
     default:
-      return "We are unable to contact Bungie.net. Please try again in a few minutes."
+      return {
+        error: "We are unable to contact Bungie.net. Please try again in a few minutes.",
+        errorType: "BungieConnectError"
+      }
       break
   }
 }
