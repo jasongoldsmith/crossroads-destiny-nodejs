@@ -539,7 +539,6 @@ var bungieMessages = {
 }
 
 var bungieErrorMessage= function(messageId) {
-  utils.l.d('bungieErrorMessage::messageId', messageId)
   switch (messageId) {
     case "UserCannotResolveCentralAccount":
       return  {
