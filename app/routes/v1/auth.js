@@ -66,23 +66,21 @@ function validateUserLogin(req, res) {
   var data = req.body
   var outerUser = null
 
-  if(!data.bungieResponse || !data.bungieResponse.Response || !data.bungieResponse.Response.user || !data.consoleType) {
+  if(!data.bungieResponse || !data.consoleType) {
     utils.l.s("Bad handleBungieResponse request")
     var err = {error: "Something went wrong. Please try again later."}
     routeUtils.handleAPIError(req, res, err, err)
     return
   }
 
-  var gamerTag = utils._.isValidNonBlank(data.bungieResponse.Response.psnId) ?
-    data.bungieResponse.Response.psnId : data.bungieResponse.Response.gamerTag
-
-  if(!data.bungieResponse.ErrorStatus || data.bungieResponse.ErrorStatus != "Success") {
+  if(!data.bungieResponse.ErrorStatus || data.bungieResponse.ErrorStatus != "Success"
+    || !data.bungieResponse.Response || !data.bungieResponse.Response.user) {
     var err = utils.constants.bungieErrorMessage(data.bungieResponse.ErrorStatus)
     err.error.replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, data.consoleType))
-      .replace(/%GAMERID%/g, gamerTag)
     routeUtils.handleAPIError(req, res, err, err)
     return
   }
+
   var createNewUser = false
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
