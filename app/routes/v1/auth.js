@@ -99,7 +99,9 @@ function validateUserLogin(req, res) {
           createNewUser=true
           handleNewUserV2(req, callback)
         } else {
-          return callback(null, user)
+          user.isLoggedIn = true
+          user.verifyStatus = "VERIFIED"
+          models.user.save(user, callback)
         }
       })
       passportHandler(req, res)

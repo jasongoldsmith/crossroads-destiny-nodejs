@@ -13,7 +13,7 @@ var UserSchema = new Schema({
   profileUrl: String,
   userName: {type: String},
   date: {type: Date, required: true},
-  passWord: {type: String, required: true},
+  passWord: {type: String},
   uniqueID: String,
   verifyStatus: acctVerifyEnum,
   verifyToken: String,
