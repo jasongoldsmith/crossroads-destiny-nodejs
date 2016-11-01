@@ -308,7 +308,15 @@ function changePrimaryConsole(user, consoleType, callback) {
 }
 
 function updateUser(user, callback) {
-  models.user.save(user, callback)
+  models.user.save(user, function(err, updatedUser) {
+    if(err) {
+      utils.l.s("There was a problem in updating the user", err)
+      return callback({error: "There was a problem. Please try again later"}, callback)
+    } else {
+      helpers.firebase.updateUser(updatedUser)
+      return callback(null, updatedUser)
+    }
+  })
 }
 
 function checkBungieAccount(console,needHelmet, callback) {
