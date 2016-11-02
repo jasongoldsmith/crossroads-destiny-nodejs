@@ -558,6 +558,12 @@ var bungieErrorMessage= function(messageId) {
         errorType: "BungieLoginError"
       }
       break
+    case "BungieLegacyConsoleError":
+      return {
+        error: "In line with Rise of Iron, we now only support next-gen consoles. When you’ve upgraded your console, please come back and join us!",
+        errorType: "BungieLegacyConsoleError"
+      }
+    break
     default:
       return {
         error: "We are unable to contact Bungie.net. Please try again in a few minutes.",

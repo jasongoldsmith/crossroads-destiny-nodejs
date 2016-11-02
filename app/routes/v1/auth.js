@@ -64,6 +64,8 @@ function login (req, res) {
 function validateUserLogin(req, res) {
   utils.l.d("handleBungieResponse request", req.body)
   var data = req.body
+  var errorStatus = data.bungieResponse.ErrorStatus
+  var response = data.bungieResponse.Response
   var outerUser = null
 
   if(!data.bungieResponse || !data.consoleType) {
@@ -73,10 +75,16 @@ function validateUserLogin(req, res) {
     return
   }
 
-  if(!data.bungieResponse.ErrorStatus || data.bungieResponse.ErrorStatus != "Success"
-    || !data.bungieResponse.Response || !data.bungieResponse.Response.user) {
+  if(!errorStatus || errorStatus != "Success" || !response || !response.bungieNetUser) {
     var err = utils.constants.bungieErrorMessage(data.bungieResponse.ErrorStatus)
     err.error.replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, data.consoleType))
+    routeUtils.handleAPIError(req, res, err, err)
+    return
+  }
+
+  var bungieNetUser = response.bungieNetUser
+  if(utils._.isValidNonBlank(response.destinyAccountErrors)) {
+    var err = utils.constants.bungieErrorMessage("BungieLegacyConsoleError")
     routeUtils.handleAPIError(req, res, err, err)
     return
   }
@@ -85,7 +93,7 @@ function validateUserLogin(req, res) {
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
     function(callback) {
-      data.bungieMemberShipId = data.bungieResponse.Response.user.membershipId
+      data.bungieMemberShipId = bungieNetUser.membershipId
       data.userName = data.bungieMemberShipId
       data.passWord = "password"
       utils.l.d('calling passport...')
@@ -94,12 +102,13 @@ function validateUserLogin(req, res) {
         if (err) {
           return callback(err, null)
         } else if (!user) {
-          createNewUser=true
-          handleNewUserV2(req, callback)
+          createNewUser = true
+          handleNewUserV2(req, bungieNetUser, data.bungieMemberShipId, data.consoleType, callback)
         } else {
           user.isLoggedIn = true
           user.verifyStatus = "VERIFIED"
-          models.user.save(user, callback)
+          service.userService.changePrimaryConsole(user, data.consoleType, function (err, updatedUser) {})
+          service.userService.updateUser(user, callback)
         }
       })
       passportHandler(req, res)
@@ -243,32 +252,32 @@ function isInvitedUser(invitation,user){
 }
 
 
-function handleNewUserV2(req, callback) {
-  var bungieResponse = req.body.bungieResponse
+function handleNewUserV2(req, bungieNetUser, bungieMemberShipId, consoleType, callback) {
   var consoles = []
   // Due to the old login flow we parsed another bungie API to lookup a user
   // We need the trimmedBungieResponse to be in this format to be parsed correctly
-  if(utils._.isValidNonBlank(bungieResponse.Response.psnId)) {
+  if(utils._.isValidNonBlank(bungieNetUser.psnDisplayName)) {
     consoles.push({
-      destinyDisplayName: bungieResponse.Response.psnId,
+      destinyDisplayName: bungieNetUser.psnDisplayName,
       destinyMembershipType: 2
     })
   }
 
-  if(utils._.isValidNonBlank(bungieResponse.Response.gamerTag)) {
+  if(utils._.isValidNonBlank(bungieNetUser.xboxDisplayName)) {
     consoles.push({
-      destinyDisplayName: bungieResponse.Response.gamerTag,
+      destinyDisplayName: bungieNetUser.xboxDisplayName,
       destinyMembershipType: 1
     })
   }
 
   var trimmedBungieResponse = {
     destinyProfile: consoles,
-    bungieMemberShipId: req.body.bungieMemberShipId
+    bungieMemberShipId: bungieMemberShipId
   }
 
+  // We need to define this as that's how we were handling consoles in the old API
   req.body.consoles = {
-    consoleType: req.body.consoleType
+    consoleType: consoleType
   }
   createNewUser(req, trimmedBungieResponse, false, "VERIFIED", callback)
 }

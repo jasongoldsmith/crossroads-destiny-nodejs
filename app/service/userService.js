@@ -441,9 +441,10 @@ module.exports = {
   addConsole: addConsole,
   changePrimaryConsole: changePrimaryConsole,
   checkBungieAccount: checkBungieAccount,
-  setLegalAttributes:setLegalAttributes,
-  refreshConsoles:refreshConsoles,
-  setPrimaryConsoleAndHelmet:setPrimaryConsoleAndHelmet,
-  getNewUserData:getNewUserData,
-  updateUserConsoles:updateUserConsoles
+  setLegalAttributes: setLegalAttributes,
+  refreshConsoles: refreshConsoles,
+  setPrimaryConsoleAndHelmet: setPrimaryConsoleAndHelmet,
+  getNewUserData: getNewUserData,
+  updateUserConsoles: updateUserConsoles,
+  updateUser: updateUser
 }
