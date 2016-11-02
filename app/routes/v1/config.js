@@ -27,9 +27,9 @@ function listConfigs(req, res) {
     function(bungieUrls, callback) {
       var configs = {
         mixpanelToken: utils.config.mixpanelKey,
-        playerDetails: bungieUrls.value.playerDetails,
-        xboxLogin: bungieUrls.value.xboxLogin,
-        psnLogin: bungieUrls.value.psnLogin
+        playerDetailsURL: bungieUrls.value.playerDetailsURL,
+        xboxLoginURL: bungieUrls.value.xboxLoginURL,
+        psnLoginURL: bungieUrls.value.psnLoginURL
       }
 
       return callback(null, configs)
