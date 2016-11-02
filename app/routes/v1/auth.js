@@ -83,7 +83,10 @@ function validateUserLogin(req, res) {
   }
 
   var bungieNetUser = response.bungieNetUser
-  if(utils._.isValidNonBlank(response.destinyAccountErrors)) {
+  if(utils._.isValidNonBlank(response.destinyAccountErrors)
+    &&
+    (response.destinyAccountErrors.length > 1
+    || utils._.get(utils.constants.newGenConsoleType, response.destinyAccountErrors[0].membershipType) == data.consoleType)) {
     var err = utils.constants.bungieErrorMessage("BungieLegacyConsoleError")
     routeUtils.handleAPIError(req, res, err, err)
     return
