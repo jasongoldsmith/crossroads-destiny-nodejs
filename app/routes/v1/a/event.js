@@ -168,6 +168,7 @@ function reportComment(req, res) {
 
 function invite(req, res) {
 	utils.l.d("Invite request: " + JSON.stringify(req.body))
+	var networkObject = null
 	if(!req.body.eId  || !req.body.invitees) {
 		var err = {
 			error: "Something went wrong in sending the invite. Please try again later"
@@ -182,7 +183,8 @@ function invite(req, res) {
 			function (callback) {
 				service.eventService.invite(req.user, data, callback)
 			},
-			function (event, userIds, userIdsInDatabase, callback) {
+			function (event, bungieNetworkObject, userIds, userIdsInDatabase, callback) {
+				networkObject = bungieNetworkObject
 				service.eventService.addUsersToEvent(event, userIds, function(err, updatedEvent) {
 					if(err) {
 						return callback(err, null)
@@ -204,7 +206,7 @@ function invite(req, res) {
 				} else {
 					if(utils._.isValidNonBlank(event))
 						helpers.firebase.updateEventV2(event, req.user,true)
-					routeUtils.handleAPISuccess(req, res, event)
+					routeUtils.handleAPISuccess(req, res, {event: event, networkObject: networkObject})
 				}
 			})
 	}

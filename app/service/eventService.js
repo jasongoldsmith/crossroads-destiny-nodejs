@@ -700,29 +700,37 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
   }
   var invitedUserIds = []
   var userIdsInDatabase = []
+  var invitedBungieMemberShipIds = []
 
   utils.async.waterfall([
     function(callback) {
       models.user.getByQuery({'consoles.consoleId': {$in : getInviteesRegex(inviteesGamertags)}}, callback)
     },
     function(usersInDatabase, callback) {
-      return handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, userIdsInDatabase, callback)
+      return handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds,
+        userIdsInDatabase, invitedBungieMemberShipIds, callback)
     },
     function(usersInDatabaseGamerTags, callback) {
       var inviteesGamertagsNotInDatabase = utils._.differenceBy(inviteesGamertags, usersInDatabaseGamerTags, utils._.toLower)
       authService.createInvitees(inviteesGamertagsNotInDatabase, utils.primaryConsole(inviter).consoleType,
         messageDetails, callback)
+    },
+    function(newUsers, callback) {
+      utils._.map(newUsers, function(newUser) {
+        invitedUserIds.push(newUser._id.toString())
+        invitedBungieMemberShipIds.push(newUser.bungieMembershipId)
+      })
+      prepareBungieNetworkObject(utils.config.bungieConvURL, "POST",
+        utils.constants.bungieMessageTypes.eventInvitation, messageDetails,
+        inviter.bungieMemberShipId, invitedBungieMemberShipIds, callback)
     }
   ],
-    function (err, newUsers) {
+    function (err, bungieNetworkObject) {
       if(err) {
         utils.l.d("Invite was unsucessful", err)
         return callback({error: "Something went wrong with sending invites. Please try again later."}, callback)
       } else {
-        utils._.map(newUsers, function(newUser) {
-          invitedUserIds.push(newUser._id.toString())
-        })
-        return callback(null, event, invitedUserIds, userIdsInDatabase)
+        return callback(null, event, bungieNetworkObject, invitedUserIds, userIdsInDatabase)
       }
     })
 }
@@ -744,15 +752,38 @@ function sendBungieMessage(userList, messageDetails) {
           }
         })
     })
-  }else
+  } else
     utils.l.d('Bungie messaging disabled. No messages sent.')
 }
 
-function handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds, userIdsInDatabase, callback) {
+function prepareBungieNetworkObject(url, methodType, messageType, messageDetails, inviterBungieMembershipId, invitedBungieMemberShipIds, callback) {
+
+  var bungieNetworkObject = {
+    url: url,
+    method: methodType,
+    headers: {},
+    json: true
+  }
+
+  destinyInterface.getMessageBody(null, null, messageType, null, messageDetails, function(err, msgTxt) {
+    if(err) {
+      utils.l.s("There was a problem in preparing bungie message body", err)
+      return callback(err, null)
+    }
+    bungieNetworkObject.body = {
+      membersToId: [inviterBungieMembershipId, invitedBungieMemberShipIds],
+      body: msgTxt
+    }
+    return callback(null, bungieNetworkObject)
+  })
+}
+
+function handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds,
+                                         userIdsInDatabase, invitedBungieMemberShipIds, callback) {
 // send bungie message and send push notification
   if(utils._.isValidNonBlank(event) && ! event.deleted) {
     addPushNotificationToQueue(event, usersInDatabase, inviter, null, "eventInvite")
-    sendBungieMessage(usersInDatabase, messageDetails)
+    //sendBungieMessage(usersInDatabase, messageDetails)
   }
 
   var usersInDatabaseGamerTags = []
@@ -760,6 +791,7 @@ function handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messag
     usersInDatabaseGamerTags.push(utils.primaryConsole(user).consoleId.toString())
     invitedUserIds.push(user._id.toString())
     userIdsInDatabase.push(user._id.toString())
+    invitedBungieMemberShipIds.push(user.bungieMemberShipId)
   })
   return callback(null, usersInDatabaseGamerTags)
 }

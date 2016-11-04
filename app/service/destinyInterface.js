@@ -583,5 +583,6 @@ module.exports = {
   sendBungieMessageV2: sendBungieMessageV2,
   listBungieGroupsJoined: listBungieGroupsJoined,
   getBungieHelmet: getBungieHelmet,
-  getBungieAccount: getBungieAccount
+  getBungieAccount: getBungieAccount,
+  getMessageBody: getMessageBody
 }
