@@ -13,6 +13,7 @@ var userGroup = require('./userGroupModel')
 var notificationQueue = require ('./notificationQueueModel')
 var helmetTracker = require('./helmetTrackerModel')
 var eventInvitationModel = require('./eventInvitationModel')
+var pendingEventInvitationModel = require('./pendingEventInvitationModel')
 
 module.exports = {
   user: user,
@@ -29,5 +30,6 @@ module.exports = {
   userGroup: userGroup,
   notificationQueue: notificationQueue,
   helmetTracker: helmetTracker,
-  eventInvitation: eventInvitationModel
+  eventInvitation: eventInvitationModel,
+  pendingEventInvitation: pendingEventInvitationModel
 }

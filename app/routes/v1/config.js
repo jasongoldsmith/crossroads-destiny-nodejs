@@ -5,6 +5,7 @@ var routeUtils = require('../routeUtils')
 var models = require('../../models')
 
 function listConfigs(req, res) {
+  utils.l.d("listConfigs request: " + JSON.stringify(req.headers["config_token"]))
   if(!req.headers["config_token"]) {
     utils.l.i("config_token missing in headers")
     routeUtils.handleAPIUnauthorized(req, res)

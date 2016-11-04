@@ -2,6 +2,7 @@ var models = require('../models')
 var utils = require('../utils')
 var eventService = require('./eventService')
 var eventNotificationTriggerService = require('./eventNotificationTriggerService')
+var pendingEventInvitationService = require('./pendingEventInvitationService')
 var destinyInterface = require('./destinyInterface')
 var passwordHash = require('password-hash')
 var helpers = require('../helpers')
@@ -434,6 +435,10 @@ function updateUserConsoles(userToupdate){
   })
 }
 
+function getPendingEventInvites(user, callback) {
+  pendingEventInvitationService.listPendingEventInvitationsForInviter(user._id, callback)
+}
+
 module.exports = {
   userTimeout: userTimeout,
   preUserTimeout: preUserTimeout,
@@ -446,5 +451,6 @@ module.exports = {
   setPrimaryConsoleAndHelmet: setPrimaryConsoleAndHelmet,
   getNewUserData: getNewUserData,
   updateUserConsoles: updateUserConsoles,
-  updateUser: updateUser
+  updateUser: updateUser,
+  getPendingEventInvites: getPendingEventInvites
 }

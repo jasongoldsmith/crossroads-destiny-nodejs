@@ -6,6 +6,7 @@ var reportService = require('./reportService')
 var destinyInterface = require('./destinyInterface')
 var authService = require('./authService')
 var eventInvitationService = require('./eventInvitationService')
+var pendingEventInvitationService = require('./pendingEventInvitationService')
 
 function clearEventsForPlayer(user, launchStatus, consoleType, callback){
 
@@ -723,6 +724,25 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
       prepareBungieNetworkObject(utils.config.bungieConvURL, "POST",
         utils.constants.bungieMessageTypes.eventInvitation, messageDetails,
         inviter.bungieMemberShipId, invitedBungieMemberShipIds, callback)
+    },
+    function(bungieNetworkObject, callback) {
+      /*
+      We need to explicitly set the mongo id because we need to identify a pending invitation
+      But we don't want to wait for the object to be saved in the db to get the id
+       */
+      var uid = utils.mongo.ObjectID()
+      utils.l.i("unique id for netowrk object", uid)
+      bungieNetworkObject._id = uid
+      var pendingEventInvitationData = {
+        _id: uid,
+        eventId: event._id,
+        inviterId: inviter._id,
+        networkObject: bungieNetworkObject
+      }
+      pendingEventInvitationService.createPendingInvitation(pendingEventInvitationData,
+        function(err, pendingEventInvitation) {})
+
+      return callback(null, bungieNetworkObject)
     }
   ],
     function (err, bungieNetworkObject) {
