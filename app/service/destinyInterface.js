@@ -318,7 +318,7 @@ function sendBungieMessage(bungieMemberShipId, consoleType, messageType, callbac
 
         getMessageBody(utils.config.hostUrl(), token, messageType,consoleType, null, function(err, msgTxt) {
           var msgBody = {
-            membersToId: [utils.config.bungieCrsRdAppId, bungieMemberShipId],
+            membersToId: utils._.flatten([utils.config.bungieCrsRdAppId, bungieMemberShipId]),
             body: msgTxt
           }
           utils.l.d("msgBody::",msgBody)
@@ -337,7 +337,7 @@ function sendBungieMessageV2(bungieMemberShipId, consoleType, messageType,messag
 
         getMessageBody(utils.config.hostUrl(), token, messageType,consoleType,messageDetails,function(err,msgTxt){
           var msgBody = {
-            membersToId: [utils.config.bungieCrsRdAppId, bungieMemberShipId],
+            membersToId: utils._.flatten([utils.config.bungieCrsRdAppId, bungieMemberShipId]),
             body: msgTxt
           }
           utils.l.d("msgBody::",msgBody)

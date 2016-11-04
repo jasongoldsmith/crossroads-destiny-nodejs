@@ -90,6 +90,12 @@ switch(command) {
       utils.l.d("helmentURL",helmetURL)
     })
     break;
+  case "messageTest":
+    destinyService.sendBungieMessage("13315699","PS4",utils.constants.bungieMessageTypes.passwordReset,function(err,messageResponse){
+      utils.l.d("err:",err)
+      utils.l.d("messageResponse",messageResponse)
+    })
+    break;
   case "sortTest":
     var sortedArray = utils._.sortBy(objArray,function(item){
       return utils.moment(item.dateTime)

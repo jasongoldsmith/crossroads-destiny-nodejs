@@ -771,7 +771,7 @@ function prepareBungieNetworkObject(url, methodType, messageType, messageDetails
       return callback(err, null)
     }
     bungieNetworkObject.body = {
-      membersToId: [inviterBungieMembershipId, invitedBungieMemberShipIds],
+      membersToId: utils._.flatten([inviterBungieMembershipId, invitedBungieMemberShipIds]),
       body: msgTxt
     }
     return callback(null, bungieNetworkObject)
