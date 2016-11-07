@@ -98,18 +98,19 @@ function handleLeaveEvent(user, data, userTimeout, sendLeavePushNotification, ca
 function removeInvitedPlayersFromEvent(user, event, callback) {
   utils.async.waterfall([
     function (callback) {
+      // Need to remove the entry if the person leaving is an invitee
+      eventInvitationService.findOneAndRemove({event: event._id, invitee: user._id}, function (err, deletedEventInvitation) {
+        if(err) {
+          utils.l.s("Event invitation could not be deleted")
+        }
+      })
+
       models.eventInvitation.getByQueryPopulated({event: event._id, inviter: user._id}, callback)
     },
     function (eventInvitationList, callback) {
       if(utils._.isInvalidOrBlank(eventInvitationList)) {
         return callback(null, event)
       }
-      // Need to remove the entry if the person leaving is an invitee
-      eventInvitationService.findOneAndRemove({invitee: user._id}, function (err, deletedEventInvitation) {
-        if(err) {
-          utils.l.s("Event invitation could not be deleted")
-        }
-      })
 
       utils.async.mapSeries(eventInvitationList, function(eventInvitation, callback) {
         eventInvitationService.deleteInvitation(eventInvitation, function (err, deletedEventInvitation) {
@@ -506,7 +507,53 @@ function listEventById(data, callback) {
       groupByInvited(eventObj, callback)
     }
   ], callback)
+}
 
+function kick(data, callback) {
+  utils.async.waterfall([
+    function (callback) {
+      // To use listEventById we need to define id
+      data.id = data.eId
+      listEventById(data, callback)
+    },
+    function (eventObj, callback) {
+      handleScenariosForKicking(eventObj, data.userId, callback)
+    },
+    function (playerToKick, callback) {
+      models.user.getById(playerToKick._id, callback)
+    },
+    function (user, callback) {
+      handleLeaveEvent(user, data, false, false, callback)
+    }
+  ], callback)
+}
+
+function handleScenariosForKicking(eventObj, userId, callback) {
+  if(utils._.isInvalidOrBlank(eventObj)) {
+    return callback({error: "Sorry, looks like that event is no longer available."}, null)
+  }
+
+  if(eventObj.status != "full") {
+    return callback({error: "Sorry, you can't kick someone from a non-full event"}, null)
+  }
+
+  if(eventObj.launchStatus != utils.constants.eventLaunchStatusList.now) {
+    return callback({error: "Sorry, you can't kick someone from an upcoming event"}, null)
+  }
+
+  var playerToKick = utils._.find(eventObj.players, function (player) {
+    return player._id == userId
+  })
+
+  if(utils._.isInvalidOrBlank(playerToKick)) {
+    return callback({error: "Looks like this player is no longer part of this event. Please refresh."}, null)
+  }
+
+  if(playerToKick.isActive) {
+    return callback({error: "You cannot kick an active"}, null)
+  }
+
+  return callback(null, playerToKick)
 }
 
 function handleCreatorChangeForFullCurrentEvent(event, callback) {
@@ -913,6 +960,7 @@ module.exports = {
   publishFullEventListing: publishFullEventListing,
   handleDuplicateCurrentEvent: handleDuplicateCurrentEvent,
   listEventById: listEventById,
+  kick: kick,
   addUsersToEvent: addUsersToEvent,
   invite: invite,
   handleCreatorChangeForFullCurrentEvent: handleCreatorChangeForFullCurrentEvent,

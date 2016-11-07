@@ -166,6 +166,17 @@ function reportComment(req, res) {
 	})
 }
 
+function kick(req, res) {
+	utils.l.d("kick request: " + JSON.stringify(req.body))
+	service.eventService.kick(req.body, function(err, event) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			routeUtils.handleAPISuccess(req, res, event)
+		}
+	})
+}
+
 function invite(req, res) {
 	utils.l.d("Invite request: " + JSON.stringify(req.body))
 	var networkObject = null
@@ -269,6 +280,7 @@ routeUtils.rPost(router, '/delete', 'removeEvent', remove)
 routeUtils.rPost(router, '/clear', 'clearEventsForPlayer', clearEventsForPlayer)
 routeUtils.rPost(router, '/addComment', 'addEventComment', addComment)
 routeUtils.rPost(router, '/reportComment', 'reportEventComment', reportComment)
+routeUtils.rPost(router, '/kick', 'kick', kick)
 routeUtils.rPost(router, '/invite', 'invite', invite)
 routeUtils.rPost(router, '/invite/accept', 'acceptInvite', acceptInvite)
 routeUtils.rPost(router, '/invite/cancel', 'cancelInvite', cancelInvite)
