@@ -17,7 +17,7 @@ function clearEventsForPlayer(user, launchStatus, consoleType, callback){
     function(eventList, callback) {
       //mapSeries used to avoid the consurrency situation in the same session.
       utils.async.mapSeries(eventList, function(event, callback) {
-        handleLeaveEvent(user, {eId: event._id.toString()}, true, callback)
+        handleLeaveEvent(user, {eId : event._id.toString()}, true, true, callback)
       }, callback)
     }
   ], callback)
@@ -64,10 +64,10 @@ function joinEvent(user, data, callback) {
 }
 
 function leaveEvent(user, data, callback) {
-  handleLeaveEvent(user, data, false, callback)
+  handleLeaveEvent(user, data, false, true, callback)
 }
 
-function handleLeaveEvent(user, data, userTimeout, callback) {
+function handleLeaveEvent(user, data, userTimeout, sendLeavePushNotification, callback) {
   utils.l.d('handleLeaveEvent::', data)
   utils.async.waterfall([
     function(callback) {
@@ -75,7 +75,9 @@ function handleLeaveEvent(user, data, userTimeout, callback) {
     },
     function(event, callback) {
       if(!userTimeout && utils._.isValidNonBlank(event) && !event.deleted) {
-        addPushNotificationToQueue(event, [user], user, null, "leave")
+        if(sendLeavePushNotification) {
+          addPushNotificationToQueue(event, [user], user, null, "leave")
+        }
         removeInvitedPlayersFromEvent(user, event, callback)
       } else {
         return callback(null, event)
@@ -858,6 +860,46 @@ function acceptInvite(user, eventInvitation, callback) {
   ], callback)
 }
 
+
+function cancelInvite(user, data, callback) {
+  utils.async.waterfall([
+    function(callback) {
+      models.eventInvitation.getByQueryLean({
+        event: data.eId,
+        inviter: user._id,
+        invitee: data.userId}, utils.firstInArrayCallback(callback))
+    },
+    function(eventInvitation, callback) {
+      if(utils._.isInvalidOrBlank(eventInvitation)) {
+        utils.l.i("No event invitation found with specified parameters", {
+          event: data.eId,
+          inviter: user._id,
+          invitee: data.userId
+        })
+        return callback({error: "Sorry that invitation is no longer valid"}, null)
+      } else {
+        utils.async.series({
+          deletedEventInvitation: function (callback) {
+            models.eventInvitation.delete(eventInvitation, callback)
+          },
+          user: function (callback) {
+            models.user.getById(data.userId, callback)
+          }
+        }, callback)
+      }
+    },
+    function(results, callback) {
+      if(utils._.isInvalidOrBlank(results)
+        || utils._.isInvalidOrBlank(results.deletedEventInvitation)
+        || utils._.isInvalidOrBlank(results.user)) {
+        utils.l.i("user or deletedEventInvitation not valid", results)
+        return callback({error: "Sorry that invitation is no longer valid"}, null)
+      }
+      handleLeaveEvent(results.user, data, false, false, callback)
+    }
+  ], callback)
+}
+
 module.exports = {
   createEvent: createEvent,
   joinEvent: joinEvent,
@@ -874,5 +916,6 @@ module.exports = {
   addUsersToEvent: addUsersToEvent,
   invite: invite,
   handleCreatorChangeForFullCurrentEvent: handleCreatorChangeForFullCurrentEvent,
-  acceptInvite:acceptInvite
+  acceptInvite: acceptInvite,
+  cancelInvite: cancelInvite
 }

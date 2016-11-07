@@ -248,6 +248,17 @@ function acceptInvite(req, res) {
 	})
 }
 
+function cancelInvite(req, res) {
+	utils.l.d("Cancel Invite request: " + JSON.stringify(req.body))
+	service.eventService.cancelInvite(req.user, req.body, function (err, event) {
+		if (err) {
+			routeUtils.handleAPIError(req, res, err, err)
+		} else {
+			routeUtils.handleAPISuccess(req, res, event)
+		}
+	})
+}
+
 routeUtils.rPost(router, '/create', 'createEvent', create)
 routeUtils.rPost(router, '/join', 'joinEvent', join)
 routeUtils.rGet(router, '/list', 'listEvents', list, {utm_dnt:"androidAppVersion"})
@@ -260,4 +271,5 @@ routeUtils.rPost(router, '/addComment', 'addEventComment', addComment)
 routeUtils.rPost(router, '/reportComment', 'reportEventComment', reportComment)
 routeUtils.rPost(router, '/invite', 'invite', invite)
 routeUtils.rPost(router, '/invite/accept', 'acceptInvite', acceptInvite)
+routeUtils.rPost(router, '/invite/cancel', 'cancelInvite', cancelInvite)
 module.exports = router
