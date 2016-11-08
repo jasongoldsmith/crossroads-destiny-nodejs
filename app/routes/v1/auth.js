@@ -93,42 +93,14 @@ function validateUserLogin(req, res) {
   }
 
   var createNewUser = false
-  var consoles = []
-  var selectedConsole = {}
-  // Due to the old login flow we parsed another bungie API to lookup a user
-  // We need the trimmedBungieResponse to be in this format to be parsed correctly
-  if(utils._.isValidNonBlank(bungieNetUser.psnDisplayName)) {
-    if(data.consoleType == "PS4"){
-      selectedConsole.consoleType= data.consoleType
-      selectedConsole.consoleId= bungieNetUser.psnDisplayName
-    }
-    consoles.push({
-      destinyDisplayName: bungieNetUser.psnDisplayName,
-      destinyMembershipType: utils.constants.bungieMemberShipType.PS4
-    })
-  }
 
-  if(utils._.isValidNonBlank(bungieNetUser.xboxDisplayName)) {
-    if(data.consoleType == "XBOXONE"){
-      selectedConsole.consoleType= data.consoleType
-      selectedConsole.consoleId= bungieNetUser.xboxDisplayName
-    }
-    consoles.push({
-      destinyDisplayName: bungieNetUser.xboxDisplayName,
-      destinyMembershipType: utils.constants.bungieMemberShipType.XBOXONE
-    })
-  }
-
-  var trimmedBungieResponse = {
-    destinyProfile: consoles,
-    bungieMemberShipId: bungieMemberShipId
-  }
+  var trimmedBungieResponse = getDestinyAccounts(bungieNetUser,data.consoleType)
 
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
     function(callback) {
       data.bungieMemberShipId = bungieNetUser.membershipId
-      data.selectedConsole = selectedConsole
+      data.selectedConsole = trimmedBungieResponse.selectedConsole
       data.userName = data.bungieMemberShipId
       data.passWord = "password"
       utils.l.d('calling passport...')
@@ -142,7 +114,7 @@ function validateUserLogin(req, res) {
         } else {
           user.isLoggedIn = true
           user.verifyStatus = "VERIFIED"
-          user.lastActive=new Date()
+          user.lastActiveTime=new Date()
           service.userService.changePrimaryConsole(user, data.consoleType, function (err, updatedUser) {})
           service.userService.updateUser(user, callback)
         }
@@ -176,6 +148,42 @@ function validateUserLogin(req, res) {
   )
 }
 
+function getDestinyAccounts(bungieNetUser,consoleType){
+  var consoles = []
+  var selectedConsole = {}
+  utils.l.d('getDestinyAccounts::consoleType',consoleType)
+  // Due to the old login flow we parsed another bungie API to lookup a user
+  // We need the trimmedBungieResponse to be in this format to be parsed correctly
+  if(utils._.isValidNonBlank(bungieNetUser.psnDisplayName)) {
+    if(consoleType.toString() == "PS4"){
+      selectedConsole.consoleType= consoleType
+      selectedConsole.consoleId= bungieNetUser.psnDisplayName
+    }
+    consoles.push({
+      destinyDisplayName: bungieNetUser.psnDisplayName,
+      destinyMembershipType: utils.constants.bungieMemberShipType.PS4
+    })
+  }
+
+  if(utils._.isValidNonBlank(bungieNetUser.xboxDisplayName)) {
+    if(consoleType.toString() == "XBOXONE"){
+      selectedConsole.consoleType= consoleType
+      selectedConsole.consoleId= bungieNetUser.xboxDisplayName
+    }
+    consoles.push({
+      destinyDisplayName: bungieNetUser.xboxDisplayName,
+      destinyMembershipType: utils.constants.bungieMemberShipType.XBOXONE
+    })
+  }
+
+  var trimmedBungieResponse = {
+    destinyProfile: consoles,
+    bungieMemberShipId: bungieNetUser.membershipId,
+    selectedConsole:selectedConsole
+  }
+  utils.l.d("trimmedBungieResponse::",trimmedBungieResponse)
+  return trimmedBungieResponse
+}
 function handlePostLogin(req,user,callback){
   var needFirebaseUpdate = false;
   var isInvitedUserInstall = false;
@@ -282,7 +290,7 @@ function handlePostLoginV2(req,user,trimmedBungieResponse, callback){
         models.user.getById(user._id,callback)
       },function(user,callback){
         if(utils._.isInvalidOrBlank(user.bungieMemberShipId)){
-          service.authService.refreshUserData(trimmedBungieResponse,user,req.body.consoleType)
+          service.userService.refreshUserData(trimmedBungieResponse,user,req.body.consoleType)
         }
 
         callback(null,user)
@@ -392,7 +400,7 @@ function createNewUser(req, bungieResponse, localEnableBungieIntegration,
   }
   var mpDistinctId = helpers.req.getHeader(req, 'x-mixpanelid')
 
-  var userData = service.userService.getNewUserData(body.passWord, body.clanId, mpDistinctId, true,
+  var userData = service.userService.getNewUserData(body.passWord, body.clanId, mpDistinctId, false,
     bungieResponse, body.consoles.consoleType, userVerificationStatus)
 
   utils.async.waterfall([

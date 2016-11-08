@@ -362,7 +362,7 @@ function getNewUserData(password, clanId, mpDistinctId, refreshedMixPanel,
     mpDistinctId: mpDistinctId,
     mpDistinctIdRefreshed:refreshedMixPanel,
     verifyStatus: userVerificationStatus,
-    lastActive: new Date()
+    lastActiveTime: new Date()
   }
 
   if(utils._.isValidNonBlank(bungieResponse)) {

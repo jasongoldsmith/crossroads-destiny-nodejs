@@ -63,8 +63,8 @@ module.exports = function (passport, config) {
           }
         )
       } else {
-        utils.l.d("bungieMemberShipId: " + body.bungieMembership)
-        utils.l.d("selectedConsole::"+body.selectedConsole)
+        utils.l.d("bungieMemberShipId: " , body.bungieMembership)
+        utils.l.d("selectedConsole::",body.selectedConsole)
 
         models.user.getUserByData({"$or":[
             {bungieMemberShipId: body.bungieMemberShipId},

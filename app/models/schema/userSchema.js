@@ -37,7 +37,7 @@ var UserSchema = new Schema({
   bungieMemberShipId: String,
   passwordResetToken: String,
   groups:[{type: Mixed}],
-  lastActiveTime: Date,
+  lastActiveTime: {type:Date, default: new Date()},
   isLoggedIn: {type: Boolean, default: true},
   notifStatus:[{type: String}],
   lastCommentReportedTime: Date,
