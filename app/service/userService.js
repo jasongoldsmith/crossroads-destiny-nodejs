@@ -361,7 +361,8 @@ function getNewUserData(password, clanId, mpDistinctId, refreshedMixPanel,
     clanId: clanId,
     mpDistinctId: mpDistinctId,
     mpDistinctIdRefreshed:refreshedMixPanel,
-    verifyStatus: userVerificationStatus
+    verifyStatus: userVerificationStatus,
+    lastActive: new Date()
   }
 
   if(utils._.isValidNonBlank(bungieResponse)) {
@@ -381,6 +382,16 @@ function getNewUserData(password, clanId, mpDistinctId, refreshedMixPanel,
     userData.bungieMemberShipId =  bungieResponse.bungieMemberShipId
   }
   return userData
+}
+
+function refreshUserData(bungieResponse, user, consoleType){
+  if(utils._.isValidNonBlank(bungieResponse)) {
+    utils._.map(bungieResponse.destinyProfile, function(destinyAccount) {
+      updateExistingConsole(destinyAccount,user,consoleType)
+    })
+    user.bungieMemberShipId =  bungieResponse.bungieMemberShipId
+  }
+  return user
 }
 
 //Used to update destiny/bungie profile info for a given user object
@@ -435,6 +446,23 @@ function updateUserConsoles(userToupdate){
   })
 }
 
+function updateExistingConsole(destinyAccount,userObj,consoleType){
+  var userConsoleType = utils._.get(utils.constants.newGenConsoleType, destinyAccount.destinyMembershipType)
+  var userConsole = utils.getUserConsoleObject(userObj,userConsoleType)
+  if(utils._.isValidNonBlank(userConsole)) {
+    if(utils._.isValidNonBlank(destinyAccount.destinyMembershipId))
+      userConsole.destinyMembershipId = destinyAccount.destinyMembershipId
+    if(utils._.isValidNonBlank(destinyAccount.clanTag))
+      userConsole.clanTag = destinyAccount.helmetUrl
+    if(utils._.isValidNonBlank(destinyAccount.clanTag))
+      userConsole.imageUrl = utils.config.bungieBaseURL + "/" + destinyAccount.helmetUrl
+
+    userConsole.isPrimary = userConsoleType == consoleType
+    userConsole.consoleId = destinyAccount.destinyDisplayName
+    userConsole.verifyStatus = userObj.verifyStatus ? userObj.verifyStatus : "INITIATED"
+  }
+}
+
 function getPendingEventInvites(user, callback) {
   pendingEventInvitationService.listPendingEventInvitationsForInviter(user._id, callback)
 }
@@ -452,5 +480,6 @@ module.exports = {
   getNewUserData: getNewUserData,
   updateUserConsoles: updateUserConsoles,
   updateUser: updateUser,
-  getPendingEventInvites: getPendingEventInvites
+  getPendingEventInvites: getPendingEventInvites,
+  refreshUserData:refreshUserData
 }

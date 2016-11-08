@@ -63,8 +63,21 @@ module.exports = function (passport, config) {
           }
         )
       } else {
-        utils.l.d("bungieMemberShipId: " + body.bungieMemberShipId)
-        models.user.getUserByData({bungieMemberShipId: body.bungieMemberShipId}, function (err, user) {
+        utils.l.d("bungieMemberShipId: " + body.bungieMembership)
+        utils.l.d("selectedConsole::"+body.selectedConsole)
+
+        models.user.getUserByData({"$or":[
+            {bungieMemberShipId: body.bungieMemberShipId},
+            {
+              consoles: {
+                $elemMatch: {
+                  consoleType: body.selectedConsole.consoleType,
+                  consoleId: {$regex: new RegExp(["^", body.selectedConsole.consoleId, "$"].join("")), $options: "i"}
+                }
+              }
+            }
+          ]},
+        function (err, user) {
           if (err) {
             utils.l.s("Database lookup for user failed", err)
             return callback({error: "Something went wrong. Please try again"}, null)

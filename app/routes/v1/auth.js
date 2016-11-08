@@ -75,7 +75,7 @@ function validateUserLogin(req, res) {
     return
   }
 
-  if(!errorStatus || errorStatus != "Success" || !response || !response.bungieNetUser) {
+  if(!errorStatus || errorStatus != "Success" || !response || !response.bungieNetUser || utils._.isInvalidOrBlank(response.bungieNetUser.membershipId)) {
     var err = utils.constants.bungieErrorMessage(data.bungieResponse.ErrorStatus)
     err.error.replace(/%CONSOLETYPE%/g, utils._.get(utils.constants.consoleGenericsId, data.consoleType))
     routeUtils.handleAPIError(req, res, err, err)
@@ -93,10 +93,42 @@ function validateUserLogin(req, res) {
   }
 
   var createNewUser = false
+  var consoles = []
+  var selectedConsole = {}
+  // Due to the old login flow we parsed another bungie API to lookup a user
+  // We need the trimmedBungieResponse to be in this format to be parsed correctly
+  if(utils._.isValidNonBlank(bungieNetUser.psnDisplayName)) {
+    if(data.consoleType == "PS4"){
+      selectedConsole.consoleType= data.consoleType
+      selectedConsole.consoleId= bungieNetUser.psnDisplayName
+    }
+    consoles.push({
+      destinyDisplayName: bungieNetUser.psnDisplayName,
+      destinyMembershipType: utils.constants.bungieMemberShipType.PS4
+    })
+  }
+
+  if(utils._.isValidNonBlank(bungieNetUser.xboxDisplayName)) {
+    if(data.consoleType == "XBOXONE"){
+      selectedConsole.consoleType= data.consoleType
+      selectedConsole.consoleId= bungieNetUser.xboxDisplayName
+    }
+    consoles.push({
+      destinyDisplayName: bungieNetUser.xboxDisplayName,
+      destinyMembershipType: utils.constants.bungieMemberShipType.XBOXONE
+    })
+  }
+
+  var trimmedBungieResponse = {
+    destinyProfile: consoles,
+    bungieMemberShipId: bungieMemberShipId
+  }
+
   utils.async.waterfall([
     helpers.req.handleVErrorWrapper(req),
     function(callback) {
       data.bungieMemberShipId = bungieNetUser.membershipId
+      data.selectedConsole = selectedConsole
       data.userName = data.bungieMemberShipId
       data.passWord = "password"
       utils.l.d('calling passport...')
@@ -106,15 +138,19 @@ function validateUserLogin(req, res) {
           return callback(err, null)
         } else if (!user) {
           createNewUser = true
-          handleNewUserV2(req, bungieNetUser, data.bungieMemberShipId, data.consoleType, callback)
+          handleNewUserV2(req, trimmedBungieResponse, data.bungieMemberShipId, data.consoleType, callback)
         } else {
           user.isLoggedIn = true
           user.verifyStatus = "VERIFIED"
+          user.lastActive=new Date()
           service.userService.changePrimaryConsole(user, data.consoleType, function (err, updatedUser) {})
           service.userService.updateUser(user, callback)
         }
       })
       passportHandler(req, res)
+    },
+    function (user, callback) {
+      handlePostLoginV2(req, user,trimmedBungieResponse, callback)
     },
     function(user, callback) {
       service.authService.addLegalAttributes(user, function(err, data) {
@@ -240,6 +276,55 @@ function handlePostLogin(req,user,callback){
   callback)
 }
 
+function handlePostLoginV2(req,user,trimmedBungieResponse, callback){
+  utils.async.waterfall([
+      function(callback){
+        models.user.getById(user._id,callback)
+      },function(user,callback){
+        if(utils._.isInvalidOrBlank(user.bungieMemberShipId)){
+          service.authService.refreshUserData(trimmedBungieResponse,user,req.body.consoleType)
+        }
+
+        callback(null,user)
+      },function(user,callback){
+        var isInvitedUserInstall =isInvitedUser(req.body.invitation,user)
+
+        var updateMpDistinctId = service.trackingService.needMPIdfresh(req,user)
+        var existingUserZuid = req.zuid
+        if(updateMpDistinctId){// An existing user logging for first time after installing the app. Create mp user
+          req.zuid = user._id
+          req.adata.distinct_id=user._id
+          service.trackingService.trackUserLogin(req,user,updateMpDistinctId,existingUserZuid,isInvitedUserInstall,function(err,data){
+            utils.l.d('*********************auth:111::err',err)
+            utils.l.d('*********************auth:111::data',data)
+            if(!err){
+              utils.l.d('setting mp refresh data')
+              var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
+              user.mpDistinctId = mpDistincId
+              user.mpDistinctIdRefreshed=true
+            }
+            utils.l.d("***************Saving user:::::",user)
+            models.user.save(user, callback)
+          })
+        }else {// An existing user logging in either as a result of log out or app calling login when launched.
+          utils.l.d("***************else::Saving user:::::", user)
+          req.zuid = user._id
+          req.adata.distinct_id=user._id
+          if(existingUserZuid.toString() != user._id.toString()){
+            //app calling due to log out then zuid and user._id are different.
+            // With logout cookie is cleared and next api call will issue new zuid
+            // Fire appInit and remove mp user created due to new session id.
+            helpers.m.removeUser(existingUserZuid)
+            helpers.m.incrementAppInit(req)
+            helpers.m.trackRequest("appInit", {}, req, user)
+          }
+          models.user.save(user, callback)
+        }
+      }
+    ],
+    callback)
+}
+
 function isInvitedUser(invitation,user){
   var invitedUser = false
   if(utils._.isValidNonBlank(invitation) && utils._.isValidNonBlank(invitation.invitees)){
@@ -255,29 +340,7 @@ function isInvitedUser(invitation,user){
 }
 
 
-function handleNewUserV2(req, bungieNetUser, bungieMemberShipId, consoleType, callback) {
-  var consoles = []
-  // Due to the old login flow we parsed another bungie API to lookup a user
-  // We need the trimmedBungieResponse to be in this format to be parsed correctly
-  if(utils._.isValidNonBlank(bungieNetUser.psnDisplayName)) {
-    consoles.push({
-      destinyDisplayName: bungieNetUser.psnDisplayName,
-      destinyMembershipType: 2
-    })
-  }
-
-  if(utils._.isValidNonBlank(bungieNetUser.xboxDisplayName)) {
-    consoles.push({
-      destinyDisplayName: bungieNetUser.xboxDisplayName,
-      destinyMembershipType: 1
-    })
-  }
-
-  var trimmedBungieResponse = {
-    destinyProfile: consoles,
-    bungieMemberShipId: bungieMemberShipId
-  }
-
+function handleNewUserV2(req, trimmedBungieResponse, bungieMemberShipId, consoleType, callback) {
   // We need to define this as that's how we were handling consoles in the old API
   req.body.consoles = {
     consoleType: consoleType
