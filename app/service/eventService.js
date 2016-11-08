@@ -895,10 +895,11 @@ function acceptInvite(user, eventInvitation, callback) {
       else
         return callback({error: "Sorry that invitation is no longer valid"}, null)
     }, function(deletedInvitation,callback){
-      models.event.getById(eventInvitation.eId,callback)
+      listEventById({id:eventInvitation.eId},callback)
+      //models.event.getById(eventInvitation.eId,callback)
     },function (event, callback) {
       var notificationInformation = {
-        userList: utils.convertMongooseArrayToPlainArray(utils.getNotificationPlayerListForEventExceptUser(user, event)),
+        userList: utils.getNotificationPlayerListForEventExceptUser(user, event),
         playerJoinedOrLeft: user.toObject()
       }
       models.notificationQueue.addToQueue(eventInvitation.eId, notificationInformation, "eventInviteAccept")
