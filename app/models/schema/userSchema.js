@@ -54,7 +54,8 @@ var UserSchema = new Schema({
     eventsFull: {type: Number, default: 0}
   },
   mpDistinctId: String,
-  mpDistinctIdRefreshed: {type: Boolean, default: false}
+  mpDistinctIdRefreshed: {type: Boolean, default: false},
+  isInvited: {type: Boolean, default: false}
 })
 
 UserSchema.index({'userName': 1})
