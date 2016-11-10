@@ -762,7 +762,17 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
 
   utils.async.waterfall([
     function(callback) {
-      models.user.getByQuery({'consoles.consoleId': {$in : getInviteesRegex(inviteesGamertags)}}, callback)
+      models.user.getByQuery(
+        {
+          consoles: {
+            $elemMatch: {
+              consoleType: event.consoleType,
+              consoleId: {$in : getInviteesRegex(inviteesGamertags)}
+            }
+          }
+        },
+        //{'consoles.consoleId': {$in : getInviteesRegex(inviteesGamertags)}},
+        callback)
     },
     function(usersInDatabase, callback) {
       return handleInvitesForUsersInDatabase(event, usersInDatabase, inviter, messageDetails, invitedUserIds,
