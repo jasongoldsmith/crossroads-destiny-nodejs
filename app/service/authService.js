@@ -285,14 +285,20 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 
 	var uid = utils.mongo.ObjectID()
 	userData._id = uid
-/*
-	var messageDetails = {
-		event: event,
- 		invitedByGamerTag: invitedByGamerTag,
-		invitationLink: invitationLink
-	}
-*/
-	createNewUser(userData,validateBungie,bungieMembership.verifyStatus,utils.constants.bungieMessageTypes.eventInvitation,messageDetails, function(err,newUser){
+
+	utils.async.waterfall([
+		function(asyncCallback){
+			if(utils._.isValidNonBlank(userData.bungieMemberShipId))
+				models.user.getUserByData({bungieMemberShipId: userData.bungieMemberShipId},asyncCallback)
+			else
+				return asyncCallback(null,null)
+		},function(user,asynCallback){
+			if(utils._.isValidNonBlank(user))
+				callback(null,user)
+			else
+				createNewUser(userData,validateBungie,bungieMembership.verifyStatus,utils.constants.bungieMessageTypes.eventInvitation,messageDetails, asynCallback)
+		}
+	],function(err,newUser){
 		if(!err)
 			helpers.firebase.createUser(newUser)
 		return callback(err,newUser)

@@ -1,5 +1,5 @@
 var models = require('../models')
-
+var utils =require('../utils')
 function createPendingInvitation(data, callback) {
   models.pendingEventInvitation.create(data, callback)
 }

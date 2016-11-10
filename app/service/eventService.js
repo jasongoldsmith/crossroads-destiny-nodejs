@@ -776,8 +776,11 @@ function handleUserInvites(event, inviter, inviteesGamertags, invitationLink, ca
     function(newUsers, callback) {
       utils._.map(newUsers, function(newUser) {
         invitedUserIds.push(newUser._id.toString())
-        invitedBungieMemberShipIds.push(newUser.bungieMembershipId)
+        invitedBungieMemberShipIds.push(newUser.bungieMemberShipId)
       })
+      //To send notifications for the users found in DB based on the bungiemebershipId.
+      // Previous step only lookup users by gamertag.
+      addPushNotificationToQueue(event, newUsers, inviter, null, "eventInvite")
       prepareBungieNetworkObject(utils.config.bungieConvURL, "POST",
         utils.constants.bungieMessageTypes.eventInvitation, messageDetails,
         inviter.bungieMemberShipId, invitedBungieMemberShipIds, callback)
