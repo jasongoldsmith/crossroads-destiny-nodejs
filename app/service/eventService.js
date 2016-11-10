@@ -510,6 +510,7 @@ function listEventById(data, callback) {
 }
 
 function kick(data, callback) {
+  var outerUser = null
   utils.async.waterfall([
     function (callback) {
       // To use listEventById we need to define id
@@ -523,9 +524,16 @@ function kick(data, callback) {
       models.user.getById(playerToKick._id, callback)
     },
     function (user, callback) {
+      outerUser = user
       handleLeaveEvent(user, data, false, false, callback)
     }
-  ], callback)
+  ],
+    function (err, event) {
+      if(event) {
+        addPushNotificationToQueue(event, [outerUser], outerUser, null, "kick")
+      }
+      return callback(err, event)
+    })
 }
 
 function handleScenariosForKicking(eventObj, userId, callback) {

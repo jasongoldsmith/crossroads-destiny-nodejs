@@ -620,11 +620,12 @@ var sysConfigKeys = {
 var notificationQueueTypeEnum = {
   join: "sendPushNotificationForJoin",
   leave: "sendPushNotificationForLeave",
+  kick: "sendPushNotificationForKick",
   newCreate: "sendPushNotificationForNewCreate",
   addComment: "sendPushNotificationForAddComment",
   creatorChange: "sendPushNotificationForCreatorChange",
   eventInvite: "sendPushNotificationForEventInvites",
-  eventInviteAccept:"sendInviteAcceptNotification"
+  eventInviteAccept: "sendInviteAcceptNotification"
 }
 
 module.exports = {

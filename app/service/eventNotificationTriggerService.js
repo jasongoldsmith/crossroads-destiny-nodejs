@@ -286,14 +286,28 @@ function handleEventInviteAccept(event, notifTrigger, playerList, callback) {
   }
 }
 
-function handleLeaveEvent(event, user, notifTrigger, callback) {
+function handleLeaveEvent(event, notifTrigger, user, callback) {
   utils.l.d("Running trigger for event leave", utils.l.eventLog(event))
   if(notifTrigger.isActive) {
     if(event.launchStatus == utils.constants.eventLaunchStatusList.now) {
       utils.async.map(notifTrigger.notifications,
         utils._.partial(createNotificationAndSend, event, user, null))
-      event.notifStatus.push("Leave")
-      models.event.update(event,callback)
+      return callback(null, event)
+    } else {
+      return callback(null, null)
+    }
+  } else {
+    return callback(null, {message: "handleLeaveEvent Trigger is not active"})
+  }
+}
+
+function handleEventKick(event, notifTrigger, user, callback) {
+  utils.l.d("Running trigger for event kick", utils.l.eventLog(event))
+  if(notifTrigger.isActive) {
+    if(event.launchStatus == utils.constants.eventLaunchStatusList.now) {
+      utils.async.map(notifTrigger.notifications,
+        utils._.partial(createNotificationAndSend, event, user, null))
+      return callback(null, event)
     } else {
       return callback(null, null)
     }
@@ -309,8 +323,7 @@ function handleAddComment(event, notifTrigger, playerList, comment, callback) {
       utils.async.map(notifTrigger.notifications,
         utils._.partial(createNotificationAndSend, event, playerList, comment))
       utils.l.d('event in add comment notification::',event)
-      event.notifStatus.push("AddComment")
-      models.event.update(event, callback)
+      return callback(null, event)
     } else {
       return callback(null, null)
     }
@@ -458,6 +471,7 @@ module.exports ={
   handleNewEvents: handleNewEvents,
   handleJoinEvent: handleJoinEvent,
   handleLeaveEvent: handleLeaveEvent,
+  handleEventKick: handleEventKick,
   handleAddComment: handleAddComment,
   handleCreatorChange: handleCreatorChange,
   handleEventInvites: handleEventInvites,
