@@ -125,6 +125,7 @@ function removeInvitedPlayersFromEvent(user, event, callback) {
 }
 
 function updateEventsFirebase(user, userTimeout, event,data) {
+  utils.l.i("event for updating in firebase", event)
   if(utils._.isValidNonBlank(event) && event.deleted) {
     // When the event has been deleted we want to make all fields null in firebase
     helpers.firebase.createEventV2({_id : data.eId, clanId: event.clanId}, user, userTimeout)
