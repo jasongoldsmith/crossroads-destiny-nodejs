@@ -101,7 +101,7 @@ function removeInvitedPlayersFromEvent(user, event, callback) {
       // Need to remove the entry if the person leaving is an invitee
       eventInvitationService.findOneAndRemove({event: event._id, invitee: user._id}, function (err, deletedEventInvitation) {
         if(err) {
-          utils.l.s("Event invitation could not be deleted")
+          utils.l.i("Event invitation could not be deleted")
         }
       })
 
@@ -115,7 +115,7 @@ function removeInvitedPlayersFromEvent(user, event, callback) {
       utils.async.mapSeries(eventInvitationList, function(eventInvitation, callback) {
         eventInvitationService.deleteInvitation(eventInvitation, function (err, deletedEventInvitation) {
           if(err) {
-            utils.l.s("Event invitation could not be deleted")
+            utils.l.i("Event invitation could not be deleted")
           }
         })
         models.event.leaveEvent(eventInvitation.invitee, {eId: event._id.toString()}, callback)
@@ -125,7 +125,7 @@ function removeInvitedPlayersFromEvent(user, event, callback) {
 }
 
 function updateEventsFirebase(user, userTimeout, event,data) {
-  utils.l.i("event for updating in firebase", event)
+  utils.l.d("event for updating in firebase", event)
   if(utils._.isValidNonBlank(event) && event.deleted) {
     // When the event has been deleted we want to make all fields null in firebase
     helpers.firebase.createEventV2({_id : data.eId, clanId: event.clanId}, user, userTimeout)
