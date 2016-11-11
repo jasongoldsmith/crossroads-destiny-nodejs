@@ -72,7 +72,11 @@ function getFeed(user, consoleType, isPublicFeed, callback) {
 				utils._.map(event.players, function(playerId) {
 					var playerObj = utils._.get(playersMap, playerId)
 					if(utils._.isValid(playerObj)) {
-						playerList.push(playerObj)
+						/*
+						We need to use a toObject since we compute isInvited later
+						We need to have a new object to ensure that we don't impact that flag for each event
+						 */
+						playerList.push(playerObj.toObject())
 					}
 				})
 				utils._.remove(event.players)
