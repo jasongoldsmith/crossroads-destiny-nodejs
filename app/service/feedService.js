@@ -105,6 +105,7 @@ function transformEventsToFeed(events, isPublicFeed, callback) {
 			//separate current and future events from event list
 			var feedObject = {}
 			feedObject.currentEvents = utils._.filter(events, {launchStatus: "now"})
+			feedObject.currentEvents = utils._.orderBy(feedObject.currentEvents, ['updated'], ['desc'])
 			feedObject.futureEvents = utils._.filter(events, {launchStatus: "upcoming"})
 
 			//Create unique activityIds array from current events
