@@ -340,6 +340,7 @@ function updateUserConsoles(user,callback){
       getById(user._id,callback)
     },function(userDB,callback){
         utils._.extend(userDB,{consoles:user.consoles})
+        userDB.imageUrl = user.imageUrl
         userDB.save(function(err, c, numAffected) {
           if (err) {
             utils.l.s("Got error on updateUserConsoles", {err: err, user: user})

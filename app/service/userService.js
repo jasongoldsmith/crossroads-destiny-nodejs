@@ -429,6 +429,10 @@ function updateUserConsoles(userToupdate){
             userConsole.clanTag = destinyAccount.clanTag
             userConsole.imageUrl = utils.config.bungieBaseURL + "/" + destinyAccount.helmetUrl
             userConsole.verifyStatus = userObj.verifyStatus ? userObj.verifyStatus : "INITIATED"
+
+            //Set the iamge Url at the user object as app is using that field to display helmet
+            if(userConsoleType == primaryConsole.consoleType)
+              userObj.imageUrl=utils.config.bungieBaseURL + "/" + destinyAccount.helmetUrl
           }else{
             var newConsole = {}
             newConsole.destinyMembershipId = destinyAccount.destinyMembershipId
