@@ -613,7 +613,8 @@ var sysConfigKeys = {
   privacyPolicyVersion: "privacyPolicyVersion",
   commentsReportMaxValue: "commentsReportMaxValue",
   commentsReportCoolingOffPeriod: "commentsReportCoolingOffPeriod",
-  userActiveTimeOutInMins: "userActiveTimeOutInMins"
+  userActiveTimeOutInMins: "userActiveTimeOutInMins",
+  deleteFullEventsTimeOutInMins: "deleteFullEventsTimeOutInMins"
 }
 
 // These keys map to the method names in eventBasedPushNotification

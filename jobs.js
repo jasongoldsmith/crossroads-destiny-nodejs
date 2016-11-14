@@ -56,9 +56,20 @@ function deleteOldFullEvents() {
 
 function deleteOldFullEventsHandler() {
   utils.async.waterfall([
-    function (callback) {
+    function(callback) {
+      models.sysConfig.getSysConfig(utils.constants.sysConfigKeys.deleteFullEventsTimeOutInMins, function (err, result) {
+        if(err || utils._.isInvalidOrBlank(result) || utils._.isInvalidOrBlank(result.value)) {
+          utils.l.i("There was an error in fetching the deleteFullEventsTimeOutInMins from db", err)
+          return callback(null, 10)
+        } else {
+          utils.l.d("Found deleteFullEventsTimeOutInMins in db", result.value)
+          return callback(null, result.value)
+        }
+      })
+    },
+    function (deleteFullEventsTimeOutInMins, callback) {
       // We need to clear full events 10 minutes after being full https://trello.com/c/ZSu0RENR
-      var date = moment().subtract(10, 'minutes')
+      var date = moment().subtract(deleteFullEventsTimeOutInMins, 'minutes')
       models.event.getByQuery({ status: "full", launchStatus:"now", updated: {$lt: date}}, null, callback)
     },
     function (events, callback) {
