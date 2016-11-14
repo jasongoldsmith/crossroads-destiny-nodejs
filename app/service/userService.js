@@ -429,11 +429,20 @@ function updateUserConsoles(userToupdate){
             userConsole.clanTag = destinyAccount.clanTag
             userConsole.imageUrl = utils.config.bungieBaseURL + "/" + destinyAccount.helmetUrl
             userConsole.verifyStatus = userObj.verifyStatus ? userObj.verifyStatus : "INITIATED"
+          }else{
+            var newConsole = {}
+            newConsole.destinyMembershipId = destinyAccount.destinyMembershipId
+            newConsole.consoleId = destinyAccount.destinyDisplayName
+            newConsole.consoleType=userConsoleType
+            newConsole.clanTag = destinyAccount.clanTag
+            newConsole.imageUrl = utils.config.bungieBaseURL + "/" + destinyAccount.helmetUrl
+            newConsole.verifyStatus = userObj.verifyStatus ? userObj.verifyStatus : "INITIATED"
+            user.consoles.push(newConsole)
           }
         })
 
         utils.l.d("updateUserConsoles::after updating user",userObj)
-        models.user.save(userObj,callback)
+        models.user.updateUserConsoles(userObj,callback)
       }else{
         callback(null,userObj)
       }

@@ -79,10 +79,10 @@ function save(user, callback) {
         }
         return callback(err, c)
       })
-    },
+    }/*,
     function(c, callback) {
       getById(c._id, callback)
-    }
+    }*/
   ],
   function(err, user) {
     if(err) {
@@ -334,6 +334,25 @@ function findUserCount(query,callback){
   User.count(query).exec(callback)
 }
 
+function updateUserConsoles(user,callback){
+  utils.async.waterfall([
+    function(callback){
+      getById(user._id,callback)
+    },function(userDB,callback){
+        utils._.extend(userDB,{consoles:user.consoles})
+        userDB.save(function(err, c, numAffected) {
+          if (err) {
+            utils.l.s("Got error on updateUserConsoles", {err: err, user: user})
+          } else if (!c) {
+            utils.l.s("Got null on updateUserConsolesr", {user: user})
+          }
+          return callback(err, c)
+        })
+      }
+  ],
+  callback)
+}
+
 module.exports = {
   model: User,
   getUserById: getUserById,
@@ -356,5 +375,6 @@ module.exports = {
   getOrCreateUIDFromRequest: getOrCreateUIDFromRequest,
   getByQueryLite: getByQueryLite,
   findUsersPaginated:findUsersPaginated,
-  findUserCount:findUserCount
+  findUserCount:findUserCount,
+  updateUserConsoles:updateUserConsoles
 }

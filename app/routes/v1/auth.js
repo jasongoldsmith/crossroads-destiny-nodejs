@@ -136,8 +136,8 @@ function validateUserLogin(req, res) {
       if (err) {
         return routeUtils.handleAPIError(req, res, err, err)
       } else {
-        if(createNewUser)
-          service.userService.updateUserConsoles(outerUser)
+        //if(createNewUser)
+        service.userService.updateUserConsoles(outerUser)
         routeUtils.handleAPISuccess(req, res,
           {
             value: outerUser,
