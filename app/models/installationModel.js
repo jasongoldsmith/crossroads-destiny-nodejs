@@ -53,7 +53,7 @@ function getOrCreateInstallation(user, callback) {
   });
 }
 
-function updateInstallation(user, deviceType, deviceToken, callback) {
+function updateInstallationV0(user, deviceType, deviceToken, callback) {
   utils.async.waterfall([
     function(callback) {
       getOrCreateInstallation(user, callback);
@@ -91,6 +91,30 @@ function save(installation, callback) {
 function findByIdAndUpdate(id,data,callback){
   Installation.findByIdAndUpdate(id,{ "$set": data},callback)
 }
+
+function updateInstallation(user,deviceType,deviceToken, callback){
+  utils.async.waterfall([
+    function(callback){
+      getInstallationByUser(user,callback)
+    },function(installation, callback){
+      if(!utils._.isInvalidOrBlank(installation)){
+        utils._.extend(installation, {deviceType: deviceType, deviceToken: deviceToken})
+        return callback(null,installation)
+      } else
+        return callback(null,new Installation({user: user, unReadNotificationCount: 0,deviceType: deviceType, deviceToken: deviceToken}))
+    },function(updatedInstallation, callback){
+      updatedInstallation.save(function(err,c,numAffected){
+        if (err) {
+          utils.l.i("Got error on saving deviceToken", {err: err, installation:{user: user, unReadNotificationCount: 0,deviceType: deviceType, deviceToken: deviceToken}})
+        } else if (!c) {
+          utils.l.i("Got an empty object while saving deviceToken", {err: err, installation:{user: user, unReadNotificationCount: 0,deviceType: deviceType, deviceToken: deviceToken}})
+        }
+        return callback(err, c)
+      })
+    }
+  ],callback)
+}
+
 
 module.exports = {
   model: Installation,

@@ -318,3 +318,8 @@ db.getCollection('users').aggregate([
     "__v" : 0
 }
 //------------END-------------
+
+//-----------BEGIN----------
+//-----------Check for array length----------
+db.getCollection('usergroups').count( { $where: "this.groups.length > 0" })
+//-----------END----------

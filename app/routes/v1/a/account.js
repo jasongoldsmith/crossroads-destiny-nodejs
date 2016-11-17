@@ -228,8 +228,9 @@ function handleMuteGroupNotifications(user, data, callback) {
       models.user.getById(user._id, callback)
     },
     function (userObj, callback) {
-      muteGroup(userObj,data,callback)
-    },function(updatedUser,callback){
+      muteGroup(userObj, data, callback)
+    },
+    function(updatedUser, callback) {
       models.user.save(updatedUser, function(err, user) {
         if(err) {
           return callback(err, null)
@@ -237,11 +238,15 @@ function handleMuteGroupNotifications(user, data, callback) {
           return callback(null, data)
         }
       })
-    }
+    },
+    //TODO: not tested yet, uncomment after testing
+    //function(userDB, callback) {
+    //  helpers.sns.unsubscribeAllEndpoints(userDB, true, callback)
+    //}
   ], callback)
 }
 
-function muteGroup(user,data,callback){
+function muteGroup(user, data, callback) {
   var userGroup = utils._.find(user.groups, {groupId: data.groupId})
   if(utils._.isInvalidOrBlank(userGroup)) {
     return callback({error: "You do not belong to this group anymore"}, null)
@@ -257,7 +262,7 @@ function muteGroup(user,data,callback){
     }
   })
 
-  return callback(null,user)
+  return callback(null, user)
 }
 function mergeEventStatsWithGroups(eventCountList, groupList, callback){
   var groupUpdatedList = null
