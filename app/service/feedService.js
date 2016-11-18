@@ -2,7 +2,7 @@ var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
 
-function getFeed(user, consoleType, isPublicFeed, callback) {
+function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) {
 	var activitiesMap = null
 	var playerIds = []
 	var eventsList = []
@@ -87,12 +87,12 @@ function getFeed(user, consoleType, isPublicFeed, callback) {
 		},
 		function(events, callback) {
 			//create final feed object
-			transformEventsToFeed(eventsList, isPublicFeed, callback)
+			transformEventsToFeed(eventsList, isPublicFeed, user, createMyEventsList, callback)
 		}
 	], callback)
 }
 
-function transformEventsToFeed(events, isPublicFeed, callback) {
+function transformEventsToFeed(events, isPublicFeed, user, createMyEventsList, callback) {
 	utils.async.waterfall([
 		function(callback) {
 			//Fetch adcard activities
@@ -103,10 +103,7 @@ function transformEventsToFeed(events, isPublicFeed, callback) {
 		},
 		function(adActivities, callback) {
 			//separate current and future events from event list
-			var feedObject = {}
-			feedObject.currentEvents = utils._.filter(events, {launchStatus: "now"})
-			feedObject.currentEvents = utils._.orderBy(feedObject.currentEvents, ['updated'], ['desc'])
-			feedObject.futureEvents = utils._.filter(events, {launchStatus: "upcoming"})
+			var feedObject = getFeedList(events,user,createMyEventsList)
 
 			//Create unique activityIds array from current events
 			utils.l.d('feedService::isPublicFeed::' + isPublicFeed)
@@ -136,6 +133,31 @@ function transformEventsToFeed(events, isPublicFeed, callback) {
 			}
 		}
 	], callback)
+}
+
+function getFeedList(events,user,createMyEventsList) {
+	var feedObject = {}
+	if(createMyEventsList && createMyEventsList == "true") {
+		feedObject.currentEvents = utils._.filter(events, function (eventObj) {
+			return (eventObj.launchStatus == "now" && utils._.findIndex(utils._.map(eventObj.players,"_id"), user._id) < 0)
+		})
+		feedObject.currentEvents = utils._.orderBy(feedObject.currentEvents, ['updated'], ['desc'])
+		feedObject.myCurrentEvents = utils._.filter(events, function (eventObj) {
+			return (eventObj.launchStatus == "now" && utils._.findIndex(utils._.map(eventObj.players,"_id"), user._id) >= 0)
+		})
+		feedObject.myCurrentEvents = utils._.orderBy(feedObject.myCurrentEvents, ['updated'], ['desc'])
+		feedObject.futureEvents = utils._.filter(events, function (eventObj) {
+			return (eventObj.launchStatus == "upcoming" && utils._.findIndex(utils._.map(eventObj.players,"_id"), user._id) < 0)
+		})
+		feedObject.myFutureEvents = utils._.filter(events, function (eventObj) {
+			return (eventObj.launchStatus == "upcoming" && utils._.findIndex(utils._.map(eventObj.players,"_id"), user._id) >= 0)
+		})
+	}else{
+		feedObject.currentEvents = utils._.filter(events, {launchStatus: "now"})
+		feedObject.currentEvents = utils._.orderBy(feedObject.currentEvents, ['updated'], ['desc'])
+		feedObject.futureEvents = utils._.filter(events, {launchStatus: "upcoming"})
+	}
+	return feedObject
 }
 
 function addIsInvitedFlagToEventPlayers(events, callback) {

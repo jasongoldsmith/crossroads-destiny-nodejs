@@ -29,7 +29,8 @@ function login (req, res) {
           if (err) {
             return callback(err, null)
           } else if (!user) {
-            handleNewUser(req, callback)
+            return callback({error: "Our signup has changed. Please update to the latest version to sign up."},null)
+            //handleNewUser(req, callback)
           } else {
             return callback(null, user)
           }
