@@ -157,6 +157,32 @@ function getUserByData(data, callback) {
     .exec(utils.firstInArrayCallback(callback))
 }
 
+function getUserByConsole(consoleId, consoleType, bungieMemberShipId, callback) {
+  var query= null
+
+  if(utils._.isInvalidOrBlank(bungieMemberShipId)){
+    query = {
+      consoles: {
+        $elemMatch: {
+          consoleType: consoleType,
+          consoleId:{$regex : new RegExp(["^", consoleId, "$"].join("")), $options:"i"}
+        }}
+    }
+  }else{
+    query = {"$or":[
+      {bungieMemberShipId:bungieMemberShipId},
+      {consoles: {
+          $elemMatch: {
+            consoleType: consoleType,
+            consoleId: {$regex: new RegExp(["^", consoleId, "$"].join("")), $options: "i"}
+          }
+        }}
+    ]}
+  }
+
+  utils.l.d("getUserByConsole::",query)
+  User.find(query).exec(utils.firstInArrayCallback(callback))
+}
 
 function getAll(callback) {
   getByQuery({}, callback)
@@ -377,5 +403,6 @@ module.exports = {
   getByQueryLite: getByQueryLite,
   findUsersPaginated:findUsersPaginated,
   findUserCount:findUserCount,
-  updateUserConsoles:updateUserConsoles
+  updateUserConsoles:updateUserConsoles,
+  getUserByConsole:getUserByConsole
 }

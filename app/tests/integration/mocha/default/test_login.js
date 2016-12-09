@@ -1,106 +1,77 @@
-var tUtils = require("../../../utils")
 var utils = require("../../../../utils")
-var cookie = require('cookie')
+var models = require("../../../../models")
+var tUtils = require('../../../utils')
 var helpers = require('../../../../helpers')
 var mongoose = require('mongoose')
-var service = require ('../../../../service/index')
+var loginDataProvider = require('../../../data/utils/loginUtils')
+var baseUrl = utils.config.testHostUrl
+var loginUrl = "/api/v1/auth/validateUserLogin"
 
-var auth = require("../../../../routes/v1/auth")
+describe("Successful login test cases: ", function() {
+	var bungieResponseValid = require('../../../data/bungieResponseData.json')
+	var user = null
 
-describe("Successful test cases: ", function() {
-	var userData1 = {
-		"userName":"test1",
-		"passWord":"test1",
-		"psnId":"test1",
-		"clanId":"1"
-	}
+	this.timeout(30000)
+	describe("test login: ", function() {
+		var loginData = {}
+		loginData.consoleType = "PS4"
 
-	var userData2 = {
-		"userName":"test2",
-		"passWord":"test2",
-		"psnId":"test2",
-	}
-
-	describe("test signup: ", function() {
-		it("signup a user: ", function(done) {
-			service.authService.signupUser(userData1, function(err, user) {
+		it("signup a new user: ", function(done) {
+			loginDataProvider.loginUser("sreeharshadasa","PS4",null,function(err,userObj){
+				user = userObj
 				validateSuccessfulSignupObject(user)
-				done()
+				done();
 			})
 		})
 
-		it("signup a user without clanId and check clanId exists: ", function(done) {
-			service.authService.signupUser(userData2, function(err, user) {
+		it("login existing user: ", function(done) {
+			loginDataProvider.loginUser("sreeharshadasa","PS4",null,function(err,userObj){
+				utils.assert.equal(userObj._id.toString(), user._id.toString(), "existing user login failed")
 				validateSuccessfulSignupObject(user)
-				utils.assert.equal(user.clanId, "clan_id_not_set", "default clanId is not set to clan_id_not_set")
-				done()
+				done();
 			})
 		})
 	})
 
 	after(function() {
-		mongoose.connection.collection('users').remove(userData1)
-		mongoose.connection.collection('users').remove(userData2)
+		utils.l.d("Removing user",user)
+		models.user.model.remove({_id:user._id},function(err,data){})
+		models.userGroup.model.remove({"user" : user._id},function(err,data){})
+		models.eventInvitation.model.remove({"inviter" : user._id},function(err,data){})
+		models.eventInvitation.model.remove({"invitee" : user._id},function(err,data){})
+		models.event.model.remove({"players" : user._id},function(err,data){})
 	})
 })
 
 describe("Unsuccessful test cases: ", function() {
-	describe("test signup: ", function() {
+	describe("test invalid login: ", function() {
+		var loginData = {}
+		loginData.consoleType = "PS4"
 
-		it("signup a user without a psnID", function(done) {
-			var userData = {
-				"userName":"test1",
-				"passWord":"test1",
-				"clanId":"1"
-			}
-			service.authService.signupUser(userData, function(err, user) {
-				validateErrorSignupObject(err, "psnId")
-				done()
-			})
-
-		})
-
-		it("signup a user without a userName", function(done) {
-			var userData = {
-				"passWord":"test",
-				"psnId":"test",
-				"clanId":"1"
-			}
-			service.authService.signupUser(userData, function(err, user) {
-				validateErrorSignupObject(err, "userName")
-				done()
-			})
-
-		})
-
-		it("signup a user without a passWord", function(done) {
-			var userData = {
-				"userName":"test",
-				"psnId":"test",
-				"clanId":"1"
-			}
-
-			service.authService.signupUser(userData, function(err, user) {
-				validateErrorSignupObject(err, "passWord")
-				done()
-			})
-
+		it("failed login without bungieResponse: ", function(done) {
+			tUtils.tPost(baseUrl, {path:loginUrl , data: loginData},
+				{status: 400},
+				function(err,res){
+					utils.l.d('validateErrorSignupObject::',err)
+					utils.l.d('validateErrorSignupObject::',JSON.parse(res.text))
+					validateErrorSignupObject(err,JSON.parse(res.text))
+					done();
+				})
 		})
 
 	})
 })
 
-function validateErrorSignupObject(err, message) {
-	utils.assert.isDefined(err, "error was expected but was not found")
-	utils.expect(err.toString()).to.have.string(message)
+function validateErrorSignupObject(err, errorData) {
+	utils.assert.isDefined(errorData, "error was expected but was not found")
+	utils.assert.isDefined(errorData.error,"error message was expected but was not found")
 }
 
 function validateSuccessfulSignupObject(data) {
-	utils.assert.isDefined(data.userName, "userName property not defined in user response object")
-	utils.assert.isDefined(data.psnId, "psnId property not defined in user response object")
 	utils.assert.isDefined(data.clanId, "clanId property not defined in user response object")
 	utils.assert.isDefined(data.imageUrl, "imageUrl property not defined in user response object")
 	utils.assert.isDefined(data.date, "date property not defined in user response object")
 	utils.assert.isDefined(data.uDate, "uDate property not defined in user response object")
 	utils.assert.isDefined(data.clanId, "clanId property not defined in user response object")
+	utils.assert.isDefined(data.bungieMemberShipId, "bungieMemberShipId property not defined in user response object")
 }

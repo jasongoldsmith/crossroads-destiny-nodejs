@@ -561,32 +561,6 @@ function bulkHelmetUpdate(){
   })
 }
 
-function bulkVerifyStatusUpdateMixPanel(){
-  var limit = 2
-  var page = 0
-  utils.l.i("Started bulkVerifyStatusUpdateMixPanel:: " + utils.moment().format())
-  utils.async.waterfall([
-    function(callback) {
-      models.user.findUserCount({}, callback)
-    },
-    function(userCount, callback){
-      temporal.loop(5 * 1000, function() {
-        var batchStop = limit * (page + 1)
-        if(batchStop >= userCount) {
-          utils.l.i("Updated verifyStatus for all users")
-          this.stop()
-          return callback(null, null)
-        }
-        utils.l.i("Processing verifyStatusUpdate : page[" + page + "] = " + batchStop + " of total users = " + userCount)
-        service.accountService.bulkUpdateVerifiedStatusMixPanel(page, limit)
-        page = page + 1
-      })
-    }
-  ],function(err, data) {
-    utils.l.i("Completed bulkVerifyStatusUpdateMixPanel:: " + utils.moment().format())
-  })
-}
-
 function createLoadTestUsers() {
   var minstoSleep = 1
   var counter = 1
@@ -755,6 +729,5 @@ module.exports = {
   createLoadTestUsers: createLoadTestUsers,
   eventBasedNotifications: eventBasedNotifications,
   bulkHelmetUpdate: bulkHelmetUpdate,
-  bulkVerifyStatusUpdateMixPanel: bulkVerifyStatusUpdateMixPanel,
   mergeDuplicateEvents: mergeDuplicateEvents
 }

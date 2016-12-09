@@ -99,9 +99,6 @@ switch(command) {
   case "bulkHelmetUpdate":
     jobs.bulkHelmetUpdate()
     break
-  case "bulkVerifyStatusUpdateMixPanel":
-    jobs.bulkVerifyStatusUpdateMixPanel()
-    break
   case "mergeDuplicateEvents":
     jobs.mergeDuplicateEvents()
     break

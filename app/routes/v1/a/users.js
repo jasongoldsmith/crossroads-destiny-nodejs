@@ -56,7 +56,7 @@ function updateGroup(req, res) {
     }
     routeUtils.handleAPIError(req, res, err, err)
   }else {
-    updateUserGroup(req.body, function (err, user) {
+    service.userService.updateUserGroup(req.body, function (err, user) {
       if (err) {
         routeUtils.handleAPIError(req, res, err, err)
       } else {
@@ -68,7 +68,6 @@ function updateGroup(req, res) {
 
 function updatePassword(req, res) {
   utils.l.i("Update user password request" + JSON.stringify(req.body))
-
 
   if(!req.body.id || !req.body.oldPassWord || !req.body.newPassWord) {
     var err = {
@@ -183,14 +182,6 @@ function listUsers(username, consoleId, callback) {
 
 function updateUser(data, callback) {
   models.user.updateUser(data, false, callback)
-}
-
-//TODO: GroupID is set in clanID field. Need to change it later.
-function updateUserGroup(data, callback) {
-  utils.l.d("updateUserGroup::",updateUserGroup)
-  var clanName = utils._.isInvalidOrBlank(data.clanName)?"":data.clanName
-  var clanImageUrl = utils._.isInvalidOrBlank(data.clanImageUrl)?"":data.clanImageUrl
-  models.user.updateUser({id: data.id, clanId: data.clanId, clanName:clanName, clanImageUrl:clanImageUrl}, true, callback)
 }
 
 function updateUserPassword(data, callback) {

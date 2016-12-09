@@ -65,9 +65,6 @@ function login (req, res) {
 function validateUserLogin(req, res) {
   utils.l.d("handleBungieResponse request", req.body)
   var data = req.body
-  var errorStatus = data.bungieResponse.ErrorStatus
-  var response = data.bungieResponse.Response
-  var outerUser = null
 
   if(!data.bungieResponse || !data.consoleType) {
     utils.l.s("Bad handleBungieResponse request")
@@ -75,6 +72,10 @@ function validateUserLogin(req, res) {
     routeUtils.handleAPIError(req, res, err, err)
     return
   }
+
+  var errorStatus = data.bungieResponse.ErrorStatus
+  var response = data.bungieResponse.Response
+  var outerUser = null
 
   if(!errorStatus || errorStatus != "Success" || !response || !response.bungieNetUser || utils._.isInvalidOrBlank(response.bungieNetUser.membershipId)) {
     var err = utils.constants.bungieErrorMessage(data.bungieResponse.ErrorStatus)
@@ -185,6 +186,7 @@ function getDestinyAccounts(bungieNetUser,consoleType){
   utils.l.d("trimmedBungieResponse::",trimmedBungieResponse)
   return trimmedBungieResponse
 }
+
 function handlePostLogin(req,user,callback){
   var needFirebaseUpdate = false;
   var isInvitedUserInstall = false;
@@ -304,19 +306,15 @@ function handlePostLoginV2(req,user,trimmedBungieResponse, callback){
           req.zuid = user._id
           req.adata.distinct_id=user._id
           service.trackingService.trackUserLogin(req,user,updateMpDistinctId,existingUserZuid,isInvitedUserInstall,function(err,data){
-            utils.l.d('*********************auth:111::err',err)
-            utils.l.d('*********************auth:111::data',data)
             if(!err){
               utils.l.d('setting mp refresh data')
               var mpDistincId = helpers.req.getHeader(req,'x-mixpanelid')
               user.mpDistinctId = mpDistincId
               user.mpDistinctIdRefreshed=true
             }
-            utils.l.d("***************Saving user:::::",user)
             models.user.save(user, callback)
           })
         }else {// An existing user logging in either as a result of log out or app calling login when launched.
-          utils.l.d("***************else::Saving user:::::", user)
           req.zuid = user._id
           req.adata.distinct_id=user._id
           if(existingUserZuid.toString() != user._id.toString()){
@@ -337,10 +335,8 @@ function handlePostLoginV2(req,user,trimmedBungieResponse, callback){
 function isInvitedUser(invitation,user){
   var invitedUser = false
   if(utils._.isValidNonBlank(invitation) && utils._.isValidNonBlank(invitation.invitees)){
-    utils.l.d('auth::isInvitedUser::1111::'+invitation.invitees)
     utils._.map(user.consoles,function(console){
       if(utils._.hasElement(invitation.invitees,console.consoleId.toString()) ) {
-        utils.l.d('auth::isInvitedUser::found gamertag::'+console.consoleId)
         invitedUser = true
       }
     })
@@ -357,6 +353,7 @@ function handleNewUserV2(req, trimmedBungieResponse, bungieMemberShipId, console
   createNewUser(req, trimmedBungieResponse, false, "VERIFIED", callback)
 }
 
+/*
 function handleNewUser(req, callback) {
   var body = req.body
   var bungieResponse = null
@@ -391,6 +388,7 @@ function handleNewUser(req, callback) {
     }
   ], callback)
 }
+*/
 
 function createNewUser(req, bungieResponse, localEnableBungieIntegration,
                        userVerificationStatus, callback) {
@@ -574,31 +572,6 @@ function verifyConfirm(req,res){
     })
 }
 
-function markUserVerified(token,callback){
-  var userObj = null
-  utils.async.waterfall([
-    function(callback){
-      var query = { $or: [ { "consoles.verifyToken":token }, { "verifyToken":token } ] }
-      models.user.getUserByData(query,callback)
-    },function(user, callback){
-      utils.l.d("user="+user)
-      if(user){
-        userObj = user
-        user.verifyStatus ="VERIFIED"
-        utils._.map(user.consoles,function(console){
-          //if(console.verifyToken == token)
-          console.verifyStatus ="VERIFIED"
-        })
-        models.user.save(user,function(err,updatedUser){
-          callback(null, utils.config.accountVerificationSuccess)
-        })
-      }else{
-        callback("Invalid verification link. Please click on the link sent to you or copy paste the link in a browser.",null)
-      }
-    }
-  ],callback)
-}
-
 function verifyReject(req,res){
   var token = req.param("token")
   utils.l.d("verifyReject::token=" + token)
@@ -689,14 +662,15 @@ function requestResetPassword(req,res){
         utils.l.d("requestResetPassword::userName="+userName+",consoleType="+consoleType+",consoleId="+consoleId)
         if(utils._.isValidNonBlank(consoleType)) {
           useGamerTag = true
-          models.user.getUserByData({
+/*          models.user.getUserByData({
             consoles: {
               $elemMatch: {
                 consoleType: consoleType,
                 consoleId:{$regex : new RegExp(["^", consoleId, "$"].join("")), $options:"i"}
               }
             }
-          }, callback)
+          }, callback)*/
+          models.user.getUserByConsole(consoleId,consoleType,null,callback)
         }
         else
           models.user.getUserByData({userName: userName.toLowerCase().trim()}, callback)
@@ -784,6 +758,7 @@ function home(req,res){
 }
 
 function checkBungieAccount(req, res) {
+/*
   utils.l.d("consoleId:: " + req.body.consoleId + ", consoleType:: " + req.body.consoleType)
   utils.l.d("checkBungieAccount", req.body)
   req.body.consoleId = utils._.isValidNonBlank(req.body.consoleId)?req.body.consoleId.trim():req.body.consoleId
@@ -819,6 +794,9 @@ function checkBungieAccount(req, res) {
       }
     }
   )
+*/
+  var err = {error: "Our signup has changed. Please update to the latest version to sign up."}
+  routeUtils.handleAPIError(req,res,err,err)
 }
 
 /** Routes */

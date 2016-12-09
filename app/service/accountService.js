@@ -76,21 +76,6 @@ function bulkUpdateHelmet(page, limit) {
 */
 }
 
-function bulkUpdateVerifiedStatusMixPanel(page, limit) {
-  utils.async.waterfall([
-    function(callback) {
-      models.user.findUsersPaginated({}, page, limit, callback)
-    },function(userList, callback) {
-      utils._.map(userList, function(user) {
-        helpers.m.setOrUpdateUserVerifiedStatusFromConsole(user)
-        return callback(null, user)
-      })
-    }
-  ],function(err, data) {
-    utils.l.d('Completed processing page for bulkUpdateVerifiedStatus::' + page)
-  })
-}
-
 function bulkMPUserStatusUpdaet(userCSVPath,callback){
   utils.async.waterfall([
     function(callback){
@@ -134,6 +119,5 @@ module.exports = {
   handlUpdateHelmet: handlUpdateHelmet,
   bulkUpdateHelmet:bulkUpdateHelmet,
   refreshHelmentAndConsoles: refreshHelmentAndConsoles,
-  bulkUpdateVerifiedStatusMixPanel: bulkUpdateVerifiedStatusMixPanel,
   bulkMPUserStatusUpdaet:bulkMPUserStatusUpdaet
 }

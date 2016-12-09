@@ -21,6 +21,7 @@ var defaults = {
   logLevel: 'info',
   appName:'Crossroads',
   tinyUrlHost:'http://dev.crsrd.co/',
+  testHostUrl:'http://localhost:3000',
   hostUrl: function() {
     var url = this.hostName;
     if (this.portNum !== -1) {

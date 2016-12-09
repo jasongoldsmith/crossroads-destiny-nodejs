@@ -3,75 +3,6 @@ var destinyService = require('./destinyInterface')
 var utils = require('../utils')
 var userService = require('./userService')
 var helpers = require('../helpers')
-//TODO:: Check for usage and remove
-function signupUser(signupData, callback) {
-	utils.async.waterfall([
-		function(callback){
-			models.user.getByQuery({userName: signupData.userName}, utils.firstInArrayCallback(callback))
-		},
-		function(user, callback) {
-			if(utils._.isValidNonBlank(user)) {
-				return callback({error: "That username is already taken"}, null)
-			} else if(utils.config.enableBungieIntegration) {
-				destinyService.getBungieHelmet(
-					signupData.consoles[0].consoleId,
-					signupData.consoles[0].consoleType,
-					null,
-					function(err, helmet) {
-						if(err) {
-							return callback(err, null)
-						} else {
-							signupData.imageUrl = utils.config.bungieBaseURL + "/" +helmet.helmetURL
-							//TODO: add imageUrl and clanTag in the consoles object of userSchema.
-							signupData.consoles[0].imageUrl = utils.config.bungieBaseURL + "/" +helmet.helmetURL
-							signupData.consoles[0].destinyMembershipId = helmet.destinyProfile.memberShipId
-							signupData.consoles[0].clanTag = helmet.clanTag
-							signupData.consoles[0].isPrimary = true
-							return callback(null, signupData)
-						}
-					}
-				)
-			} else {
-				return callback(null, signupData)
-			}
-		},
-		function(user, callback) {
-			//TBD: membershiptype is hardcoded to PSN for now. When we introduce multiple channels change this to take it from userdata
-			// or send notification to both xbox and psn depending on the ID availability
-			if(utils.config.enableBungieIntegration) {
-				utils.l.d("Destiny validation enabled", signupData)
-				destinyService.sendBungieMessage(
-					signupData.bungieMemberShipId,
-					utils._.get(utils.constants.consoleGenericsId, signupData.consoles[0].consoleType),
-					utils.constants.bungieMessageTypes.accountVerification,
-					function (error, messageResponse) {
-						utils.l.d('messageResponse', messageResponse)
-						utils.l.d('signupUser::sendBungieMessage::error', error)
-						if (messageResponse) {
-							utils.l.d("messageResponse::token===" + messageResponse.token)
-							signupData.consoles[0].verifyStatus = "INITIATED"
-							signupData.consoles[0].verifyToken = messageResponse.token
-							return callback(null, signupData)
-						} else {
-							return callback(error, null)
-						}
-					})
-			} else {
-				utils.l.d("Destiny validation disabled")
-				return callback(null, signupData)
-			}
-		},
-		function(newUser,callback){
-			newUser.clanName = utils.constants.freelanceBungieGroup.groupName
-			getCurrentLegalObject(function(err,legal){
-				newUser.legal = legal
-				utils.l.d('signup::getCurrentLegalObject',newUser)
-				utils.l.d("creating user", utils.l.userLog(newUser))
-				models.user.createUserFromData(newUser, callback)  // don't send message
-			})
-		}
-	], callback)
-}
 
 function createNewUser(signupData,validateBungie,verifyStatus,messageType,messageDetails,callback){
 	var primaryConsole = utils.primaryConsole(signupData)
@@ -117,35 +48,6 @@ function sendVerificationMessage(signupData,consoleType,messageType,messageDetai
 						return callback(null, signupData)
 					}else{
 						return callback(error, null) //This is the case where user is signing up in the normal flow
-					}
-				}
-			})
-
-}
-
-function sendVerificationMessageV2(signupData,consoleType,messageType,messageDetails,verifyStatus){
-	destinyService.sendBungieMessageV2(signupData.bungieMemberShipId,
-			utils._.get(utils.constants.consoleGenericsId, consoleType),
-			messageType,
-			messageDetails,
-			function (error, messageResponse) {
-				utils.l.d('messageResponse', messageResponse)
-				utils.l.d('signupUser::sendBungieMessage::error', error)
-				if (messageResponse) {
-					utils.l.d("messageResponse::token===" + messageResponse.token)
-					signupData.verifyStatus = verifyStatus
-					signupData.verifyToken = messageResponse.token
-					return {error:null, value:signupData}
-				} else {
-					if(messageType == utils.constants.bungieMessageTypes.eventInvitation){
-						signupData.verifyStatus = "INVITATION_MSG_FAILED"
-						return {error:null, value:signupData}
-					}else if(messageType == utils.constants.bungieMessageTypes.accountVerification){
-						signupData.verifyStatus = "FAILED_INITIATION"
-						return {error:null, value:signupData}
-						//return {error:error, value:null}
-					}else{
-						return {error:error, value:null}
 					}
 				}
 			})
@@ -306,12 +208,10 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 }
 
 module.exports = {
-	signupUser: signupUser,
 	requestResetPassword: requestResetPassword,
 	listMemberCountByClan: listMemberCountByClan,
 	addLegalAttributes: addLegalAttributes,
 	createNewUser: createNewUser,
 	createInvitees: createInvitees,
-	sendVerificationMessage: sendVerificationMessage,
-	sendVerificationMessageV2: sendVerificationMessageV2
+	sendVerificationMessage: sendVerificationMessage
 }

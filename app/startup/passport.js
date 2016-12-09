@@ -21,7 +21,6 @@ module.exports = function (passport, config) {
     },
     function(req, userName, password, callback) {
       var body = req.body
-      utils.l.d('passport::body',body)
       if(!body.consoles && !body.bungieMemberShipId) {
         models.user.getUserByData({userName:body.userName.toLowerCase().trim()}, function (err, user) {
           if(err) {
@@ -40,14 +39,7 @@ module.exports = function (passport, config) {
       } else if(body.consoles) {
         var consoleId = body.consoles.consoleId
         utils.l.d("consoles: " + consoleId)
-        models.user.getUserByData({
-          consoles: {
-            $elemMatch: {
-              consoleType: body.consoles.consoleType,
-              consoleId: {$regex: new RegExp(["^", consoleId, "$"].join("")), $options: "i"}
-            }
-          }
-        },
+        models.user.getUserByConsole(consoleId, body.consoles.consoleType, null,
           function (err, user) {
             if (err) {
               utils.l.s("Database lookup for user failed", err)
@@ -65,18 +57,7 @@ module.exports = function (passport, config) {
       } else {
         utils.l.d("bungieMemberShipId: " , body.bungieMembership)
         utils.l.d("selectedConsole::",body.selectedConsole)
-
-        models.user.getUserByData({"$or":[
-            {bungieMemberShipId: body.bungieMemberShipId},
-            {
-              consoles: {
-                $elemMatch: {
-                  consoleType: body.selectedConsole.consoleType,
-                  consoleId: {$regex: new RegExp(["^", body.selectedConsole.consoleId, "$"].join("")), $options: "i"}
-                }
-              }
-            }
-          ]},
+        models.user.getUserByConsole(body.selectedConsole.consoleId, body.selectedConsole.consoleType, body.bungieMemberShipId,
         function (err, user) {
           if (err) {
             utils.l.s("Database lookup for user failed", err)
