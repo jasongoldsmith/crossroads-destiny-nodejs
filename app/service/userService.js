@@ -492,176 +492,153 @@ function updateUserGroup(data, callback) {
 
 function listGroups(user, callback) {
   var groupList = null
-  var userObj = null
   utils.async.waterfall([
-    function (callback) {
-      models.user.getUserById({id: user._id}, callback)
-    },function(user,callback){
-      if(user){
-        userObj = user
+    function(callback){
+      if(user)
         models.userGroup.getByUser(user._id,callback)
-      }
       else return callback({error: "User doesnot exist/logged in."})
     },
     function(userGroup,callback) {
       listUserGroups(userGroup,user,callback)
     },
-    function(groups, callback) {
-      if(groups) {
-        groupList = groups
-        groupList.push(utils.constants.freelanceBungieGroup)
-        models.user.updateUser(mergeGroups(userObj, groupList), false, function(err, user) {
-          addMuteFlagToGroupObject(user, groupList)
-
-          if (user) {
-            eventService.listEventCountByGroups(utils._.map(groupList, 'groupId'),
-              utils.primaryConsole(userObj).consoleType, callback)
-          } else {
-            return callback(err, null)
-          }
-        })
-      } else {
-        return callback(null, null)
-      }
-    },
-    function(eventCounts, callback) {
-      mergeEventStatsWithGroups(eventCounts,groupList, callback)
-    },
-    function(groupEventStatsList,callback) {
-      groupList = groupEventStatsList
-      models.user.listMemberCount(utils._.map(groupList, 'groupId'),
-        utils.primaryConsole(userObj).consoleType, callback)
-    },
-    function(memberCounts, callback) {
-      mergeMemberStatsWithGroups(memberCounts, groupList, callback)
+    function(userGroupList, callback) {
+      transformGroups(userGroupList,utils.primaryConsole(user).consoleType,callback)
     }
   ], callback)
 }
 
-function listUserGroups(userGroup,user,callback){
+function listUserGroups(userGroupLst,user,callback){
   utils.async.waterfall([
     function(callback) {
-      var groupsObj = (userGroup && userGroup.groups) ? userGroup.groups : []
-      var dateUpdated = userGroup ? utils.moment(userGroup.uDate).utc().add("24","hours") : utils.moment().utc()
+      var groupsObj = (userGroupLst && userGroupLst.length>0) ? userGroupLst[0]: null
+      utils.l.d('groupsObj',groupsObj)
+      var dateUpdated = utils._.isValidNonBlank(groupsObj) ? utils.moment(groupsObj.uDate).utc().add("24","hours") : utils.moment().utc()
       utils.l.d("dateUpdated",dateUpdated)
-      if (groupsObj.length>0 && dateUpdated >= utils.moment().utc()) {
-        utils.l.d("Groups already exists.")
-        callback (null,userGroup)
-      } else {
+      if (utils._.isInvalidOrBlank(groupsObj) || dateUpdated < utils.moment().utc() || groupsObj.refreshGroups) {
         utils.l.d("Groups does not exists. Fetching from bungie")
         destinyInterface.listBungieGroupsJoined(user.bungieMemberShipId, utils.primaryConsole(user).consoleType, 1, function(err, groups){
           if(groups)
-            models.userGroup.updateUserGroup(user._id,groups,callback)
-          else callback(err,userGroup)
+            refreshGroups(user,userGroupLst,groups,callback)
+          else
+            callback(err,userGroupLst)
         })
+      } else {
+        utils.l.d("Groups already exists.")
+        callback (null,userGroupLst)
       }
-    },function(updatedUserGroup, callback){
-      callback(null,(updatedUserGroup && updatedUserGroup.groups) ? updatedUserGroup.groups : [])
     }
   ],callback)
 }
 
-function handleMuteGroupNotifications(user, data, callback) {
+function refreshGroups(user,userGroupLst,groups,callback){
   utils.async.waterfall([
-    function(callback) {
-      models.user.getById(user._id, callback)
-    },
-    function (userObj, callback) {
-      muteGroup(userObj, data, callback)
-    },
-    function(updatedUser, callback) {
-      models.user.save(updatedUser, function(err, user) {
-        if(err) {
-          return callback(err, null)
-        } else {
-          return callback(null, data)
-        }
+    function(callback){
+      models.groups.addGroups(groups,utils._.map(user.consoles,"consoleType"),callback)
+    },function(docs, callback){
+      models.userGroup.refreshUserGroup(user,groups,userGroupLst,callback)
+    }
+  ],callback)
+}
+
+function transformGroups(userGroupLst,consoleType,callback){
+  utils.async.waterfall([
+    function(callback){
+      var groups = []
+      utils._.map(userGroupLst, function(userGroup){
+        groups.push({
+          "groupId": userGroup.group._id,
+          "groupName": userGroup.group.groupName,
+          "avatarPath": userGroup.group.avatarPath,
+          "clanEnabled": userGroup.group.clanEnabled,
+          "bungieMemberCount": userGroup.group.bungieMemberCount,
+          "memberCount": utils._.find(userGroup.group.appStats,{consoleType:consoleType}).memberCount,
+          "muteNotification": userGroup.muteNotification
+        })
       })
-    },
-    //TODO: not tested yet, uncomment after testing
-    //function(userDB, callback) {
-    //  helpers.sns.unsubscribeAllEndpoints(userDB, true, callback)
-    //}
-  ], callback)
+      eventService.listEventCountByGroups(utils._.map(groups, 'groupId'), consoleType, function(err,eventStats){
+        return callback(null, mergeEventStatsWithGroups(eventStats,groups))
+      })
+    }
+  ],callback)
 }
 
-function muteGroup(user, data, callback) {
-  var userGroup = utils._.find(user.groups, {groupId: data.groupId})
-  if(utils._.isInvalidOrBlank(userGroup)) {
-    return callback({error: "You do not belong to this group anymore"}, null)
-  }
-
-  utils._.map(user.groups, function(group) {
-    if(group.groupId.toString() == data.groupId.toString()) {
-      if(data.muteNotification === "true" || data.muteNotification == true) {
-        group.muteNotification = true
-      }else {
-        group.muteNotification = false
-      }
-    }
+function mergeEventStatsWithGroups(eventCountList, groupList){
+  utils.l.d('groupList without eventcount',groupList)
+  utils._.map(groupList,function(group){
+    eventCountObj = utils._.find(eventCountList, {"_id": group.groupId})
+    group.eventCount= utils._.isValidNonBlank(eventCountObj)?eventCountObj.count:0
   })
 
-  return callback(null, user)
-}
-function mergeEventStatsWithGroups(eventCountList, groupList, callback){
-  var groupUpdatedList = null
-  if (eventCountList) {
-    groupUpdatedList = utils._.map(JSON.parse(JSON.stringify(groupList)), function(group) {
-      var eventCount = utils._.find(eventCountList, {"_id": group.groupId})
-      if (eventCount) {
-        group.eventCount = eventCount.count
-      }
-      return group
-    })
-  } else {
-    groupUpdatedList = groupList
-  }
-  return callback(null, groupUpdatedList)
+  return groupList
 }
 
-function mergeMemberStatsWithGroups(memberCounts, groupList, callback) {
-  var groupUpdatedList = null
-  if(memberCounts) {
-    groupUpdatedList = utils._.map(JSON.parse(JSON.stringify(groupList)), function(group) {
-      var userCount = utils._.find(memberCounts, {"_id": group.groupId})
-      if (userCount) {
-        group.memberCount = userCount.count
-      }
-      return group
-    })
-  } else {
-    groupUpdatedList = groupList
-  }
-  return callback(null, groupUpdatedList)
+function handleMuteGroupNotifications(user, data, callback) {
+  var muteNotification = data.muteNotification=="true" || data.muteNotification == true?true:false
+  models.userGroup.updateUserGroup(user._id,data.groupId,{muteNotification:muteNotification},callback)
 }
 
-function mergeGroups(user, bungieGroups) {
-  var bungieGroupIds = utils._.map(bungieGroups, 'groupId')
-  var updatedGroups = utils._.map(bungieGroupIds,function(bungieId) {
-    var userGroup = utils._.find(user.groups, {groupId: bungieId})
-    if(!userGroup) {
-      return {
-        groupId: bungieId,
-        muteNotification: false
+function bulkUpdateUserGroups(page, limit){
+  utils.async.waterfall([
+      function(callback) {
+        models.user.findUsersPaginated({"verifyStatus" : "VERIFIED"} ,page ,limit, callback)
+      },
+      function(userList, callback) {
+        utils._.map(userList, function(user) {
+          listGroups(user, callback)
+        })
       }
-    } else {
-      return userGroup
+    ],
+    function(err ,data) {
+      utils.l.d('Completed processing page::' + page)
+    })
+}
+
+function bulkUpdateGroupStats(page,limit){
+  utils.async.waterfall([
+      function(callback) {
+        models.groups.findGroupsPaginated({} ,page ,limit, callback)
+      },
+      function(groupList, callback) {
+        utils._.map(groupList, function(group) {
+          updateGroupStats(group, callback)
+        })
+      }
+    ],
+    function(err ,data) {
+      utils.l.d('Completed processing page::' + page)
+    })
+}
+
+function updateGroupStats(group, callback){
+  utils.l.d("group",group)
+  utils.async.waterfall([
+    function(callback){
+      utils.async.parallel({
+          ps4Stats: function (callback) {
+            models.userGroup.getGroupCountByConsole(group._id,"PS4", callback)
+          },
+          xboxStats: function (callback) {
+            models.userGroup.getGroupCountByConsole(group._id,"XBOXONE", callback)
+          }
+        },
+        function (err, results) {
+          if(utils._.isValidNonBlank(err)) {
+            utils.l.s("There was an error in fetching group stats for "+group._id, err)
+            return callback(null, null)
+          }
+          else {
+            return callback(null, results)
+          }
+        })
+    },function(results, callback){
+      if(utils._.isValidNonBlank(results)) {
+        models.groups.updateGroupStats(group._id, "PS4", results.ps4Stats, callback)
+        models.groups.updateGroupStats(group._id, "XBOXONE", results.xboxStats, callback)
+      }else{
+        callback(null,null)
+      }
     }
-  })
-
-  return {
-    id: user._id,
-    groups: updatedGroups
-  }
-}
-
-function addMuteFlagToGroupObject(user, groupsList) {
-  if(utils._.isValidNonBlank(user)) {
-    utils._.map(groupsList, function(group) {
-      var userGroup = utils._.find(user.groups, {"groupId": group.groupId})
-      group.muteNotification = userGroup.muteNotification
-    })
-  }
+  ],callback)
 }
 
 module.exports = {
@@ -681,5 +658,7 @@ module.exports = {
   refreshUserData:refreshUserData,
   updateUserGroup:updateUserGroup,
   handleMuteGroupNotifications:handleMuteGroupNotifications,
-  listGroups:listGroups
+  listGroups:listGroups,
+  bulkUpdateUserGroups:bulkUpdateUserGroups,
+  updateGroupStats:bulkUpdateGroupStats
 }

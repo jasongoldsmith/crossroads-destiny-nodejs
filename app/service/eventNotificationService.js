@@ -151,13 +151,7 @@ function getClanMembers(event, clanId, consoleType, callback) {
 	if(clanId == utils.constants.freelanceBungieGroup.groupId){
 		return callback(null,[])
 	}else {
-		models.user.getUserIdsByQuery(
-				{
-					'groups': {'$elemMatch': {'groupId': clanId, 'muteNotification': false}},
-					'consoles.consoleType': consoleType
-				},
-				callback
-		)
+		models.userGroup.getUsersByGroup(clanId,false,consoleType,callback)
 	}
 }
 

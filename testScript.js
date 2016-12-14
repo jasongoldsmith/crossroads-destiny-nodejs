@@ -260,6 +260,10 @@ switch(command) {
     models.event.getAllCurrentEventPlayers(function(err,playerIds){
       utils.l.d("playerIds",playerIds)
     })
+  case 'valueTest':
+    console.log('getting consoles')
+    utils.l.d("consoles",utils._.values(utils.constants.newGenConsoleType))
+    break;
   case 'snsRegisterTest':
     utils.async.waterfall([
       function(callback){
@@ -324,6 +328,11 @@ switch(command) {
   case 'bulkHelmet':
     actService.bulkUpdateHelmet(function(err,data){
       utils.l.d('OUT OF STREAM')
+    })
+    break;
+  case 'userGroupTest':
+    models.userGroup.getUsersByGroup('1570656',false,'PS4',function(err,data){
+      utils.l.d('users by group',data)
     })
     break;
   default:

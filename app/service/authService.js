@@ -54,6 +54,7 @@ function sendVerificationMessage(signupData,consoleType,messageType,messageDetai
 
 }
 
+/*
 function requestResetPassword(userData, callback) {
 	utils.async.waterfall([
 		function(callback) {
@@ -81,6 +82,7 @@ function requestResetPassword(userData, callback) {
 		}
 	], callback)
 }
+*/
 
 function addLegalAttributes(user,callback){
 	var userLegal = JSON.parse(JSON.stringify(user))
@@ -95,10 +97,6 @@ function addLegalAttributes(user,callback){
 
 		return callback(null,userLegal)
 	})
-}
-
-function listMemberCountByClan(groupIds,consoleType, callback) {
-	models.user.listMemberCount(groupIds, consoleType, callback)
 }
 
 function getCurrentLegalObject(callback){
@@ -208,8 +206,7 @@ function createInvitedUsers(bungieMembership,consoleType,messageDetails,callback
 }
 
 module.exports = {
-	requestResetPassword: requestResetPassword,
-	listMemberCountByClan: listMemberCountByClan,
+	//requestResetPassword: requestResetPassword,
 	addLegalAttributes: addLegalAttributes,
 	createNewUser: createNewUser,
 	createInvitees: createInvitees,

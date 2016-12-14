@@ -15,6 +15,7 @@ var models = require('./app/models/index')
 var helpers = require('./app/helpers')
 var service = require ('./app/service')
 require('./app/startup/db')
+var mongoose = require('mongoose')
 
 function updatePassWord() {
   utils.async.waterfall(
@@ -561,6 +562,57 @@ function bulkHelmetUpdate(){
   })
 }
 
+function bulkUserGroupUpdate(){
+  var limit = 10
+  var page = 0
+  utils.l.i("Started helmetupdate:"+utils.moment().format())
+  utils.async.waterfall([
+    function(callback){
+      //models.user.findUserCount({"verifyStatus":"VERIFIED"},callback)
+      models.user.model.count({"verifyStatus":"VERIFIED"},callback)
+    },function(userCount, callback){
+      temporal.loop(5 * 1000, function() {
+        var batchStop = limit * (page+1)
+        utils.l.i("Processing bulkUserGroupUpdate:page["+page+"]="+batchStop+" of total users="+userCount)
+        service.userService.bulkUpdateUserGroups(page,limit)
+        if(batchStop >= userCount) {
+          utils.l.i("Updated usergroups for all users")
+          this.stop()
+        } else {
+          page = page + 1
+        }
+      })
+    }
+  ],function(err,data){
+    utils.l.i("Completed helmetupdate:"+utils.moment().format())
+  })
+}
+
+function groupStatsUpdate(){
+  var limit = 10
+  var page = 0
+  utils.l.i("Started helmetupdate:"+utils.moment().format())
+  utils.async.waterfall([
+    function(callback){
+      models.groups.model.count({},callback)
+    },function(groupCount, callback){
+      temporal.loop(5 * 1000, function() {
+        var batchStop = limit * (page+1)
+        utils.l.i("Processing group stats:page["+page+"]="+batchStop+" of total groups="+groupCount)
+        service.userService.updateGroupStats(page,limit)
+        if(batchStop >= groupCount) {
+          utils.l.i("Updated stats for all group")
+          this.stop()
+        } else {
+          page = page + 1
+        }
+      })
+    }
+  ],function(err,data){
+    utils.l.i("Completed helmetupdate:"+utils.moment().format())
+  })
+}
+
 function createLoadTestUsers() {
   var minstoSleep = 1
   var counter = 1
@@ -729,5 +781,7 @@ module.exports = {
   createLoadTestUsers: createLoadTestUsers,
   eventBasedNotifications: eventBasedNotifications,
   bulkHelmetUpdate: bulkHelmetUpdate,
-  mergeDuplicateEvents: mergeDuplicateEvents
+  mergeDuplicateEvents: mergeDuplicateEvents,
+  bulkUserGroupUpdate:bulkUserGroupUpdate,
+  groupStatsUpdate:groupStatsUpdate
 }

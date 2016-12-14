@@ -241,6 +241,7 @@ function updateUser(data, allowClanUpdate, callback) {
     callback)
 }
 
+/*
 function listMemberCount(ids,consoleType,callback){
   utils.async.map(ids,
      function(id,callback){
@@ -264,6 +265,7 @@ function getUserCount(id,consoleType,callback){
     ],callback
   )
 }
+*/
 
 function getUserMetrics(callback) {
   User.aggregate([{
@@ -395,7 +397,7 @@ module.exports = {
   updateUser: updateUser,
   getByQuery: getByQuery,
   getUserIdsByQuery: getUserIdsByQuery,
-  listMemberCount: listMemberCount,
+  //listMemberCount: listMemberCount,
   getUserMetrics: getUserMetrics,
   findByUserIdAndUpdate: findByUserIdAndUpdate,
   findUsersByIdAndUpdate: findUsersByIdAndUpdate,

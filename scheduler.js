@@ -102,6 +102,12 @@ switch(command) {
   case "mergeDuplicateEvents":
     jobs.mergeDuplicateEvents()
     break
+  case "bulkUserGroupUpdate":
+    jobs.bulkUserGroupUpdate()
+    break
+  case "groupStatsUpdate":
+    jobs.groupStatsUpdate()
+    break
   case "addSysConfig":
     models.sysConfig.createSysConfig({key:'eventExpiryTimeInMins',description:'Time to expire events. Use - value.',value:'-40'},function(err,sysconf){
       console.log('addSysConfig::err::'+err)

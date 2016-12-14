@@ -9,67 +9,90 @@ var UserGroupSchema = require('./schema/userGroupSchema')
 var UserGroup = mongoose.model('UserGroup', UserGroupSchema.schema)
 
 // Public functions
-function updateUserGroup(userId, groups, callback) {
-  getByUser(userId, function(err, userGroup) {
-    if (!err){
-      userGroup = userGroup ? utils._.extend(userGroup, {groups:groups}):new UserGroup({user:userId,groups:groups})
-      save(userGroup, callback)
-    }else
-      return callback(err)
-  })
+function updateUserGroup(userId,groupId, data, callback) {
+  var query={}
+  if(utils._.isValidNonBlank(userId))
+    query.user=userId
+  if(utils._.isValidNonBlank(groupId))
+    query.group=groupId
+  UserGroup.update(query,{"$set":data},{multi:true},callback)
 }
 
-function getByQuery(query, callback) {
-  UserGroup
-    .find(query)
-    .exec(callback)
+//Remove existing usergroups and add new usergroups with mute notification flag.
+function refreshUserGroup(user,groups,userGroupLst,callback){
+  utils.l.d("Refreshing groups...1111",userGroupLst)
+  utils.async.waterfall([
+    function(callback){
+      UserGroup.collection.remove({user:user._id},callback)
+    },function(docsRemoved, callback){
+      var userGroups = []
+      utils._.map(groups,function(groupObj){
+        var userGroup = utils._.isValidNonBlank(userGroupLst) ?utils._.find(userGroupLst,{group:groupObj.groupId}):null
+        userGroups.push({
+          user:user._id,
+          refreshGroups:false,
+          group:groupObj.groupId,
+          consoles:utils._.map(user.consoles,"consoleType"),
+          muteNotification:utils._.isValidNonBlank(userGroup)?userGroup.muteNotification:false,
+          date:new Date(),
+          uDate:new Date()
+        })
+      })
+
+      //Add free lance group
+      userGroups.push({
+        user:user._id,
+        refreshGroups:false,
+        group:utils.constants.freelanceBungieGroup.groupId,
+        consoles:utils._.map(user.consoles,"consoleType"),
+        muteNotification:utils._.isValidNonBlank(userGroupLst)?userGroupLst.muteNotification:false,
+        date:new Date(),
+        uDate:new Date()
+      })
+
+      utils.l.d("Refreshing groups...2222",userGroups)
+      UserGroup.collection.insert(userGroups,callback)
+    },function(docs, callback){
+      getByUser(user._id,callback)
+
+    }
+  ],callback)
 }
 
 function getByUser(userId, callback) {
   UserGroup
-    .findOne({user:userId})
+    .find({user:userId}).populate("group")
     .exec(callback)
 }
 
-function save(userGroup, callback) {
-  utils.async.waterfall([
-    function(callback) {
-      // We need this as groups is mixed type
-      userGroup.markModified('groups')
-      userGroup.save(function (err, c, numAffected) {
-        if (err) {
-          utils.l.i("Got error on saving userGroup", {err: err, userGroup: userGroup})
-        } else if (!c) {
-          utils.l.i("Got null on saving userGroup", {userGroup: userGroup})
-        }
-        return callback(err, c)
-      })
-    }],
-    callback
-  )
+function getUsersByGroup(groupId,muteNotification, consoleType,callback){
+  var query = {
+    group: groupId,
+    consoles: consoleType
+  }
+  if(utils._.isValidNonBlank(muteNotification))
+    query.muteNotification = muteNotification
+
+      //TODO: Remove populate when noitifcation service is refactored to use only users
+  UserGroup
+    .find(query)
+    .select("user")
+    .populate("user")
+    .exec(function(err,data){
+      if(!err) return callback(null,utils._.map(data,"user"))
+      else return callback(err,null)
+    })
 }
 
-function deleteUserGroup(userId, callback) {
-  utils.async.waterfall([
-      function(callback) {
-        UserGroup.findOne({user: userId}, callback)
-      },
-      function(userGroup, callback) {
-        if(!userGroup) {
-          return callback({error: "userGroup with this id does not exist"}, null)
-        }
-        utils.l.d("Deleting the userGroup")
-        userGroup.remove(callback)
-      }
-    ],
-    callback
-  )
+function getGroupCountByConsole(groupId,consoleType,callback){
+  UserGroup.count({group:groupId,consoles:consoleType}).exec(callback)
 }
 
 module.exports = {
   model: UserGroup,
   updateUserGroup:updateUserGroup,
-  deleteUserGroup:deleteUserGroup,
-  getByQuery:getByQuery,
-  getByUser:getByUser
+  getUsersByGroup:getUsersByGroup,
+  getByUser:getByUser,
+  refreshUserGroup:refreshUserGroup,
+  getGroupCountByConsole:getGroupCountByConsole
 }

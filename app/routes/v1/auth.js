@@ -512,6 +512,7 @@ function signup(req, res) {
 }
 
 function verifyAccount(req,res){
+/*
   var token = req.param("token")
   var query = { $or: [ { "consoles.verifyToken":token }, { "verifyToken":token } ] }
   models.user.getUserByData(query,function(err, user){
@@ -529,9 +530,11 @@ function verifyAccount(req,res){
       res.render("account/error")
     }
   })
+*/
+  res.render("account/error")
 }
 
-function verifyConfirm(req,res){
+/*function verifyConfirm(req,res){
   var token = req.param("token")
   var userObj = null
   utils.l.d("verifyAccount::token="+token)
@@ -625,6 +628,7 @@ function handleInvalidUser(user,callback){
     })
   })
 }
+*/
 
 function logout(req, res) {
   var user = req.user
@@ -633,7 +637,7 @@ function logout(req, res) {
       user.isLoggedIn = false
       models.user.save(user,callback)
     },function(user,callback){
-      models.userGroup.updateUserGroup(user._id,[],callback)
+      models.userGroup.updateUserGroup(user._id,null,{refreshGroups:true},callback)
     }
   ],function(err,userGroup){
     if(err) {
@@ -653,7 +657,7 @@ function getSignupMessage(user){
 }
 
 function requestResetPassword(req,res){
-  var useGamerTag = false
+/*  var useGamerTag = false
   var userName = req.body.userName
   var consoleType = req.body.consoleType ? req.body.consoleType.toString().toUpperCase() : null
   var consoleId = req.body.consoleId ? req.body.consoleId.toString().trim() : null
@@ -662,14 +666,14 @@ function requestResetPassword(req,res){
         utils.l.d("requestResetPassword::userName="+userName+",consoleType="+consoleType+",consoleId="+consoleId)
         if(utils._.isValidNonBlank(consoleType)) {
           useGamerTag = true
-/*          models.user.getUserByData({
+/!*          models.user.getUserByData({
             consoles: {
               $elemMatch: {
                 consoleType: consoleType,
                 consoleId:{$regex : new RegExp(["^", consoleId, "$"].join("")), $options:"i"}
               }
             }
-          }, callback)*/
+          }, callback)*!/
           models.user.getUserByConsole(consoleId,consoleType,null,callback)
         }
         else
@@ -694,10 +698,15 @@ function requestResetPassword(req,res){
         return routeUtils.handleAPISuccess(req, res, updatedUser)
       }
     }
-  )
+  )*/
+
+  var errorResponse = {
+    error: "Our login system has changed. Please update to the latest version in the App Store to continue using Crossroads."
+  }
+  routeUtils.handleAPIError(req, res, errorResponse, errorResponse)
 }
 
-function resetPasswordLaunch(req,res){
+/*function resetPasswordLaunch(req,res){
   var token = req.param("token")
   models.user.getUserByData({passwordResetToken:token},function(err, user){
     if(user){
@@ -749,7 +758,7 @@ function resetPassword(req,res){
       return res.render("account/resetPasswordConfirm",{appName:utils.config.appName})
     }
   )
-}
+}*/
 
 function home(req,res){
   //res.render('home/index')
@@ -804,12 +813,12 @@ routeUtils.rGetPost(router, '/login', 'Login', login, login)
 routeUtils.rGetPost(router, '/bo/login', 'BOLogin', boLogin, boLogin)
 routeUtils.rPost(router, '/register', 'Signup', signup)
 routeUtils.rPost(router, '/logout', 'Logout', logout)
-routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyConfirm)
-routeUtils.rGet(router, '/verifyReject/:token', 'verifyReject', verifyReject)
+//routeUtils.rGet(router, '/verifyconfirm/:token', 'AccountVerification', verifyConfirm)
+//routeUtils.rGet(router, '/verifyReject/:token', 'verifyReject', verifyReject)
 routeUtils.rGet(router, '/verify/:token', 'AccountVerification', verifyAccount)
-routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
+//routeUtils.rGet(router, '/resetPassword/:token', 'resetPasswordLaunch', resetPasswordLaunch, resetPasswordLaunch)
 routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', requestResetPassword, requestResetPassword)
-routeUtils.rPost(router, '/resetPassword/:token', 'resetPassword', resetPassword, resetPassword)
+//routeUtils.rPost(router, '/resetPassword/:token', 'resetPassword', resetPassword, resetPassword)
 routeUtils.rGet(router,'/','homePage',home,home)
 routeUtils.rPost(router, '/checkBungieAccount', 'checkBungieAccount', checkBungieAccount)
 routeUtils.rPost(router, '/validateUserLogin', 'validateUserLogin', validateUserLogin)
