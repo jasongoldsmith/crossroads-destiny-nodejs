@@ -1,5 +1,11 @@
 var mongoose = require('mongoose')
+var utils = require('../../utils')
 var Schema = mongoose.Schema
+var serviceTypeEnum = {
+  type: String,
+  enum: utils._.values(utils.constants.serviceTypes),
+  default: utils.constants.serviceTypes.PUSHNOTIFICATION
+}
 
 var UserGroupSchema = new Schema({
   user: {type: Schema.Types.ObjectId, ref: 'User'},
@@ -8,6 +14,12 @@ var UserGroupSchema = new Schema({
   refreshGroups:{type:Boolean,default:false},
   group:{ type: String, ref: 'Group', required: true },
   consoles:[{type:String}],
+  serviceEndpoints:[{
+    serviceType:serviceTypeEnum,
+    consoleType:String,
+    topicSubscriptionEndpoint:String,
+    topicName:String
+  }],
   muteNotification:Boolean
 })
 

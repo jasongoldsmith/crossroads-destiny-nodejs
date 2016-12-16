@@ -13,6 +13,7 @@ function listMyGroups(req, res) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {
       groupsResponse = groups || [{}]
+      service.userService.subscribeUserNotifications(req.user,false)
       routeUtils.handleAPISuccess(req, res, groupsResponse)
     }
   })
