@@ -629,6 +629,9 @@ var notificationQueueTypeEnum = {
   eventInviteAccept: "sendInviteAcceptNotification"
 }
 
+var serviceTypes = {PUSHNOTIFICATION:'PUSHNOTIFICATION',
+  EMAIL:'EMAIL'}
+
 module.exports = {
   l: lodash,
   baseUrl: baseUrl,
@@ -649,5 +652,6 @@ module.exports = {
   notificationQueueTypeEnum: notificationQueueTypeEnum,
   existingUserInstallData:existingUserInstallData,
   newGenConsoleType:newGenConsoleType,
-  invitedUserInstallData:invitedUserInstallData
+  invitedUserInstallData:invitedUserInstallData,
+  serviceTypes:serviceTypes
 }

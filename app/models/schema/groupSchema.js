@@ -1,5 +1,11 @@
 var mongoose = require('mongoose')
+var utils = require('../../utils')
 var Schema = mongoose.Schema
+var serviceTypeEnum = {
+  type: String,
+  enum: utils._.values(utils.constants.serviceTypes),
+  default: utils.constants.serviceTypes.PUSHNOTIFICATION
+}
 
 var GroupSchema = new Schema({
   _id:String,
@@ -12,6 +18,12 @@ var GroupSchema = new Schema({
   appStats:[{
     consoleType:String,
     memberCount:Number
+  }],
+  serviceEndpoints:[{
+    serviceType:serviceTypeEnum,
+    consoleType:String,
+    topicEndpoint:String,
+    topicName:String
   }]
 })
 

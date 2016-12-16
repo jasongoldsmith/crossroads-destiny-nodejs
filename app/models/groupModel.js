@@ -13,6 +13,15 @@ function updateGroupStats(groupId,consoleType,memberCount, callback) {
   Group.update({_id:groupId,"appStats.consoleType":consoleType},{"$set":{"appStats.$.memberCount":memberCount}},{multi:true},callback)
 }
 
+function addServiceEndpoints(groupId,serviceEndPoint,callback){
+  var query={}
+  query._id=groupId
+  Group.update(query,
+    {"$push":{"serviceEndpoints": serviceEndPoint}},
+    {safe: true, upsert: true, new : true},
+    callback)
+}
+
 function addGroups(groupObjects,consoleTypes, callback){
   var groupIds = utils._.map(groupObjects,"groupId")
   utils.l.d("addGroups::consoleTypes",utils._.values(utils.constants.newGenConsoleType))
@@ -62,5 +71,6 @@ module.exports = {
   model: Group,
   updateGroupStats:updateGroupStats,
   addGroups:addGroups,
-  findGroupsPaginated:findGroupsPaginated
+  findGroupsPaginated:findGroupsPaginated,
+  addServiceEndpoints:addServiceEndpoints
 }

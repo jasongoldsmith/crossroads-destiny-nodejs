@@ -1,5 +1,6 @@
 var AWS = require('aws-sdk');
 var utils = require('../utils')
+var models = require('../models')
 
 AWS.config.update(utils.config.awsSNSKey)
 var sns = new AWS.SNS()
@@ -8,8 +9,201 @@ function unRegisterDeviceToken(user, callback) {
 
 }
 
+function createTopic(topicName,callback){
+  //var models = require('../models')
+  var params = {
+    Name: topicName /* required */
+  };
+  utils.async.waterfall([
+    function (callback){
+      sns.createTopic(params, callback);
+    },function(topicArn, callback){
+      models.sysConfig.createSysConfig({key:topicName,value:topicArn,description:topicName},callback)
+    }
+  ],callback)
+}
+
+function getTopicARNEndpoint(consoleType, groupId){
+  //var models = require('../models')
+  var topicARNKey = getTopicARNKey(consoleType,groupId)
+  utils.async.waterfall([
+    function(callback){
+      utils.l.d('topicARNKey::', topicARNKey)
+      models.sysConfig.getSysConfig(topicARNKey, function(err,sysConfig){
+        if(utils._.isValidNonBlank(err)){
+          if(err.errorType == "InvalidKey") callback(null,null)
+          else callback(err,null)
+        }else{
+          callback(null,sysConfig)
+        }
+      })
+    },function(topicARNConfig,callback){
+      if(utils._.isValidNonBlank(topicARNConfig))
+        createTopic(topicARNKey,callback)
+      else
+        return callback(null, topicARNConfig)
+    }
+  ],function(err,topicEndPoint){
+    if(utils._.isValidNonBlank(err))
+      return null
+    else
+      return topicEndPoint
+  })
+}
+
+function getApplicationArnEndPoint(deviceType) {
+  //var models = require('../models')
+  var appARNKey =  utils.constants.sysConfigKeys.awsSNSAppArn
+    .replace(/%DEVICE_TYPE%/g, deviceType)
+    .replace(/%ENV%/g, utils.config.environment)
+  utils.l.d('appARNKey::', appARNKey)
+  models.sysConfig.getSysConfig(appARNKey, function(err,data){
+    if(!err) return data
+    else return null
+  })
+}
+
+/**
+ * @param user - required
+ * @param installation - requried
+ * @param callback
+ *
+ *   - Register a device token to an app
+ *   - Subscribe to all users topic
+ */
 function registerDeviceToken(user,installation,callback){
-  var models = require('../models')
+  //var models = require('../models')
+  var config = {}
+  utils.async.waterfall([
+    function(callback) {
+      config.appArnEndpoint = getApplicationArnEndPoint(installation.deviceType)
+      config.allUsersTopicArnEndpoint = getTopicARNEndpoint('All_Platforms','All_Groups')
+      sns.createPlatformEndpoint({
+        PlatformApplicationArn: config.appArnEndpoint.value,
+        Token: installation.deviceToken,
+        Attributes: {Enabled: 'true'}
+      }, callback)
+    },
+    function(deviceEndPoint, callback) {
+      config.deviceEndPointArn = deviceEndPoint.EndpointArn
+      sns.subscribe({
+        Protocol: 'application',
+        TopicArn: config.allUsersTopicArnEndpoint.value,
+        Endpoint: deviceEndPoint.EndpointArn
+      }, callback)
+    },
+    function(subscribeEndPoint, callback) {
+      if(installation.deviceSubscription) {
+        installation.deviceSubscription.deviceEndpointArn = config.deviceEndPointArn
+        installation.deviceSubscription.allUsersTopicSubscriptionArn=subscribeEndPoint.SubscriptionArn
+      }else{
+        installation.deviceSubscription= {deviceEndpointArn: config.deviceEndPointArn,
+                                          allUsersTopicSubscriptionArn: subscribeEndPoint.SubscriptionArn}
+      }
+      models.installation.findByIdAndUpdate(installationObj._id,
+      {deviceSubscription: installation.deviceSubscription}, callback)
+    }
+  ],callback)
+}
+
+/**
+ * register topic for each console
+ *
+ * @param group
+ * @param consoles
+ * @param callback
+ */
+function subscribeGroup(group,consoleType,callback){
+  var serviceEndPoint = utils._.find(group.serviceEndpoints,{consoleType:consoleType,serviceType:utils.constants.serviceTypes.PUSHNOTIFICATION})
+  if(utils._.isValidNonBlank(serviceEndPoint))
+    return callback(null,null)
+  else{
+    var topic = getTopicARNEndpoint(consoleType,group._id)
+    var newServiceEndpoint = {}
+    newServiceEndpoint.serviceType =utils.constants.serviceTypes.PUSHNOTIFICATION
+    newServiceEndpoint.consoleType = consoleType
+    newServiceEndpoint.topicEndpoint = topic.value
+    newServiceEndpoint.topicName = topic.key
+    models.groups.addServiceEndpoints(group._id,serviceEndPoint,function(err,data){callback(null,null)})
+  }
+}
+
+/**
+ * @param userGroup
+ * @param callback
+ *
+ * Subscribe to a given user group. userGroup has console and group information
+ */
+function subscirbeUserGroup(userGroup,installation, callback){
+  utils.async.waterfall([
+    function(callback){
+      if(utils._.isValidNonBlank(installation.deviceSubscription) && utils._.isValidNonBlank(installation.deviceSubscription.deviceEndpointArn))
+        callback(null,installation)
+      else
+        registerDeviceToken(userGroup.user,installation,callback)
+    },function(installation, callback){
+      if(utils._.isValidNonBlank(installation.deviceSubscription) && utils._.isValidNonBlank(installation.deviceSubscription.deviceEndpointArn)){
+        utils.async.mapSeries(userGroup.consoles,
+          function(consoleType,asyncCallback){
+            var appStats = utils._.find(userGroup.group.appStats,{consoleType:consoleType})
+            if(utils._.isValidNonBlank(appStats) && appStats.memberCount >= utils.config.minUsersForGroupNotification)
+              createUserGroupEndPoints(userGroup,consoleType,installation.deviceSubscription.deviceEndpointArn,asyncCallback)
+            else asyncCallback(null,null)
+          },
+          function(errList,results){
+            callback(null,null)
+          }
+        )
+      }else
+        callback(null,null)
+    }
+  ],callback)
+}
+
+function createUserGroupEndPoints(userGroup, consoleType, deviceEndpointArn, callback){
+  utils.async.waterfall([
+    function(callback){
+      var serviceEndPoint = utils._.find(userGroup.serviceEndpoints,{consoleType:consoleType,serviceType:utils.constants.serviceTypes.PUSHNOTIFICATION})
+      if(utils._.isValidNonBlank(serviceEndPoint)){
+        return callback(null, null)
+      }else{
+        var topic = getTopicARNEndpoint(consoleType,userGroup.group._id)
+        subscibeTopic(deviceEndpointArn,topic.value,function(err,subscribeEndPoint){
+          if(!err) {
+            var newServiceEndpoint = {}
+            newServiceEndpoint.serviceType =utils.constants.serviceTypes.PUSHNOTIFICATION
+            newServiceEndpoint.consoleType = consoleType
+            newServiceEndpoint.topicSubscriptionEndpoint = subscribeEndPoint.SubscriptionArn
+            newServiceEndpoint.topicName = topic.key
+            return callback(null, newServiceEndpoint)
+          }else{
+            callback(null,null)
+          }
+        })
+      }
+    },function(serviceEndpoint,callback){
+      if(utils._.isValidNonBlank(serviceEndpoint)){
+        models.userGroup.addServiceEndpoints(userGroup.user._id,userGroup.group._id,serviceEndpoint,callback)
+      }else
+        callback(null,null)
+    }
+  ],callback)
+}
+
+function reSubscirbeUserGroup(userGroup,installation, callback){
+//unsubscribe and then subscribe for notifications
+}
+
+function subscibeTopic(deviceEndpointArn, topicARN, callback){
+  sns.subscribe({
+    Protocol: 'application',
+    TopicArn: topicARN,
+    Endpoint: deviceEndpointArn
+  }, callback)
+}
+
+function registerDeviceToken(user,installation,callback){
+  //var models = require('../models')
   //get deviceToken from installation
   //Register devicetoken with SNS for app_%DEVICE_TYPE%_%ENV%_%GROUP%_%CONSOLETYPE%
   //Store endpointurl for device in user as deviceEndPoints:[{app_%DEVICE_TYPE%_%ENV%_%GROUP%_%CONSOLETYPE%:endpoint}]
@@ -132,7 +326,7 @@ function getSubscriptionArn(user, groupId, consoleType, installation) {
 }
 
 function getApplicationArn(deviceType, callback) {
-  var models = require('../models')
+  //var models = require('../models')
   var appARNKey =  utils.constants.sysConfigKeys.awsSNSAppArn
     .replace(/%DEVICE_TYPE%/g, deviceType)
     .replace(/%ENV%/g, utils.config.environment)
@@ -141,7 +335,7 @@ function getApplicationArn(deviceType, callback) {
 }
 
 function getTopicARN(consoleType, groupId, callback) {
-  var models = require('../models')
+ // var models = require('../models')
   var topicARN = getTopicARNKey(consoleType,groupId)
   utils.l.d('topicARN::', topicARN)
   models.sysConfig.getSysConfig(topicARN, callback)
@@ -276,5 +470,8 @@ module.exports = {
   sendPush: sendPush,
   registerDeviceToken: registerDeviceToken,
   publishToSNSTopic: publishToSNSTopic,
-  unsubscribeAllEndpoints: unsubscribeAllEndpoints
+  unsubscribeAllEndpoints: unsubscribeAllEndpoints,
+  subscribeGroup:subscribeGroup,
+  subscirbeUserGroup:subscirbeUserGroup,
+  reSubscirbeUserGroup:reSubscirbeUserGroup
 }

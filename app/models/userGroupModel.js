@@ -18,19 +18,44 @@ function updateUserGroup(userId,groupId, data, callback) {
   UserGroup.update(query,{"$set":data},{multi:true},callback)
 }
 
+function addServiceEndpoints(userId,groupId,serviceEndPoint,callback){
+  var query={}
+    query.user=userId
+    query.group=groupId
+  UserGroup.update(query,
+    {"$push":{"serviceEndpoints": serviceEndPoint}},
+    {safe: true, upsert: true, new : true},
+    callback)
+}
+
 //Remove existing usergroups and add new usergroups with mute notification flag.
 function refreshUserGroup(user,groups,userGroupLst,callback){
   utils.async.waterfall([
     function(callback){
-      UserGroup.collection.remove({user:user._id},callback)
-    },function(docsRemoved, callback){
+      var groupIds = utils._.map(groups,"_id")
+      var userGroupIds = utils._.map(userGroupLst,"group")
+      var groupsToAdd = utils._.difference(groupIds,userGroupIds)
+
+      //Add free lance group
+      if(utils._.findIndex(userGroupLst,{group:utils.constants.freelanceBungieGroup.groupId}) < 0)
+        groupsToAdd.push(utils.constants.freelanceBungieGroup.groupId)
+
+      var groupsToRemove = utils._.difference(userGroupIds,groupIds)
+      utils._.remove(groupsToRemove,function(groupId){
+        return groupId == utils.constants.freelanceBungieGroup.groupId
+      })
+
+      if(utils._.isValidNonBlank(groupsToRemove))
+        UserGroup.collection.remove({user:user._id,group:{"$in":groupsToRemove}},function(err,data){})
+      callback(null,groupsToAdd)
+    },function(groupsToAdd, callback){
       var userGroups = []
-      utils._.map(groups,function(groupObj){
-        var userGroup = utils._.isValidNonBlank(userGroupLst) ?utils._.find(userGroupLst,{group:groupObj.groupId}):null
+      utils._.map(groupsToAdd,function(groupId){
+        var userGroup = utils._.isValidNonBlank(userGroupLst) ?utils._.find(userGroupLst,{group:groupId}):null
         userGroups.push({
           user:user._id,
           refreshGroups:false,
-          group:groupObj.groupId,
+          group:groupId,
           consoles:utils._.map(user.consoles,"consoleType"),
           muteNotification:utils._.isValidNonBlank(userGroup)?userGroup.muteNotification:false,
           date:new Date(),
@@ -40,6 +65,7 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
 
       userGroup = utils._.isValidNonBlank(userGroupLst) ?utils._.find(userGroupLst,{group:utils.constants.freelanceBungieGroup.groupId}):null
       //Add free lance group
+/*
       userGroups.push({
         user:user._id,
         refreshGroups:false,
@@ -49,12 +75,12 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
         date:new Date(),
         uDate:new Date()
       })
+*/
 
       utils.l.d("Refreshing groups...2222",userGroups)
       UserGroup.collection.insert(userGroups,callback)
     },function(docs, callback){
       getByUser(user._id,callback)
-
     }
   ],callback)
 }
@@ -101,5 +127,6 @@ module.exports = {
   getByUser:getByUser,
   refreshUserGroup:refreshUserGroup,
   getGroupCountByConsole:getGroupCountByConsole,
+  addServiceEndpoints:addServiceEndpoints,
   getByUserLean:getByUserLean
 }

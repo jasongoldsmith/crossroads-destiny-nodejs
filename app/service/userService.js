@@ -656,13 +656,51 @@ function updateGroupStats(group, callback){
         })
     },function(results, callback){
       if(utils._.isValidNonBlank(results)) {
-        models.groups.updateGroupStats(group._id, "PS4", results.ps4Stats, callback)
-        models.groups.updateGroupStats(group._id, "XBOXONE", results.xboxStats, callback)
+        var ps4Stats = results.ps4Stats
+        var xboxStats = results.xboxStats
+        if(ps4Stats >= utils.config.minUsersForGroupNotification)
+          helpers.sns.subscribeGroup(group,"PS4",callback)
+
+        if(xboxStats >= utils.config.minUsersForGroupNotification)
+          helpers.sns.subscribeGroup(group,"XBOXONE",callback)
+
+        models.groups.updateGroupStats(group._id, "PS4", ps4Stats, callback)
+        models.groups.updateGroupStats(group._id, "XBOXONE", xboxStats, callback)
       }else{
         callback(null,null)
       }
     }
   ],callback)
+}
+
+function subscribeUserNotifications(user,forceUpdaate){
+  var installationObj = null
+  utils.async.waterfall([
+    function(callback){
+      models.installation.getInstallationByUser(user,callback)
+    },function(installation, callback){
+      models.userGroup.getByUser(user._id,callback)
+    },function(userGroupList, callback){
+      utils.async.mapSeries(
+        userGroupList,
+        function(userGroup,asyncCallback){
+          if(utils._.isValidNonBlank(userGroup.serviceEndpoints))
+            helpers.sns.subscirbeUserGroup(userGroup, installationObj, asyncCallback)
+          else if(forceUpdate)
+            helpers.sns.reSubscirbeUserGroup(userGroup, installationObj, asyncCallback)
+          else
+            return asyncCallback(null, null)
+
+        },
+        function(err, results){
+          utils.l.d("completed userNotificationSubscriptions for "+utils.l.userLog(user))
+          callback(null,null)
+        }
+      )
+    }
+  ],function(err,data){
+    utils.l.d('completed subscription for notifications ')
+  })
 }
 
 module.exports = {
@@ -684,5 +722,6 @@ module.exports = {
   handleMuteGroupNotifications:handleMuteGroupNotifications,
   listGroups:listGroups,
   bulkUpdateUserGroups:bulkUpdateUserGroups,
-  updateGroupStats:bulkUpdateGroupStats
+  updateGroupStats:bulkUpdateGroupStats,
+  subscribeUserNotifications:subscribeUserNotifications
 }

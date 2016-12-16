@@ -38,7 +38,7 @@ function getSysConfig(key, callback) {
       return callback(err, null)
     }
     if(!sysConfig) {
-      return callback({error: "This key is invalid"}, null)
+      return callback({error: "This key is invalid",errorType:"InvalidKey"}, null)
     } else {
       return callback(null, sysConfig)
     }
