@@ -29,6 +29,7 @@ function updateHelmet(req, res) {
 }
 
 function resendBungieMessage(req, res) {
+/*
   handleResendBungieMessage(req.user, function(err, user) {
     if (err) {
       routeUtils.handleAPIError(req, res, err, err)
@@ -36,8 +37,15 @@ function resendBungieMessage(req, res) {
       routeUtils.handleAPISuccess(req, res, user)
     }
   })
+*/
+  var errorResponse = {
+    error: "Our login system has changed. Please update to the latest version in the App Store to continue using Crossroads."
+  }
+  routeUtils.handleAPIError(req, res, errorResponse, errorResponse)
+
 }
 
+/*
 function handleResendBungieMessage(userData,callback){
   utils.async.waterfall([
     function(callback) {
@@ -79,6 +87,7 @@ function handleResendBungieMessage(userData,callback){
     }
   ], callback)
 }
+*/
 
 /*
 function searchGroupReq(req, res) {

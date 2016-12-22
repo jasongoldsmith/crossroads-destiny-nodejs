@@ -11,7 +11,7 @@ var passwordHash = require('password-hash')
 
 function login (req, res) {
   utils.l.d("Login request", req.body)
-  var outerUser = null
+/*  var outerUser = null
     utils.async.waterfall(
     [
       helpers.req.handleVErrorWrapper(req),
@@ -59,7 +59,12 @@ function login (req, res) {
             })
         }
       }
-    )
+    )*/
+
+  var errorResponse = {
+    error: "Our login system has changed. Please update to the latest version in the App Store to continue using Crossroads."
+  }
+  routeUtils.handleAPIError(req, res, errorResponse, errorResponse)
 }
 
 function validateUserLogin(req, res) {

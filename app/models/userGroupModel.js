@@ -6,7 +6,7 @@ var helpers = require('../helpers')
 var UserGroupSchema = require('./schema/userGroupSchema')
 
 // Model initialization
-var UserGroup = mongoose.model('UserGroup', UserGroupSchema.schema)
+var UserGroup = mongoose.model('UsersGroup', UserGroupSchema.schema)
 
 // Public functions
 function updateUserGroup(userId,groupId, data, callback) {
@@ -20,7 +20,6 @@ function updateUserGroup(userId,groupId, data, callback) {
 
 //Remove existing usergroups and add new usergroups with mute notification flag.
 function refreshUserGroup(user,groups,userGroupLst,callback){
-  utils.l.d("Refreshing groups...1111",userGroupLst)
   utils.async.waterfall([
     function(callback){
       UserGroup.collection.remove({user:user._id},callback)
@@ -39,13 +38,14 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
         })
       })
 
+      userGroup = utils._.isValidNonBlank(userGroupLst) ?utils._.find(userGroupLst,{group:utils.constants.freelanceBungieGroup.groupId}):null
       //Add free lance group
       userGroups.push({
         user:user._id,
         refreshGroups:false,
         group:utils.constants.freelanceBungieGroup.groupId,
         consoles:utils._.map(user.consoles,"consoleType"),
-        muteNotification:utils._.isValidNonBlank(userGroupLst)?userGroupLst.muteNotification:false,
+        muteNotification:utils._.isValidNonBlank(userGroup)?userGroup.muteNotification:false,
         date:new Date(),
         uDate:new Date()
       })
@@ -62,6 +62,12 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
 function getByUser(userId, callback) {
   UserGroup
     .find({user:userId}).populate("group")
+    .exec(callback)
+}
+
+function getByUserLean(userId, callback) {
+  UserGroup
+    .find({user:userId})
     .exec(callback)
 }
 
@@ -94,5 +100,6 @@ module.exports = {
   getUsersByGroup:getUsersByGroup,
   getByUser:getByUser,
   refreshUserGroup:refreshUserGroup,
-  getGroupCountByConsole:getGroupCountByConsole
+  getGroupCountByConsole:getGroupCountByConsole,
+  getByUserLean:getByUserLean
 }

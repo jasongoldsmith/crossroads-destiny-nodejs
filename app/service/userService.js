@@ -495,7 +495,7 @@ function listGroups(user, callback) {
   utils.async.waterfall([
     function(callback){
       if(user)
-        models.userGroup.getByUser(user._id,callback)
+        models.userGroup.getByUserLean(user._id,callback)
       else return callback({error: "User doesnot exist/logged in."})
     },
     function(userGroup,callback) {
@@ -511,10 +511,8 @@ function listUserGroups(userGroupLst,user,callback){
   utils.async.waterfall([
     function(callback) {
       var groupsObj = (userGroupLst && userGroupLst.length>0) ? userGroupLst[0]: null
-      utils.l.d('groupsObj',groupsObj)
       var dateUpdated = utils._.isValidNonBlank(groupsObj) ? utils.moment(groupsObj.uDate).utc().add("24","hours") : utils.moment().utc()
-      utils.l.d("dateUpdated",dateUpdated)
-      if (utils._.isInvalidOrBlank(groupsObj) || dateUpdated < utils.moment().utc() || groupsObj.refreshGroups) {
+      if (utils._.isInvalidOrBlank(groupsObj) || dateUpdated < utils.moment().utc() || groupsObj.refreshGroups || utils._.isInvalidOrBlank(groupsObj.group)) {
         utils.l.d("Groups does not exists. Fetching from bungie")
         destinyInterface.listBungieGroupsJoined(user.bungieMemberShipId, utils.primaryConsole(user).consoleType, 1, function(err, groups){
           if(groups)
@@ -583,14 +581,40 @@ function bulkUpdateUserGroups(page, limit){
         models.user.findUsersPaginated({"verifyStatus" : "VERIFIED"} ,page ,limit, callback)
       },
       function(userList, callback) {
-        utils._.map(userList, function(user) {
-          listGroups(user, callback)
-        })
+        utils.async.mapSeries(userList,
+          function(user,asyncCallback) {
+            migrateUserGroup(user, asyncCallback)
+          },function(errList, results){
+            callback(errList,results)
+          }
+        )
       }
     ],
     function(err ,data) {
       utils.l.d('Completed processing page::' + page)
     })
+}
+
+function migrateUserGroup(user,callback){
+  utils.async.waterfall([
+    function(callback){
+      models.userGroup.getByUserLean(user._id,callback)
+    },function(userGroupList, callback){
+      listUserGroups(userGroupList,user,callback)
+    },function(userGroupList,callback){
+      utils.async.map(userGroupList,function(userGroup,asyncCallback){
+        var group = utils._.isValidNonBlank(userGroup.group)?utils._.find(user.groups,{"groupId":userGroup.group._id}):null
+        if(group && group.muteNotification == true) models.userGroup.updateUserGroup(user._id,userGroup.group._id,{muteNotification:group.muteNotification},asyncCallback)
+        else asyncCallback(null,null)
+      },function(errorList, results){
+        callback(null,null)
+      })
+    }
+  ],function(err,result){
+    if(err)
+      models.helmetTracker.createUser(user,err,callback)
+    else return callback(null, result)
+  })
 }
 
 function bulkUpdateGroupStats(page,limit){
