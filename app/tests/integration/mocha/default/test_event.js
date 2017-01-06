@@ -4,9 +4,9 @@ var helpers = require('../../../../helpers')
 var mongoose = require('mongoose')
 var loginDataProvider = require('../../../data/utils/loginUtils')
 var service = require('../../../../service')
+var usersData = require('../../../data/users.json')
 
 describe("Successful event test cases: ", function() {
-
   this.timeout(30000)
   var firstUserObj = null
   var secondUserObj = null
@@ -15,7 +15,8 @@ describe("Successful event test cases: ", function() {
 
     utils.async.waterfall([
       function loginFirstUser(callback) {
-        loginDataProvider.loginUser("sreeharshadasa", "PS4", null, callback)
+        //loginDataProvider.loginUser("sreeharshadasa", "PS4", null, callback)
+        models.user.createUserFromData(usersData.sreeharshadasa,callback)
       },
       function createActivity(user, callback) {
         firstUserObj = user
@@ -57,7 +58,8 @@ describe("Successful event test cases: ", function() {
         })
       },
       function loginSecondUser(event, callback) {
-        loginDataProvider.loginUser("CrossroadsTina", "PS4", null, callback)
+       // loginDataProvider.loginUser("CrossroadsTina", "PS4", null, callback)
+        models.user.createUserFromData(usersData.CrossroadsTina,callback)
       },
       function secondUserJoinsEvent(user, callback) {
         secondUserObj = user
@@ -93,8 +95,11 @@ describe("Successful event test cases: ", function() {
   after(function() {
     utils.l.d("Removing user", firstUserObj)
     models.user.model.remove({_id: {$in: [firstUserObj._id, secondUserObj. _id]}}, function(err, data) {})
+    utils.l.d("Removing user:2222")
     models.userGroup.model.remove({"user": {$in: [firstUserObj._id, secondUserObj. _id]}}, function(err, data) {})
+    utils.l.d("Removing user:3333")
     models.eventInvitation.model.remove({"inviter": {$in: [firstUserObj._id, secondUserObj. _id]}}, function(err, data) {})
+    utils.l.d("Removing user:2222")
     models.eventInvitation.model.remove({"invitee": {$in: [firstUserObj._id, secondUserObj. _id]}}, function(err, data) {})
     models.event.model.remove({"players": {$in: [firstUserObj._id, secondUserObj. _id]}}, function(err, data) {})
   })
