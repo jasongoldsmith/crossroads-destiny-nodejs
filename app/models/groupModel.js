@@ -39,9 +39,7 @@ function addGroups(groupObjects,consoleTypes, callback){
         .distinct("_id",{_id:{"$in":groupIds}})
         .exec(callback)
     },function(groupIds,callback){
-      utils.l.d("Got group IDs",groupIds)
       var newGroupIdArray = utils._.difference(utils._.map(groupObjects,"groupId"),groupIds)
-      utils.l.d("newGroupIdArray",newGroupIdArray)
       var newGroups = utils._.map(newGroupIdArray,function(newGroupId){
         var groupObj = utils._.find(groupObjects,{groupId:newGroupId})
         return{
@@ -52,15 +50,21 @@ function addGroups(groupObjects,consoleTypes, callback){
           clanEnabled:groupObj.clanEnabled,
           date:new Date(),
           uDate:new Date(),
-          appStats:appStats
+          appStats:appStats,
+          serviceEndpoints:[]
         }
       })
+
       if(utils._.isValidNonBlank(newGroups))
         Group.collection.insert(newGroups,callback)
       else
         return callback(null,null)
     }
   ],callback)
+}
+
+function findGroupById(groupId,callback){
+  Group.findOne({_id:groupId},callback)
 }
 
 function findGroupsPaginated(query, pageNumber, limit, callback){
@@ -72,5 +76,6 @@ module.exports = {
   updateGroupStats:updateGroupStats,
   addGroups:addGroups,
   findGroupsPaginated:findGroupsPaginated,
-  addServiceEndpoints:addServiceEndpoints
+  addServiceEndpoints:addServiceEndpoints,
+  findGroupById:findGroupById
 }

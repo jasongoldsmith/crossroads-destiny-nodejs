@@ -18,6 +18,10 @@ function updateUserGroup(userId,groupId, data, callback) {
   UserGroup.update(query,{"$set":data},{multi:true},callback)
 }
 
+function getByGroup(groupId,callback){
+
+}
+
 function addServiceEndpoints(userId,groupId,serviceEndPoint,callback){
   var query={}
     query.user=userId
@@ -32,10 +36,9 @@ function addServiceEndpoints(userId,groupId,serviceEndPoint,callback){
 function refreshUserGroup(user,groups,userGroupLst,callback){
   utils.async.waterfall([
     function(callback){
-      var groupIds = utils._.map(groups,"_id")
+      var groupIds = utils._.map(groups,"groupId")
       var userGroupIds = utils._.map(userGroupLst,"group")
       var groupsToAdd = utils._.difference(groupIds,userGroupIds)
-
       //Add free lance group
       if(utils._.findIndex(userGroupLst,{group:utils.constants.freelanceBungieGroup.groupId}) < 0)
         groupsToAdd.push(utils.constants.freelanceBungieGroup.groupId)
@@ -77,17 +80,22 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
       })
 */
 
-      utils.l.d("Refreshing groups...2222",userGroups)
       UserGroup.collection.insert(userGroups,callback)
     },function(docs, callback){
-      getByUser(user._id,callback)
+      getByUser(user._id,null,callback)
     }
   ],callback)
 }
 
-function getByUser(userId, callback) {
+function getByUser(userId, groupId,callback) {
+  var query={}
+  if(utils._.isValidNonBlank(userId))
+    query.user=userId
+  if(utils._.isValidNonBlank(groupId))
+    query.group=groupId
+  utils.l.d("userGroups::getByUser::",query)
   UserGroup
-    .find({user:userId}).populate("group")
+    .find(query).populate("group")
     .exec(callback)
 }
 

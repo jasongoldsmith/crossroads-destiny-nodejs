@@ -1,13 +1,9 @@
 var AWS = require('aws-sdk');
 var utils = require('../utils')
-var models = require('../models')
+//var models = require('../models')
 
 AWS.config.update(utils.config.awsSNSKey)
 var sns = new AWS.SNS()
-
-function unRegisterDeviceToken(user, callback) {
-
-}
 
 function createTopic(topicName,callback){
   //var models = require('../models')
@@ -17,49 +13,88 @@ function createTopic(topicName,callback){
   utils.async.waterfall([
     function (callback){
       sns.createTopic(params, callback);
-    },function(topicArn, callback){
-      models.sysConfig.createSysConfig({key:topicName,value:topicArn,description:topicName},callback)
     }
-  ],callback)
+  ],function(err,topicArn){
+    utils.l.d("created new topic",topicArn)
+    if(!err)
+      return callback(null,{key:topicName,value:topicArn.TopicArn,description:topicName})
+    else
+      return callback(err, null)
+  })
 }
 
-function getTopicARNEndpoint(consoleType, groupId){
+function deleteTopic(topicEndPoint,callback){
   //var models = require('../models')
+  var params = {
+    TopicArn: topicEndPoint /* required */
+  };
+  utils.async.waterfall([
+    function (callback){
+      sns.deleteTopic(params, callback);
+    }
+  ],function(err,topicArn){
+    utils.l.d("Deleted new topic",topicArn)
+    if(!err)
+      return callback(null,topicArn)
+    else
+      return callback(err, null)
+  })
+}
+
+function getTopicARNEndpoint(consoleType, groupId,topicSource,callback){
+  var models = require('../models')
   var topicARNKey = getTopicARNKey(consoleType,groupId)
   utils.async.waterfall([
     function(callback){
       utils.l.d('topicARNKey::', topicARNKey)
-      models.sysConfig.getSysConfig(topicARNKey, function(err,sysConfig){
+      if(topicSource == "GROUP"){
+        callback(null,null)
+      }else{
+        models.sysConfig.getSysConfig(topicARNKey,callback)
+      }
+      /*models.sysConfig.getSysConfig(topicARNKey, function(err,sysConfig){
         if(utils._.isValidNonBlank(err)){
           if(err.errorType == "InvalidKey") callback(null,null)
           else callback(err,null)
         }else{
           callback(null,sysConfig)
         }
-      })
+      })*/
     },function(topicARNConfig,callback){
-      if(utils._.isValidNonBlank(topicARNConfig))
+      utils.l.d("topicARNConfig::",topicARNConfig)
+      if(utils._.isInvalidOrBlank(topicARNConfig))
         createTopic(topicARNKey,callback)
       else
         return callback(null, topicARNConfig)
     }
   ],function(err,topicEndPoint){
+    utils.l.d("got the topicEndpoint",topicEndPoint)
     if(utils._.isValidNonBlank(err))
-      return null
+      return callback(null,null)
     else
-      return topicEndPoint
+      return callback(null,topicEndPoint)
   })
 }
 
-function getApplicationArnEndPoint(deviceType) {
-  //var models = require('../models')
+function getGroupTopicARNEndpoint(consoleType, group){
+  var serviceEndPoint = utils._.find(group.serviceEndpoints,{consoleType:consoleType,serviceType:utils.constants.serviceTypes.PUSHNOTIFICATION})
+  if(utils._.isValidNonBlank(serviceEndPoint))
+    return {key:serviceEndPoint.topicName,value:serviceEndPoint.topicEndpoint}
+  else{
+    return getTopicARNEndpoint(consoleType,group._id,"GROUP")
+  }
+}
+
+function getApplicationArnEndPoint(deviceType,callback) {
+  var models = require('../models')
   var appARNKey =  utils.constants.sysConfigKeys.awsSNSAppArn
     .replace(/%DEVICE_TYPE%/g, deviceType)
     .replace(/%ENV%/g, utils.config.environment)
   utils.l.d('appARNKey::', appARNKey)
   models.sysConfig.getSysConfig(appARNKey, function(err,data){
-    if(!err) return data
-    else return null
+    utils.l.d("appARN::Sysconfig::",data)
+    if(!err) return callback(null, data)
+    else return callback(null,null)
   })
 }
 
@@ -71,13 +106,61 @@ function getApplicationArnEndPoint(deviceType) {
  *   - Register a device token to an app
  *   - Subscribe to all users topic
  */
-function registerDeviceToken(user,installation,callback){
-  //var models = require('../models')
+function unRegisterDeviceToken(user,installation,callback){
+  var models = require('../models')
   var config = {}
   utils.async.waterfall([
     function(callback) {
-      config.appArnEndpoint = getApplicationArnEndPoint(installation.deviceType)
-      config.allUsersTopicArnEndpoint = getTopicARNEndpoint('All_Platforms','All_Groups')
+      sns.deleteEndpoint({
+        EndpointArn: installation.deviceSubscription.deviceEndpointArn
+      }, callback)
+    },function(deviceEndPoint,callback){
+      sns.unsubscribe({SubscriptionArn: installation.deviceSubscription.allUsersTopicSubscriptionArn}, callback)
+    },function(subscriptionEndPoint, callback) {
+      unSubscribeUser(user,callback)
+    },function(subscribeEndPoint, callback) {
+      models.installation.findByIdAndUpdate(installation._id,
+        {deviceSubscription: null}, callback)
+    }
+  ],callback)
+}
+
+function unSubscribeGroup(groupId,callback){
+  var models = require('../models')
+  utils.async.waterfall([
+    function(callback){
+      models.groups.findGroupById(groupId,callback)
+    },function(group,callback){
+      utils.async.mapSeries(group.serviceEndpoints,
+        function(serviceEndpoint,asyncCallback){
+          deleteTopic(serviceEndpoint.topicEndpoint,asyncCallback)
+        },
+        function(errors, results){
+          callback(errors,results)
+        }
+      )
+    }
+  ],callback)
+}
+/**
+ * @param user - required
+ * @param installation - requried
+ * @param callback
+ *
+ *   - Register a device token to an app
+ *   - Subscribe to all users topic
+ */
+function registerDeviceToken(user,installation,callback){
+  var models = require('../models')
+  var config = {}
+  utils.async.waterfall([
+    function(callback) {
+      getApplicationArnEndPoint(installation.deviceType,callback)
+    },function(appArnEndpoint,callback){
+      config.appArnEndpoint = appArnEndpoint
+      getTopicARNEndpoint('All_Platforms','All_Groups',"SYSTEM",callback)
+    },function(topicArnEndpoint,callback){
+      config.allUsersTopicArnEndpoint = topicArnEndpoint
       sns.createPlatformEndpoint({
         PlatformApplicationArn: config.appArnEndpoint.value,
         Token: installation.deviceToken,
@@ -100,7 +183,7 @@ function registerDeviceToken(user,installation,callback){
         installation.deviceSubscription= {deviceEndpointArn: config.deviceEndPointArn,
                                           allUsersTopicSubscriptionArn: subscribeEndPoint.SubscriptionArn}
       }
-      models.installation.findByIdAndUpdate(installationObj._id,
+      models.installation.findByIdAndUpdate(installation._id,
       {deviceSubscription: installation.deviceSubscription}, callback)
     }
   ],callback)
@@ -114,17 +197,25 @@ function registerDeviceToken(user,installation,callback){
  * @param callback
  */
 function subscribeGroup(group,consoleType,callback){
+  var models = require('../models')
   var serviceEndPoint = utils._.find(group.serviceEndpoints,{consoleType:consoleType,serviceType:utils.constants.serviceTypes.PUSHNOTIFICATION})
   if(utils._.isValidNonBlank(serviceEndPoint))
     return callback(null,null)
   else{
-    var topic = getTopicARNEndpoint(consoleType,group._id)
-    var newServiceEndpoint = {}
-    newServiceEndpoint.serviceType =utils.constants.serviceTypes.PUSHNOTIFICATION
-    newServiceEndpoint.consoleType = consoleType
-    newServiceEndpoint.topicEndpoint = topic.value
-    newServiceEndpoint.topicName = topic.key
-    models.groups.addServiceEndpoints(group._id,serviceEndPoint,function(err,data){callback(null,null)})
+    utils.async.waterfall([
+      function(callback){
+        getTopicARNEndpoint(consoleType,group._id,"GROUP",callback)
+      },function(topic,callback){
+        var newServiceEndpoint = {}
+        newServiceEndpoint.serviceType =utils.constants.serviceTypes.PUSHNOTIFICATION
+        newServiceEndpoint.consoleType = consoleType
+        newServiceEndpoint.topicEndpoint = topic.value
+        newServiceEndpoint.topicName = topic.key
+        models.groups.addServiceEndpoints(group._id,newServiceEndpoint,callback)
+      }
+    ],function(err,data){
+      callback(null,null)
+    })
   }
 }
 
@@ -141,13 +232,13 @@ function subscirbeUserGroup(userGroup,installation, callback){
         callback(null,installation)
       else
         registerDeviceToken(userGroup.user,installation,callback)
-    },function(installation, callback){
-      if(utils._.isValidNonBlank(installation.deviceSubscription) && utils._.isValidNonBlank(installation.deviceSubscription.deviceEndpointArn)){
+    },function(installationUpdated, callback){
+      if(utils._.isValidNonBlank(installationUpdated.deviceSubscription) && utils._.isValidNonBlank(installationUpdated.deviceSubscription.deviceEndpointArn)){
         utils.async.mapSeries(userGroup.consoles,
           function(consoleType,asyncCallback){
             var appStats = utils._.find(userGroup.group.appStats,{consoleType:consoleType})
             if(utils._.isValidNonBlank(appStats) && appStats.memberCount >= utils.config.minUsersForGroupNotification)
-              createUserGroupEndPoints(userGroup,consoleType,installation.deviceSubscription.deviceEndpointArn,asyncCallback)
+              createUserGroupEndPoints(userGroup,consoleType,installationUpdated.deviceSubscription.deviceEndpointArn,asyncCallback)
             else asyncCallback(null,null)
           },
           function(errList,results){
@@ -161,13 +252,14 @@ function subscirbeUserGroup(userGroup,installation, callback){
 }
 
 function createUserGroupEndPoints(userGroup, consoleType, deviceEndpointArn, callback){
+  var models = require('../models')
   utils.async.waterfall([
     function(callback){
       var serviceEndPoint = utils._.find(userGroup.serviceEndpoints,{consoleType:consoleType,serviceType:utils.constants.serviceTypes.PUSHNOTIFICATION})
       if(utils._.isValidNonBlank(serviceEndPoint)){
         return callback(null, null)
       }else{
-        var topic = getTopicARNEndpoint(consoleType,userGroup.group._id)
+        var topic = getGroupTopicARNEndpoint(consoleType,userGroup.group)
         subscibeTopic(deviceEndpointArn,topic.value,function(err,subscribeEndPoint){
           if(!err) {
             var newServiceEndpoint = {}
@@ -183,7 +275,7 @@ function createUserGroupEndPoints(userGroup, consoleType, deviceEndpointArn, cal
       }
     },function(serviceEndpoint,callback){
       if(utils._.isValidNonBlank(serviceEndpoint)){
-        models.userGroup.addServiceEndpoints(userGroup.user._id,userGroup.group._id,serviceEndpoint,callback)
+        models.userGroup.addServiceEndpoints(userGroup.user,userGroup.group._id,serviceEndpoint,callback)
       }else
         callback(null,null)
     }
@@ -202,6 +294,48 @@ function subscibeTopic(deviceEndpointArn, topicARN, callback){
   }, callback)
 }
 
+function unSubscirbeUserGroup(userGroup,callback){
+  utils.async.waterfall([
+    function(callback){
+        utils.async.mapSeries(userGroup.serviceEndpoints,
+          function(endPoint,asyncCallback){
+            if(utils._.isValidNonBlank(endPoint))
+              sns.unsubscribe({SubscriptionArn: endPoint.topicSubscriptionEndpoint}, asyncCallback)
+            else asyncCallback(null,null)
+          },
+          function(errList,results){
+            callback(null,null)
+          }
+        )
+    }
+  ],callback)
+}
+
+function unSubscribeAllUserGroups(userGroupList, callback){
+  utils.async.mapSeries(userGroupList,
+    function(userGroup,asyncCallback){
+      unSubscirbeUserGroup(userGroup,asyncCallback)
+    },
+    function(errList,results){
+      return callback(null,null)
+    }
+  )
+}
+
+function unSubscribeUser(user,callback){
+  var models = require('../models')
+  utils.async.waterfall([
+    function(callback){
+      models.userGroup.getByUser(user._id,null,callback)
+    },function(userGroupList, callback){
+      unSubscribeAllUserGroups(userGroupList,callback)
+    },function(results,callback){
+      models.userGroup.updateUserGroup(user,null,{serviceEndpoints:[]},callback)
+    }
+  ],callback)
+}
+
+/*
 function registerDeviceToken(user,installation,callback){
   //var models = require('../models')
   //get deviceToken from installation
@@ -294,7 +428,7 @@ function unsubscribeAllEndpoints(user, isUserLoggedIn, callback) {
 function unsubscribeEndpoint(user, groupId, consoleType, installation, callback) {
   utils.async.waterfall([
     function(callback) {
-/*
+/!*
       getTopicARN(config.consoleType,config.groupId,function(err,sysconfigTopic){
         if(!err) {
           var topicARN = sysconfigTopic.value
@@ -302,7 +436,7 @@ function unsubscribeEndpoint(user, groupId, consoleType, installation, callback)
           sns.unsubscribe({SubscriptionArn:subscriptionArn},callback)
         }else return callback({error:"unable to lookup topic subscription details."},null)
       })
-*/
+*!/
       var deviceSubscription = getSubscriptionArn(user, groupId, consoleType, installation)
       var subscriptionArn = deviceSubscription.subscriptionArn.toString()
       //Unsubscribe from AWS
@@ -319,6 +453,7 @@ function unsubscribeEndpoint(user, groupId, consoleType, installation, callback)
   ], callback)
 }
 
+
 function getSubscriptionArn(user, groupId, consoleType, installation) {
   var deviceSubscription = utils._.filter(installation.deviceSubscriptions,
     {key: getTopicARNKey(consoleType, groupId)})
@@ -333,9 +468,10 @@ function getApplicationArn(deviceType, callback) {
   utils.l.d('appARNKey::', appARNKey)
   models.sysConfig.getSysConfig(appARNKey, callback)
 }
+ */
 
 function getTopicARN(consoleType, groupId, callback) {
- // var models = require('../models')
+ var models = require('../models')
   var topicARN = getTopicARNKey(consoleType,groupId)
   utils.l.d('topicARN::', topicARN)
   models.sysConfig.getSysConfig(topicARN, callback)
@@ -470,8 +606,13 @@ module.exports = {
   sendPush: sendPush,
   registerDeviceToken: registerDeviceToken,
   publishToSNSTopic: publishToSNSTopic,
-  unsubscribeAllEndpoints: unsubscribeAllEndpoints,
+  //unsubscribeAllEndpoints: unsubscribeAllEndpoints,
   subscribeGroup:subscribeGroup,
   subscirbeUserGroup:subscirbeUserGroup,
-  reSubscirbeUserGroup:reSubscirbeUserGroup
+  reSubscirbeUserGroup:reSubscirbeUserGroup,
+  unRegisterDeviceToken:unRegisterDeviceToken,
+  unSubscribeUser:unSubscribeUser,
+  unSubscirbeUserGroup:unSubscirbeUserGroup,
+  deleteTopic:deleteTopic,
+  unSubscribeGroup:unSubscribeGroup
 }
