@@ -10,7 +10,7 @@ var bungieResponse = require('../bungieResponseData.json')
 function loginUser(consoleId, consoleType,invitation, callback){
   var loginData = {}
   var bungieData = utils._.find(bungieResponse,{consoleId:consoleId,consoleType:consoleType})
-  utils.l.d("bungieData",bungieData)
+//  utils.l.d("bungieData",bungieData)
   loginData.bungieResponse = bungieData.bungieResponse
   loginData.consoleType = consoleType
   loginData.invitation = invitation

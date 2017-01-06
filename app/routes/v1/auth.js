@@ -642,7 +642,8 @@ function logout(req, res) {
       user.isLoggedIn = false
       models.user.save(user,callback)
     },function(user,callback){
-      models.userGroup.updateUserGroup(user._id,{refreshGroups:true},callback)
+      //models.userGroup.updateUserGroup(user._id,{refreshGroups:true},callback)
+      helpers.sns.unSubscribeUser(user,callback)
     }
   ],function(err,userGroup){
     if(err) {

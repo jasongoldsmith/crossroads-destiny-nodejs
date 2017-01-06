@@ -14,5 +14,6 @@ module.exports = {
   userService: require('./userService'),
   activityService: require('./activityService'),
   trackingService: require('./trackingService'),
-  accountService:require('./accountService')
+  accountService:require('./accountService'),
+  installationService:require('./installationService')
 }

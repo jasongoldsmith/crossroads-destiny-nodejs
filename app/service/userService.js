@@ -572,7 +572,38 @@ function mergeEventStatsWithGroups(eventCountList, groupList){
 
 function handleMuteGroupNotifications(user, data, callback) {
   var muteNotification = data.muteNotification=="true" || data.muteNotification == true?true:false
-  models.userGroup.updateUserGroup(user._id,data.groupId,{muteNotification:muteNotification},callback)
+  utils.async.waterfall([
+    function(callback){
+      models.userGroup.getByUser(user._id,data.groupId,callback)
+    },function(userGroup,callback){
+      if(muteNotification)
+        unSubscribeUserGroupNotification(userGroup,user,data.groupId,muteNotification,callback)
+      else
+        subscribeUserGroupNotification(userGroup,user,data.groupId,muteNotification,callback)
+    }
+  ],callback)
+}
+
+function unSubscribeUserGroupNotification(userGroup,user,groupId, muteNotification, callback){
+  utils.async.waterfall([
+    function(callback){
+      helpers.sns.unSubscirbeUserGroup(userGroup,callback)
+    },function(result,callback){
+      models.userGroup.updateUserGroup(user._id,groupId,{muteNotification:muteNotification,serviceEndpoints:[]},callback)
+    }
+  ],callback)
+}
+
+function subscribeUserGroupNotification(userGroup,user,groupId, muteNotification,callback){
+  utils.async.waterfall([
+    function(callback){
+      models.installation.getInstallationByUser(user,callback)
+    },function(installation,callback){
+      helpers.sns.subscirbeUserGroup(userGroup,installation,callback)
+    },function(result,callback){
+      models.userGroup.updateUserGroup(user._id,groupId,{muteNotification:muteNotification},callback)
+    }
+  ],callback)
 }
 
 function bulkUpdateUserGroups(page, limit){
@@ -658,14 +689,7 @@ function updateGroupStats(group, callback){
       if(utils._.isValidNonBlank(results)) {
         var ps4Stats = results.ps4Stats
         var xboxStats = results.xboxStats
-        if(ps4Stats >= utils.config.minUsersForGroupNotification)
-          helpers.sns.subscribeGroup(group,"PS4",callback)
-
-        if(xboxStats >= utils.config.minUsersForGroupNotification)
-          helpers.sns.subscribeGroup(group,"XBOXONE",callback)
-
-        models.groups.updateGroupStats(group._id, "PS4", ps4Stats, callback)
-        models.groups.updateGroupStats(group._id, "XBOXONE", xboxStats, callback)
+        subscribeGroups(ps4Stats,xboxStats,group,callback)
       }else{
         callback(null,null)
       }
@@ -673,24 +697,52 @@ function updateGroupStats(group, callback){
   ],callback)
 }
 
-function subscribeUserNotifications(user,forceUpdaate){
+function subscribeGroups(ps4Stats,xboxStats,group, callback){
+  utils.async.waterfall([
+    function(callback){
+      if(ps4Stats >= utils.config.minUsersForGroupNotification)
+        helpers.sns.subscribeGroup(group,"PS4",callback)
+      else
+        callback(null,null)
+    },function(result,callback){
+      if(xboxStats >= utils.config.minUsersForGroupNotification)
+        helpers.sns.subscribeGroup(group,"XBOXONE",callback)
+      else
+        callback(null,null)
+    },function(result,callback){
+      utils.async.parallel({
+          ps4StatsUpdate: function (callback) {
+            models.groups.updateGroupStats(group._id, "PS4", ps4Stats, callback)
+          },
+          xboxStatsUpdate: function (callback) {
+            models.groups.updateGroupStats(group._id, "XBOXONE", xboxStats, callback)
+          }
+        },
+        function (err, results) {
+            return callback(err, results)
+        })
+    }
+  ],callback)
+}
+
+function subscribeUserNotifications(user,forceUpdate,callback){
   var installationObj = null
   utils.async.waterfall([
     function(callback){
       models.installation.getInstallationByUser(user,callback)
     },function(installation, callback){
-      models.userGroup.getByUser(user._id,callback)
+      installationObj=installation
+      models.userGroup.getByUser(user._id,null,callback)
     },function(userGroupList, callback){
       utils.async.mapSeries(
         userGroupList,
         function(userGroup,asyncCallback){
-          if(utils._.isValidNonBlank(userGroup.serviceEndpoints))
+          if(utils._.isInvalidOrBlank(userGroup.serviceEndpoints))
             helpers.sns.subscirbeUserGroup(userGroup, installationObj, asyncCallback)
           else if(forceUpdate)
             helpers.sns.reSubscirbeUserGroup(userGroup, installationObj, asyncCallback)
           else
             return asyncCallback(null, null)
-
         },
         function(err, results){
           utils.l.d("completed userNotificationSubscriptions for "+utils.l.userLog(user))
@@ -700,6 +752,7 @@ function subscribeUserNotifications(user,forceUpdaate){
     }
   ],function(err,data){
     utils.l.d('completed subscription for notifications ')
+    return callback(err,data)
   })
 }
 
@@ -722,6 +775,8 @@ module.exports = {
   handleMuteGroupNotifications:handleMuteGroupNotifications,
   listGroups:listGroups,
   bulkUpdateUserGroups:bulkUpdateUserGroups,
-  updateGroupStats:bulkUpdateGroupStats,
-  subscribeUserNotifications:subscribeUserNotifications
+  bulkUpdateGroupStats:bulkUpdateGroupStats,
+  subscribeUserNotifications:subscribeUserNotifications,
+  updateGroupStats:updateGroupStats,
+  refreshGroups:refreshGroups
 }

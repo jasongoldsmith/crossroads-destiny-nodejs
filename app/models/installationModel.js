@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var utils = require('../utils');
-
+var helpers = require('../helpers');
 var InstallationSchema = require('./schema/installationSchema');
 var Installation = mongoose.model('Installation', InstallationSchema.schema);
 function getByQuery(query, callback) {
@@ -98,6 +98,12 @@ function updateInstallation(user,deviceType,deviceToken, callback){
       getInstallationByUser(user,callback)
     },function(installation, callback){
       if(!utils._.isInvalidOrBlank(installation)){
+        //Unregister old device token and unsubcribe to all topics
+        if(utils._.isValidNonBlank(installation.deviceSubscription.deviceEndpointArn)) {
+          helpers.sns.unRegisterDeviceToken(user, installation, function (err, result) {
+            if (err) utils.l.i("error while unregistering device token for " + utils.l.userLog(user))
+          })
+        }
         utils._.extend(installation, {deviceType: deviceType, deviceToken: deviceToken})
         return callback(null,installation)
       } else

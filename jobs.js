@@ -599,7 +599,7 @@ function groupStatsUpdate(){
       temporal.loop(5 * 1000, function() {
         var batchStop = limit * (page+1)
         utils.l.i("Processing group stats:page["+page+"]="+batchStop+" of total groups="+groupCount)
-        service.userService.updateGroupStats(page,limit)
+        service.userService.bulkUpdateGroupStats(page,limit)
         if(batchStop >= groupCount) {
           utils.l.i("Updated stats for all group")
           this.stop()

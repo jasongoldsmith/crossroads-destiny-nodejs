@@ -1,0 +1,78 @@
+{
+  "sreeharshadasa":{
+    "mpDistinctId": null,
+    "bungieMemberShipId": "13172709",
+    "imageUrl": "https://www.bungie.net//common/destiny_content/icons/3e0b919ea55d420156cdf384b66a7f8a.jpg",
+    "clanName": "Freelance Lobby",
+    "__v": 3,
+    "isInvited": false,
+    "mpDistinctIdRefreshed": false,
+    "stats": {
+      "eventsFull": 0,
+      "eventsLeft": 0,
+      "eventsJoined": 0,
+      "eventsCreated": 0
+    },
+    "legal": {
+      "privacyVersion": "0.1",
+      "termsVersion": "0.2"
+    },
+    "hasReachedMaxReportedComments": false,
+    "commentsReported": 0,
+    "notifStatus": [],
+    "isLoggedIn": true,
+    "lastActiveTime": "2017-01-05T19:06:06.890Z",
+    "groups": [],
+    "clanId": "clan_id_not_set",
+    "consoles": [
+      {
+        "clanTag": null,
+        "destinyMembershipId": "4611686018459149267",
+        "consoleType": "PS4",
+        "consoleId": "sreeharshadasa",
+        "imageUrl": "https://www.bungie.net//common/destiny_content/icons/3e0b919ea55d420156cdf384b66a7f8a.jpg",
+        "isPrimary": true,
+        "verifyStatus": "VERIFIED"
+      }
+    ],
+    "verifyStatus": "VERIFIED"
+  },
+  "tinacplays":{
+    "mpDistinctId": null,
+    "bungieMemberShipId": "12777673",
+    "imageUrl": "https://www.bungie.net//common/destiny_content/icons/3e0b919ea55d420156cdf384b66a7f8a.jpg",
+    "clanName": "Freelance Lobby",
+    "__v": 3,
+    "isInvited": false,
+    "mpDistinctIdRefreshed": false,
+    "stats": {
+      "eventsFull": 0,
+      "eventsLeft": 0,
+      "eventsJoined": 0,
+      "eventsCreated": 0
+    },
+    "legal": {
+      "privacyVersion": "0.1",
+      "termsVersion": "0.2"
+    },
+    "hasReachedMaxReportedComments": false,
+    "commentsReported": 0,
+    "notifStatus": [],
+    "isLoggedIn": true,
+    "lastActiveTime": "2017-01-05T19:06:06.890Z",
+    "groups": [],
+    "clanId": "clan_id_not_set",
+    "consoles": [
+      {
+        "clanTag": null,
+        "destinyMembershipId": "4611686018457509474",
+        "consoleType": "PS4",
+        "consoleId": "tinacplays",
+        "imageUrl": "https://www.bungie.net//common/destiny_content/icons/3e0b919ea55d420156cdf384b66a7f8a.jpg",
+        "isPrimary": true,
+        "verifyStatus": "VERIFIED"
+      }
+    ],
+    "verifyStatus": "VERIFIED"
+  }
+}
