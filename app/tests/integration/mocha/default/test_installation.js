@@ -6,7 +6,7 @@ var mongoose = require('mongoose')
 var loginDataProvider = require('../../../data/utils/loginUtils')
 var usersData = require('../../../data/users.json')
 
-/*describe("Successful installation object create test cases: ", function() {
+describe("Successful installation object create test cases: ", function() {
 	this.timeout(30000)
 	describe("test installation: ", function() {
 		var loginData = {}
@@ -56,7 +56,7 @@ var usersData = require('../../../data/users.json')
 
 	after(function() {
 	})
-})*/
+})
 
 /*describe("Unsuccessful test cases: ", function() {
 	describe("test invalid login: ", function() {

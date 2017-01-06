@@ -13,7 +13,9 @@ function listMyGroups(req, res) {
       routeUtils.handleAPIError(req, res, err, err)
     } else {
       groupsResponse = groups || [{}]
-      service.userService.subscribeUserNotifications(req.user,false)
+      service.userService.subscribeUserNotifications(req.user,false,function(errors,results){
+        utils.l.d("Notification subscription completed for user",utils.l.userLog(req.user))
+      })
       routeUtils.handleAPISuccess(req, res, groupsResponse)
     }
   })

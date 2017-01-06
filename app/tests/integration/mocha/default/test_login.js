@@ -7,7 +7,7 @@ var loginDataProvider = require('../../../data/utils/loginUtils')
 var baseUrl = utils.config.testHostUrl
 var loginUrl = "/api/v1/auth/validateUserLogin"
 
-/*describe("Successful login test cases: ", function() {
+describe("Successful login test cases: ", function() {
 	var bungieResponseValid = require('../../../data/bungieResponseData.json')
 	var user = null
 
@@ -60,7 +60,7 @@ describe("Unsuccessful test cases: ", function() {
 		})
 
 	})
-})*/
+})
 
 function validateErrorSignupObject(err, errorData) {
 	utils.assert.isDefined(errorData, "error was expected but was not found")
