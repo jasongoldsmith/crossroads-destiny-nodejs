@@ -17,14 +17,37 @@ describe("Successful event test cases: ", function() {
       function loginFirstUser(callback) {
         loginDataProvider.loginUser("sreeharshadasa", "PS4", null, callback)
       },
-      function createEvent(user, callback) {
+      function createActivity(user, callback) {
         firstUserObj = user
         var data = {
-          "eType": "56df5421dac7e703003a0f5c",
+          "aType": "Raid",
+          "aSubType": "Crota's End",
+          "aCheckpoint": "Fresh",
+          "aDifficulty": "Normal",
+          "aLight": 1,
+          "minPlayers": 4,
+          "maxPlayers": 6,
+          "aIconUrl": "https://www.bungie.net/common/destiny_content/icons/b4f61245217ab76825ad1bb1a16a5cee.png",
+          "aLevel": 30,
+          "isAdCard": true,
+          "aTypeDefault": false,
+          "adCard": {
+            "isAdCard": false
+          },
+          "isFeatured": false,
+          "isActive": false,
+          "aBonus": [],
+          "aModifiers": []
+        }
+        models.activity.createActivity(data, callback)
+      },
+      function createEvent(activity, callback) {
+        var data = {
+          "eType": activity._id.toString(),
           "minPlayers": 1,
           "maxPlayers": 6
         }
-        service.eventService.createEvent(user, data, function(err, event) {
+        service.eventService.createEvent(firstUserObj, data, function(err, event) {
           if(err) {
             return callback(err, event)
           }
@@ -63,9 +86,7 @@ describe("Successful event test cases: ", function() {
       }
     ],
       function (err, result) {
-        if(!err) {
-          done()
-        }
+        done()
       })
   })
 
