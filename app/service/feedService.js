@@ -1,13 +1,14 @@
 var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
+var reviewPromptCardService = require('./reviewPromptCardService')
 
 function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) {
 	var activitiesMap = null
 	var playerIds = []
 	var eventsList = []
 	utils.async.waterfall([
-		function(callback){
+		function getEventsForUser(callback) {
 			var query = {}
 			if(utils._.isInvalidOrBlank(user))
 				query.clanId = utils.constants.freelanceBungieGroup.groupId
@@ -35,7 +36,7 @@ function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) 
 			utils.l.d("feed::query", query)
 			models.event.getByQueryLean(query, callback)
 		},
-		function(events, callback) {
+		function getActivityAndPlayerObjectsById(events, callback) {
 			eventsList = events
 			var activityIds = utils._.uniq(utils._.map(events, 'eType'))
 			playerIds = utils._.map(events, 'players')
@@ -58,7 +59,7 @@ function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) 
 					}
 			})
 		},
-		function(results, callback) {
+		function populateInEventObject(results, callback) {
 			activitiesMap = utils._.keyBy(results.activities, function (activity) {
 				return activity._id
 			})
@@ -85,7 +86,7 @@ function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) 
 
 			addIsInvitedFlagToEventPlayers(eventsList, callback)
 		},
-		function(events, callback) {
+		function transformToFeed(events, callback) {
 			//create final feed object
 			transformEventsToFeed(eventsList, isPublicFeed, user, createMyEventsList, callback)
 		}
@@ -93,46 +94,77 @@ function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) 
 }
 
 function transformEventsToFeed(events, isPublicFeed, user, createMyEventsList, callback) {
-	utils.async.waterfall([
-		function(callback) {
-			//Fetch adcard activities
-			if(isPublicFeed)
-				return callback(null, null)
-			else
-				models.activity.listAdActivities(callback)
-		},
-		function(adActivities, callback) {
-			//separate current and future events from event list
-			var feedObject = getFeedList(events,user,createMyEventsList)
+	//separate current and future events from event list
+	var feedObject = getFeedList(events, user, createMyEventsList)
+	if(isPublicFeed) {
+		getPublicFeed(feedObject, callback)
+	} else {
+		getPrivateFeed(feedObject, user, callback)
+	}
+}
 
+function getPrivateFeed(feedObject, user, callback) {
+	utils.async.parallel({
+		adActivities: function (callback) {
+			addAdActivitiesToFeed(feedObject, callback)
+		},
+		reviewPromptCard: function (callback) {
+			addReviewCardPromptToFeed(feedObject, user, callback)
+		}
+	},
+		function (err, results) {
+			return callback(null, feedObject)
+		})
+}
+
+function addReviewCardPromptToFeed(feedObject, user, callback) {
+	if (user.reviewPromptCard.status != utils.constants.reviewPromptCardStatus.TO_BE_SHOWN) {
+		return callback(null, feedObject)
+	}
+
+	var reviewPromptCardId = user.reviewPromptCard.cardId
+	if(utils._.isInvalidOrBlank(reviewPromptCardId)) {
+		return callback(null, feedObject)
+	}
+
+	reviewPromptCardService.listReviewPromptCardsById(reviewPromptCardId.toString(), function (err, reviewPromptCard) {
+		feedObject.reviewPromptCard = reviewPromptCard
+		return callback(null, feedObject)
+	})
+}
+
+function addAdActivitiesToFeed(feedObject, callback) {
+	utils.async.waterfall([
+		function getAdActivities(callback) {
+			models.activity.listAdActivities(callback)
+		},
+		function addAdActivitiesToFeed(adActivities, callback) {
 			//Create unique activityIds array from current events
-			utils.l.d('feedService::isPublicFeed::' + isPublicFeed)
 			var currentActivityIds = utils._.uniq(utils._.map(feedObject.currentEvents, 'eType._id'))
 			utils.l.d('currentActivityIds', currentActivityIds)
-			//Run through adcard activities usually 5-6 objects and remove the ones alrady prsent in currentActivityIds
+
+			//Run through adcard activities usually 5-6 objects and remove the ones already present in currentActivityIds
 			feedObject.adActivities = []
-			if(!isPublicFeed) {
-				utils._.map(adActivities, function (activity) {
-					utils.l.d('activity._id::' + activity._id + "  ###" + utils._.find(currentActivityIds, activity._id))
-					if (!utils._.find(currentActivityIds, activity._id))
-						feedObject.adActivities.push(activity)
-				})
-			}
-			if(isPublicFeed) {
-				models.user.findUserCount({"consoles.verifyStatus":"VERIFIED"}, function(err, userCount) {
-					utils.l.d('feedService::totalUsers::' + userCount)
-					utils.l.d('feedService::totalUsers::err', err)
-					if(userCount > 0) {
-						feedObject.totalUsers = userCount.toString()
-						utils.l.d('feedService::totalUsers::feedObject.totalUsers' + feedObject.totalUsers)
-					}
-					return callback(null, feedObject)
-				})
-			} else {
-				return callback(null, feedObject)
-			}
+			utils._.map(adActivities, function (activity) {
+				utils.l.d('activity._id::' + activity._id + "  ###" + utils._.find(currentActivityIds, activity._id))
+				if (!utils._.find(currentActivityIds, activity._id))
+					feedObject.adActivities.push(activity)
+			})
+			return callback(null, feedObject)
 		}
 	], callback)
+}
+
+function getPublicFeed(feedObject, callback) {
+	models.user.findUserCount({"consoles.verifyStatus":"VERIFIED"}, function(err, userCount) {
+		utils.l.d('feedService::totalUsers::' + userCount)
+		utils.l.d('feedService::totalUsers::err', err)
+		if(userCount > 0) {
+			feedObject.totalUsers = userCount.toString()
+			utils.l.d('feedService::totalUsers::feedObject.totalUsers' + feedObject.totalUsers)
+		}
+		return callback(null, feedObject)
+	})
 }
 
 function getFeedList(events,user,createMyEventsList) {

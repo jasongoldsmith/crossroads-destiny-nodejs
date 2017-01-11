@@ -500,6 +500,13 @@ var eventStatus = {
   can_join:'can_join'
 }
 
+var reviewPromptCardStatus = {
+  COMPLETED: 'COMPLETED',
+  REFUSED: 'REFUSED',
+  NEVER_SHOWN: 'NEVER_SHOWN',
+  TO_BE_SHOWN: 'TO_BE_SHOWN'
+}
+
 var bungieMemberShipType = {
   PSN:2,
   XBOX:1,
@@ -646,6 +653,7 @@ module.exports = {
   consoleGenericsId: consoleGenericsId,
   sysConfigKeys: sysConfigKeys,
   eventStatus: eventStatus,
+  reviewPromptCardStatus: reviewPromptCardStatus,
   notificationQueueTypeEnum: notificationQueueTypeEnum,
   existingUserInstallData:existingUserInstallData,
   newGenConsoleType:newGenConsoleType,

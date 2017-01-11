@@ -24,10 +24,10 @@ function getByQuery(query, callback) {
 function createReviewPromptCard(data, callback) {
   var reviewPromptCardObj = new ReviewPromptCard(data)
   utils.async.waterfall([
-    function (callback) {
+    function checkForExistingReviewPromptCard(callback) {
       getByQuery({name: data.name}, utils.firstInArrayCallback(callback))
     },
-    function (reviewPromptCard, callback) {
+    function createNewPromptCardIfNotFound(reviewPromptCard, callback) {
       if (!reviewPromptCard) {
         utils.l.d("no ReviewPromptCard found, saving ReviewPromptCard")
         reviewPromptCardObj.save(callback)
