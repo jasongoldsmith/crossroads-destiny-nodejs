@@ -13,5 +13,6 @@ module.exports = {
   enableBungieIntegration:process.env.enableBungieIntegration|| false,
   logLevel: 'info',
   enableNewRelic:process.env.enableNewRelic || true,
-  disableEnvetUpdateForComments: process.env.DISABLE_EVENT_UPDATE_COMMENTS || false
+  disableEnvetUpdateForComments: process.env.DISABLE_EVENT_UPDATE_COMMENTS || false,
+  minUsersForGroupNotification:100
 };

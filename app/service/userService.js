@@ -7,6 +7,7 @@ var pendingEventInvitationService = require('./pendingEventInvitationService')
 var destinyInterface = require('./destinyInterface')
 var passwordHash = require('password-hash')
 var helpers = require('../helpers')
+var temporal = require('temporal')
 
 function preUserTimeout(notifTrigger,sysConfig){
   utils.l.d("Starting preUserTimeout")
@@ -654,9 +655,14 @@ function bulkUpdateGroupStats(page,limit){
         models.groups.findGroupsPaginated({} ,page ,limit, callback)
       },
       function(groupList, callback) {
-        utils._.map(groupList, function(group) {
-          updateGroupStats(group, callback)
-        })
+        utils.async.mapSeries(groupList,
+          function(group,asyncCallback) {
+            updateGroupStats(group, asyncCallback)
+          },function(errors,results){
+            utils.l.d("completed processing group status update for page:"+page)
+            callback(null,null)
+          }
+        )
       }
     ],
     function(err ,data) {
@@ -665,7 +671,7 @@ function bulkUpdateGroupStats(page,limit){
 }
 
 function updateGroupStats(group, callback){
-  utils.l.d("group",group)
+  utils.l.d("group",group._id)
   utils.async.waterfall([
     function(callback){
       utils.async.parallel({
@@ -710,19 +716,102 @@ function subscribeGroups(ps4Stats,xboxStats,group, callback){
       else
         callback(null,null)
     },function(result,callback){
+      if(ps4Stats >= utils.config.minUsersForGroupNotification || xboxStats >= utils.config.minUsersForGroupNotification)
+        subscribeUsersForGroup(group,callback)
+      else
+        callback(null,null)
+    },function(result,callback){
       utils.async.parallel({
-          ps4StatsUpdate: function (callback) {
-            models.groups.updateGroupStats(group._id, "PS4", ps4Stats, callback)
+          ps4StatsUpdate: function (parallelCallback) {
+            models.groups.updateGroupStats(group._id, "PS4", ps4Stats, parallelCallback)
           },
-          xboxStatsUpdate: function (callback) {
-            models.groups.updateGroupStats(group._id, "XBOXONE", xboxStats, callback)
+          xboxStatsUpdate: function (parallelCallback) {
+            models.groups.updateGroupStats(group._id, "XBOXONE", xboxStats, parallelCallback)
           }
         },
         function (err, results) {
-            return callback(err, results)
+          return callback(err, results)
         })
     }
   ],callback)
+}
+function subscribeUsersForGroup(group,callback){
+  utils.l.d("BEGIN subscribeUsersForGroup:"+group._id)
+  utils.async.waterfall([
+    function(callback){
+      models.userGroup.findUsersByGroup(group._id,callback)
+    },function(userGroupStream,callback){
+      userGroupStream.on('data', function (doc) {
+        utils.l.d('################# got user',doc._id)
+        subsribeUserGroupNotification(doc,function(err,data){
+          utils.l.d('&&&&& COMPLETED subScribeUsergropu UPDATE &&&&')
+        })
+      }).on('error', function (err) {
+        utils.l.d('error getting userGroup',err)
+      }).on('close', function () {
+        utils.l.d('Completed processing subscribeUsersForGroup for group',group._id)
+        return callback(null,null)
+      });
+    }
+  ],callback)
+}
+
+/*function subscribeUsersForGroup(group,callback){
+  utils.l.d("BEGIN subscribeUsersForGroup:"+group._id)
+  utils.async.waterfall([
+    function(callback){
+      models.userGroup.getUserCountByGroup(group._id,callback)
+    },function(userCount, callback){
+      var limit=10
+      var page=0
+      temporal.loop(2 * 1000, function() {
+        var batchStop = limit * (page+1)
+        utils.l.i("Processing user notification for group:page["+page+"]="+batchStop+" of total users="+userCount)
+        subsribeUsersForGroupPaginated(group,page,limit)
+        if(batchStop >= userCount){
+          utils.l.d("COMPLETED execution of grop subscription for:"+group._id)
+          this.stop()
+          return callback(null,null)
+        }else{
+          page = page + 1
+        }
+      })
+    }
+  ],callback)
+}
+
+function subsribeUsersForGroupPaginated(group,page,limit){
+  utils.async.waterfall([
+    function(callback){
+      models.userGroup.findUsersPaginated({group:group._id},page,limit,callback)
+    },function(userGroupList, callback){
+      utils.async.map(userGroupList,
+        function(userGroup,asynCallback){
+          subsribeUserGroupNotification(userGroup,asynCallback)
+        },function(errors, results){
+          callback(null,null)
+        }
+      )
+    }
+  ],function(err,data){
+    utils.l.d("Completed subsribeUsersForGroupPaginated")
+    //return callback(err,data)
+  })
+}*/
+
+function subsribeUserGroupNotification(userGroup,callback){
+  utils.async.waterfall([
+    function(callback){
+      models.installation.getInstallationByUser(userGroup.user,callback)
+    },function(installation, callback) {
+      if(utils._.isValidNonBlank(installation))
+        helpers.sns.subscirbeUserGroup(userGroup, installation, callback)
+      else return callback(null,null)
+    }
+  ],function(err,data){
+    utils.l.d('completed subsribeUserGroupNotification')
+    return callback(err,data)
+  })
 }
 
 function subscribeUserNotifications(user,forceUpdate,callback){
@@ -732,7 +821,9 @@ function subscribeUserNotifications(user,forceUpdate,callback){
       models.installation.getInstallationByUser(user,callback)
     },function(installation, callback){
       installationObj=installation
-      models.userGroup.getByUser(user._id,null,callback)
+      if(utils._.isValidNonBlank(installation))
+        models.userGroup.getByUser(user._id,null,callback)
+      else return callback({errorType:"EMPTY_INSTALLATION"},null)
     },function(userGroupList, callback){
       utils.async.mapSeries(
         userGroupList,
@@ -752,7 +843,10 @@ function subscribeUserNotifications(user,forceUpdate,callback){
     }
   ],function(err,data){
     utils.l.d('completed subscription for notifications ')
-    return callback(err,data)
+    if(utils._.isValidNonBlank(err) && err.errorType == "EMPTY_INSTALLATION")
+      return callback(null,data)
+    else
+      return callback(err,data)
   })
 }
 

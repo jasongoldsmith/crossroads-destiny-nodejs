@@ -62,7 +62,8 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
           consoles:utils._.map(user.consoles,"consoleType"),
           muteNotification:utils._.isValidNonBlank(userGroup)?userGroup.muteNotification:false,
           date:new Date(),
-          uDate:new Date()
+          uDate:new Date(),
+          serviceEndpoints:[]
         })
       })
 
@@ -128,6 +129,29 @@ function getGroupCountByConsole(groupId,consoleType,callback){
   UserGroup.count({group:groupId,consoles:consoleType}).exec(callback)
 }
 
+function getUserCountByGroup(groupId,callback){
+  UserGroup.count({group:groupId}).exec(callback)
+}
+
+function findUsersPaginated(query, pageNumber, limit, callback){
+  UserGroup
+    .find(query)
+    .populate("user","-passWord")
+    .populate("group")
+    .skip(pageNumber > 0 ? ((pageNumber) * limit) : 0)
+    .limit(limit)
+    .exec(callback)
+}
+
+function findUsersByGroup(groupId,callback){
+  var cursor =  UserGroup
+    .find({group:groupId})
+    .populate("user","-password")
+    .populate("group")
+    .stream()
+  return callback(null,cursor)
+}
+
 module.exports = {
   model: UserGroup,
   updateUserGroup:updateUserGroup,
@@ -136,5 +160,8 @@ module.exports = {
   refreshUserGroup:refreshUserGroup,
   getGroupCountByConsole:getGroupCountByConsole,
   addServiceEndpoints:addServiceEndpoints,
-  getByUserLean:getByUserLean
+  getByUserLean:getByUserLean,
+  getUserCountByGroup:getUserCountByGroup,
+  findUsersPaginated:findUsersPaginated,
+  findUsersByGroup:findUsersByGroup
 }

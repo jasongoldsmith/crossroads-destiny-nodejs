@@ -15,7 +15,6 @@ function createTopic(topicName,callback){
       sns.createTopic(params, callback);
     }
   ],function(err,topicArn){
-    utils.l.d("created new topic",topicArn)
     if(!err)
       return callback(null,{key:topicName,value:topicArn.TopicArn,description:topicName})
     else
@@ -33,7 +32,6 @@ function deleteTopic(topicEndPoint,callback){
       sns.deleteTopic(params, callback);
     }
   ],function(err,topicArn){
-    utils.l.d("Deleted new topic",topicArn)
     if(!err)
       return callback(null,topicArn)
     else
@@ -46,22 +44,12 @@ function getTopicARNEndpoint(consoleType, groupId,topicSource,callback){
   var topicARNKey = getTopicARNKey(consoleType,groupId)
   utils.async.waterfall([
     function(callback){
-      utils.l.d('topicARNKey::', topicARNKey)
       if(topicSource == "GROUP"){
         callback(null,null)
       }else{
         models.sysConfig.getSysConfig(topicARNKey,callback)
       }
-      /*models.sysConfig.getSysConfig(topicARNKey, function(err,sysConfig){
-        if(utils._.isValidNonBlank(err)){
-          if(err.errorType == "InvalidKey") callback(null,null)
-          else callback(err,null)
-        }else{
-          callback(null,sysConfig)
-        }
-      })*/
     },function(topicARNConfig,callback){
-      utils.l.d("topicARNConfig::",topicARNConfig)
       if(utils._.isInvalidOrBlank(topicARNConfig))
         createTopic(topicARNKey,callback)
       else
@@ -90,9 +78,7 @@ function getApplicationArnEndPoint(deviceType,callback) {
   var appARNKey =  utils.constants.sysConfigKeys.awsSNSAppArn
     .replace(/%DEVICE_TYPE%/g, deviceType)
     .replace(/%ENV%/g, utils.config.environment)
-  utils.l.d('appARNKey::', appARNKey)
   models.sysConfig.getSysConfig(appARNKey, function(err,data){
-    utils.l.d("appARN::Sysconfig::",data)
     if(!err) return callback(null, data)
     else return callback(null,null)
   })
@@ -274,8 +260,10 @@ function createUserGroupEndPoints(userGroup, consoleType, deviceEndpointArn, cal
         })
       }
     },function(serviceEndpoint,callback){
+      utils.l.d("createUserGroupEndPoints::serviceEndpoint",serviceEndpoint)
       if(utils._.isValidNonBlank(serviceEndpoint)){
-        models.userGroup.addServiceEndpoints(userGroup.user,userGroup.group._id,serviceEndpoint,callback)
+        var user = utils._.isValidNonBlank(userGroup.user._id)?userGroup.user._id:userGroup.user
+        models.userGroup.addServiceEndpoints(user,userGroup.group._id,serviceEndpoint,callback)
       }else
         callback(null,null)
     }
@@ -473,7 +461,6 @@ function getApplicationArn(deviceType, callback) {
 function getTopicARN(consoleType, groupId, callback) {
  var models = require('../models')
   var topicARN = getTopicARNKey(consoleType,groupId)
-  utils.l.d('topicARN::', topicARN)
   models.sysConfig.getSysConfig(topicARN, callback)
 }
 
