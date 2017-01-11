@@ -1,6 +1,7 @@
 var user = require('./userModel')
 var temporaryUser = require('./temporaryUserModel')
 var activity = require('./activityModel')
+var reviewPromptCard = require('./reviewPromptCardModel')
 var event = require ('./eventModel')
 var archiveEvent = require ('./archiveEventModel')
 var installation = require('./installationModel')
@@ -20,6 +21,7 @@ module.exports = {
   user: user,
   temporaryUser: temporaryUser,
   activity: activity,
+  reviewPromptCard: reviewPromptCard,
   event: event,
   installation: installation,
   archiveEvent: archiveEvent,

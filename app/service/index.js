@@ -13,6 +13,7 @@ module.exports = {
   tinyUrlService: require('./tinyUrlService'),
   userService: require('./userService'),
   activityService: require('./activityService'),
+  reviewPromptCardService: require('./reviewPromptCardService'),
   trackingService: require('./trackingService'),
   accountService:require('./accountService')
 }
