@@ -552,6 +552,7 @@ function bulkHelmetUpdate(){
         if(batchStop >= userCount) {
           utils.l.i("Updated helmets for all users")
           this.stop()
+          return callback(null, null)
         } else {
           page = page + 1
         }
@@ -578,18 +579,19 @@ function bulkUserGroupUpdate(){
         if(batchStop >= userCount) {
           utils.l.i("Updated usergroups for all users")
           this.stop()
+          return callback(null, null)
         } else {
           page = page + 1
         }
       })
     }
   ],function(err,data){
-    utils.l.i("Completed helmetupdate:"+utils.moment().format())
+    utils.l.i("Completed bulkUserGroupUpdate:"+utils.moment().format())
   })
 }
 
 function groupStatsUpdate(){
-  var limit = 10
+  var limit = 30
   var page = 0
   utils.l.i("Started helmetupdate:"+utils.moment().format())
   utils.async.waterfall([
@@ -601,15 +603,18 @@ function groupStatsUpdate(){
         utils.l.i("Processing group stats:page["+page+"]="+batchStop+" of total groups="+groupCount)
         service.userService.bulkUpdateGroupStats(page,limit)
         if(batchStop >= groupCount) {
-          utils.l.i("Updated stats for all group")
+          utils.l.d("Updated stats for all group")
           this.stop()
+          return callback(null, null)
         } else {
+          utils.l.d("Processing next page for group stats")
           page = page + 1
         }
+        utils.l.d("End of loop for group stats")
       })
     }
   ],function(err,data){
-    utils.l.i("Completed helmetupdate:"+utils.moment().format())
+    utils.l.i("Completed groupStatsUpdate:"+utils.moment().format())
   })
 }
 
