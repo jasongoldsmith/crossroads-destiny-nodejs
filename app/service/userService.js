@@ -165,16 +165,14 @@ function upgradeConsole(user, oldConsoleType, newConsoleType, callback) {
     },
     function (events, callback) {
       consoleObject.consoleType = newConsoleType
-      updateUser(user, function (err, updatedUser) {
-        if(err) {
-          utils.l.s("Unable to update the user", err)
-          return callback({error: "Something went wrong. Please try again"}, null)
-        } else {
-          return callback(null, updatedUser)
-        }
-      })
+      updateUser(user, callback)
     }
   ], callback)
+}
+
+function updateReviewPromptCardStatus(user, data, callback) {
+  user.reviewPromptCard.status = data.reviewPromptCardStatus.toUpperCase()
+  updateUser(user, callback)
 }
 
 function addConsole(user, console, callback) {
@@ -879,6 +877,7 @@ module.exports = {
   userTimeout: userTimeout,
   preUserTimeout: preUserTimeout,
   upgradeConsole: upgradeConsole,
+  updateReviewPromptCardStatus: updateReviewPromptCardStatus,
   addConsole: addConsole,
   changePrimaryConsole: changePrimaryConsole,
   checkBungieAccount: checkBungieAccount,

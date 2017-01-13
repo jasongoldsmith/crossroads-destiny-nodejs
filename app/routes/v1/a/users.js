@@ -95,6 +95,24 @@ function updatePassword(req, res) {
   }
 }
 
+function updateReviewPromptCardStatus(req, res) {
+  utils.l.d("Update user review prompt card status request" + JSON.stringify(req.body))
+  if(!req.body.reviewPromptCardStatus) {
+    var err = {
+      error: "reviewPromptCardStatus is a required field"
+    }
+    routeUtils.handleAPIError(req, res, err, err)
+  } else {
+    service.userService.updateReviewPromptCardStatus(req.user, req.body, function (err, user) {
+      if (err) {
+        routeUtils.handleAPIError(req, res, err, err)
+      } else {
+        routeUtils.handleAPISuccess(req, res, user)
+      }
+    })
+  }
+}
+
 function getUserMetrics(req, res) {
   utils.l.i("Get user metrics request")
   models.user.getUserMetrics(function(err, metrics) {
@@ -248,6 +266,7 @@ routeUtils.rPost(router, '/update', 'update', update)
 routeUtils.rPost(router, '/updateGroup', 'updateGroup', updateGroup)
 routeUtils.rPost(router, '/acceptLegal', 'acceptLegal', acceptLegal)
 routeUtils.rPost(router, '/updatePassword', 'updatePassword', updatePassword)
+routeUtils.rPost(router, '/updateReviewPromptCardStatus', 'updateReviewPromptCardStatus', updateReviewPromptCardStatus)
 routeUtils.rPost(router, '/addConsole', 'addUserConsole', addConsole)
 routeUtils.rPost(router, '/changePrimaryConsole', 'changePrimaryConsole', changePrimaryConsole)
 routeUtils.rGet(router, '/getMetrics', 'getUserMetrics', getUserMetrics)

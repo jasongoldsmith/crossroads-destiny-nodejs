@@ -14,37 +14,37 @@ describe("Successful installation object create test cases: ", function() {
       var user = null
       var installation = null
       utils.async.waterfall([
-        function(callback){
-          models.user.createUserFromData(usersData.tinacplays,callback)
-        },function (userDB,callback) {
+        function (callback) {
+          models.user.createUserFromData(usersData.tinacplays, callback)
+        }, function (userDB, callback) {
           user = userDB
           service.installationService.updateInstallation("apn", "c56d4bd5434f73b4d9decd313f7a0daafffd809b8318eafcabcca7f62156f37c", user, callback)
-        },function(installationDB,callback){
-          installation=installationDB
+        }, function (installationDB, callback) {
+          installation = installationDB
           var groupsList = []
           groupsList.push(groupsData["112233"])
-          service.userService.refreshGroups(user,null,groupsList, callback)
-        },function(data,callback){
-          utils.l.d("testcase::got groups after refresh",data)
-          models.groups.findGroupById("112233",callback)
-        },function(groupDB,callback){
-          group=groupDB
+          service.userService.refreshGroups(user, null, groupsList, callback)
+        }, function (data, callback) {
+          utils.l.d("testcase::got groups after refresh", data)
+          models.groups.findGroupById("112233", callback)
+        }, function (groupDB, callback) {
+          group = groupDB
           utils.l.d("about to update groupstats")
-          utils.config.minUsersForGroupNotification=1
-          service.userService.updateGroupStats(group,callback)
-        }, function(groupStats,callback){
+          utils.config.minUsersForGroupNotification = 1
+          service.userService.updateGroupStats(group, callback)
+        }, function (groupStats, callback) {
           utils.l.d("about to subscribe notifications")
-          service.userService.subscribeUserNotifications(user,false,callback)
-        },function (subscription, callback) {
+          service.userService.subscribeUserNotifications(user, false, callback)
+        }, function (subscription, callback) {
           utils.l.d("Starting cleanup")
-          cleanupData(user,installation,group, callback)
+          cleanupData(user, installation, group, callback)
         }
       ], function (err, data) {
         utils.l.d("END:Create a new installation object::")
         done();
       })
     })
-
+  })
 /*
     it("Set Group stats,create topic and subscribe users to that topic: ", function (done) {
       utils.l.d("BEGINING:Create a new installation object::")

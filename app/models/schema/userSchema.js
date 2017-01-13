@@ -7,6 +7,11 @@ var acctVerifyEnum = {
   enum: ['VERIFIED','INITIATED','FAILED_INITIATION','NOT_INITIATED','INVALID_GAMERTAG','INVITED','INVITATION_MSG_FAILED'],
   default: "NOT_INITIATED"
 }
+var reviewPromptCardStatusEnum = {
+  type: String,
+  enum: ['COMPLETED', 'REFUSED', 'NEVER_SHOWN', 'TO_BE_SHOWN'],
+  default: "NEVER_SHOWN"
+}
 
 var UserSchema = new Schema({
   name: String,
@@ -55,7 +60,11 @@ var UserSchema = new Schema({
   },
   mpDistinctId: String,
   mpDistinctIdRefreshed: {type: Boolean, default: false},
-  isInvited: {type: Boolean, default: false}
+  isInvited: {type: Boolean, default: false},
+  reviewPromptCard: {
+    status: reviewPromptCardStatusEnum,
+    cardId: { type: Schema.Types.ObjectId, ref: 'ReviewPromptCard'}
+  }
 })
 
 UserSchema.index({'userName': 1})
