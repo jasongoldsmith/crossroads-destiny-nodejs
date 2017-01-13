@@ -323,3 +323,16 @@ db.getCollection('users').aggregate([
 //-----------Check for array length----------
 db.getCollection('usergroups').count( { $where: "this.groups.length > 0" })
 //-----------END----------
+
+//----------BEGIN---------
+function getArchiveEvents(){
+    var evtCursor = db.archiveevents.aggregate( [ { $project: { status: "$status", _id:"$_id",launchDate:"$launchDate",created:"$created",dateDifference: { $subtract: [ "$launchDate", "$created" ] } } } ] )
+        evtCursor.forEach(
+            function (evt) {
+                print(evt)
+            }
+    )
+}
+
+getArchiveEvents()
+//-----------END----------

@@ -610,7 +610,8 @@ function subscribeUserGroupNotification(userGroup,user,groupId, muteNotification
 function bulkUpdateUserGroups(page, limit){
   utils.async.waterfall([
       function(callback) {
-        models.user.findUsersPaginated({"verifyStatus" : "VERIFIED"} ,page ,limit, callback)
+        //models.user.findUsersPaginated({"verifyStatus" : "VERIFIED"} ,page ,limit, callback)
+        models.user.findUsersPaginated({"consoles.verifyStatus":{"$in":["VERIFIED"]},"verifyStatus":{"$in":[null]},"bungieMemberShipId":{"$ne":null}} ,page ,limit, callback)
       },
       function(userList, callback) {
         utils.async.mapSeries(userList,
@@ -704,21 +705,26 @@ function updateGroupStats(group, callback){
 }
 
 function subscribeGroups(ps4Stats,xboxStats,group, callback){
+  var needUserGroupSubscription = false;
   utils.async.waterfall([
     function(callback){
-      if(ps4Stats >= utils.config.minUsersForGroupNotification)
-        helpers.sns.subscribeGroup(group,"PS4",callback)
-      else
+      var serviceEndPoint = utils._.find(group.serviceEndpoints,{consoleType:"PS4",serviceType:utils.constants.serviceTypes.PUSHNOTIFICATION})
+      if(ps4Stats >= utils.config.minUsersForGroupNotification && (utils._.isInvalidOrBlank(serviceEndPoint) || utils._.isInvalidOrBlank(serviceEndPoint.topicEndpoint))) {
+        needUserGroupSubscription=true
+        helpers.sns.subscribeGroup(group, "PS4", callback)
+      }else
         callback(null,null)
     },function(result,callback){
-      if(xboxStats >= utils.config.minUsersForGroupNotification)
-        helpers.sns.subscribeGroup(group,"XBOXONE",callback)
-      else
+      var serviceEndPoint = utils._.find(group.serviceEndpoints,{consoleType:"XBOXONE",serviceType:utils.constants.serviceTypes.PUSHNOTIFICATION})
+      if(xboxStats >= utils.config.minUsersForGroupNotification && (utils._.isInvalidOrBlank(serviceEndPoint) || utils._.isInvalidOrBlank(serviceEndPoint.topicEndpoint))) {
+        needUserGroupSubscription=true
+        helpers.sns.subscribeGroup(group, "XBOXONE", callback)
+      }else
         callback(null,null)
     },function(result,callback){
-      if(ps4Stats >= utils.config.minUsersForGroupNotification || xboxStats >= utils.config.minUsersForGroupNotification)
-        subscribeUsersForGroup(group,callback)
-      else
+      if((ps4Stats >= utils.config.minUsersForGroupNotification || xboxStats >= utils.config.minUsersForGroupNotification) && needUserGroupSubscription) {
+        subscribeUsersForGroup(group, callback)
+      }else
         callback(null,null)
     },function(result,callback){
       utils.async.parallel({
@@ -735,6 +741,7 @@ function subscribeGroups(ps4Stats,xboxStats,group, callback){
     }
   ],callback)
 }
+/*
 function subscribeUsersForGroup(group,callback){
   utils.l.d("BEGIN subscribeUsersForGroup:"+group._id)
   utils.async.waterfall([
@@ -755,31 +762,49 @@ function subscribeUsersForGroup(group,callback){
     }
   ],callback)
 }
-
-/*function subscribeUsersForGroup(group,callback){
-  utils.l.d("BEGIN subscribeUsersForGroup:"+group._id)
+*/
+function subscribeUsersForGroup(group,callback){
   utils.async.waterfall([
     function(callback){
       models.userGroup.getUserCountByGroup(group._id,callback)
-    },function(userCount, callback){
-      var limit=10
+    },function(userGroupCount, callback){
+      utils.l.d("usercount",userGroupCount)
       var page=0
-      temporal.loop(2 * 1000, function() {
-        var batchStop = limit * (page+1)
-        utils.l.i("Processing user notification for group:page["+page+"]="+batchStop+" of total users="+userCount)
-        subsribeUsersForGroupPaginated(group,page,limit)
-        if(batchStop >= userCount){
-          utils.l.d("COMPLETED execution of grop subscription for:"+group._id)
-          this.stop()
-          return callback(null,null)
-        }else{
-          page = page + 1
+      var limit=50
+      var batchStop = 0
+      utils.async.whilst(
+        function(){
+          utils.l.d("batchStop in condition",batchStop)
+          return batchStop<userGroupCount
+        },function(asyncCallback){
+          utils.l.d("about to call subscribeUsersForGroupAsync",page)
+          subscribeUsersForGroupAsync(page,limit,group,asyncCallback)
+          page=page+1
+          batchStop = page*limit
+        },function(err,n){
+          utils.l.d("completed processing:",n)
+          callback(null,null)
         }
-      })
+      )
     }
   ],callback)
 }
 
+function subscribeUsersForGroupAsync(page,limit,group,callback){
+  utils.l.i("processing page::"+page)
+  utils.async.waterfall([
+    function(callback){
+      models.userGroup.findUsersPaginated({group:group._id},page,limit,callback)
+    },function(userGroupList,callback){
+      utils.async.map(userGroupList,function(userGroup,asynCallback){
+        utils.l.d("subscribing for ",userGroup._id)
+        subsribeUserGroupNotification(userGroup,asynCallback)
+      },function(err,result){callback(null,page)})
+    }
+  ],callback)
+}
+
+/*
 function subsribeUsersForGroupPaginated(group,page,limit){
   utils.async.waterfall([
     function(callback){
@@ -872,5 +897,6 @@ module.exports = {
   bulkUpdateGroupStats:bulkUpdateGroupStats,
   subscribeUserNotifications:subscribeUserNotifications,
   updateGroupStats:updateGroupStats,
-  refreshGroups:refreshGroups
+  refreshGroups:refreshGroups,
+  subscribeUsersForGroup:subscribeUsersForGroup
 }

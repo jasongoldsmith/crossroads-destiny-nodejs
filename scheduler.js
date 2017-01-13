@@ -113,6 +113,16 @@ switch(command) {
       console.log('addSysConfig::err::'+err)
       console.log('addSysConfig::sysconf::'+JSON.stringify(sysconf))
     })
+    break;
+  case "subscribeUsersForGroup":
+    jobs.subscribeUsersForGroup();
+    break
+  case "updateGroupStats":
+    jobs.updateGroupStats();
+    break;
+  case "migrateInstllationsToSNS":
+    jobs.migrateInstllationsToSNS();
+    break;
   case "momentTest":
     var date = new Date()
     date.setHours(0,0,0,0)

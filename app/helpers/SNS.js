@@ -139,10 +139,12 @@ function unSubscribeGroup(groupId,callback){
 function registerDeviceToken(user,installation,callback){
   var models = require('../models')
   var config = {}
+  utils.l.d("registering for insllation::"+installation._id)
   utils.async.waterfall([
     function(callback) {
       getApplicationArnEndPoint(installation.deviceType,callback)
     },function(appArnEndpoint,callback){
+      utils.l.d("appArnEndpoint",appArnEndpoint)
       config.appArnEndpoint = appArnEndpoint
       getTopicARNEndpoint('All_Platforms','All_Groups',"SYSTEM",callback)
     },function(topicArnEndpoint,callback){
@@ -154,6 +156,7 @@ function registerDeviceToken(user,installation,callback){
       }, callback)
     },
     function(deviceEndPoint, callback) {
+      utils.l.d("deviceEndPoint",deviceEndPoint)
       config.deviceEndPointArn = deviceEndPoint.EndpointArn
       sns.subscribe({
         Protocol: 'application',
@@ -223,7 +226,7 @@ function subscirbeUserGroup(userGroup,installation, callback){
         utils.async.mapSeries(userGroup.consoles,
           function(consoleType,asyncCallback){
             var appStats = utils._.find(userGroup.group.appStats,{consoleType:consoleType})
-            if(utils._.isValidNonBlank(appStats) && appStats.memberCount >= utils.config.minUsersForGroupNotification)
+            if(utils._.isValidNonBlank(appStats) && appStats.memberCount >= utils.config.minUsersForGroupNotification && !userGroup.muteNotification)
               createUserGroupEndPoints(userGroup,consoleType,installationUpdated.deviceSubscription.deviceEndpointArn,asyncCallback)
             else asyncCallback(null,null)
           },

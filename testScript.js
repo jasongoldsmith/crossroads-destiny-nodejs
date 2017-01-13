@@ -335,6 +335,28 @@ switch(command) {
       utils.l.d('users by group',data)
     })
     break;
+  case "registerDeviceToken":
+    utils.async.waterfall([
+      function(callback){
+        models.installation.getById("580a518683de74fc2612035a",callback)
+      },function(installation,callback){
+        helpers.sns.registerDeviceToken(null,installation,callback)
+      }
+    ],function(err,installationDB){
+      utils.l.d("got installatio",installationDB)
+    })
+    break;
+  case "listGroups":
+    utils.async.waterfall([
+      function(callback){
+        models.user.getById("580a517f83de74fc26120357",callback)
+      },function(user,callback){
+        userService.listGroups(user,callback)
+      }
+    ],function(err,userGroupList){
+      utils.l.d("got userGroups",userGroupList)
+    })
+    break;
   default:
     return;
 }

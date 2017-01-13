@@ -26,6 +26,53 @@ function updateInstallation(pushDeviceType, deviceToken, user, callback){
   )
 }
 
+function subscribeInstallation(callback){
+  utils.async.waterfall([
+    function(callback){
+      models.installation.getInsallationCount({},callback)
+    },function(installCount, callback){
+      utils.l.d("installCount",installCount)
+      var page=0
+      var limit=100
+      var batchStop = 0
+      utils.async.whilst(
+        function(){
+          utils.l.d("batchStop in condition",batchStop)
+          return batchStop<installCount
+        },function(asyncCallback){
+          utils.l.d("about to call subscribeInstallationAsync",page)
+          subscribeInstallationAsync(page,limit,asyncCallback)
+          page=page+1
+          batchStop = page*limit
+        },function(err,n){
+          utils.l.d("completed processing:",n)
+          callback(null,null)
+        }
+      )
+    }
+  ],callback)
+}
+
+function subscribeInstallationAsync(page, limit, callback){
+  utils.l.i("processing subscribeInstallationAsync page::"+page)
+  utils.async.waterfall([
+    function(callback){
+      models.installation.findInstallationsPaginated({},page,limit,callback)
+    },function(installList,callback){
+      utils.async.map(installList,function(installation,asynCallback){
+        utils.l.d("subscribing for "+installation._id+"::deviceSubscription::"+installation.deviceSubscription)
+        if(utils._.isInvalidOrBlank(installation.deviceSubscription) || utils._.isInvalidOrBlank(installation.deviceSubscription.deviceEndpointArn))
+          helpers.sns.registerDeviceToken(installation.user,installation,asynCallback)
+        else
+          return asynCallback(null,null)
+      },function(err,result){
+        callback(null,page)
+      })
+    }
+  ],callback)
+}
+
 module.exports = {
-  updateInstallation: updateInstallation
+  updateInstallation: updateInstallation,
+  subscribeInstallation:subscribeInstallation
 }

@@ -121,6 +121,19 @@ function updateInstallation(user,deviceType,deviceToken, callback){
   ],callback)
 }
 
+function getInsallationCount(query,callback){
+  Installation.count(query).exec(callback)
+}
+
+function findInstallationsPaginated(query, pageNumber, limit, callback){
+  Installation
+    .find(query)
+    .populate("user","-passWord")
+    .skip(pageNumber > 0 ? ((pageNumber) * limit) : 0)
+    .limit(limit)
+    .exec(callback)
+}
+
 
 module.exports = {
   model: Installation,
@@ -129,7 +142,9 @@ module.exports = {
   updateInstallation: updateInstallation,
   getInstallationByUser: getInstallationByUser,
   getInstallationByUserList: getInstallationByUserList,
-  findByIdAndUpdate:findByIdAndUpdate
+  findByIdAndUpdate:findByIdAndUpdate,
+  getInsallationCount:getInsallationCount,
+  findInstallationsPaginated:findInstallationsPaginated
 };
 
 

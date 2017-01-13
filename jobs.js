@@ -564,13 +564,14 @@ function bulkHelmetUpdate(){
 }
 
 function bulkUserGroupUpdate(){
-  var limit = 10
+  var limit = 50
   var page = 0
   utils.l.i("Started helmetupdate:"+utils.moment().format())
   utils.async.waterfall([
     function(callback){
       //models.user.findUserCount({"verifyStatus":"VERIFIED"},callback)
-      models.user.model.count({"verifyStatus":"VERIFIED"},callback)
+      //models.user.model.count({"verifyStatus":"VERIFIED"},callback)
+      models.user.model.count({"consoles.verifyStatus":{"$in":["VERIFIED"]},"verifyStatus":{"$in":[null]},"bungieMemberShipId":{"$ne":null}},callback)
     },function(userCount, callback){
       temporal.loop(5 * 1000, function() {
         var batchStop = limit * (page+1)
@@ -591,14 +592,14 @@ function bulkUserGroupUpdate(){
 }
 
 function groupStatsUpdate(){
-  var limit = 30
+  var limit = 150
   var page = 0
-  utils.l.i("Started helmetupdate:"+utils.moment().format())
+  utils.l.i("Started groupStatsUpdate:"+utils.moment().format())
   utils.async.waterfall([
     function(callback){
       models.groups.model.count({},callback)
     },function(groupCount, callback){
-      temporal.loop(5 * 1000, function() {
+      temporal.loop(2 * 1000, function() {
         var batchStop = limit * (page+1)
         utils.l.i("Processing group stats:page["+page+"]="+batchStop+" of total groups="+groupCount)
         service.userService.bulkUpdateGroupStats(page,limit)
@@ -615,6 +616,84 @@ function groupStatsUpdate(){
     }
   ],function(err,data){
     utils.l.i("Completed groupStatsUpdate:"+utils.moment().format())
+  })
+}
+function subscribeUsersForGroup(){
+  var groupIdList = [
+    "719107",
+    "116823",
+    "99063",
+    "660926",
+    "99846",
+    "192001",
+    "1052369",
+    "672594",
+    "414592",
+    "63838",
+    "118152",
+    "900481",
+    "755014",
+    "1100775",
+    "151350",
+    "16555",
+    "178871",
+    "1115970",
+    "619636",
+    "879736",
+    "844497",
+    "503520",
+    "660904",
+    "233346",
+    "313379",
+    "693072",
+    "648790",
+    "3656",
+    "129599",
+    "247082",
+    "551240",
+    "370949",
+    "172979",
+    "40101",
+    "498189",
+    "544299"
+  ]
+  utils.async.mapSeries(groupIdList,
+    function(groupId,asyncCallback){
+      subscribeUsersForGroupById(groupId,asyncCallback)
+    },function(err,results){
+      utils.l.d("Completed updateGroupStats for all groups")
+    }
+  )
+}
+function updateGroupStats(){
+  utils.async.waterfall([
+    function(callback){
+      models.groups.findGroupById("1570671",callback)
+    },function(group, callback){
+      service.userService.updateGroupStats(group,callback)
+    }
+  ],function(err,data){
+    utils.l.i("Completed updateGroupStats:for groupId::"+"1570671"+"::"+utils.moment().format())
+
+  })
+}
+function subscribeUsersForGroupById(groupId,callback){
+  utils.l.i("jobs::subscribeUsersForGroup::group::"+groupId)
+  utils.async.waterfall([
+    function(callback){
+      models.groups.findGroupById(groupId,callback)
+    },function(group, callback){
+      service.userService.subscribeUsersForGroup(group,callback)
+    }
+  ],function(err,data){
+    utils.l.i("Completed subscribeUsersForGroup:"+utils.moment().format())
+    return callback(null,null)
+  })
+}
+
+function migrateInstllationsToSNS(){
+  service.installationService.subscribeInstallation(function(err,data){
+    utils.l.i("Completed migrateInstllationsToSNS:"+utils.moment().format())
   })
 }
 
@@ -788,5 +867,8 @@ module.exports = {
   bulkHelmetUpdate: bulkHelmetUpdate,
   mergeDuplicateEvents: mergeDuplicateEvents,
   bulkUserGroupUpdate:bulkUserGroupUpdate,
-  groupStatsUpdate:groupStatsUpdate
+  groupStatsUpdate:groupStatsUpdate,
+  subscribeUsersForGroup:subscribeUsersForGroup,
+  updateGroupStats:updateGroupStats,
+  migrateInstllationsToSNS:migrateInstllationsToSNS
 }

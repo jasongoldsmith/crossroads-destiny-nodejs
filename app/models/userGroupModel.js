@@ -80,8 +80,10 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
         uDate:new Date()
       })
 */
-
-      UserGroup.collection.insert(userGroups,callback)
+      if(utils._.isValidNonBlank(userGroups))
+        UserGroup.collection.insert(userGroups,callback)
+      else
+        return callback(null,null)
     },function(docs, callback){
       getByUser(user._id,null,callback)
     }

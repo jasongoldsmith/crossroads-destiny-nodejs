@@ -44,7 +44,34 @@ describe("Successful installation object create test cases: ", function() {
         done();
       })
     })
+
+/*
+    it("Set Group stats,create topic and subscribe users to that topic: ", function (done) {
+      utils.l.d("BEGINING:Create a new installation object::")
+      var group = null
+      var user = null
+      var installation = null
+      utils.async.waterfall([
+        function(callback){
+          models.user.createUserFromData(usersData.tinacplays,callback)
+        },function (userDB,callback) {
+          user = userDB
+          service.installationService.updateInstallation("apn", "c56d4bd5434f73b4d9decd313f7a0daafffd809b8318eafcabcca7f62156f37c", user, callback)
+        },function(installationDB,callback){
+          installation=installationDB
+          service.userService.listGroups(user,callback)
+        },function(groupsList,callback){
+          validteUserGroupList(groupsList)
+          utils.l.d("Starting cleanup")
+          cleanupData(user,installation,group, callback)
+        }
+      ], function (err, data) {
+        utils.l.d("END:Create a new installation object::")
+        done();
+      })
+    })
   })
+*/
 
   after(function() {
   })
