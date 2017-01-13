@@ -483,7 +483,7 @@ function getPendingEventInvites(user, callback) {
 
 //TODO: GroupID is set in clanID field. Need to change it later.
 function updateUserGroup(data, callback) {
-  utils.l.d("updateUserGroup::",updateUserGroup)
+  utils.l.d("updateUserGroup::",data)
   var clanName = utils._.isInvalidOrBlank(data.clanName)?"":data.clanName
   var clanImageUrl = utils._.isInvalidOrBlank(data.clanImageUrl)?"":data.clanImageUrl
   models.user.updateUser({id: data.id, clanId: data.clanId, clanName:clanName, clanImageUrl:clanImageUrl}, true, callback)

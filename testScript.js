@@ -287,7 +287,7 @@ switch(command) {
     }))
     break
   case 'snsPublishTest':
-    var customPayload = {
+/*    var customPayload = {
       //alert:"Custom Hello World for event from Harsha",
       eventId:"57c5afccfd06cd0300cf8477",
       notificationName:"eventCreateNotif",
@@ -297,8 +297,26 @@ switch(command) {
       eventClanName: 'Free Lance Lobby',
       eventClanImageUrl: 'http://www.amazon.com/test.jpg',
       eventConsole: 'PS4'
+    }*/
+
+    var customPayload = {
+      "notificationName": "NoSignupNotification",
+      "eventId": "5878582d821555f8a66ab143",
+      "activityId": null,
+      "eventUpdated": "2017-01-13T04:32:09.898Z",
+      "eventName": "Classic Free-For-All",
+      "eventClanId": "1570671",
+      "eventClanName": "",
+      "eventClanImageUrl": "",
+      "eventConsole": "PS4",
+      "messengerConsoleId": null,
+      "messengerImageUrl": null,
+      "isTrackable": true
     }
-    helpers.sns.publishToSNSTopic('PS4','clan_id_not_set',customPayload,function(err,result){
+
+    var alert = "sreeharshadasa need(s) 2 more for Classic Free-For-All. View details…"
+
+    helpers.sns.publishToSNSTopic('PS4','1570671',customPayload,alert,function(err,result){
       utils.l.d('err',err)
       utils.l.d('result',result)
     })

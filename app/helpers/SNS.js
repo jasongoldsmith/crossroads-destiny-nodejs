@@ -462,9 +462,21 @@ function getApplicationArn(deviceType, callback) {
  */
 
 function getTopicARN(consoleType, groupId, callback) {
- var models = require('../models')
-  var topicARN = getTopicARNKey(consoleType,groupId)
-  models.sysConfig.getSysConfig(topicARN, callback)
+  var models = require('../models')
+  utils.async.waterfall([
+    function(callback){
+      models.groups.findGroupById(groupId,callback)
+    },function(group,callback){
+      var serviceEndPoint = utils._.find(group.serviceEndpoints,{consoleType:consoleType,serviceType:utils.constants.serviceTypes.PUSHNOTIFICATION})
+      if(utils._.isValidNonBlank(serviceEndPoint) && utils._.isValidNonBlank(serviceEndPoint.topicEndpoint))
+        return callback(null,{key:serviceEndPoint.topicName,value:serviceEndPoint.topicEndpoint})
+      else
+        return callback({error:"No topic registered for this group"},null)
+
+    }
+  ],callback)
+
+  //models.sysConfig.getSysConfig(topicARN, callback)
 }
 
 function getTopicARNKey(consoleType,groupId){
@@ -475,7 +487,7 @@ function getTopicARNKey(consoleType,groupId){
   return topicARNKey
 }
 
-function publishToSNSTopic(consoleType, groupId, customPayload, callback) {
+function publishToSNSTopic(consoleType, groupId, customPayload, alert,callback) {
   var topicARN = null
   utils.async.waterfall([
     function(callback) {
@@ -488,7 +500,7 @@ function publishToSNSTopic(consoleType, groupId, customPayload, callback) {
 
       var apsData = {
         aps: {
-          alert: 'Custom Hello World for event from Harsha',
+          alert: alert,
           sound: 'default',
           badge: 1
         }
@@ -507,14 +519,14 @@ function publishToSNSTopic(consoleType, groupId, customPayload, callback) {
       */
       payload.GCM = {
           "data": {
-            "message": "Custom Hello World for event from Harsha",
+            "message": alert,
             "payload": customPayload
             }
           }
 
 
-      utils.l.d('publishToSNSTopic::topicARN', topicARN)
-      utils.l.d('payloadJson', payload)
+      utils.l.i('publishToSNSTopic::topicARN', topicARN)
+      utils.l.i('payloadJson', payload)
       // first have to stringify the inner APNS object...
       payload.APNS = JSON.stringify(payload.APNS);
       payload.APNS_SANDBOX = JSON.stringify(payload.APNS_SANDBOX)
@@ -523,8 +535,8 @@ function publishToSNSTopic(consoleType, groupId, customPayload, callback) {
       //payload.payload = JSON.stringify(payload.payload);
      payload = JSON.stringify(payload)
 
-      utils.l.d('payload', payload)
-      utils.l.d()
+      utils.l.i('payload', payload)
+      utils.l.i('alert',alert)
       var params = {
         Message: payload,
         MessageStructure: 'json',
