@@ -494,7 +494,7 @@ function listGroups(user, callback) {
   utils.async.waterfall([
     function(callback){
       if(user)
-        models.userGroup.getByUserLean(user._id,callback)
+        models.userGroup.getByUser(user._id,null,callback)
       else return callback({error: "User doesnot exist/logged in."})
     },
     function(userGroup,callback) {
@@ -608,8 +608,8 @@ function subscribeUserGroupNotification(userGroup,user,groupId, muteNotification
 function bulkUpdateUserGroups(page, limit){
   utils.async.waterfall([
       function(callback) {
-        //models.user.findUsersPaginated({"verifyStatus" : "VERIFIED"} ,page ,limit, callback)
-        models.user.findUsersPaginated({"consoles.verifyStatus":{"$in":["VERIFIED"]},"verifyStatus":{"$in":[null]},"bungieMemberShipId":{"$ne":null}} ,page ,limit, callback)
+        models.user.findUsersPaginated({"verifyStatus" : "VERIFIED"} ,page ,limit, callback)
+        //models.user.findUsersPaginated({"consoles.verifyStatus":{"$in":["VERIFIED"]},"verifyStatus":{"$in":[null]},"bungieMemberShipId":{"$ne":null}} ,page ,limit, callback)
       },
       function(userList, callback) {
         utils.async.mapSeries(userList,

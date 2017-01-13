@@ -570,8 +570,8 @@ function bulkUserGroupUpdate(){
   utils.async.waterfall([
     function(callback){
       //models.user.findUserCount({"verifyStatus":"VERIFIED"},callback)
-      //models.user.model.count({"verifyStatus":"VERIFIED"},callback)
-      models.user.model.count({"consoles.verifyStatus":{"$in":["VERIFIED"]},"verifyStatus":{"$in":[null]},"bungieMemberShipId":{"$ne":null}},callback)
+      models.user.model.count({"verifyStatus":"VERIFIED"},callback)
+      //models.user.model.count({"consoles.verifyStatus":{"$in":["VERIFIED"]},"verifyStatus":{"$in":[null]},"bungieMemberShipId":{"$ne":null}},callback)
     },function(userCount, callback){
       temporal.loop(5 * 1000, function() {
         var batchStop = limit * (page+1)
