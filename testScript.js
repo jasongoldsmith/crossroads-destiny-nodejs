@@ -367,7 +367,7 @@ switch(command) {
   case "listGroups":
     utils.async.waterfall([
       function(callback){
-        models.user.getById("580a517f83de74fc26120357",callback)
+        models.user.getById("582259a63682806d43f9df76",callback)
       },function(user,callback){
         userService.listGroups(user,callback)
       }

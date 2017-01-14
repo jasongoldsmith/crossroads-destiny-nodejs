@@ -37,10 +37,10 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
   utils.async.waterfall([
     function(callback){
       var groupIds = utils._.map(groups,"groupId")
-      var userGroupIds = utils._.map(userGroupLst,"group")
+      var userGroupIds = utils._.map(userGroupLst,"group._id")
       var groupsToAdd = utils._.difference(groupIds,userGroupIds)
       //Add free lance group
-      if(utils._.findIndex(userGroupLst,{group:utils.constants.freelanceBungieGroup.groupId}) < 0)
+      if(utils._.isInvalidOrBlank(findUserGroup(userGroupLst,utils.constants.freelanceBungieGroup.groupId)))
         groupsToAdd.push(utils.constants.freelanceBungieGroup.groupId)
 
       var groupsToRemove = utils._.difference(userGroupIds,groupIds)
@@ -54,7 +54,7 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
     },function(groupsToAdd, callback){
       var userGroups = []
       utils._.map(groupsToAdd,function(groupId){
-        var userGroup = utils._.isValidNonBlank(userGroupLst) ?utils._.find(userGroupLst,{group:groupId}):null
+        var userGroup = findUserGroup(userGroupLst,groupId)
         userGroups.push({
           user:user._id,
           refreshGroups:false,
@@ -67,7 +67,7 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
         })
       })
 
-      userGroup = utils._.isValidNonBlank(userGroupLst) ?utils._.find(userGroupLst,{group:utils.constants.freelanceBungieGroup.groupId}):null
+      userGroup = utils._.isValidNonBlank(userGroupLst) ?findUserGroup(userGroupLst,utils.constants.freelanceBungieGroup.groupId):null
       //Add free lance group
 /*
       userGroups.push({
@@ -83,11 +83,20 @@ function refreshUserGroup(user,groups,userGroupLst,callback){
       if(utils._.isValidNonBlank(userGroups))
         UserGroup.collection.insert(userGroups,callback)
       else
-        return callback(null,null)
+        updateUserGroup(user._id,null,{uDate:new Date()},callback)
     },function(docs, callback){
       getByUser(user._id,null,callback)
     }
   ],callback)
+}
+
+function findUserGroup(userGroupList,groupId){
+  var userGroupObj = null
+  utils._.map(userGroupList,function(userGroup){
+    if(userGroup.group == groupId || userGroup.group._id == groupId)
+      userGroupObj = userGroup
+  })
+  return userGroupObj
 }
 
 function getByUser(userId, groupId,callback) {

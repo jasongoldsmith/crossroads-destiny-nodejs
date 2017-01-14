@@ -641,16 +641,19 @@ function logout(req, res) {
     function(callback){
       user.isLoggedIn = false
       models.user.save(user,callback)
-    },function(user,callback){
+    }/*,function(user,callback){
       //models.userGroup.updateUserGroup(user._id,{refreshGroups:true},callback)
-      helpers.sns.unSubscribeUser(user,callback)
-    }
+
+    }*/
   ],function(err,userGroup){
     if(err) {
       utils.l.d("failed to save ths user object: ", err)
     }
 
     req.logout()
+    helpers.sns.unSubscribeUser(user,function(err,data){
+      utils.l.i("Completed the unsubscribe in aws")
+    })
     routeUtils.handleAPISuccess(req, res, {success: true})
   })
 }

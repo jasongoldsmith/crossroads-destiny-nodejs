@@ -511,6 +511,8 @@ function listUserGroups(userGroupLst,user,callback){
     function(callback) {
       var groupsObj = (userGroupLst && userGroupLst.length>0) ? userGroupLst[0]: null
       var dateUpdated = utils._.isValidNonBlank(groupsObj) ? utils.moment(groupsObj.uDate).utc().add("24","hours") : utils.moment().utc()
+      utils.l.d("dateUpdated:",dateUpdated)
+      utils.l.d("groupsObj:",groupsObj)
       if (utils._.isInvalidOrBlank(groupsObj) || dateUpdated < utils.moment().utc() || groupsObj.refreshGroups || utils._.isInvalidOrBlank(groupsObj.group)) {
         utils.l.d("Groups does not exists. Fetching from bungie")
         destinyInterface.listBungieGroupsJoined(user.bungieMemberShipId, utils.primaryConsole(user).consoleType, 1, function(err, groups){
