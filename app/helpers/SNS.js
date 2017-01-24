@@ -553,6 +553,7 @@ function publishToSNSTopic(consoleType, groupId, customPayload, alert,callback) 
       }
       console.log('push sent')
       console.log(data)
+      callback(err,data)
     })
 }
 

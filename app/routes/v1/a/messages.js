@@ -70,6 +70,36 @@ function sendMessage(data, messageCreator, callback) {
 }
 
 function sendCustomMessageToAllUsers(data, callback) {
+
+	var consoles = utils._.values(utils.constants.newGenConsoleType)
+
+	utils.async.mapSeries(consoles,function(consoleType,asyncCallback){
+		utils.l.d("Sending notification for console",consoleType)
+
+		var customPayload = {
+			"notificationName": null,
+			"eventId": null,
+			"activityId": null,
+			"eventUpdated": null,
+			"eventName": null,
+			"eventClanId": data.clanId,
+			"eventClanName": "",
+			"eventClanImageUrl": "",
+			"eventConsole":consoleType,
+			"messengerConsoleId": null,
+			"messengerImageUrl": null,
+			"isTrackable": false
+		}
+		utils.l.d("data",data)
+		helpers.sns.publishToSNSTopic(consoleType,data.clanId,customPayload,data.message,function(err,result){
+			utils.l.d("push notification sent successfully for "+consoleType)
+			utils.l.d('err',err)
+			return asyncCallback(null, {message: "push notification sent successfully for "+consoleType})
+		})
+	},function(errors,resultList){
+		return callback(null, resultList)
+	})
+/*
 	utils.async.waterfall([
 		function (callback) {
 			if(utils._.isValidNonBlank(data.clanId)) {
@@ -87,6 +117,7 @@ function sendCustomMessageToAllUsers(data, callback) {
 			callback(null, {message: "pushes were sent successfully"})
 		}
 	], callback)
+*/
 
 }
 

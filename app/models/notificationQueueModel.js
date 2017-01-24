@@ -31,6 +31,7 @@ function addToQueue(eventId, notificationInformation, notificationType) {
 }
 
 module.exports = {
+	model:NotificationQueue,
 	addToQueue: addToQueue,
 	getByQuery: getByQuery
 }

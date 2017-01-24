@@ -300,23 +300,40 @@ switch(command) {
     }*/
 
     var customPayload = {
-      "notificationName": "NoSignupNotification",
-      "eventId": "5878582d821555f8a66ab143",
+      "notificationName": null,
+      "eventId": null,
       "activityId": null,
-      "eventUpdated": "2017-01-13T04:32:09.898Z",
-      "eventName": "Classic Free-For-All",
-      "eventClanId": "1570671",
+      "eventUpdated": null,
+      "eventName": null,
+      "eventClanId": "clan_id_not_set",
       "eventClanName": "",
       "eventClanImageUrl": "",
-      "eventConsole": "PS4",
+      "eventConsole": "XBOXONE",
       "messengerConsoleId": null,
       "messengerImageUrl": null,
-      "isTrackable": true
+      "isTrackable": false
     }
 
-    var alert = "sreeharshadasa need(s) 2 more for Classic Free-For-All. View details…"
+/*
+  {
+    "notificationName": "NoSignupNotification",
+    "eventId": "5878582d821555f8a66ab143",
+    "activityId": null,
+    "eventUpdated": "2017-01-13T04:32:09.898Z",
+    "eventName": "Classic Free-For-All",
+    "eventClanId": "1570671",
+    "eventClanName": "",
+    "eventClanImageUrl": "",
+    "eventConsole": "PS4",
+    "messengerConsoleId": null,
+    "messengerImageUrl": null,
+    "isTrackable": true
+  }
+*/
 
-    helpers.sns.publishToSNSTopic('PS4','1570671',customPayload,alert,function(err,result){
+    var alert = "Last day before reset! The Nightfall is The Sunless Cell with Arc Burn, Specialist, Juggler, Airborne. WOTM is Aksis Challenge. Update to the latest version of Crossroads and find your team!"
+
+    helpers.sns.publishToSNSTopic('XBOXONE','clan_id_not_set',customPayload,alert,function(err,result){
       utils.l.d('err',err)
       utils.l.d('result',result)
     })

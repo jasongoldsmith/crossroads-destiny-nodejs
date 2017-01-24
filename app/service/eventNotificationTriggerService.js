@@ -179,7 +179,7 @@ function launchUpComingReminders(notifTrigger){
       function (events, callback) {
         var totalEventsToLaunch = events ? events.length: 0
         if(totalEventsToLaunch > 0) {
-          utils.async.map(events, function(event) {
+          utils.async.map(events, function(event,asyncCallback) {
             if(notifTrigger.isActive && notifTrigger.notifications.length > 0) {
               var raidLf2mfNotif = utils._.find(notifTrigger.notifications, {"name": "RaidEventLf2mNotification"})
               var eventLf1mNotif = utils._.find(notifTrigger.notifications, {"name": "EventLf1mNotification"})
@@ -200,11 +200,11 @@ function launchUpComingReminders(notifTrigger){
               }
 
               if(!eventUdpated)
-                callback(null,event)
+                asyncCallback(null,event)
               else
-                models.event.update(event, callback)
+                models.event.update(event, asyncCallback)
             } else {
-              return callback(null, null)
+              return asyncCallback(null, null)
             }
           },function(err, updatedEvents) {
             return callback(err, updatedEvents)
