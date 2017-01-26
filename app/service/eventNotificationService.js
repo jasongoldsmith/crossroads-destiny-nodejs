@@ -148,11 +148,21 @@ function getRecipients(recipientType, event, clanId, consoleType, callback) {
 function getClanMembers(event, clanId, consoleType, callback) {
 	var clanId = event ? event.clanId : clanId
 	var consoleType = event ? event.consoleType : consoleType
-	if(clanId == utils.constants.freelanceBungieGroup.groupId){
-		return callback(null,[])
-	}else {
-		models.userGroup.getUsersByGroup(clanId,false,consoleType,callback)
-	}
+	utils.async.waterfall([
+		function findGroupInDb(callback) {
+			models.groups.findGroupById(clanId, callback)
+		},
+		function checkIfGroupHasTopicEndpoint(group, callback) {
+			utils.l.d("group found in getClanMembers", group)
+			if(utils._.isInvalidOrBlank(group) || utils._.isInvalidOrBlank(group.serviceEndpoints) ||
+				utils._.isInvalidOrBlank(utils._.find(group.serviceEndpoints, {consoleType: consoleType}))) {
+				utils.l.d("Didn't find the topicEndpoint using regular push")
+				models.userGroup.getUsersByGroup(clanId, false, consoleType, callback)
+			} else {
+				return callback(null, [])
+			}
+		}
+	], callback)
 }
 
 function removeEventPlayersFromClan(clanPlayers, eventPlayers) {
@@ -203,6 +213,6 @@ function getTimeStringForDisplay(date) {
 module.exports = {
 	getNotificationDetails: getNotificationDetails,
 	getAggregateNotificationDetails: getAggregateNotificationDetails,
-	getClanMembers:getClanMembers,
-	formatMessage:formatMessage
+	getClanMembers: getClanMembers,
+	formatMessage: formatMessage
 }
