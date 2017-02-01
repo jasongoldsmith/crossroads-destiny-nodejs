@@ -50,21 +50,21 @@ function sendMultiplePushNotifications(installations, data, alert, notificationR
 function sendMultiplePushNotificationsForUsers(notification, data, clanId) {
   models = require('../models')
 
-  utils.l.d("sendMultiplePushNotificationsForUsers::notification::", {notification:notification.name,message:notification.message})
+  utils.l.i("sendMultiplePushNotificationsForUsers::notification::", {notification:notification.name,message:notification.message})
 
   // If there are no recipeints we assume that the group has an endpoint and we send a push via SNS
   if(utils._.isValidNonBlank(notification.recipients)
     && utils._.isValidNonBlank(notification.recipients.type)
     && notification.recipients.type == "SNS") {
-    utils.l.d("notification recipients is blank")
+    utils.l.i("notification recipients is blank")
     var payload = getPayload(data, notification, clanId)
-    utils.l.d("payload to be sent to sns", payload)
+    utils.l.i("payload to be sent to sns", payload)
     sns.publishToSNSTopic(payload.eventConsole, payload.eventClanId, payload, notification.message, function (err, result) {
       if(err) {
         utils.l.d('err', err)
       }
       else {
-        utils.l.d("push notification sent successfully for " , result)
+        utils.l.i("push notification sent successfully for " , result)
       }
     })
   } else {

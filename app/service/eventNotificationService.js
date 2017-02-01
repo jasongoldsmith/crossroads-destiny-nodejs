@@ -153,12 +153,13 @@ function getClanMembers(event, clanId, consoleType, callback) {
 			models.groups.findGroupById(clanId, callback)
 		},
 		function checkIfGroupHasTopicEndpoint(group, callback) {
+			utils.l.i("group found in getClanMembers", group)
 			if(doesGroupHaveATopicEndpoint(group, consoleType)) {
 				// We don't want to compute recipients if a group has an SNS endpoint
-				utils.l.d("group found in getClanMembers", group)
+				utils.l.i("returning type as SNS")
 				return callback(null, {type: "SNS"})
 			} else {
-				utils.l.d("Didn't find the topicEndpoint using regular push")
+				utils.l.i("Didn't find the topicEndpoint using regular push")
 				models.userGroup.getUsersByGroup(clanId, false, consoleType, callback)
 			}
 		}
@@ -168,6 +169,7 @@ function getClanMembers(event, clanId, consoleType, callback) {
 function doesGroupHaveATopicEndpoint(group, consoleType) {
 	if(utils._.isValidNonBlank(group) && utils._.isValidNonBlank(group.serviceEndpoints)) {
 		var serviceEndpoint = utils._.find(group.serviceEndpoints, {consoleType: consoleType})
+		utils.l.i("serviceEndpoint", serviceEndpoint)
 		return utils._.isValidNonBlank(serviceEndpoint) && utils._.isValidNonBlank(serviceEndpoint.topicEndpoint)
 	} else {
 		return false
