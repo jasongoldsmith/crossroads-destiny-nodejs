@@ -97,7 +97,7 @@ function updateInstallation(user,deviceType,deviceToken, callback){
     function(callback){
       getInstallationByUser(user,callback)
     },function(installation, callback){
-      if(!utils._.isInvalidOrBlank(installation)){
+      if(!utils._.isInvalidOrBlank(installation) && (installation.deviceToken != deviceToken)){
         //Unregister old device token and unsubcribe to all topics
         if(utils._.isValidNonBlank(installation.deviceSubscription) && utils._.isValidNonBlank(installation.deviceSubscription.deviceEndpointArn)) {
           helpers.sns.unRegisterDeviceToken(user, installation, function (err, result) {

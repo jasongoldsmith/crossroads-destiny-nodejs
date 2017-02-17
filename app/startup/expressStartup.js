@@ -43,7 +43,7 @@ module.exports = function (app, passport) {
     if(req.user)
       headerLog = headerLog + req.user.id
     else
-      headerLog = headerLog + req.session.zuid
+      headerLog = headerLog + (utils._.isValidNonBlank(req.sesscion)?req.session.zuid:req.zuid)
 
     headerLog = headerLog + ' ' + getFromHeader(req,'x-osversion','os')
     headerLog = headerLog + ' ' + getFromHeader(req,'x-devicetype','dt')

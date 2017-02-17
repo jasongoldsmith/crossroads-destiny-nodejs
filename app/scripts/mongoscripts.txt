@@ -336,3 +336,35 @@ function getArchiveEvents(){
 
 getArchiveEvents()
 //-----------END----------
+
+//----------BEGIN---------
+//Get list of users signedup in a date range
+function getUserStats(){
+    var userCursor = db.getCollection('users').distinct("_id",{
+	"$and":[{"date":{"$gt":ISODate("2017-02-13 07:00:00.000Z")}},{"date":{"$lt":ISODate("2017-02-14 07:00:00.000Z")}}]
+        })
+    var userList = []
+    userCursor.forEach(
+        function (user) {
+            userList.push(user)
+        }
+    )
+    //print(userList)
+    var usrStats = db.getCollection('installations').aggregate(
+                        [
+                            {"$match":{"user":{"$in":
+                               userList
+                            }}
+                            },
+                            { $group: { _id: "$deviceType", count: { $sum: 1 } } }
+                        ])
+    usrStats.forEach(
+        function (stat) {
+            print(stat)
+        }
+    )
+
+}
+
+getUserStats()
+//----------END-----------
