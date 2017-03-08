@@ -2,11 +2,12 @@ var utils = require('../utils')
 var models = require('../models')
 var helpers = require('../helpers')
 var reviewPromptCardService = require('./reviewPromptCardService')
+var eventService = require('./eventService')
 
 function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) {
 	var activitiesMap = null
 	var playerIds = []
-	var eventsList = []
+	var eventListOuter = []
 	utils.async.waterfall([
 		function getEventsForUser(callback) {
 			var query = {}
@@ -37,7 +38,7 @@ function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) 
 			models.event.getByQueryLean(query, callback)
 		},
 		function getActivityAndPlayerObjectsById(events, callback) {
-			eventsList = events
+			eventListOuter = events
 			var activityIds = utils._.uniq(utils._.map(events, 'eType'))
 			playerIds = utils._.map(events, 'players')
 			playerIds = utils._.uniq(utils._.flatten(playerIds))
@@ -66,7 +67,7 @@ function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) 
 			var playersMap = utils._.keyBy(results.players, function(player) {
 				return player._id
 			})
-			utils._.map(eventsList, function(event) {
+			utils._.map(eventListOuter, function(event) {
 				event.eType = utils._.get(activitiesMap, event.eType)
 				event.creator = utils._.get(playersMap, event.creator)
 				var playerList = []
@@ -84,11 +85,17 @@ function getFeed(user, consoleType, isPublicFeed, createMyEventsList, callback) 
 				utils._.assign(event.players, playerList)
 			})
 
-			addIsInvitedFlagToEventPlayers(eventsList, callback)
+			addIsInvitedFlagToEventPlayers(eventListOuter, callback)
 		},
-		function transformToFeed(events, callback) {
+		function addConsoleToShowToEventPlayers(eventList, callback) {
+			utils.async.mapSeries(eventList, function(event, callback) {
+				var eventObj = event.toObject()
+				eventService.addConsoleToShowToEventPlayers(eventObj, callback)
+			}, callback)
+		},
+		function transformToFeed(eventListObj, callback) {
 			//create final feed object
-			transformEventsToFeed(eventsList, isPublicFeed, user, createMyEventsList, callback)
+			transformEventsToFeed(eventListObj, isPublicFeed, user, createMyEventsList, callback)
 		}
 	], callback)
 }

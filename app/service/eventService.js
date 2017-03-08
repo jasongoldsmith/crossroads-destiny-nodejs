@@ -495,16 +495,19 @@ function handleDuplicateCurrentEvent(event, callback) {
 
 function listEventById(data, callback) {
   utils.async.waterfall([
-    function (callback) {
+    function(callback) {
       models.event.getById(data.id, callback)
     },
-    function (event, callback) {
+    function(event, callback) {
       if(utils._.isInvalidOrBlank(event)){
         return callback({ error: "Sorry, looks like that event is no longer available."},null)
       }
       addIsActiveFlagToEventPlayers(event, callback)
     },
     function (eventObj, callback) {
+      addConsoleToShowToEventPlayers(eventObj, callback)
+    },
+    function(eventObj, callback) {
       groupByInvited(eventObj, callback)
     }
   ], callback)
@@ -568,13 +571,13 @@ function handleScenariosForKicking(eventObj, userId, callback) {
 function handleCreatorChangeForFullCurrentEvent(event, callback) {
   if(utils._.isValidNonBlank(event) && event.status == "full" && event.launchStatus == "now") {
     utils.async.waterfall([
-      function (callback) {
+      function(callback) {
         addIsActiveFlagToEventPlayers(event, callback)
       },
-      function (eventObj, callback) {
+      function(eventObj, callback) {
         addIsInvitedByToPlayers(eventObj, callback)
       },
-      function (eventObj, callback) {
+      function(eventObj, callback) {
         makeFirstActivePlayerTheCreator(event, eventObj, callback)
       }
     ], callback)
@@ -601,11 +604,7 @@ function addIsActiveFlagToEventPlayers(event, callback) {
 
     // Decide isActive for event players
     utils._.forEach(eventObj.players, function(player) {
-      if(player.lastActiveTime < activeCutOffTime) {
-        player.isActive = false
-      } else {
-        player.isActive = true
-      }
+      player.isActive = player.lastActiveTime > activeCutOffTime
     })
 
     return callback(null, eventObj)
@@ -641,6 +640,33 @@ function makeFirstActivePlayerTheCreator(event, eventObj, callback) {
   } else {
     return callback(null, event)
   }
+}
+
+function addConsoleToShowToEventPlayers(eventObj, callback) {
+
+  var creator = eventObj.creator
+  var consoleToUse = utils.getUserConsoleObject(creator, eventObj.consoleType)
+  creator.consoleId = consoleToUse.consoleId
+  creator.clanTag = consoleToUse.clanTag
+  creator.imageUrl = consoleToUse.imageUrl
+
+  utils._.forEach(eventObj.players, function(player) {
+    var consoleToUse = utils.getUserConsoleObject(player, eventObj.consoleType)
+    player.consoleId = consoleToUse.consoleId
+    player.clanTag = consoleToUse.clanTag
+    player.imageUrl = consoleToUse.imageUrl
+  })
+
+  if(utils._.isValidNonBlank(eventObj.comments)) {
+    utils._.forEach(eventObj.comments, function(comment) {
+      var commenter = comment.user
+      var consoleToUse = utils.getUserConsoleObject(commenter, eventObj.consoleType)
+      commenter.consoleId = consoleToUse.consoleId
+      commenter.clanTag = consoleToUse.clanTag
+      commenter.imageUrl = consoleToUse.imageUrl
+    })
+  }
+  return callback(null, eventObj)
 }
 
 function groupByInvited(eventObj, callback) {
@@ -988,5 +1014,6 @@ module.exports = {
   invite: invite,
   handleCreatorChangeForFullCurrentEvent: handleCreatorChangeForFullCurrentEvent,
   acceptInvite: acceptInvite,
-  cancelInvite: cancelInvite
+  cancelInvite: cancelInvite,
+  addConsoleToShowToEventPlayers: addConsoleToShowToEventPlayers
 }
