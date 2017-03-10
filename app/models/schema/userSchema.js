@@ -64,6 +64,14 @@ var UserSchema = new Schema({
   reviewPromptCard: {
     status: reviewPromptCardStatusEnum,
     cardId: { type: Schema.Types.ObjectId, ref: 'ReviewPromptCard'}
+  },
+  externalProfile:{
+    email:String,
+    emailStatus:Number,
+    emailUsage:Number,
+    showPsnPublic:Boolean,
+    showXboxPublic:Boolean,
+    privacy:Number
   }
 })
 

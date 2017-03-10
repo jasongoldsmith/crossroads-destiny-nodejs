@@ -259,6 +259,41 @@ function getPendingEventInvites(req, res) {
   })
 }
 
+function saveBungieCurrentUser(req,res){
+  var data = req.body
+  var err = {error: "Something went wrong. Please try again later."}
+
+  if(!data.bungieResponse) {
+    utils.l.i("Bad handleBungieResponse request")
+    routeUtils.handleAPIError(req, res, err, err)
+    return
+  }
+
+  var errorStatus = data.bungieResponse.ErrorStatus
+  var response = data.bungieResponse.Response
+  var outerUser = null
+
+  if(!errorStatus || errorStatus != "Success" || !response) {
+    routeUtils.handleAPIError(req, res, err, err)
+    return
+  }
+
+  var bungieProfile = {
+    email:response.email,
+    emailStatus:response.emailStatus,
+    emailUsage:response.emailUsage,
+    showPsnPublic:response.showPsnPublic,
+    showXboxPublic:response.showXboxPublic,
+    privacy:response.privacy
+  }
+  models.user.saveBungieProfile(req.user._id,bungieProfile,function(err,data){
+    if(err)
+      routeUtils.handleAPIError(req, res, err, err)
+    else
+      routeUtils.handleAPISuccess(req, res, {})
+  })
+}
+
 routeUtils.rGet(router, '/self', 'GetSelfUser', getSelfUser)
 routeUtils.rGet(router, '/list', 'list', list)
 routeUtils.rPost(router, '/listById', 'listById', listById)
@@ -271,4 +306,5 @@ routeUtils.rPost(router, '/addConsole', 'addUserConsole', addConsole)
 routeUtils.rPost(router, '/changePrimaryConsole', 'changePrimaryConsole', changePrimaryConsole)
 routeUtils.rGet(router, '/getMetrics', 'getUserMetrics', getUserMetrics)
 routeUtils.rGet(router, '/getPendingEventInvites', 'getPendingEventInvites', getPendingEventInvites)
+routeUtils.rPost(router, '/bungieCurrentUser', 'saveBungieCurrentUser', saveBungieCurrentUser)
 module.exports = router

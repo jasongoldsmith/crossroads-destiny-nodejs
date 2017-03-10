@@ -382,6 +382,10 @@ function updateUserConsoles(user,callback){
   callback)
 }
 
+function saveBungieProfile(userId,bungieProfile, callback){
+  utils.l.d("got profile",bungieProfile)
+  User.findByIdAndUpdate(userId,{externalProfile:bungieProfile},{upsert:true},callback)
+}
 module.exports = {
   model: User,
   getUserById: getUserById,
@@ -406,5 +410,6 @@ module.exports = {
   findUsersPaginated:findUsersPaginated,
   findUserCount:findUserCount,
   updateUserConsoles:updateUserConsoles,
-  getUserByConsole:getUserByConsole
+  getUserByConsole:getUserByConsole,
+  saveBungieProfile:saveBungieProfile
 }

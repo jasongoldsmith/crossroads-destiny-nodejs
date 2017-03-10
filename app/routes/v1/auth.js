@@ -831,5 +831,6 @@ routeUtils.rPost(router, '/request/resetPassword', 'requestResetPassword', reque
 routeUtils.rGet(router,'/','homePage',home,home)
 routeUtils.rPost(router, '/checkBungieAccount', 'checkBungieAccount', checkBungieAccount)
 routeUtils.rPost(router, '/validateUserLogin', 'validateUserLogin', validateUserLogin)
+
 module.exports = router
 
