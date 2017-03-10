@@ -30,7 +30,8 @@ function listConfigs(req, res) {
         mixpanelToken: utils.config.mixpanelKey,
         playerDetailsURL: bungieUrls.value.playerDetailsURL,
         xboxLoginURL: bungieUrls.value.xboxLoginURL,
-        psnLoginURL: bungieUrls.value.psnLoginURL
+        psnLoginURL: bungieUrls.value.psnLoginURL,
+        bungieAccountURL: bungieUrls.value.bungieAccountURL
       }
 
       return callback(null, configs)
