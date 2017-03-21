@@ -12,6 +12,10 @@ function listConfigs(req, res) {
     return
   }
 
+  var configs = {
+    mixpanelToken: utils.config.mixpanelKey
+  }
+
   utils.async.waterfall([
     function(callback) {
       models.sysConfig.getSysConfig('CONFIG_TOKEN', callback)
@@ -26,15 +30,15 @@ function listConfigs(req, res) {
       getBungieUrls(callback)
     },
     function(bungieUrls, callback) {
-      var configs = {
-        mixpanelToken: utils.config.mixpanelKey,
-        playerDetailsURL: bungieUrls.value.playerDetailsURL,
-        xboxLoginURL: bungieUrls.value.xboxLoginURL,
-        psnLoginURL: bungieUrls.value.psnLoginURL,
-        bungieAccountURL: bungieUrls.value.bungieAccountURL
-      }
+      configs.playerDetailsURL = bungieUrls.value.playerDetailsURL
+      configs.xboxLoginURL = bungieUrls.value.xboxLoginURL
+      configs.psnLoginURL = bungieUrls.value.psnLoginURL
+      configs.bungieAccountURL = bungieUrls.value.bungieAccountURL
 
-      return callback(null, configs)
+      getOnBoardingScreens(null, function(err, onBoardingScreens) {
+        configs.onBoardingScreens = onBoardingScreens
+        return callback(null, configs)
+      })
     }
   ],
   function(err, configs) {
@@ -48,6 +52,30 @@ function listConfigs(req, res) {
 
 function getBungieUrls(callback) {
   models.sysConfig.getSysConfig('bungieUrls', callback)
+}
+
+function getOnBoardingScreens(language, callback) {
+  var onBoardingScreens = {
+  }
+  utils.async.parallel({
+    required: function(callback) {
+      models.onBoarding.getRequiredOnBoardingScreenByLanguage(language, callback)
+    },
+    optional: function(callback) {
+      models.onBoarding.getOptionalOnBoardingScreenByLanguage(language, callback)
+    }
+  }, function(err, result) {
+    if(err){
+      utils.l.s("Error in getting the onboarding screens, err: ", err)
+    }
+    if(utils._.isValidNonEmpty(result.required)){
+      onBoardingScreens.required = result.required
+    }
+    if(utils._.isValidNonEmpty(result.optional)){
+      onBoardingScreens.optional = result.optional
+    }
+    return callback(null, onBoardingScreens)
+  })
 }
 
 routeUtils.rGet(router, '/', 'listConfigs', listConfigs)

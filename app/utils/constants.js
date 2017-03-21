@@ -640,6 +640,10 @@ var notificationQueueTypeEnum = {
 var serviceTypes = {PUSHNOTIFICATION:'PUSHNOTIFICATION',
   EMAIL:'EMAIL'}
 
+var languagesForOnBoarding = {
+  "en": "en"
+}
+
 module.exports = {
   l: lodash,
   baseUrl: baseUrl,
@@ -662,5 +666,6 @@ module.exports = {
   existingUserInstallData:existingUserInstallData,
   newGenConsoleType:newGenConsoleType,
   invitedUserInstallData:invitedUserInstallData,
-  serviceTypes:serviceTypes
+  serviceTypes:serviceTypes,
+  languagesForOnBoarding: languagesForOnBoarding
 }
