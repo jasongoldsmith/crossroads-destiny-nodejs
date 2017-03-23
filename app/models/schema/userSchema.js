@@ -72,7 +72,8 @@ var UserSchema = new Schema({
     showPsnPublic:Boolean,
     showXboxPublic:Boolean,
     privacy:Number
-  }
+  },
+  hasCompletedOnBoarding: {type: Boolean, default: false}
 })
 
 UserSchema.index({'userName': 1})
